@@ -2,6 +2,11 @@ domain: k8s.ianunruh.com
 layout: go.kubebuilder.io/v3
 projectName: openstack-operator2
 repo: github.com/ianunruh/openstack-operator
+resources:
+- crdVersion: v1
+  group: openstack
+  kind: ControlPlane
+  version: v1beta1
 version: 3-alpha
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
