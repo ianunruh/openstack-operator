@@ -20,11 +20,15 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/controlplane"
+	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 )
 
 // ControlPlaneReconciler reconciles a ControlPlane object
@@ -48,9 +52,22 @@ type ControlPlaneReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.0/pkg/reconcile
 func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = r.Log.WithValues("controlplane", req.NamespacedName)
+	log := r.Log.WithValues("instance", req.NamespacedName)
 
-	// your logic here
+	instance := &openstackv1beta1.ControlPlane{}
+	err := r.Client.Get(ctx, req.NamespacedName, instance)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
+
+	database := controlplane.Database(instance)
+	controllerutil.SetControllerReference(instance, database, r.Scheme)
+	if err := mariadb.EnsureCluster(ctx, r.Client, database, log); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }

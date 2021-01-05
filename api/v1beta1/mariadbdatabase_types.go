@@ -23,18 +23,18 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// ControlPlaneSpec defines the desired state of ControlPlane
-type ControlPlaneSpec struct {
+// MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
+type MariaDBDatabaseSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Domain string `json:"domain"`
-
-	Database MariaDBSpec `json:"database"`
+	Cluster string `json:"cluster"`
+	Name    string `json:"name"`
+	Secret  string `json:"secret"`
 }
 
-// ControlPlaneStatus defines the observed state of ControlPlane
-type ControlPlaneStatus struct {
+// MariaDBDatabaseStatus defines the observed state of MariaDBDatabase
+type MariaDBDatabaseStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
@@ -42,24 +42,24 @@ type ControlPlaneStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// ControlPlane is the Schema for the controlplanes API
-type ControlPlane struct {
+// MariaDBDatabase is the Schema for the mariadbdatabases API
+type MariaDBDatabase struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ControlPlaneSpec   `json:"spec,omitempty"`
-	Status ControlPlaneStatus `json:"status,omitempty"`
+	Spec   MariaDBDatabaseSpec   `json:"spec,omitempty"`
+	Status MariaDBDatabaseStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// ControlPlaneList contains a list of ControlPlane
-type ControlPlaneList struct {
+// MariaDBDatabaseList contains a list of MariaDBDatabase
+type MariaDBDatabaseList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ControlPlane `json:"items"`
+	Items           []MariaDBDatabase `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&ControlPlane{}, &ControlPlaneList{})
+	SchemeBuilder.Register(&MariaDBDatabase{}, &MariaDBDatabaseList{})
 }
