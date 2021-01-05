@@ -5,6 +5,7 @@ resources:
 - bases/openstack.k8s.ianunruh.com_controlplanes.yaml
 - bases/openstack.k8s.ianunruh.com_mariadbs.yaml
 - bases/openstack.k8s.ianunruh.com_mariadbdatabases.yaml
+- bases/openstack.k8s.ianunruh.com_keystones.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
@@ -13,6 +14,7 @@ patchesStrategicMerge:
 #- patches/webhook_in_controlplanes.yaml
 #- patches/webhook_in_mariadbs.yaml
 #- patches/webhook_in_mariadbdatabases.yaml
+#- patches/webhook_in_keystones.yaml
 # +kubebuilder:scaffold:crdkustomizewebhookpatch
 
 # [CERTMANAGER] To enable webhook, uncomment all the sections with [CERTMANAGER] prefix.
@@ -20,6 +22,7 @@ patchesStrategicMerge:
 #- patches/cainjection_in_controlplanes.yaml
 #- patches/cainjection_in_mariadbs.yaml
 #- patches/cainjection_in_mariadbdatabases.yaml
+#- patches/cainjection_in_keystones.yaml
 # +kubebuilder:scaffold:crdkustomizecainjectionpatch
 
 # the following config is for teaching kustomize how to do kustomization for CRDs.

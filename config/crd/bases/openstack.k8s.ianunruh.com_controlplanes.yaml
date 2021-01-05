@@ -41,8 +41,6 @@ spec:
                 properties:
                   image:
                     type: string
-                  secret:
-                    type: string
                   volume:
                     properties:
                       capacity:
@@ -54,17 +52,68 @@ spec:
                     type: object
                 required:
                 - image
-                - secret
                 - volume
                 type: object
               domain:
                 type: string
+              keystone:
+                description: KeystoneSpec defines the desired state of Keystone
+                properties:
+                  api:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                        required:
+                        - annotations
+                        - host
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    required:
+                    - ingress
+                    - replicas
+                    type: object
+                  database:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  image:
+                    type: string
+                required:
+                - api
+                - database
+                - image
+                type: object
             required:
             - database
             - domain
+            - keystone
             type: object
           status:
             description: ControlPlaneStatus defines the observed state of ControlPlane
+            properties:
+              ready:
+                type: boolean
+            required:
+            - ready
             type: object
         type: object
     served: true

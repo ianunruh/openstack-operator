@@ -49,6 +49,11 @@ spec:
             type: object
           status:
             description: MariaDBDatabaseStatus defines the observed state of MariaDBDatabase
+            properties:
+              ready:
+                type: boolean
+            required:
+            - ready
             type: object
         type: object
     served: true

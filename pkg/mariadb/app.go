@@ -22,7 +22,7 @@ func ConfigMap(instance *openstackv1beta1.MariaDB) *corev1.ConfigMap {
 
 func Secret(instance *openstackv1beta1.MariaDB) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, AppLabel)
-	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
+	secret := template.GenericSecret(instance.Name, instance.Namespace, labels)
 
 	secret.StringData["password"] = template.NewPassword()
 

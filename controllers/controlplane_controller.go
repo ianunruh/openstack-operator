@@ -28,6 +28,7 @@ import (
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/controlplane"
+	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 )
 
@@ -66,6 +67,12 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	database := controlplane.Database(instance)
 	controllerutil.SetControllerReference(instance, database, r.Scheme)
 	if err := mariadb.EnsureCluster(ctx, r.Client, database, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	ks := controlplane.Keystone(instance)
+	controllerutil.SetControllerReference(instance, ks, r.Scheme)
+	if err := keystone.EnsureKeystone(ctx, r.Client, ks, log); err != nil {
 		return ctrl.Result{}, err
 	}
 

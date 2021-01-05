@@ -6,20 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: mariadbs.openstack.k8s.ianunruh.com
+  name: keystones.openstack.k8s.ianunruh.com
 spec:
   group: openstack.k8s.ianunruh.com
   names:
-    kind: MariaDB
-    listKind: MariaDBList
-    plural: mariadbs
-    singular: mariadb
+    kind: Keystone
+    listKind: KeystoneList
+    plural: keystones
+    singular: keystone
   scope: Namespaced
   versions:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: MariaDB is the Schema for the mariadbs API
+        description: Keystone is the Schema for the keystones API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,25 +34,52 @@ spec:
           metadata:
             type: object
           spec:
-            description: MariaDBSpec defines the desired state of MariaDB
+            description: KeystoneSpec defines the desired state of Keystone
             properties:
-              image:
-                type: string
-              volume:
+              api:
                 properties:
-                  capacity:
+                  ingress:
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      host:
+                        type: string
+                    required:
+                    - annotations
+                    - host
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                required:
+                - ingress
+                - replicas
+                type: object
+              database:
+                description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
+                properties:
+                  cluster:
                     type: string
-                  storageClass:
+                  name:
+                    type: string
+                  secret:
                     type: string
                 required:
-                - capacity
+                - cluster
+                - name
+                - secret
                 type: object
+              image:
+                type: string
             required:
+            - api
+            - database
             - image
-            - volume
             type: object
           status:
-            description: MariaDBStatus defines the observed state of MariaDB
+            description: KeystoneStatus defines the observed state of Keystone
             properties:
               ready:
                 type: boolean

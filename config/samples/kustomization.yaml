@@ -3,4 +3,5 @@ resources:
 - openstack_v1beta1_controlplane.yaml
 - openstack_v1beta1_mariadb.yaml
 - openstack_v1beta1_mariadbdatabase.yaml
+- openstack_v1beta1_keystone.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

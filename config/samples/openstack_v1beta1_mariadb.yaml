@@ -4,7 +4,6 @@ metadata:
   name: mariadb
 spec:
   image: docker.io/bitnami/mariadb:10.5.8-debian-10-r21
-  secret: mariadb
   volume:
     capacity: 50Gi
     storageClass: ceph-block-ssd

@@ -6,7 +6,19 @@ spec:
   domain: openstack2.kcloud.zone
   database:
     image: docker.io/bitnami/mariadb:10.5.8-debian-10-r21
-    secret: mariadb
     volume:
       capacity: 50Gi
       storageClass: ceph-block-ssd
+  keystone:
+    image: registry.kcloud.zone/ops/keystone:37a47821
+    api:
+      replicas: 2
+      ingress:
+        host: keystone.openstack2.kcloud.zone
+        annotations:
+          external-dns/enabled: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+    database:
+      name: keystone
+      secret: keystone-db
+      cluster: mariadb

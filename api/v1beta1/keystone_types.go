@@ -23,18 +23,25 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// MariaDBSpec defines the desired state of MariaDB
-type MariaDBSpec struct {
+// KeystoneSpec defines the desired state of Keystone
+type KeystoneSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
 	Image string `json:"image"`
 
-	Volume VolumeSpec `json:"volume"`
+	API KeystoneAPISpec `json:"api"`
+
+	Database MariaDBDatabaseSpec `json:"database"`
 }
 
-// MariaDBStatus defines the observed state of MariaDB
-type MariaDBStatus struct {
+type KeystoneAPISpec struct {
+	Replicas int32        `json:"replicas"`
+	Ingress  *IngressSpec `json:"ingress"`
+}
+
+// KeystoneStatus defines the observed state of Keystone
+type KeystoneStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
@@ -44,24 +51,24 @@ type MariaDBStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// MariaDB is the Schema for the mariadbs API
-type MariaDB struct {
+// Keystone is the Schema for the keystones API
+type Keystone struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   MariaDBSpec   `json:"spec,omitempty"`
-	Status MariaDBStatus `json:"status,omitempty"`
+	Spec   KeystoneSpec   `json:"spec,omitempty"`
+	Status KeystoneStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// MariaDBList contains a list of MariaDB
-type MariaDBList struct {
+// KeystoneList contains a list of Keystone
+type KeystoneList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []MariaDB `json:"items"`
+	Items           []Keystone `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&MariaDB{}, &MariaDBList{})
+	SchemeBuilder.Register(&Keystone{}, &KeystoneList{})
 }

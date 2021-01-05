@@ -48,7 +48,7 @@ type MariaDBReconciler struct {
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;create;update;delete
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;create;update;delete
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;create;update;delete
-// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;create;update;delete
+// +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;create;update;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -89,6 +89,7 @@ func (r *MariaDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err := r.reconcileStatefulSet(ctx, instance, configHash, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	// TODO wait on sts to be ready and update status
 
 	return ctrl.Result{}, nil
 }

@@ -41,7 +41,6 @@ type MariaDBDatabaseReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=mariadbs,verbs=get
 // +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=mariadbdatabases,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=mariadbdatabases/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=mariadbdatabases/finalizers,verbs=update
@@ -79,6 +78,7 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	// TODO wait on cluster to be ready
 
 	secret := mariadb.DatabaseSecret(instance)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
@@ -86,11 +86,12 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	job := mariadb.DatabaseJob(instance, cluster.Spec.Image, cluster.Name, cluster.Spec.Secret)
+	job := mariadb.DatabaseJob(instance, cluster.Spec.Image, cluster.Name, cluster.Name)
 	controllerutil.SetControllerReference(instance, job, r.Scheme)
 	if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	// TODO mark status as Ready once job is complete
 
 	return ctrl.Result{}, nil
 }

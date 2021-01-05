@@ -17,6 +17,16 @@ rules:
   - list
   - update
 - apiGroups:
+  - apps
+  resources:
+  - statefulsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+- apiGroups:
   - batch
   resources:
   - jobs
@@ -57,6 +67,16 @@ rules:
   - list
   - update
 - apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+- apiGroups:
   - openstack.k8s.ianunruh.com
   resources:
   - controlplanes
@@ -78,6 +98,32 @@ rules:
   - openstack.k8s.ianunruh.com
   resources:
   - controlplanes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - keystones
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - keystones/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - keystones/status
   verbs:
   - get
   - patch
