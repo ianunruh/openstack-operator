@@ -23,53 +23,46 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// KeystoneSpec defines the desired state of Keystone
-type KeystoneSpec struct {
+// KeystoneServiceSpec defines the desired state of KeystoneService
+type KeystoneServiceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Image string `json:"image"`
+	Name string `json:"name"`
 
-	API KeystoneAPISpec `json:"api"`
+	Type string `json:"type"`
 
-	Database MariaDBDatabaseSpec `json:"database"`
+	PublicURL   string `json:"publicURL"`
+	InternalURL string `json:"internalURL"`
 }
 
-type KeystoneAPISpec struct {
-	// +optional
-	Replicas int32        `json:"replicas"`
-	Ingress  *IngressSpec `json:"ingress"`
-}
-
-// KeystoneStatus defines the observed state of Keystone
-type KeystoneStatus struct {
+// KeystoneServiceStatus defines the observed state of KeystoneService
+type KeystoneServiceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	Ready bool `json:"ready"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// Keystone is the Schema for the keystones API
-type Keystone struct {
+// KeystoneService is the Schema for the keystoneservices API
+type KeystoneService struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   KeystoneSpec   `json:"spec,omitempty"`
-	Status KeystoneStatus `json:"status,omitempty"`
+	Spec   KeystoneServiceSpec   `json:"spec,omitempty"`
+	Status KeystoneServiceStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// KeystoneList contains a list of Keystone
-type KeystoneList struct {
+// KeystoneServiceList contains a list of KeystoneService
+type KeystoneServiceList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Keystone `json:"items"`
+	Items           []KeystoneService `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&Keystone{}, &KeystoneList{})
+	SchemeBuilder.Register(&KeystoneService{}, &KeystoneServiceList{})
 }

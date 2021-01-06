@@ -25,6 +25,16 @@ func SecretEnvVar(name, secretName, secretKey string) corev1.EnvVar {
 	}
 }
 
+func EnvFromSecret(name string) corev1.EnvFromSource {
+	return corev1.EnvFromSource{
+		SecretRef: &corev1.SecretEnvSource{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: name,
+			},
+		},
+	}
+}
+
 func ConfigMapVolume(name, configMapName string, defaultMode *int32) corev1.Volume {
 	return corev1.Volume{
 		Name: name,

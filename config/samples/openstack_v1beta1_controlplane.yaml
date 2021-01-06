@@ -22,3 +22,16 @@ spec:
       name: keystone
       secret: keystone-db
       cluster: mariadb
+  glance:
+    image: registry.kcloud.zone/ops/glance:286f670e
+    api:
+      replicas: 2
+      ingress:
+        host: glance.openstack2.kcloud.zone
+        annotations:
+          external-dns/enabled: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+    database:
+      name: glance
+      secret: glance-db
+      cluster: mariadb

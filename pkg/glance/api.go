@@ -1,4 +1,4 @@
-package keystone
+package glance
 
 import (
 	appsv1 "k8s.io/api/apps/v1"
@@ -15,19 +15,15 @@ const (
 	APIComponentLabel = "api"
 )
 
-func APIDeployment(instance *openstackv1beta1.Keystone, configHash string) *appsv1.Deployment {
+func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	probe := &corev1.Probe{
 		Handler: corev1.Handler{
-			HTTPGet: &corev1.HTTPGetAction{
-				Path: "/v3/",
-				Port: intstr.FromInt(5000),
+			TCPSocket: &corev1.TCPSocketAction{
+				Port: intstr.FromInt(9292),
 			},
 		},
-		InitialDelaySeconds: 10,
-		PeriodSeconds:       10,
-		TimeoutSeconds:      5,
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -39,50 +35,29 @@ func APIDeployment(instance *openstackv1beta1.Keystone, configHash string) *apps
 				Name:  "api",
 				Image: instance.Spec.Image,
 				Command: []string{
-					"apachectl",
-					"-DFOREGROUND",
-				},
-				Lifecycle: &corev1.Lifecycle{
-					PreStop: &corev1.Handler{
-						Exec: &corev1.ExecAction{
-							Command: []string{
-								"apachectl",
-								"-k",
-								"graceful-stop",
-							},
-						},
-					},
+					"glance-api",
+					"--config-file=/etc/glance/glance-api.conf",
 				},
 				Env: []corev1.EnvVar{
 					template.EnvVar("CONFIG_HASH", configHash),
 					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 				},
 				Ports: []corev1.ContainerPort{
-					{Name: "http", ContainerPort: 5000},
+					{Name: "http", ContainerPort: 9292},
 				},
 				LivenessProbe:  probe,
 				ReadinessProbe: probe,
 				VolumeMounts: []corev1.VolumeMount{
 					{
-						Name:      "etc-keystone",
-						SubPath:   "keystone.conf",
-						MountPath: "/etc/keystone/keystone.conf",
-					},
-					{
-						Name:      "credential-keys",
-						MountPath: "/etc/keystone/credential-keys",
-					},
-					{
-						Name:      "fernet-keys",
-						MountPath: "/etc/keystone/fernet-keys",
+						Name:      "etc-glance",
+						SubPath:   "glance-api.conf",
+						MountPath: "/etc/glance/glance-api.conf",
 					},
 				},
 			},
 		},
 		Volumes: []corev1.Volume{
-			template.ConfigMapVolume("etc-keystone", instance.Name, nil),
-			template.SecretVolume("credential-keys", template.Combine(instance.Name, "credential-keys"), nil),
-			template.SecretVolume("fernet-keys", template.Combine(instance.Name, "fernet-keys"), nil),
+			template.ConfigMapVolume("etc-glance", instance.Name, nil),
 		},
 	})
 
@@ -91,7 +66,7 @@ func APIDeployment(instance *openstackv1beta1.Keystone, configHash string) *apps
 	return deploy
 }
 
-func APIService(instance *openstackv1beta1.Keystone) *corev1.Service {
+func APIService(instance *openstackv1beta1.Glance) *corev1.Service {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	svc := &corev1.Service{
@@ -103,7 +78,7 @@ func APIService(instance *openstackv1beta1.Keystone) *corev1.Service {
 		Spec: corev1.ServiceSpec{
 			Selector: labels,
 			Ports: []corev1.ServicePort{
-				{Name: "http", Port: 5000},
+				{Name: "http", Port: 9292},
 			},
 		},
 	}
@@ -111,7 +86,7 @@ func APIService(instance *openstackv1beta1.Keystone) *corev1.Service {
 	return svc
 }
 
-func APIIngress(instance *openstackv1beta1.Keystone) *netv1.Ingress {
+func APIIngress(instance *openstackv1beta1.Glance) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	spec := instance.Spec.API.Ingress

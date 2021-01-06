@@ -2,8 +2,8 @@ package keystone
 
 import (
 	"encoding/base64"
+	"fmt"
 	"math/rand"
-	"time"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -23,7 +23,18 @@ func Secrets(instance *openstackv1beta1.Keystone) []*corev1.Secret {
 
 func adminSecret(name, namespace string, labels map[string]string) *corev1.Secret {
 	secret := template.GenericSecret(name, namespace, labels)
-	secret.StringData["password"] = template.NewPassword()
+
+	secret.StringData = map[string]string{
+		"OS_IDENTITY_API_VERSION": "3",
+		"OS_AUTH_URL":             fmt.Sprintf("http://%s-api.%s.svc:5000/v3", name, namespace),
+		"OS_REGION_NAME":          "RegionOne",
+		"OS_PROJECT_DOMAIN_NAME":  "Default",
+		"OS_USER_DOMAIN_NAME":     "Default",
+		"OS_PROJECT_NAME":         "admin",
+		"OS_USERNAME":             "admin",
+		"OS_PASSWORD":             template.NewPassword(),
+	}
+
 	return secret
 }
 
@@ -35,7 +46,6 @@ func fernetSecret(name, namespace string, labels map[string]string) *corev1.Secr
 }
 
 func newFernetKey() string {
-	rand.Seed(time.Now().UnixNano())
 	data := make([]byte, 32)
 	for i := 0; i < 32; i++ {
 		data[i] = byte(rand.Intn(10))

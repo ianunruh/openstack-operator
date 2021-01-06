@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/go-logr/logr"
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -121,13 +121,13 @@ func EnsureCluster(ctx context.Context, c client.Client, intended *openstackv1be
 
 		template.SetAppliedHash(intended, hash)
 
-		log.Info("Creating MariaDB cluster", "Name", intended.Name)
+		log.Info("Creating MariaDB", "Name", intended.Name)
 		return c.Create(ctx, intended)
 	} else if !template.MatchesAppliedHash(found, hash) {
 		found.Spec = intended.Spec
 		template.SetAppliedHash(found, hash)
 
-		log.Info("Updating MariaDB cluster", "Name", intended.Name)
+		log.Info("Updating MariaDB", "Name", intended.Name)
 		return c.Update(ctx, found)
 	}
 

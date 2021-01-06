@@ -6,13 +6,12 @@ import (
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 )
 
-func Keystone(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Keystone {
-	// TODO labels
-	spec := instance.Spec.Keystone
+func Glance(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Glance {
+	spec := instance.Spec.Glance
 
-	return &openstackv1beta1.Keystone{
+	return &openstackv1beta1.Glance{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "keystone",
+			Name:      "glance",
 			Namespace: instance.Namespace,
 		},
 		Spec: spec,

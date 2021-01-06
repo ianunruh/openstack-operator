@@ -6,20 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: keystones.openstack.k8s.ianunruh.com
+  name: glances.openstack.k8s.ianunruh.com
 spec:
   group: openstack.k8s.ianunruh.com
   names:
-    kind: Keystone
-    listKind: KeystoneList
-    plural: keystones
-    singular: keystone
+    kind: Glance
+    listKind: GlanceList
+    plural: glances
+    singular: glance
   scope: Namespaced
   versions:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Keystone is the Schema for the keystones API
+        description: Glance is the Schema for the glances API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,7 +34,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: KeystoneSpec defines the desired state of Keystone
+            description: GlanceSpec defines the desired state of Glance
             properties:
               api:
                 properties:
@@ -78,12 +78,7 @@ spec:
             - image
             type: object
           status:
-            description: KeystoneStatus defines the observed state of Keystone
-            properties:
-              ready:
-                type: boolean
-            required:
-            - ready
+            description: GlanceStatus defines the observed state of Glance
             type: object
         type: object
     served: true

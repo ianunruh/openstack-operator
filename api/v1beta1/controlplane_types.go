@@ -33,6 +33,7 @@ type ControlPlaneSpec struct {
 	Database MariaDBSpec `json:"database"`
 
 	Keystone KeystoneSpec `json:"keystone"`
+	Glance   GlanceSpec   `json:"glance"`
 }
 
 // ControlPlaneStatus defines the observed state of ControlPlane

@@ -4,4 +4,7 @@ resources:
 - openstack_v1beta1_mariadb.yaml
 - openstack_v1beta1_mariadbdatabase.yaml
 - openstack_v1beta1_keystone.yaml
+- openstack_v1beta1_keystoneservice.yaml
+- openstack_v1beta1_keystoneuser.yaml
+- openstack_v1beta1_glance.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

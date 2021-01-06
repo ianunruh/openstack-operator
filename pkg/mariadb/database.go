@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/go-logr/logr"
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -58,7 +58,13 @@ func DatabaseSecret(instance *openstackv1beta1.MariaDBDatabase) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
 
-	secret.StringData["password"] = template.NewPassword()
+	hostname := instance.Spec.Cluster
+	username := instance.Spec.Name
+	password := template.NewPassword()
+	db := instance.Spec.Name
+
+	secret.StringData["connection"] = fmt.Sprintf("mysql+pymysql://%s:%s@%s/%s", username, password, hostname, db)
+	secret.StringData["password"] = password
 
 	return secret
 }
@@ -77,13 +83,13 @@ func EnsureDatabase(ctx context.Context, c client.Client, intended *openstackv1b
 
 		template.SetAppliedHash(intended, hash)
 
-		log.Info("Creating MariaDB database", "Name", intended.Name)
+		log.Info("Creating MariaDBDatabase", "Name", intended.Name)
 		return c.Create(ctx, intended)
 	} else if !template.MatchesAppliedHash(found, hash) {
 		found.Spec = intended.Spec
 		template.SetAppliedHash(found, hash)
 
-		log.Info("Updating MariaDB database", "Name", intended.Name)
+		log.Info("Updating MariaDBDatabase", "Name", intended.Name)
 		return c.Update(ctx, found)
 	}
 

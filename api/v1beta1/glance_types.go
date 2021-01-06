@@ -23,53 +23,51 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// KeystoneSpec defines the desired state of Keystone
-type KeystoneSpec struct {
+// GlanceSpec defines the desired state of Glance
+type GlanceSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
 	Image string `json:"image"`
 
-	API KeystoneAPISpec `json:"api"`
+	API GlanceAPISpec `json:"api"`
 
 	Database MariaDBDatabaseSpec `json:"database"`
 }
 
-type KeystoneAPISpec struct {
+type GlanceAPISpec struct {
 	// +optional
 	Replicas int32        `json:"replicas"`
 	Ingress  *IngressSpec `json:"ingress"`
 }
 
-// KeystoneStatus defines the observed state of Keystone
-type KeystoneStatus struct {
+// GlanceStatus defines the observed state of Glance
+type GlanceStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	Ready bool `json:"ready"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// Keystone is the Schema for the keystones API
-type Keystone struct {
+// Glance is the Schema for the glances API
+type Glance struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   KeystoneSpec   `json:"spec,omitempty"`
-	Status KeystoneStatus `json:"status,omitempty"`
+	Spec   GlanceSpec   `json:"spec,omitempty"`
+	Status GlanceStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// KeystoneList contains a list of Keystone
-type KeystoneList struct {
+// GlanceList contains a list of Glance
+type GlanceList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Keystone `json:"items"`
+	Items           []Glance `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&Keystone{}, &KeystoneList{})
+	SchemeBuilder.Register(&Glance{}, &GlanceList{})
 }
