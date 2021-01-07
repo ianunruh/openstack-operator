@@ -1,0 +1,30 @@
+apiVersion: openstack.k8s.ianunruh.com/v1beta1
+kind: Nova
+metadata:
+  name: nova
+spec:
+  image: registry.kcloud.zone/ops/nova:3173da3b
+  api:
+    replicas: 2
+    ingress:
+      host: nova.openstack2.kcloud.zone
+      annotations:
+        external-dns/enabled: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+  database:
+    name: nova
+    secret: nova-db
+    cluster: mariadb
+  apiDatabase:
+    name: nova_api
+    secret: nova-db-api
+    cluster: mariadb
+  cellDatabase:
+    name: nova_cell0
+    secret: nova-db-cell0
+    cluster: mariadb
+  broker:
+    name: nova
+    secret: nova-rabbitmq
+    cluster: rabbitmq
+    virtualHost: openstack

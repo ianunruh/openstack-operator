@@ -30,7 +30,7 @@ func Secret(instance *openstackv1beta1.RabbitMQ) *corev1.Secret {
 
 	secret.StringData["erlang-cookie"] = template.NewPassword()
 	secret.StringData["password"] = password
-	secret.StringData["connection"] = fmt.Sprintf("rabbit://admin:%s@%s:5672", password, instance.Name)
+	secret.StringData["connection"] = fmt.Sprintf("rabbit://admin:%s@%s:15672", password, instance.Name)
 
 	return secret
 }

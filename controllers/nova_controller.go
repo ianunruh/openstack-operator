@@ -31,22 +31,23 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
-	"github.com/ianunruh/openstack-operator/pkg/glance"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
+	"github.com/ianunruh/openstack-operator/pkg/nova"
+	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-// GlanceReconciler reconciles a Glance object
-type GlanceReconciler struct {
+// NovaReconciler reconciles a Nova object
+type NovaReconciler struct {
 	client.Client
 	Log    logr.Logger
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=glances,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=glances/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=glances/finalizers,verbs=update
+// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=novas,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=novas/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=novas/finalizers,verbs=update
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;create;update;delete
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;create;update;delete
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;create;update;delete
@@ -56,17 +57,13 @@ type GlanceReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Glance object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.0/pkg/reconcile
-func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
 
-	instance := &openstackv1beta1.Glance{}
+	instance := &openstackv1beta1.Nova{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -75,26 +72,39 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	database := glance.Database(instance)
-	controllerutil.SetControllerReference(instance, database, r.Scheme)
-	if err := mariadb.EnsureDatabase(ctx, r.Client, database, log); err != nil {
+	databases := []*openstackv1beta1.MariaDBDatabase{
+		nova.Database(instance),
+		nova.APIDatabase(instance),
+		nova.CellDatabase(instance),
+	}
+	for _, db := range databases {
+		controllerutil.SetControllerReference(instance, db, r.Scheme)
+		if err := mariadb.EnsureDatabase(ctx, r.Client, db, log); err != nil {
+			return ctrl.Result{}, err
+		}
+		// TODO wait for database to be ready
+	}
+
+	brokerUser := nova.BrokerUser(instance)
+	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
+	if err := rabbitmq.EnsureUser(ctx, r.Client, brokerUser, log); err != nil {
 		return ctrl.Result{}, err
 	}
-	// TODO wait for database to be ready
+	// TODO wait for broker to be ready
 
-	keystoneSvc := glance.KeystoneService(instance)
+	keystoneSvc := nova.KeystoneService(instance)
 	controllerutil.SetControllerReference(instance, keystoneSvc, r.Scheme)
 	if err := keystone.EnsureService(ctx, r.Client, keystoneSvc, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	keystoneUser := glance.KeystoneUser(instance)
+	keystoneUser := nova.KeystoneUser(instance)
 	controllerutil.SetControllerReference(instance, keystoneUser, r.Scheme)
 	if err := keystone.EnsureUser(ctx, r.Client, keystoneUser, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	cm := glance.ConfigMap(instance)
+	cm := nova.ConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
 	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
 		return ctrl.Result{}, err
@@ -102,8 +112,8 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	configHash := template.AppliedHash(cm)
 
 	jobs := []*batchv1.Job{
-		glance.DBSyncJob(instance),
-		// glance.BootstrapJob(instance),
+		nova.DBSyncJob(instance),
+		// nova.BootstrapJob(instance),
 	}
 	for _, job := range jobs {
 		controllerutil.SetControllerReference(instance, job, r.Scheme)
@@ -113,19 +123,19 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		// TODO wait for job to finish
 	}
 
-	service := glance.APIService(instance)
+	service := nova.APIService(instance)
 	controllerutil.SetControllerReference(instance, service, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, service, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	ingress := glance.APIIngress(instance)
+	ingress := nova.APIIngress(instance)
 	controllerutil.SetControllerReference(instance, ingress, r.Scheme)
 	if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	deploy := glance.APIDeployment(instance, configHash)
+	deploy := nova.APIDeployment(instance, configHash)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err
@@ -136,9 +146,9 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *GlanceReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *NovaReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&openstackv1beta1.Glance{}).
+		For(&openstackv1beta1.Nova{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&netv1.Ingress{}).

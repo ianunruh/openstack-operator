@@ -164,6 +164,101 @@ spec:
                 - database
                 - image
                 type: object
+              nova:
+                description: NovaSpec defines the desired state of Nova
+                properties:
+                  api:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                        required:
+                        - annotations
+                        - host
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    required:
+                    - ingress
+                    type: object
+                  apiDatabase:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  broker:
+                    description: RabbitMQUserSpec defines the desired state of RabbitMQUser
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                      virtualHost:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    - virtualHost
+                    type: object
+                  cellDatabase:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  database:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  image:
+                    type: string
+                required:
+                - api
+                - apiDatabase
+                - broker
+                - cellDatabase
+                - database
+                - image
+                type: object
               placement:
                 description: PlacementSpec defines the desired state of Placement
                 properties:
@@ -215,6 +310,7 @@ spec:
             - domain
             - glance
             - keystone
+            - nova
             - placement
             type: object
           status:

@@ -22,12 +22,13 @@ func UserJob(instance *openstackv1beta1.RabbitMQUser, containerImage, databaseHo
 		Labels:    labels,
 		Containers: []corev1.Container{
 			{
-				Name:  "user",
-				Image: containerImage,
+				Name: "user",
+				// TODO make configurable
+				Image: "rabbitmq:3.8.9-management",
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustRenderFile(AppLabel, "user.sh", nil),
+					template.MustRenderFile(AppLabel, "user-setup.sh", nil),
 				},
 				Env: []corev1.EnvVar{
 					template.SecretEnvVar("RABBITMQ_ADMIN_CONNECTION", adminSecret, "connection"),
@@ -51,7 +52,7 @@ func UserSecret(instance *openstackv1beta1.RabbitMQUser) *corev1.Secret {
 	password := template.NewPassword()
 	vhost := instance.Spec.VirtualHost
 
-	secret.StringData["connection"] = fmt.Sprintf("rabbitmq://%s:%s@%s/%s", username, password, hostname, vhost)
+	secret.StringData["connection"] = fmt.Sprintf("rabbit://%s:%s@%s/%s", username, password, hostname, vhost)
 	secret.StringData["password"] = password
 
 	return secret

@@ -43,6 +43,10 @@ resources:
   group: openstack
   kind: RabbitMQUser
   version: v1beta1
+- crdVersion: v1
+  group: openstack
+  kind: Nova
+  version: v1beta1
 version: 3-alpha
 plugins:
   manifests.sdk.operatorframework.io/v2: {}

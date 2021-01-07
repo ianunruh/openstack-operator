@@ -31,6 +31,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/glance"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
+	"github.com/ianunruh/openstack-operator/pkg/nova"
 	"github.com/ianunruh/openstack-operator/pkg/placement"
 	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
 )
@@ -94,6 +95,12 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	pm := controlplane.Placement(instance)
 	controllerutil.SetControllerReference(instance, pm, r.Scheme)
 	if err := placement.EnsurePlacement(ctx, r.Client, pm, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	compute := controlplane.Nova(instance)
+	controllerutil.SetControllerReference(instance, compute, r.Scheme)
+	if err := nova.EnsureNova(ctx, r.Client, compute, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
