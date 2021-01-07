@@ -32,6 +32,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 	"github.com/ianunruh/openstack-operator/pkg/placement"
+	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
 )
 
 // ControlPlaneReconciler reconciles a ControlPlane object
@@ -69,6 +70,12 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	database := controlplane.Database(instance)
 	controllerutil.SetControllerReference(instance, database, r.Scheme)
 	if err := mariadb.EnsureCluster(ctx, r.Client, database, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	broker := controlplane.Broker(instance)
+	controllerutil.SetControllerReference(instance, broker, r.Scheme)
+	if err := rabbitmq.EnsureCluster(ctx, r.Client, broker, log); err != nil {
 		return ctrl.Result{}, err
 	}
 

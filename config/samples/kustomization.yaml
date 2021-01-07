@@ -8,4 +8,6 @@ resources:
 - openstack_v1beta1_keystoneuser.yaml
 - openstack_v1beta1_glance.yaml
 - openstack_v1beta1_placement.yaml
+- openstack_v1beta1_rabbitmq.yaml
+- openstack_v1beta1_rabbitmquser.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

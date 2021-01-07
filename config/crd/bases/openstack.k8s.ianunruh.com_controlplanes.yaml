@@ -36,6 +36,24 @@ spec:
           spec:
             description: ControlPlaneSpec defines the desired state of ControlPlane
             properties:
+              broker:
+                description: RabbitMQSpec defines the desired state of RabbitMQ
+                properties:
+                  image:
+                    type: string
+                  volume:
+                    properties:
+                      capacity:
+                        type: string
+                      storageClass:
+                        type: string
+                    required:
+                    - capacity
+                    type: object
+                required:
+                - image
+                - volume
+                type: object
               database:
                 description: MariaDBSpec defines the desired state of MariaDB
                 properties:
@@ -192,6 +210,7 @@ spec:
                 - image
                 type: object
             required:
+            - broker
             - database
             - domain
             - glance

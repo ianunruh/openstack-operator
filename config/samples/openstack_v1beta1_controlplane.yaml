@@ -4,6 +4,11 @@ metadata:
   name: default
 spec:
   domain: openstack2.kcloud.zone
+  broker:
+    image: docker.io/bitnami/rabbitmq:3.8.9-debian-10-r58
+    volume:
+      capacity: 50Gi
+      storageClass: ceph-block-ssd
   database:
     image: docker.io/bitnami/mariadb:10.5.8-debian-10-r21
     volume:

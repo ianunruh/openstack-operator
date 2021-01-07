@@ -11,6 +11,17 @@ func EnvVar(name, value string) corev1.EnvVar {
 	}
 }
 
+func FieldEnvVar(name, fieldPath string) corev1.EnvVar {
+	return corev1.EnvVar{
+		Name: name,
+		ValueFrom: &corev1.EnvVarSource{
+			FieldRef: &corev1.ObjectFieldSelector{
+				FieldPath: fieldPath,
+			},
+		},
+	}
+}
+
 func SecretEnvVar(name, secretName, secretKey string) corev1.EnvVar {
 	return corev1.EnvVar{
 		Name: name,

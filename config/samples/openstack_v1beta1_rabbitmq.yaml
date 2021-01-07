@@ -1,0 +1,9 @@
+apiVersion: openstack.k8s.ianunruh.com/v1beta1
+kind: RabbitMQ
+metadata:
+  name: rabbitmq
+spec:
+  image: docker.io/bitnami/rabbitmq:3.8.9-debian-10-r58
+  volume:
+    capacity: 50Gi
+    storageClass: ceph-block-ssd
