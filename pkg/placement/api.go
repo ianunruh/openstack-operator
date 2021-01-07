@@ -1,4 +1,4 @@
-package glance
+package placement
 
 import (
 	appsv1 "k8s.io/api/apps/v1"
@@ -15,7 +15,7 @@ const (
 	APIComponentLabel = "api"
 )
 
-func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1.Deployment {
+func APIDeployment(instance *openstackv1beta1.Placement, configHash string) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	keystoneSecret := template.Combine(instance.Name, "keystone")
@@ -37,30 +37,41 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 				Name:  "api",
 				Image: instance.Spec.Image,
 				Command: []string{
-					"glance-api",
-					"--config-file=/etc/glance/glance-api.conf",
+					"apachectl",
+					"-DFOREGROUND",
+				},
+				Lifecycle: &corev1.Lifecycle{
+					PreStop: &corev1.Handler{
+						Exec: &corev1.ExecAction{
+							Command: []string{
+								"apachectl",
+								"-k",
+								"graceful-stop",
+							},
+						},
+					},
 				},
 				Env: []corev1.EnvVar{
 					template.EnvVar("CONFIG_HASH", configHash),
-					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
+					template.SecretEnvVar("OS_PLACEMENT_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 					template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneSecret, "OS_PASSWORD"),
 				},
 				Ports: []corev1.ContainerPort{
-					{Name: "http", ContainerPort: 9292},
+					{Name: "http", ContainerPort: 8778},
 				},
 				LivenessProbe:  probe,
 				ReadinessProbe: probe,
 				VolumeMounts: []corev1.VolumeMount{
 					{
-						Name:      "etc-glance",
-						SubPath:   "glance-api.conf",
-						MountPath: "/etc/glance/glance-api.conf",
+						Name:      "etc-placement",
+						SubPath:   "placement.conf",
+						MountPath: "/etc/placement/placement.conf",
 					},
 				},
 			},
 		},
 		Volumes: []corev1.Volume{
-			template.ConfigMapVolume("etc-glance", instance.Name, nil),
+			template.ConfigMapVolume("etc-placement", instance.Name, nil),
 		},
 	})
 
@@ -69,7 +80,7 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 	return deploy
 }
 
-func APIService(instance *openstackv1beta1.Glance) *corev1.Service {
+func APIService(instance *openstackv1beta1.Placement) *corev1.Service {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	svc := &corev1.Service{
@@ -81,7 +92,7 @@ func APIService(instance *openstackv1beta1.Glance) *corev1.Service {
 		Spec: corev1.ServiceSpec{
 			Selector: labels,
 			Ports: []corev1.ServicePort{
-				{Name: "http", Port: 9292},
+				{Name: "http", Port: 8778},
 			},
 		},
 	}
@@ -89,7 +100,7 @@ func APIService(instance *openstackv1beta1.Glance) *corev1.Service {
 	return svc
 }
 
-func APIIngress(instance *openstackv1beta1.Glance) *netv1.Ingress {
+func APIIngress(instance *openstackv1beta1.Placement) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	spec := instance.Spec.API.Ingress

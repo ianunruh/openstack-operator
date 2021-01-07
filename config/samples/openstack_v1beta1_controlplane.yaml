@@ -35,3 +35,17 @@ spec:
       name: glance
       secret: glance-db
       cluster: mariadb
+  placement:
+    image: registry.kcloud.zone/ops/placement:d8f1ff3a
+    api:
+      replicas: 2
+      ingress:
+        host: placement.openstack2.kcloud.zone
+        annotations:
+          external-dns/enabled: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+    database:
+      name: placement
+      secret: placement-db
+      cluster: mariadb
+

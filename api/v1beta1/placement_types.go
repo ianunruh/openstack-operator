@@ -23,49 +23,51 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// ControlPlaneSpec defines the desired state of ControlPlane
-type ControlPlaneSpec struct {
+// PlacementSpec defines the desired state of Placement
+type PlacementSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Domain string `json:"domain"`
+	Image string `json:"image"`
 
-	Database MariaDBSpec `json:"database"`
+	API PlacementAPISpec `json:"api"`
 
-	Keystone  KeystoneSpec  `json:"keystone"`
-	Glance    GlanceSpec    `json:"glance"`
-	Placement PlacementSpec `json:"placement"`
+	Database MariaDBDatabaseSpec `json:"database"`
 }
 
-// ControlPlaneStatus defines the observed state of ControlPlane
-type ControlPlaneStatus struct {
+type PlacementAPISpec struct {
+	// +optional
+	Replicas int32        `json:"replicas"`
+	Ingress  *IngressSpec `json:"ingress"`
+}
+
+// PlacementStatus defines the observed state of Placement
+type PlacementStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	Ready bool `json:"ready"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// ControlPlane is the Schema for the controlplanes API
-type ControlPlane struct {
+// Placement is the Schema for the placements API
+type Placement struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ControlPlaneSpec   `json:"spec,omitempty"`
-	Status ControlPlaneStatus `json:"status,omitempty"`
+	Spec   PlacementSpec   `json:"spec,omitempty"`
+	Status PlacementStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// ControlPlaneList contains a list of ControlPlane
-type ControlPlaneList struct {
+// PlacementList contains a list of Placement
+type PlacementList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ControlPlane `json:"items"`
+	Items           []Placement `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&ControlPlane{}, &ControlPlaneList{})
+	SchemeBuilder.Register(&Placement{}, &PlacementList{})
 }

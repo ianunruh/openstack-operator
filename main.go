@@ -134,6 +134,14 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Glance")
 		os.Exit(1)
 	}
+	if err = (&controllers.PlacementReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("Placement"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Placement")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {

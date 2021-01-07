@@ -146,11 +146,57 @@ spec:
                 - database
                 - image
                 type: object
+              placement:
+                description: PlacementSpec defines the desired state of Placement
+                properties:
+                  api:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                        required:
+                        - annotations
+                        - host
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    required:
+                    - ingress
+                    type: object
+                  database:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  image:
+                    type: string
+                required:
+                - api
+                - database
+                - image
+                type: object
             required:
             - database
             - domain
             - glance
             - keystone
+            - placement
             type: object
           status:
             description: ControlPlaneStatus defines the observed state of ControlPlane

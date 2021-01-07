@@ -31,6 +31,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/glance"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
+	"github.com/ianunruh/openstack-operator/pkg/placement"
 )
 
 // ControlPlaneReconciler reconciles a ControlPlane object
@@ -80,6 +81,12 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	image := controlplane.Glance(instance)
 	controllerutil.SetControllerReference(instance, image, r.Scheme)
 	if err := glance.EnsureGlance(ctx, r.Client, image, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	pm := controlplane.Placement(instance)
+	controllerutil.SetControllerReference(instance, pm, r.Scheme)
+	if err := placement.EnsurePlacement(ctx, r.Client, pm, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
