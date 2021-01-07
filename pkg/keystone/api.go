@@ -8,6 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/httpd"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -36,23 +37,10 @@ func APIDeployment(instance *openstackv1beta1.Keystone, configHash string) *apps
 		Replicas:  instance.Spec.API.Replicas,
 		Containers: []corev1.Container{
 			{
-				Name:  "api",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"apachectl",
-					"-DFOREGROUND",
-				},
-				Lifecycle: &corev1.Lifecycle{
-					PreStop: &corev1.Handler{
-						Exec: &corev1.ExecAction{
-							Command: []string{
-								"apachectl",
-								"-k",
-								"graceful-stop",
-							},
-						},
-					},
-				},
+				Name:      "api",
+				Image:     instance.Spec.Image,
+				Command:   httpd.Command(),
+				Lifecycle: httpd.Lifecycle(),
 				Env: []corev1.EnvVar{
 					template.EnvVar("CONFIG_HASH", configHash),
 					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),

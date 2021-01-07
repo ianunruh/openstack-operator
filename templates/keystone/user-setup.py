@@ -27,7 +27,7 @@ def main():
     if user:
         conn.identity.update_user(user, password=password, default_project_id=project.id)
     else:
-        conn.identity.create_user(name=username, domain_id=user_domain.id, password=password, default_project_id=project.id)
+        user = conn.identity.create_user(name=username, domain_id=user_domain.id, password=password, default_project_id=project.id)
 
     conn.identity.assign_project_role_to_user(project, user, role)
 

@@ -12,7 +12,6 @@ spec:
   keystone:
     image: registry.kcloud.zone/ops/keystone:37a47821
     api:
-      replicas: 2
       ingress:
         host: keystone.openstack2.kcloud.zone
         annotations:
@@ -25,7 +24,6 @@ spec:
   glance:
     image: registry.kcloud.zone/ops/glance:286f670e
     api:
-      replicas: 2
       ingress:
         host: glance.openstack2.kcloud.zone
         annotations:
@@ -38,7 +36,6 @@ spec:
   placement:
     image: registry.kcloud.zone/ops/placement:d8f1ff3a
     api:
-      replicas: 2
       ingress:
         host: placement.openstack2.kcloud.zone
         annotations:
