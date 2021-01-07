@@ -137,6 +137,7 @@ func (r *KeystoneReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.ConfigMap{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&netv1.Ingress{}).
+		Owns(&batchv1.Job{}).
 		Owns(&corev1.Secret{}).
 		Owns(&corev1.Service{}).
 		Owns(&openstackv1beta1.MariaDBDatabase{}).

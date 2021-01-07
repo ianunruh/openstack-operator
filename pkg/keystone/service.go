@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/go-logr/logr"
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -22,7 +22,7 @@ func ServiceJob(instance *openstackv1beta1.KeystoneService, containerImage, admi
 		Labels:    labels,
 		Containers: []corev1.Container{
 			{
-				Name:  "database",
+				Name:  "setup",
 				Image: containerImage,
 				Command: []string{
 					"python3",
@@ -33,11 +33,12 @@ func ServiceJob(instance *openstackv1beta1.KeystoneService, containerImage, admi
 					template.EnvFromSecret(adminSecret),
 				},
 				Env: []corev1.EnvVar{
-					template.EnvVar("KEYSTONE_SERVICE_NAME", instance.Spec.Name),
-					template.EnvVar("KEYSTONE_SERVICE_TYPE", instance.Spec.Type),
-					template.EnvVar("KEYSTONE_SERVICE_ENDPOINT_ADMIN", instance.Spec.PublicURL),
-					template.EnvVar("KEYSTONE_SERVICE_ENDPOINT_INTERNAL", instance.Spec.InternalURL),
-					template.EnvVar("KEYSTONE_SERVICE_ENDPOINT_PUBLIC", instance.Spec.PublicURL),
+					template.EnvVar("SVC_NAME", instance.Spec.Name),
+					template.EnvVar("SVC_TYPE", instance.Spec.Type),
+					template.EnvVar("SVC_REGION", "RegionOne"),
+					template.EnvVar("SVC_ENDPOINT_ADMIN", instance.Spec.PublicURL),
+					template.EnvVar("SVC_ENDPOINT_INTERNAL", instance.Spec.InternalURL),
+					template.EnvVar("SVC_ENDPOINT_PUBLIC", instance.Spec.PublicURL),
 				},
 			},
 		},

@@ -26,7 +26,12 @@ func SecretEnvVar(name, secretName, secretKey string) corev1.EnvVar {
 }
 
 func EnvFromSecret(name string) corev1.EnvFromSource {
+	return EnvFromSecretPrefixed(name, "")
+}
+
+func EnvFromSecretPrefixed(name, prefix string) corev1.EnvFromSource {
 	return corev1.EnvFromSource{
+		Prefix: prefix,
 		SecretRef: &corev1.SecretEnvSource{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: name,

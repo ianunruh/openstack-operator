@@ -22,7 +22,7 @@ func UserJob(instance *openstackv1beta1.KeystoneUser, containerImage, adminSecre
 		Labels:    labels,
 		Containers: []corev1.Container{
 			{
-				Name:  "database",
+				Name:  "setup",
 				Image: containerImage,
 				Command: []string{
 					"python3",
@@ -31,8 +31,8 @@ func UserJob(instance *openstackv1beta1.KeystoneUser, containerImage, adminSecre
 				},
 				EnvFrom: []corev1.EnvFromSource{
 					template.EnvFromSecret(adminSecret),
+					template.EnvFromSecretPrefixed(instance.Spec.Secret, "SVC_"),
 				},
-				Env: []corev1.EnvVar{},
 			},
 		},
 	})
@@ -45,7 +45,18 @@ func UserJob(instance *openstackv1beta1.KeystoneUser, containerImage, adminSecre
 func UserSecret(instance *openstackv1beta1.KeystoneUser) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
-	secret.StringData["password"] = template.NewPassword()
+
+	secret.StringData = map[string]string{
+		"OS_IDENTITY_API_VERSION": "3",
+		"OS_AUTH_URL":             "http://keystone-api:5000/v3",
+		"OS_REGION_NAME":          "RegionOne",
+		"OS_PROJECT_DOMAIN_NAME":  "Default",
+		"OS_USER_DOMAIN_NAME":     "Default",
+		"OS_PROJECT_NAME":         "service",
+		"OS_USERNAME":             instance.Name,
+		"OS_PASSWORD":             template.NewPassword(),
+	}
+
 	return secret
 }
 

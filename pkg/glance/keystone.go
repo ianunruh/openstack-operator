@@ -21,7 +21,7 @@ func KeystoneService(instance *openstackv1beta1.Glance) *openstackv1beta1.Keysto
 		Spec: openstackv1beta1.KeystoneServiceSpec{
 			Name:        "glance",
 			Type:        "image",
-			InternalURL: fmt.Sprintf("http://%s.%s.svc:9292", instance.Name, instance.Namespace),
+			InternalURL: fmt.Sprintf("http://%s-api.%s.svc:9292", instance.Name, instance.Namespace),
 			PublicURL:   fmt.Sprintf("https://%s", instance.Spec.API.Ingress.Host),
 		},
 	}
