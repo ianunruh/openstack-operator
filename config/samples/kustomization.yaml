@@ -11,4 +11,5 @@ resources:
 - openstack_v1beta1_rabbitmq.yaml
 - openstack_v1beta1_rabbitmquser.yaml
 - openstack_v1beta1_nova.yaml
+- openstack_v1beta1_novacell.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

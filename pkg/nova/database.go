@@ -7,16 +7,6 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func Database(instance *openstackv1beta1.Nova) *openstackv1beta1.MariaDBDatabase {
-	return &openstackv1beta1.MariaDBDatabase{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name,
-			Namespace: instance.Namespace,
-		},
-		Spec: instance.Spec.Database,
-	}
-}
-
 func APIDatabase(instance *openstackv1beta1.Nova) *openstackv1beta1.MariaDBDatabase {
 	return &openstackv1beta1.MariaDBDatabase{
 		ObjectMeta: metav1.ObjectMeta{
@@ -27,12 +17,12 @@ func APIDatabase(instance *openstackv1beta1.Nova) *openstackv1beta1.MariaDBDatab
 	}
 }
 
-func CellDatabase(instance *openstackv1beta1.Nova) *openstackv1beta1.MariaDBDatabase {
+func CellDatabase(instanceName, cellName, namespace string, spec openstackv1beta1.MariaDBDatabaseSpec) *openstackv1beta1.MariaDBDatabase {
 	return &openstackv1beta1.MariaDBDatabase{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      template.Combine(instance.Name, "cell0"),
-			Namespace: instance.Namespace,
+			Name:      template.Combine(instanceName, cellName),
+			Namespace: namespace,
 		},
-		Spec: instance.Spec.CellDatabase,
+		Spec: spec,
 	}
 }

@@ -101,28 +101,84 @@ spec:
                 - name
                 - secret
                 type: object
-              database:
-                description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
+              cells:
+                items:
+                  description: NovaCellSpec defines the desired state of NovaCell
+                  properties:
+                    conductor:
+                      properties:
+                        replicas:
+                          format: int32
+                          type: integer
+                      type: object
+                    database:
+                      description: MariaDBDatabaseSpec defines the desired state of
+                        MariaDBDatabase
+                      properties:
+                        cluster:
+                          type: string
+                        name:
+                          type: string
+                        secret:
+                          type: string
+                      required:
+                      - cluster
+                      - name
+                      - secret
+                      type: object
+                    metadata:
+                      properties:
+                        replicas:
+                          format: int32
+                          type: integer
+                      type: object
+                    name:
+                      type: string
+                    novncproxy:
+                      properties:
+                        ingress:
+                          properties:
+                            annotations:
+                              additionalProperties:
+                                type: string
+                              type: object
+                            host:
+                              type: string
+                          required:
+                          - annotations
+                          - host
+                          type: object
+                        replicas:
+                          format: int32
+                          type: integer
+                      required:
+                      - ingress
+                      type: object
+                  required:
+                  - database
+                  - name
+                  type: object
+                type: array
+              conductor:
                 properties:
-                  cluster:
-                    type: string
-                  name:
-                    type: string
-                  secret:
-                    type: string
-                required:
-                - cluster
-                - name
-                - secret
+                  replicas:
+                    format: int32
+                    type: integer
                 type: object
               image:
                 type: string
+              scheduler:
+                properties:
+                  replicas:
+                    format: int32
+                    type: integer
+                type: object
             required:
             - api
             - apiDatabase
             - broker
             - cellDatabase
-            - database
+            - cells
             - image
             type: object
           status:

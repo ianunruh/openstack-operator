@@ -11,10 +11,8 @@ spec:
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
-  database:
-    name: nova
-    secret: nova-db
-    cluster: mariadb
+  scheduler:
+    replicas: 2
   apiDatabase:
     name: nova_api
     secret: nova-db-api

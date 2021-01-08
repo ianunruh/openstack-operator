@@ -73,9 +73,8 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 
 	databases := []*openstackv1beta1.MariaDBDatabase{
-		nova.Database(instance),
 		nova.APIDatabase(instance),
-		nova.CellDatabase(instance),
+		nova.CellDatabase(instance.Name, "cell0", instance.Namespace, instance.Spec.CellDatabase),
 	}
 	for _, db := range databases {
 		controllerutil.SetControllerReference(instance, db, r.Scheme)
@@ -111,8 +110,21 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 	configHash := template.AppliedHash(cm)
 
+	envVars := []corev1.EnvVar{
+		template.EnvVar("CONFIG_HASH", configHash),
+		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
+		template.SecretEnvVar("OS_API_DATABASE__CONNECTION", instance.Spec.APIDatabase.Secret, "connection"),
+		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.CellDatabase.Secret, "connection"),
+		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
+		template.SecretEnvVar("OS_PLACEMENT__PASSWORD", "placement-keystone", "OS_PASSWORD"),
+	}
+
+	volumes := []corev1.Volume{
+		template.ConfigMapVolume("etc-nova", cm.Name, nil),
+	}
+
 	jobs := []*batchv1.Job{
-		nova.DBSyncJob(instance),
+		nova.DBSyncJob(instance, envVars, volumes),
 		// nova.BootstrapJob(instance),
 	}
 	for _, job := range jobs {
@@ -123,26 +135,84 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		// TODO wait for job to finish
 	}
 
-	service := nova.APIService(instance)
-	controllerutil.SetControllerReference(instance, service, r.Scheme)
-	if err := template.EnsureService(ctx, r.Client, service, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, envVars, volumes, log); err != nil {
 		return ctrl.Result{}, err
+	}
+
+	if err := r.reconcileConductor(ctx, instance, envVars, volumes, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := r.reconcileScheduler(ctx, instance, envVars, volumes, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// TODO wait for deploys to be ready then mark status
+
+	for _, cellSpec := range instance.Spec.Cells {
+		cell := nova.Cell(instance, cellSpec)
+		controllerutil.SetControllerReference(instance, cell, r.Scheme)
+		if err := nova.EnsureCell(ctx, r.Client, cell, log); err != nil {
+			return ctrl.Result{}, err
+		}
+		// TODO wait on cell to be ready
+	}
+
+	return ctrl.Result{}, nil
+}
+
+func (r *NovaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	svc := nova.APIService(instance)
+	controllerutil.SetControllerReference(instance, svc, r.Scheme)
+	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
+		return err
 	}
 
 	ingress := nova.APIIngress(instance)
 	controllerutil.SetControllerReference(instance, ingress, r.Scheme)
 	if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
-		return ctrl.Result{}, err
+		return err
 	}
 
-	deploy := nova.APIDeployment(instance, configHash)
+	deploy := nova.APIDeployment(instance, envVars, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
-		return ctrl.Result{}, err
+		return err
 	}
-	// TODO wait for deploy to be ready then mark status
 
-	return ctrl.Result{}, nil
+	return nil
+}
+
+func (r *NovaReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	svc := nova.ConductorService(instance.Name, instance.Namespace)
+	controllerutil.SetControllerReference(instance, svc, r.Scheme)
+	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
+		return err
+	}
+
+	sts := nova.ConductorStatefulSet(instance.Name, instance.Namespace, instance.Spec.Conductor, envVars, volumes, instance.Spec.Image)
+	controllerutil.SetControllerReference(instance, sts, r.Scheme)
+	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *NovaReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	svc := nova.SchedulerService(instance)
+	controllerutil.SetControllerReference(instance, svc, r.Scheme)
+	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
+		return err
+	}
+
+	sts := nova.SchedulerStatefulSet(instance, envVars, volumes)
+	controllerutil.SetControllerReference(instance, sts, r.Scheme)
+	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

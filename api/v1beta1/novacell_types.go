@@ -23,59 +23,27 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// NovaSpec defines the desired state of Nova
-type NovaSpec struct {
+// NovaCellSpec defines the desired state of NovaCell
+type NovaCellSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Image string `json:"image"`
+	Name string `json:"name"`
 
-	API NovaAPISpec `json:"api"`
+	Database MariaDBDatabaseSpec `json:"database"`
 
 	// +optional
 	Conductor NovaConductorSpec `json:"conductor"`
 
 	// +optional
-	Scheduler NovaSchedulerSpec `json:"scheduler"`
+	Metadata NovaMetadataSpec `json:"metadata"`
 
-	APIDatabase MariaDBDatabaseSpec `json:"apiDatabase"`
-
-	CellDatabase MariaDBDatabaseSpec `json:"cellDatabase"`
-
-	Broker RabbitMQUserSpec `json:"broker"`
-
-	Cells []NovaCellSpec `json:"cells"`
-}
-
-type NovaAPISpec struct {
 	// +optional
-	Replicas int32        `json:"replicas"`
-	Ingress  *IngressSpec `json:"ingress"`
+	NoVNCProxy NovaNoVNCProxySpec `json:"novncproxy"`
 }
 
-type NovaConductorSpec struct {
-	// +optional
-	Replicas int32 `json:"replicas"`
-}
-
-type NovaMetadataSpec struct {
-	// +optional
-	Replicas int32 `json:"replicas"`
-}
-
-type NovaNoVNCProxySpec struct {
-	// +optional
-	Replicas int32        `json:"replicas"`
-	Ingress  *IngressSpec `json:"ingress"`
-}
-
-type NovaSchedulerSpec struct {
-	// +optional
-	Replicas int32 `json:"replicas"`
-}
-
-// NovaStatus defines the observed state of Nova
-type NovaStatus struct {
+// NovaCellStatus defines the observed state of NovaCell
+type NovaCellStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
@@ -83,24 +51,24 @@ type NovaStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// Nova is the Schema for the nova API
-type Nova struct {
+// NovaCell is the Schema for the novacells API
+type NovaCell struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   NovaSpec   `json:"spec,omitempty"`
-	Status NovaStatus `json:"status,omitempty"`
+	Spec   NovaCellSpec   `json:"spec,omitempty"`
+	Status NovaCellStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// NovaList contains a list of Nova
-type NovaList struct {
+// NovaCellList contains a list of NovaCell
+type NovaCellList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Nova `json:"items"`
+	Items           []NovaCell `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&Nova{}, &NovaList{})
+	SchemeBuilder.Register(&NovaCell{}, &NovaCellList{})
 }

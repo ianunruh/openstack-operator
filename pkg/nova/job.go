@@ -8,7 +8,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func DBSyncJob(instance *openstackv1beta1.Nova) *batchv1.Job {
+func DBSyncJob(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
 
 	job := template.GenericJob(template.Component{
@@ -23,12 +23,7 @@ func DBSyncJob(instance *openstackv1beta1.Nova) *batchv1.Job {
 					"-c",
 					template.MustRenderFile(AppLabel, "db-sync.sh", nil),
 				},
-				Env: []corev1.EnvVar{
-					template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
-					template.SecretEnvVar("OS_API_DATABASE__CONNECTION", instance.Spec.APIDatabase.Secret, "connection"),
-					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
-					template.SecretEnvVar("CELL_DATABASE", instance.Spec.CellDatabase.Secret, "connection"),
-				},
+				Env: env,
 				VolumeMounts: []corev1.VolumeMount{
 					{
 						Name:      "etc-nova",
@@ -38,9 +33,7 @@ func DBSyncJob(instance *openstackv1beta1.Nova) *batchv1.Job {
 				},
 			},
 		},
-		Volumes: []corev1.Volume{
-			template.ConfigMapVolume("etc-nova", instance.Name, nil),
-		},
+		Volumes: volumes,
 	})
 
 	job.Name = template.Combine(instance.Name, "db-sync")
