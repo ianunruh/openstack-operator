@@ -271,6 +271,32 @@ rules:
 - apiGroups:
   - openstack.k8s.ianunruh.com
   resources:
+  - memcacheds
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - memcacheds/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - memcacheds/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
   - neutrons
   verbs:
   - create

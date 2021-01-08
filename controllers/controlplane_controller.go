@@ -32,6 +32,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/horizon"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
+	"github.com/ianunruh/openstack-operator/pkg/memcached"
 	"github.com/ianunruh/openstack-operator/pkg/neutron"
 	"github.com/ianunruh/openstack-operator/pkg/nova"
 	"github.com/ianunruh/openstack-operator/pkg/placement"
@@ -67,6 +68,12 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		if errors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
+		return ctrl.Result{}, err
+	}
+
+	cache := controlplane.Cache(instance)
+	controllerutil.SetControllerReference(instance, cache, r.Scheme)
+	if err := memcached.EnsureCluster(ctx, r.Client, cache, log); err != nil {
 		return ctrl.Result{}, err
 	}
 

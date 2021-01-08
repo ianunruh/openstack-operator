@@ -54,6 +54,24 @@ spec:
                 - image
                 - volume
                 type: object
+              cache:
+                description: MemcachedSpec defines the desired state of Memcached
+                properties:
+                  image:
+                    type: string
+                  volume:
+                    properties:
+                      capacity:
+                        type: string
+                      storageClass:
+                        type: string
+                    required:
+                    - capacity
+                    type: object
+                required:
+                - image
+                - volume
+                type: object
               database:
                 description: MariaDBSpec defines the desired state of MariaDB
                 properties:
@@ -453,6 +471,7 @@ spec:
                 type: object
             required:
             - broker
+            - cache
             - database
             - domain
             - glance

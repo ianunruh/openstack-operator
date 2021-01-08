@@ -23,54 +23,42 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// ControlPlaneSpec defines the desired state of ControlPlane
-type ControlPlaneSpec struct {
+// MemcachedSpec defines the desired state of Memcached
+type MemcachedSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Domain string `json:"domain"`
-
-	Broker   RabbitMQSpec  `json:"broker"`
-	Cache    MemcachedSpec `json:"cache"`
-	Database MariaDBSpec   `json:"database"`
-
-	Keystone  KeystoneSpec  `json:"keystone"`
-	Glance    GlanceSpec    `json:"glance"`
-	Placement PlacementSpec `json:"placement"`
-	Nova      NovaSpec      `json:"nova"`
-	Neutron   NeutronSpec   `json:"neutron"`
-	Horizon   HorizonSpec   `json:"horizon"`
+	Image  string     `json:"image"`
+	Volume VolumeSpec `json:"volume"`
 }
 
-// ControlPlaneStatus defines the observed state of ControlPlane
-type ControlPlaneStatus struct {
+// MemcachedStatus defines the observed state of Memcached
+type MemcachedStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	Ready bool `json:"ready"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// ControlPlane is the Schema for the controlplanes API
-type ControlPlane struct {
+// Memcached is the Schema for the memcacheds API
+type Memcached struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ControlPlaneSpec   `json:"spec,omitempty"`
-	Status ControlPlaneStatus `json:"status,omitempty"`
+	Spec   MemcachedSpec   `json:"spec,omitempty"`
+	Status MemcachedStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// ControlPlaneList contains a list of ControlPlane
-type ControlPlaneList struct {
+// MemcachedList contains a list of Memcached
+type MemcachedList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ControlPlane `json:"items"`
+	Items           []Memcached `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&ControlPlane{}, &ControlPlaneList{})
+	SchemeBuilder.Register(&Memcached{}, &MemcachedList{})
 }

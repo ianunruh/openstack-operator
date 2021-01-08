@@ -9,6 +9,11 @@ spec:
     volume:
       capacity: 50Gi
       storageClass: ceph-block-ssd
+  cache:
+    image: docker.io/bitnami/memcached:1.6.9-debian-10-r0
+    volume:
+      capacity: 50Gi
+      storageClass: ceph-block-ssd
   database:
     image: docker.io/bitnami/mariadb:10.5.8-debian-10-r21
     volume:

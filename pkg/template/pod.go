@@ -76,3 +76,12 @@ func SecretVolume(name, secretName string, defaultMode *int32) corev1.Volume {
 		},
 	}
 }
+
+func EmptyDirVolume(name string) corev1.Volume {
+	return corev1.Volume{
+		Name: name,
+		VolumeSource: corev1.VolumeSource{
+			EmptyDir: &corev1.EmptyDirVolumeSource{},
+		},
+	}
+}
