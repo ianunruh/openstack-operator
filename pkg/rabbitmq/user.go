@@ -52,7 +52,7 @@ func UserSecret(instance *openstackv1beta1.RabbitMQUser) *corev1.Secret {
 	password := template.NewPassword()
 	vhost := instance.Spec.VirtualHost
 
-	secret.StringData["connection"] = fmt.Sprintf("rabbit://%s:%s@%s/%s", username, password, hostname, vhost)
+	secret.StringData["connection"] = fmt.Sprintf("rabbit://%s:%s@%s:5672/%s", username, password, hostname, vhost)
 	secret.StringData["password"] = password
 
 	return secret

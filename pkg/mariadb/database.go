@@ -63,7 +63,7 @@ func DatabaseSecret(instance *openstackv1beta1.MariaDBDatabase) *corev1.Secret {
 	password := template.NewPassword()
 	db := instance.Spec.Name
 
-	secret.StringData["connection"] = fmt.Sprintf("mysql+pymysql://%s:%s@%s/%s", username, password, hostname, db)
+	secret.StringData["connection"] = fmt.Sprintf("mysql+pymysql://%s:%s@%s:3306/%s", username, password, hostname, db)
 	secret.StringData["password"] = password
 
 	return secret
