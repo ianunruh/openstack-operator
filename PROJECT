@@ -1,6 +1,6 @@
 domain: k8s.ianunruh.com
 layout: go.kubebuilder.io/v3
-projectName: openstack-operator2
+projectName: openstack-operator
 repo: github.com/ianunruh/openstack-operator
 resources:
 - crdVersion: v1
