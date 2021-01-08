@@ -174,6 +174,14 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "NovaCell")
 		os.Exit(1)
 	}
+	if err = (&controllers.NeutronReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("Neutron"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Neutron")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {

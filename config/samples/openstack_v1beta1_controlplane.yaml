@@ -83,4 +83,21 @@ spec:
       secret: nova-rabbitmq
       cluster: rabbitmq
       virtualHost: openstack
+  neutron:
+    image: registry.kcloud.zone/ops/neutron:9b559abf
+    server:
+      ingress:
+        host: neutron.openstack2.kcloud.zone
+        annotations:
+          external-dns/enabled: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+    database:
+      name: neutron
+      secret: neutron-db
+      cluster: mariadb
+    broker:
+      name: neutron
+      secret: neutron-rabbitmq
+      cluster: rabbitmq
+      virtualHost: openstack
 

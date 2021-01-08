@@ -164,6 +164,69 @@ spec:
                 - database
                 - image
                 type: object
+              neutron:
+                description: NeutronSpec defines the desired state of Neutron
+                properties:
+                  broker:
+                    description: RabbitMQUserSpec defines the desired state of RabbitMQUser
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                      virtualHost:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    - virtualHost
+                    type: object
+                  database:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  image:
+                    type: string
+                  server:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                        required:
+                        - annotations
+                        - host
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    required:
+                    - ingress
+                    type: object
+                required:
+                - broker
+                - database
+                - image
+                - server
+                type: object
               nova:
                 description: NovaSpec defines the desired state of Nova
                 properties:
@@ -365,6 +428,7 @@ spec:
             - domain
             - glance
             - keystone
+            - neutron
             - nova
             - placement
             type: object
