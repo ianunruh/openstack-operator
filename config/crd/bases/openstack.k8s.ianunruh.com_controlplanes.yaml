@@ -119,6 +119,35 @@ spec:
                 - database
                 - image
                 type: object
+              horizon:
+                description: HorizonSpec defines the desired state of Horizon
+                properties:
+                  image:
+                    type: string
+                  server:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                        required:
+                        - annotations
+                        - host
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    required:
+                    - ingress
+                    type: object
+                required:
+                - image
+                - server
+                type: object
               keystone:
                 description: KeystoneSpec defines the desired state of Keystone
                 properties:
@@ -427,6 +456,7 @@ spec:
             - database
             - domain
             - glance
+            - horizon
             - keystone
             - neutron
             - nova

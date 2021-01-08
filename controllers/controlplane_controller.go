@@ -29,6 +29,7 @@ import (
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/controlplane"
 	"github.com/ianunruh/openstack-operator/pkg/glance"
+	"github.com/ianunruh/openstack-operator/pkg/horizon"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 	"github.com/ianunruh/openstack-operator/pkg/neutron"
@@ -108,6 +109,12 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	network := controlplane.Neutron(instance)
 	controllerutil.SetControllerReference(instance, network, r.Scheme)
 	if err := neutron.EnsureNeutron(ctx, r.Client, network, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	dashboard := controlplane.Horizon(instance)
+	controllerutil.SetControllerReference(instance, dashboard, r.Scheme)
+	if err := horizon.EnsureHorizon(ctx, r.Client, dashboard, log); err != nil {
 		return ctrl.Result{}, err
 	}
 

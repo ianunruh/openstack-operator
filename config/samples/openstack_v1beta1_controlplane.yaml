@@ -100,4 +100,12 @@ spec:
       secret: neutron-rabbitmq
       cluster: rabbitmq
       virtualHost: openstack
+  horizon:
+    image: registry.kcloud.zone/ops/horizon:af7b46c8
+    server:
+      ingress:
+        host: horizon.openstack2.kcloud.zone
+        annotations:
+          external-dns/enabled: "true"
+          cert-manager.io/cluster-issuer: letsencrypt-prod
 

@@ -182,6 +182,14 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Neutron")
 		os.Exit(1)
 	}
+	if err = (&controllers.HorizonReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("Horizon"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Horizon")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {

@@ -23,53 +23,49 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// ControlPlaneSpec defines the desired state of ControlPlane
-type ControlPlaneSpec struct {
+// HorizonSpec defines the desired state of Horizon
+type HorizonSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Domain string `json:"domain"`
+	Image string `json:"image"`
 
-	Broker   RabbitMQSpec `json:"broker"`
-	Database MariaDBSpec  `json:"database"`
-
-	Keystone  KeystoneSpec  `json:"keystone"`
-	Glance    GlanceSpec    `json:"glance"`
-	Placement PlacementSpec `json:"placement"`
-	Nova      NovaSpec      `json:"nova"`
-	Neutron   NeutronSpec   `json:"neutron"`
-	Horizon   HorizonSpec   `json:"horizon"`
+	Server HorizonServerSpec `json:"server"`
 }
 
-// ControlPlaneStatus defines the observed state of ControlPlane
-type ControlPlaneStatus struct {
+type HorizonServerSpec struct {
+	// +optional
+	Replicas int32        `json:"replicas"`
+	Ingress  *IngressSpec `json:"ingress"`
+}
+
+// HorizonStatus defines the observed state of Horizon
+type HorizonStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	Ready bool `json:"ready"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// ControlPlane is the Schema for the controlplanes API
-type ControlPlane struct {
+// Horizon is the Schema for the horizons API
+type Horizon struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ControlPlaneSpec   `json:"spec,omitempty"`
-	Status ControlPlaneStatus `json:"status,omitempty"`
+	Spec   HorizonSpec   `json:"spec,omitempty"`
+	Status HorizonStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// ControlPlaneList contains a list of ControlPlane
-type ControlPlaneList struct {
+// HorizonList contains a list of Horizon
+type HorizonList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ControlPlane `json:"items"`
+	Items           []Horizon `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&ControlPlane{}, &ControlPlaneList{})
+	SchemeBuilder.Register(&Horizon{}, &HorizonList{})
 }
