@@ -21,8 +21,33 @@ cd openstack-operator
 make install
 make run
 
+# Optionally, switch to the namespace you wish to test in
+kubectl config set-context --current --namespace=openstack2
+
 kubectl apply -f config/samples/openstack_v1beta1_controlplane.yaml
 ```
+
+Use the supplied `openrc` file with the Python CLI client.
+
+```
+source openrc
+
+openstack token issue
+openstack catalog list
+openstack image list
+openstack compute service list
+openstack network agent list
+```
+
+To clean up a cluster completely, make sure the persistent volumes are deleted.
+
+```
+kubectl delete controlplane default
+kubectl delete pvc -l app=mariadb
+kubectl delete pvc -l app=rabbitmq
+```
+
+Ingress secrets will also remain until manually cleaned up.
 
 ## Requirements
 
