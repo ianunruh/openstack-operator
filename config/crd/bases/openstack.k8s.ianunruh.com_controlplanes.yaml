@@ -248,6 +248,15 @@ spec:
                     type: object
                   image:
                     type: string
+                  linuxBridgeAgent:
+                    properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    required:
+                    - nodeSelector
+                    type: object
                   server:
                     properties:
                       ingress:
@@ -272,6 +281,7 @@ spec:
                 - broker
                 - database
                 - image
+                - linuxBridgeAgent
                 - server
                 type: object
               nova:

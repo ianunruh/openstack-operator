@@ -32,6 +32,8 @@ type NeutronSpec struct {
 
 	Server NeutronServerSpec `json:"server"`
 
+	LinuxBridgeAgent NeutronLinuxBridgeAgentSpec `json:"linuxBridgeAgent"`
+
 	Database MariaDBDatabaseSpec `json:"database"`
 
 	Broker RabbitMQUserSpec `json:"broker"`
@@ -41,6 +43,10 @@ type NeutronServerSpec struct {
 	// +optional
 	Replicas int32        `json:"replicas"`
 	Ingress  *IngressSpec `json:"ingress"`
+}
+
+type NeutronLinuxBridgeAgentSpec struct {
+	NodeSelector map[string]string `json:"nodeSelector"`
 }
 
 // NeutronStatus defines the observed state of Neutron

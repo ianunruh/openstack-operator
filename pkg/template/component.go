@@ -11,11 +11,41 @@ type Component struct {
 	Namespace            string
 	Labels               map[string]string
 	Replicas             int32
+	NodeSelector         map[string]string
 	InitContainers       []corev1.Container
 	Containers           []corev1.Container
 	SecurityContext      *corev1.PodSecurityContext
 	Volumes              []corev1.Volume
 	VolumeClaimTemplates []corev1.PersistentVolumeClaim
+}
+
+func GenericDaemonSet(component Component) *appsv1.DaemonSet {
+	labels := component.Labels
+
+	return &appsv1.DaemonSet{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      labels[InstanceLabel],
+			Namespace: component.Namespace,
+			Labels:    labels,
+		},
+		Spec: appsv1.DaemonSetSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: labels,
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: labels,
+				},
+				Spec: corev1.PodSpec{
+					Containers:      component.Containers,
+					InitContainers:  component.InitContainers,
+					NodeSelector:    component.NodeSelector,
+					SecurityContext: component.SecurityContext,
+					Volumes:         component.Volumes,
+				},
+			},
+		},
+	}
 }
 
 func GenericDeployment(component Component) *appsv1.Deployment {
@@ -44,6 +74,7 @@ func GenericDeployment(component Component) *appsv1.Deployment {
 				Spec: corev1.PodSpec{
 					Containers:      component.Containers,
 					InitContainers:  component.InitContainers,
+					NodeSelector:    component.NodeSelector,
 					SecurityContext: component.SecurityContext,
 					Volumes:         component.Volumes,
 				},
@@ -69,6 +100,7 @@ func GenericJob(component Component) *batchv1.Job {
 				Spec: corev1.PodSpec{
 					Containers:      component.Containers,
 					InitContainers:  component.InitContainers,
+					NodeSelector:    component.NodeSelector,
 					SecurityContext: component.SecurityContext,
 					Volumes:         component.Volumes,
 					RestartPolicy:   corev1.RestartPolicyOnFailure,
@@ -105,6 +137,7 @@ func GenericStatefulSet(component Component) *appsv1.StatefulSet {
 				Spec: corev1.PodSpec{
 					Containers:      component.Containers,
 					InitContainers:  component.InitContainers,
+					NodeSelector:    component.NodeSelector,
 					SecurityContext: component.SecurityContext,
 					Volumes:         component.Volumes,
 				},

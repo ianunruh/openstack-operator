@@ -96,6 +96,9 @@ spec:
         annotations:
           external-dns/enabled: "true"
           cert-manager.io/cluster-issuer: letsencrypt-prod
+    linuxBridgeAgent:
+      nodeSelector:
+        linuxbridge: enabled
     database:
       name: neutron
       secret: neutron-db

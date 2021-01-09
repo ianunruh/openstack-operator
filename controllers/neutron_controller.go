@@ -133,6 +133,10 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
+	if err := r.reconcileLinuxBridgeAgent(ctx, instance, envVars, volumes, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	// TODO wait for deploys to be ready then mark status
 
 	return ctrl.Result{}, nil
@@ -154,6 +158,16 @@ func (r *NeutronReconciler) reconcileServer(ctx context.Context, instance *opens
 	deploy := neutron.ServerDeployment(instance, envVars, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *NeutronReconciler) reconcileLinuxBridgeAgent(ctx context.Context, instance *openstackv1beta1.Neutron, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	ds := neutron.LinuxBridgeAgentDaemonSet(instance, envVars, volumes)
+	controllerutil.SetControllerReference(instance, ds, r.Scheme)
+	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err
 	}
 
