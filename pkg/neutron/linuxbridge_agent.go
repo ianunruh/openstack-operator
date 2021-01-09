@@ -22,8 +22,8 @@ func LinuxBridgeAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.
 	privileged := true
 
 	extraVolumes := []corev1.Volume{
-		template.EmptyDirVolume("pod-shared"),
 		template.EmptyDirVolume("pod-tmp"),
+		template.EmptyDirVolume("pod-shared"),
 		template.EmptyDirVolume("pod-var-lib-neutron"),
 		template.HostPathVolume("host-rootfs", "/"),
 		template.HostPathVolume("host-run", "/run"),

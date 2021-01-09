@@ -32,7 +32,10 @@ type NeutronSpec struct {
 
 	Server NeutronServerSpec `json:"server"`
 
+	DHCPAgent        NeutronDHCPAgentSpec        `json:"dhcpAgent"`
+	L3Agent          NeutronL3AgentSpec          `json:"l3Agent"`
 	LinuxBridgeAgent NeutronLinuxBridgeAgentSpec `json:"linuxBridgeAgent"`
+	MetadataAgent    NeutronMetadataAgentSpec    `json:"metadataAgent"`
 
 	Database MariaDBDatabaseSpec `json:"database"`
 
@@ -46,6 +49,18 @@ type NeutronServerSpec struct {
 }
 
 type NeutronLinuxBridgeAgentSpec struct {
+	NodeSelector map[string]string `json:"nodeSelector"`
+}
+
+type NeutronDHCPAgentSpec struct {
+	NodeSelector map[string]string `json:"nodeSelector"`
+}
+
+type NeutronL3AgentSpec struct {
+	NodeSelector map[string]string `json:"nodeSelector"`
+}
+
+type NeutronMetadataAgentSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector"`
 }
 

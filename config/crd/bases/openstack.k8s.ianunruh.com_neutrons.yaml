@@ -67,9 +67,36 @@ spec:
                 - name
                 - secret
                 type: object
+              dhcpAgent:
+                properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                required:
+                - nodeSelector
+                type: object
               image:
                 type: string
+              l3Agent:
+                properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                required:
+                - nodeSelector
+                type: object
               linuxBridgeAgent:
+                properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                required:
+                - nodeSelector
+                type: object
+              metadataAgent:
                 properties:
                   nodeSelector:
                     additionalProperties:
@@ -101,8 +128,11 @@ spec:
             required:
             - broker
             - database
+            - dhcpAgent
             - image
+            - l3Agent
             - linuxBridgeAgent
+            - metadataAgent
             - server
             type: object
           status:

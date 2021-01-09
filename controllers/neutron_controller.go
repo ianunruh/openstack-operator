@@ -108,10 +108,17 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	envVars := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
-		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
+	}
+
+	// TODO OS_DEFAULT__METADATA_PROXY_SHARED_SECRET
+
+	fullEnvVars := []corev1.EnvVar{
+		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 		template.SecretEnvVar("OS_NOVA__PASSWORD", "nova-keystone", "OS_PASSWORD"),
 	}
+
+	serverEnvVars := append(envVars, fullEnvVars...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-neutron", cm.Name, nil),
@@ -129,11 +136,25 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		// TODO wait for job to finish
 	}
 
-	if err := r.reconcileServer(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileServer(ctx, instance, serverEnvVars, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if err := r.reconcileLinuxBridgeAgent(ctx, instance, envVars, volumes, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// TODO wait for bridge agent to be ready
+
+	if err := r.reconcileDHCPAgent(ctx, instance, envVars, volumes, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := r.reconcileL3Agent(ctx, instance, envVars, volumes, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := r.reconcileMetadataAgent(ctx, instance, envVars, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -174,11 +195,42 @@ func (r *NeutronReconciler) reconcileLinuxBridgeAgent(ctx context.Context, insta
 	return nil
 }
 
+func (r *NeutronReconciler) reconcileDHCPAgent(ctx context.Context, instance *openstackv1beta1.Neutron, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	ds := neutron.DHCPAgentDaemonSet(instance, envVars, volumes)
+	controllerutil.SetControllerReference(instance, ds, r.Scheme)
+	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *NeutronReconciler) reconcileL3Agent(ctx context.Context, instance *openstackv1beta1.Neutron, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	ds := neutron.L3AgentDaemonSet(instance, envVars, volumes)
+	controllerutil.SetControllerReference(instance, ds, r.Scheme)
+	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *NeutronReconciler) reconcileMetadataAgent(ctx context.Context, instance *openstackv1beta1.Neutron, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	ds := neutron.MetadataAgentDaemonSet(instance, envVars, volumes)
+	controllerutil.SetControllerReference(instance, ds, r.Scheme)
+	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *NeutronReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&openstackv1beta1.Neutron{}).
 		Owns(&corev1.ConfigMap{}).
+		Owns(&appsv1.DaemonSet{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&netv1.Ingress{}).
 		Owns(&batchv1.Job{}).
