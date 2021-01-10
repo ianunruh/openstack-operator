@@ -38,6 +38,8 @@ type RabbitMQUserSpec struct {
 type RabbitMQUserStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	Ready bool `json:"ready"`
 }
 
 // +kubebuilder:object:root=true

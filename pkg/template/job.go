@@ -9,15 +9,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func CreateJob(ctx context.Context, c client.Client, intended *batchv1.Job, log logr.Logger) error {
-	found := &batchv1.Job{}
-	if err := c.Get(ctx, client.ObjectKeyFromObject(intended), found); err != nil {
+func CreateJob(ctx context.Context, c client.Client, instance *batchv1.Job, log logr.Logger) error {
+	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
 
-		log.Info("Creating Job", "Name", intended.Name)
-		return c.Create(ctx, intended)
+		log.Info("Creating Job", "Name", instance.Name)
+		return c.Create(ctx, instance)
 	}
 	return nil
 }

@@ -26,17 +26,16 @@ func NewPassword() string {
 	return utilrand.String(20)
 }
 
-func CreateSecret(ctx context.Context, c client.Client, intended *corev1.Secret, log logr.Logger) (*corev1.Secret, error) {
-	found := &corev1.Secret{}
-	err := c.Get(ctx, client.ObjectKeyFromObject(intended), found)
+func CreateSecret(ctx context.Context, c client.Client, instance *corev1.Secret, log logr.Logger) error {
+	err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance)
 	if err != nil {
 		if !errors.IsNotFound(err) {
-			return nil, err
+			return err
 		}
 
-		log.Info("Creating Secret", "Name", intended.Name)
-		return intended, c.Create(ctx, intended)
+		log.Info("Creating Secret", "Name", instance.Name)
+		return c.Create(ctx, instance)
 	}
 
-	return found, nil
+	return nil
 }

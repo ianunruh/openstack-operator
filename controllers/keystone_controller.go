@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -74,17 +75,19 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	database := keystone.Database(instance)
-	controllerutil.SetControllerReference(instance, database, r.Scheme)
-	if err := mariadb.EnsureDatabase(ctx, r.Client, database, log); err != nil {
+	db := keystone.Database(instance)
+	controllerutil.SetControllerReference(instance, db, r.Scheme)
+	if err := mariadb.EnsureDatabase(ctx, r.Client, db, log); err != nil {
 		return ctrl.Result{}, err
+	} else if !db.Status.Ready {
+		log.Info("Waiting on database to be available", "name", db.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
-	// TODO wait for database to be ready
 
 	secrets := keystone.Secrets(instance)
 	for _, secret := range secrets {
 		controllerutil.SetControllerReference(instance, secret, r.Scheme)
-		if _, err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
+		if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
@@ -104,8 +107,10 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		controllerutil.SetControllerReference(instance, job, r.Scheme)
 		if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
 			return ctrl.Result{}, err
+		} else if job.Status.CompletionTime == nil {
+			log.Info("Waiting on job completion", "name", job.Name)
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 		}
-		// TODO wait for job to finish
 	}
 
 	service := keystone.APIService(instance)
@@ -124,8 +129,15 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err
+	} else if deploy.Status.AvailableReplicas == 0 {
+		log.Info("Waiting on deployment to be available", "name", deploy.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+	} else if !instance.Status.Ready {
+		instance.Status.Ready = true
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
-	// TODO wait for deploy to be ready then mark status
 
 	return ctrl.Result{}, nil
 }

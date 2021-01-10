@@ -14,14 +14,14 @@ func HeadlessServiceName(name string) string {
 	return Combine(name, "headless")
 }
 
-func EnsureService(ctx context.Context, c client.Client, intended *corev1.Service, log logr.Logger) error {
+func EnsureService(ctx context.Context, c client.Client, instance *corev1.Service, log logr.Logger) error {
+	intended := instance.DeepCopy()
 	hash, err := ObjectHash(intended)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
 
-	found := &corev1.Service{}
-	if err := c.Get(ctx, client.ObjectKeyFromObject(intended), found); err != nil {
+	if err := c.Get(ctx, client.ObjectKeyFromObject(intended), instance); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
@@ -30,15 +30,15 @@ func EnsureService(ctx context.Context, c client.Client, intended *corev1.Servic
 
 		log.Info("Creating Service", "Name", intended.Name)
 		return c.Create(ctx, intended)
-	} else if !MatchesAppliedHash(found, hash) {
+	} else if !MatchesAppliedHash(instance, hash) {
 		// copy immutable fields
-		intended.Spec.ClusterIP = found.Spec.ClusterIP
+		intended.Spec.ClusterIP = instance.Spec.ClusterIP
 
-		found.Spec = intended.Spec
-		SetAppliedHash(found, hash)
+		instance.Spec = intended.Spec
+		SetAppliedHash(instance, hash)
 
 		log.Info("Updating Service", "Name", intended.Name)
-		return c.Update(ctx, found)
+		return c.Update(ctx, instance)
 	}
 
 	return nil

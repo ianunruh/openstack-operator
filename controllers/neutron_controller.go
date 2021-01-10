@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -76,15 +77,19 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
 	if err := mariadb.EnsureDatabase(ctx, r.Client, db, log); err != nil {
 		return ctrl.Result{}, err
+	} else if !db.Status.Ready {
+		log.Info("Waiting on database to be available", "name", db.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
-	// TODO wait for database to be ready
 
 	brokerUser := neutron.BrokerUser(instance)
 	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
 	if err := rabbitmq.EnsureUser(ctx, r.Client, brokerUser, log); err != nil {
 		return ctrl.Result{}, err
+	} else if !brokerUser.Status.Ready {
+		log.Info("Waiting on broker to be available", "name", brokerUser.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
-	// TODO wait for broker to be ready
 
 	keystoneSvc := neutron.KeystoneService(instance)
 	controllerutil.SetControllerReference(instance, keystoneSvc, r.Scheme)
@@ -96,6 +101,9 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	controllerutil.SetControllerReference(instance, keystoneUser, r.Scheme)
 	if err := keystone.EnsureUser(ctx, r.Client, keystoneUser, log); err != nil {
 		return ctrl.Result{}, err
+	} else if !keystoneUser.Status.Ready {
+		log.Info("Waiting on Keystone user to be available", "name", keystoneUser.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
 	cm := neutron.ConfigMap(instance)
@@ -132,8 +140,10 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		controllerutil.SetControllerReference(instance, job, r.Scheme)
 		if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
 			return ctrl.Result{}, err
+		} else if job.Status.CompletionTime == nil {
+			log.Info("Waiting on job completion", "name", job.Name)
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 		}
-		// TODO wait for job to finish
 	}
 
 	if err := r.reconcileServer(ctx, instance, serverEnvVars, volumes, log); err != nil {

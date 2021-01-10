@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -75,12 +76,14 @@ func (r *PlacementReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
-	database := placement.Database(instance)
-	controllerutil.SetControllerReference(instance, database, r.Scheme)
-	if err := mariadb.EnsureDatabase(ctx, r.Client, database, log); err != nil {
+	db := placement.Database(instance)
+	controllerutil.SetControllerReference(instance, db, r.Scheme)
+	if err := mariadb.EnsureDatabase(ctx, r.Client, db, log); err != nil {
 		return ctrl.Result{}, err
+	} else if !db.Status.Ready {
+		log.Info("Waiting on database to be available", "name", db.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
-	// TODO wait for database to be ready
 
 	keystoneSvc := placement.KeystoneService(instance)
 	controllerutil.SetControllerReference(instance, keystoneSvc, r.Scheme)
@@ -92,6 +95,9 @@ func (r *PlacementReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	controllerutil.SetControllerReference(instance, keystoneUser, r.Scheme)
 	if err := keystone.EnsureUser(ctx, r.Client, keystoneUser, log); err != nil {
 		return ctrl.Result{}, err
+	} else if !keystoneUser.Status.Ready {
+		log.Info("Waiting on Keystone user to be available", "name", keystoneUser.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
 	cm := placement.ConfigMap(instance)
@@ -109,8 +115,10 @@ func (r *PlacementReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		controllerutil.SetControllerReference(instance, job, r.Scheme)
 		if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
 			return ctrl.Result{}, err
+		} else if job.Status.CompletionTime == nil {
+			log.Info("Waiting on job completion", "name", job.Name)
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 		}
-		// TODO wait for job to finish
 	}
 
 	service := placement.APIService(instance)

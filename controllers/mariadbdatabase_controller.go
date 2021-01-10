@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -74,16 +75,16 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			Namespace: instance.Namespace,
 		},
 	}
-	err = r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster)
-	if err != nil {
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
 		return ctrl.Result{}, err
+	} else if !cluster.Status.Ready {
+		log.Info("Waiting on MariaDB to be available", "name", cluster.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
-	// TODO wait on cluster to be ready
 
 	secret := mariadb.DatabaseSecret(instance)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
-	secret, err = template.CreateSecret(ctx, r.Client, secret, log)
-	if err != nil {
+	if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -91,8 +92,15 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	controllerutil.SetControllerReference(instance, job, r.Scheme)
 	if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
 		return ctrl.Result{}, err
+	} else if job.Status.CompletionTime == nil {
+		log.Info("Waiting on job completion", "name", job.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+	} else if !instance.Status.Ready {
+		instance.Status.Ready = true
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
-	// TODO mark status as Ready once job is complete
 
 	return ctrl.Result{}, nil
 }

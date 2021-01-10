@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -86,10 +87,19 @@ func (r *MariaDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileStatefulSet(ctx, instance, configHash, log); err != nil {
+	sts := mariadb.ClusterStatefulSet(instance, configHash)
+	controllerutil.SetControllerReference(instance, sts, r.Scheme)
+	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return ctrl.Result{}, err
+	} else if sts.Status.ReadyReplicas == 0 {
+		log.Info("Waiting for StatefulSet to be available", "name", sts.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+	} else if !instance.Status.Ready {
+		instance.Status.Ready = true
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
-	// TODO wait on sts to be ready and update status
 
 	return ctrl.Result{}, nil
 }
@@ -97,24 +107,16 @@ func (r *MariaDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 func (r *MariaDBReconciler) reconcileSecret(ctx context.Context, instance *openstackv1beta1.MariaDB, log logr.Logger) error {
 	secret := mariadb.Secret(instance)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
-	_, err := template.CreateSecret(ctx, r.Client, secret, log)
-	return err
+	return template.CreateSecret(ctx, r.Client, secret, log)
 }
 
 func (r *MariaDBReconciler) reconcileConfigMap(ctx context.Context, instance *openstackv1beta1.MariaDB, log logr.Logger) ([]string, error) {
 	cm := mariadb.ConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
-	err := template.EnsureConfigMap(ctx, r.Client, cm, log)
-	if err != nil {
+	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
 		return nil, err
 	}
 	return []string{template.AppliedHash(cm)}, nil
-}
-
-func (r *MariaDBReconciler) reconcileStatefulSet(ctx context.Context, instance *openstackv1beta1.MariaDB, configHash string, log logr.Logger) error {
-	sts := mariadb.ClusterStatefulSet(instance, configHash)
-	controllerutil.SetControllerReference(instance, sts, r.Scheme)
-	return template.EnsureStatefulSet(ctx, r.Client, sts, log)
 }
 
 func (r *MariaDBReconciler) reconcileServices(ctx context.Context, instance *openstackv1beta1.MariaDB, log logr.Logger) error {
@@ -125,8 +127,7 @@ func (r *MariaDBReconciler) reconcileServices(ctx context.Context, instance *ope
 
 	for _, svc := range services {
 		controllerutil.SetControllerReference(instance, svc, r.Scheme)
-		err := template.EnsureService(ctx, r.Client, svc, log)
-		if err != nil {
+		if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
 			return err
 		}
 	}

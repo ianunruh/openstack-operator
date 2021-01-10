@@ -58,28 +58,28 @@ func UserSecret(instance *openstackv1beta1.RabbitMQUser) *corev1.Secret {
 	return secret
 }
 
-func EnsureUser(ctx context.Context, c client.Client, intended *openstackv1beta1.RabbitMQUser, log logr.Logger) error {
+func EnsureUser(ctx context.Context, c client.Client, instance *openstackv1beta1.RabbitMQUser, log logr.Logger) error {
+	intended := instance.DeepCopy()
 	hash, err := template.ObjectHash(intended)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
 
-	found := &openstackv1beta1.RabbitMQUser{}
-	if err := c.Get(ctx, client.ObjectKeyFromObject(intended), found); err != nil {
+	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
 
-		template.SetAppliedHash(intended, hash)
+		template.SetAppliedHash(instance, hash)
 
-		log.Info("Creating RabbitMQUser", "Name", intended.Name)
-		return c.Create(ctx, intended)
-	} else if !template.MatchesAppliedHash(found, hash) {
-		found.Spec = intended.Spec
-		template.SetAppliedHash(found, hash)
+		log.Info("Creating RabbitMQUser", "Name", instance.Name)
+		return c.Create(ctx, instance)
+	} else if !template.MatchesAppliedHash(instance, hash) {
+		instance.Spec = intended.Spec
+		template.SetAppliedHash(instance, hash)
 
-		log.Info("Updating RabbitMQUser", "Name", intended.Name)
-		return c.Update(ctx, found)
+		log.Info("Updating RabbitMQUser", "Name", instance.Name)
+		return c.Update(ctx, instance)
 	}
 
 	return nil
