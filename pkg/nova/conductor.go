@@ -27,6 +27,7 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 				Command: []string{
 					"nova-conductor",
 					"--config-file=/etc/nova/nova.conf",
+					"--debug",
 				},
 				Env: envVars,
 				VolumeMounts: []corev1.VolumeMount{

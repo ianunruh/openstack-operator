@@ -80,7 +80,8 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	secret := keystone.UserSecret(instance)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
-	if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
+	secret, err = template.CreateSecret(ctx, r.Client, secret, log)
+	if err != nil {
 		return ctrl.Result{}, err
 	}
 

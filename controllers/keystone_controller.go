@@ -84,7 +84,7 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	secrets := keystone.Secrets(instance)
 	for _, secret := range secrets {
 		controllerutil.SetControllerReference(instance, secret, r.Scheme)
-		if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
+		if _, err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}

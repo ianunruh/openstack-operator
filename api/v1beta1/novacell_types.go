@@ -32,6 +32,8 @@ type NovaCellSpec struct {
 
 	Database MariaDBDatabaseSpec `json:"database"`
 
+	Broker RabbitMQUserSpec `json:"broker"`
+
 	// +optional
 	Conductor NovaConductorSpec `json:"conductor"`
 

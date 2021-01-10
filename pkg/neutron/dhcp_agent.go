@@ -59,8 +59,8 @@ func DHCPAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.EnvVar,
 					},
 					{
 						Name:      "etc-neutron",
-						MountPath: "/etc/neutron/plugins/ml2/linuxbridge_agent.ini",
-						SubPath:   "linuxbridge_agent.ini",
+						MountPath: "/etc/neutron/dhcp_agent.ini",
+						SubPath:   "dhcp_agent.ini",
 					},
 					{
 						Name:      "pod-tmp",

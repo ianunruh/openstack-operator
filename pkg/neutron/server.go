@@ -52,8 +52,13 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 				VolumeMounts: []corev1.VolumeMount{
 					{
 						Name:      "etc-neutron",
-						SubPath:   "neutron.conf",
 						MountPath: "/etc/neutron/neutron.conf",
+						SubPath:   "neutron.conf",
+					},
+					{
+						Name:      "etc-neutron",
+						MountPath: "/etc/neutron/plugins/ml2/ml2_conf.ini",
+						SubPath:   "ml2_conf.ini",
 					},
 				},
 			},

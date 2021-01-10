@@ -36,6 +36,23 @@ spec:
           spec:
             description: NovaCellSpec defines the desired state of NovaCell
             properties:
+              broker:
+                description: RabbitMQUserSpec defines the desired state of RabbitMQUser
+                properties:
+                  cluster:
+                    type: string
+                  name:
+                    type: string
+                  secret:
+                    type: string
+                  virtualHost:
+                    type: string
+                required:
+                - cluster
+                - name
+                - secret
+                - virtualHost
+                type: object
               conductor:
                 properties:
                   replicas:
@@ -85,6 +102,7 @@ spec:
                 - ingress
                 type: object
             required:
+            - broker
             - database
             - name
             type: object

@@ -13,6 +13,11 @@ spec:
         cert-manager.io/cluster-issuer: letsencrypt-prod
   scheduler:
     replicas: 2
+  libvirtd:
+    image: registry.kcloud.zone/ops/libvirt:4495c89d
+  compute:
+    nodeSelector:
+      openstack/compute-node: enabled
   apiDatabase:
     name: nova_api
     secret: nova-db-api
@@ -26,3 +31,10 @@ spec:
     secret: nova-rabbitmq
     cluster: rabbitmq
     virtualHost: openstack
+  cells:
+  - name: cell1
+    broker:
+      name: nova-cell1
+      secret: nova-cell1-rabbitmq
+      cluster: rabbitmq
+      virtualHost: nova-cell1

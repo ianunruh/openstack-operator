@@ -84,7 +84,7 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		// TODO wait for database to be ready
 	}
 
-	brokerUser := nova.BrokerUser(instance)
+	brokerUser := nova.BrokerUser(instance.Name, instance.Namespace, instance.Spec.Broker)
 	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
 	if err := rabbitmq.EnsureUser(ctx, r.Client, brokerUser, log); err != nil {
 		return ctrl.Result{}, err
@@ -112,19 +112,25 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	envVars := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
+		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
+		template.SecretEnvVar("OS_PLACEMENT__PASSWORD", "placement-keystone", "OS_PASSWORD"),
+		template.SecretEnvVar("OS_NEUTRON__PASSWORD", "neutron-keystone", "OS_PASSWORD"),
+	}
+
+	dbEnvVars := []corev1.EnvVar{
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_API_DATABASE__CONNECTION", instance.Spec.APIDatabase.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.CellDatabase.Secret, "connection"),
-		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
-		template.SecretEnvVar("OS_PLACEMENT__PASSWORD", "placement-keystone", "OS_PASSWORD"),
 	}
+
+	fullEnvVars := append(envVars, dbEnvVars...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-nova", cm.Name, nil),
 	}
 
 	jobs := []*batchv1.Job{
-		nova.DBSyncJob(instance, envVars, volumes),
+		nova.DBSyncJob(instance, fullEnvVars, volumes),
 		// nova.BootstrapJob(instance),
 	}
 	for _, job := range jobs {
@@ -135,15 +141,15 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		// TODO wait for job to finish
 	}
 
-	if err := r.reconcileAPI(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, fullEnvVars, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileConductor(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileConductor(ctx, instance, fullEnvVars, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileScheduler(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileScheduler(ctx, instance, fullEnvVars, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -156,6 +162,14 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 			return ctrl.Result{}, err
 		}
 		// TODO wait on cell to be ready
+	}
+
+	if err := r.reconcileLibvirtd(ctx, instance, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := r.reconcileCompute(ctx, instance, envVars, volumes, log); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -209,6 +223,40 @@ func (r *NovaReconciler) reconcileScheduler(ctx context.Context, instance *opens
 	sts := nova.SchedulerStatefulSet(instance, envVars, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openstackv1beta1.Nova, log logr.Logger) error {
+	cm := nova.LibvirtdConfigMap(instance)
+	controllerutil.SetControllerReference(instance, cm, r.Scheme)
+	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
+		return err
+	}
+	configHash := template.AppliedHash(cm)
+
+	ds := nova.LibvirtdDaemonSet(instance, configHash)
+	controllerutil.SetControllerReference(instance, ds, r.Scheme)
+	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *NovaReconciler) reconcileCompute(ctx context.Context, instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	extraEnvVars := []corev1.EnvVar{
+		// TODO make this configurable
+		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Cells[0].Broker.Secret, "connection"),
+	}
+
+	envVars = append(envVars, extraEnvVars...)
+
+	ds := nova.ComputeDaemonSet(instance, envVars, volumes)
+	controllerutil.SetControllerReference(instance, ds, r.Scheme)
+	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err
 	}
 

@@ -82,7 +82,8 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	secret := mariadb.DatabaseSecret(instance)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
-	if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
+	secret, err = template.CreateSecret(ctx, r.Client, secret, log)
+	if err != nil {
 		return ctrl.Result{}, err
 	}
 

@@ -125,7 +125,7 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	jobs := []*batchv1.Job{
-		neutron.DBSyncJob(instance, envVars, volumes),
+		neutron.DBSyncJob(instance, fullEnvVars, volumes),
 		// neutron.BootstrapJob(instance),
 	}
 	for _, job := range jobs {

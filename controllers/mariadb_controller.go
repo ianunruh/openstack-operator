@@ -97,7 +97,8 @@ func (r *MariaDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 func (r *MariaDBReconciler) reconcileSecret(ctx context.Context, instance *openstackv1beta1.MariaDB, log logr.Logger) error {
 	secret := mariadb.Secret(instance)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
-	return template.CreateSecret(ctx, r.Client, secret, log)
+	_, err := template.CreateSecret(ctx, r.Client, secret, log)
+	return err
 }
 
 func (r *MariaDBReconciler) reconcileConfigMap(ctx context.Context, instance *openstackv1beta1.MariaDB, log logr.Logger) ([]string, error) {

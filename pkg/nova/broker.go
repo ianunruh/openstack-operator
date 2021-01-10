@@ -6,12 +6,12 @@ import (
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 )
 
-func BrokerUser(instance *openstackv1beta1.Nova) *openstackv1beta1.RabbitMQUser {
+func BrokerUser(name, namespace string, spec openstackv1beta1.RabbitMQUserSpec) *openstackv1beta1.RabbitMQUser {
 	return &openstackv1beta1.RabbitMQUser{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name,
-			Namespace: instance.Namespace,
+			Name:      name,
+			Namespace: namespace,
 		},
-		Spec: instance.Spec.Broker,
+		Spec: spec,
 	}
 }

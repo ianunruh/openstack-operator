@@ -3,6 +3,11 @@ kind: NovaCell
 metadata:
   name: nova-cell1
 spec:
+  broker:
+    name: nova-cell1
+    secret: nova-cell1-rabbitmq
+    cluster: rabbitmq
+    virtualHost: nova-cell1
   conductor:
     replicas: 2
   metadata:

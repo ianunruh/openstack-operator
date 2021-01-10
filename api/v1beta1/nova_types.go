@@ -38,6 +38,10 @@ type NovaSpec struct {
 	// +optional
 	Scheduler NovaSchedulerSpec `json:"scheduler"`
 
+	Libvirtd NovaLibvirtdSpec `json:"libvirtd"`
+
+	Compute NovaComputeSpec `json:"compute"`
+
 	APIDatabase MariaDBDatabaseSpec `json:"apiDatabase"`
 
 	CellDatabase MariaDBDatabaseSpec `json:"cellDatabase"`
@@ -72,6 +76,14 @@ type NovaNoVNCProxySpec struct {
 type NovaSchedulerSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas"`
+}
+
+type NovaLibvirtdSpec struct {
+	Image string `json:"image"`
+}
+
+type NovaComputeSpec struct {
+	NodeSelector map[string]string `json:"nodeSelector"`
 }
 
 // NovaStatus defines the observed state of Nova

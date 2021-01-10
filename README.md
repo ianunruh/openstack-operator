@@ -35,7 +35,9 @@ source openrc
 openstack token issue
 openstack catalog list
 openstack image list
+openstack resource provider list
 openstack compute service list
+openstack hypervisor list
 openstack network agent list
 ```
 

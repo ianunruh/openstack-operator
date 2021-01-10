@@ -20,8 +20,10 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -32,6 +34,7 @@ import (
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 	"github.com/ianunruh/openstack-operator/pkg/nova"
+	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -98,16 +101,24 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	envVars := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
-		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", cluster.Spec.Broker.Secret, "connection"),
+		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_API_DATABASE__CONNECTION", cluster.Spec.APIDatabase.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneSecret, "OS_PASSWORD"),
 		template.SecretEnvVar("OS_PLACEMENT__PASSWORD", "placement-keystone", "OS_PASSWORD"),
+		template.SecretEnvVar("OS_NEUTRON__PASSWORD", "neutron-keystone", "OS_PASSWORD"),
 	}
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-nova", cm.Name, nil),
 	}
+
+	brokerUser := nova.BrokerUser(instance.Name, instance.Namespace, instance.Spec.Broker)
+	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
+	if err := rabbitmq.EnsureUser(ctx, r.Client, brokerUser, log); err != nil {
+		return ctrl.Result{}, err
+	}
+	// TODO wait for broker to be ready
 
 	jobs := []*batchv1.Job{
 		nova.CellDBSyncJob(instance, envVars, volumes, cluster.Spec.Image),
@@ -194,5 +205,14 @@ func (r *NovaCellReconciler) reconcileNoVNCProxy(ctx context.Context, instance *
 func (r *NovaCellReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&openstackv1beta1.NovaCell{}).
+		Owns(&corev1.ConfigMap{}).
+		Owns(&appsv1.Deployment{}).
+		Owns(&netv1.Ingress{}).
+		Owns(&batchv1.Job{}).
+		Owns(&corev1.Secret{}).
+		Owns(&corev1.Service{}).
+		Owns(&openstackv1beta1.KeystoneService{}).
+		Owns(&openstackv1beta1.KeystoneUser{}).
+		Owns(&openstackv1beta1.MariaDBDatabase{}).
 		Complete(r)
 }

@@ -388,6 +388,24 @@ spec:
                     items:
                       description: NovaCellSpec defines the desired state of NovaCell
                       properties:
+                        broker:
+                          description: RabbitMQUserSpec defines the desired state
+                            of RabbitMQUser
+                          properties:
+                            cluster:
+                              type: string
+                            name:
+                              type: string
+                            secret:
+                              type: string
+                            virtualHost:
+                              type: string
+                          required:
+                          - cluster
+                          - name
+                          - secret
+                          - virtualHost
+                          type: object
                         conductor:
                           properties:
                             replicas:
@@ -438,10 +456,20 @@ spec:
                           - ingress
                           type: object
                       required:
+                      - broker
                       - database
                       - name
                       type: object
                     type: array
+                  compute:
+                    properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    required:
+                    - nodeSelector
+                    type: object
                   conductor:
                     properties:
                       replicas:
@@ -450,6 +478,13 @@ spec:
                     type: object
                   image:
                     type: string
+                  libvirtd:
+                    properties:
+                      image:
+                        type: string
+                    required:
+                    - image
+                    type: object
                   scheduler:
                     properties:
                       replicas:
@@ -462,7 +497,9 @@ spec:
                 - broker
                 - cellDatabase
                 - cells
+                - compute
                 - image
+                - libvirtd
                 type: object
               placement:
                 description: PlacementSpec defines the desired state of Placement

@@ -146,7 +146,8 @@ func (r *RabbitMQReconciler) reconcileRBAC(ctx context.Context, instance *openst
 func (r *RabbitMQReconciler) reconcileSecret(ctx context.Context, instance *openstackv1beta1.RabbitMQ, log logr.Logger) error {
 	secret := rabbitmq.Secret(instance)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
-	return template.CreateSecret(ctx, r.Client, secret, log)
+	_, err := template.CreateSecret(ctx, r.Client, secret, log)
+	return err
 }
 
 func (r *RabbitMQReconciler) reconcileConfigMap(ctx context.Context, instance *openstackv1beta1.RabbitMQ, log logr.Logger) ([]string, error) {
