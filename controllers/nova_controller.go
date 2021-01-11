@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -257,9 +258,12 @@ func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openst
 }
 
 func (r *NovaReconciler) reconcileCompute(ctx context.Context, instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	// TODO make this configurable
+	cell := instance.Spec.Cells[0]
+
 	extraEnvVars := []corev1.EnvVar{
-		// TODO make this configurable
-		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Cells[0].Broker.Secret, "connection"),
+		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", cell.Broker.Secret, "connection"),
+		template.EnvVar("OS_VNC__NOVNCPROXY_BASE_URL", fmt.Sprintf("https://%s/vnc_auto.html", cell.NoVNCProxy.Ingress.Host)),
 	}
 
 	envVars = append(envVars, extraEnvVars...)
