@@ -56,11 +56,16 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 						SubPath:   "glance-api.conf",
 						MountPath: "/etc/glance/glance-api.conf",
 					},
+					{
+						Name:      "images",
+						MountPath: "/var/lib/glance/images",
+					},
 				},
 			},
 		},
 		Volumes: []corev1.Volume{
 			template.ConfigMapVolume("etc-glance", instance.Name, nil),
+			template.PersistentVolume("images", instance.Name),
 		},
 	})
 

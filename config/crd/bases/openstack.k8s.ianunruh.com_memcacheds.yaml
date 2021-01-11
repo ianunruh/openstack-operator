@@ -40,6 +40,10 @@ spec:
                 type: string
               volume:
                 properties:
+                  accessModes:
+                    items:
+                      type: string
+                    type: array
                   capacity:
                     type: string
                   storageClass:

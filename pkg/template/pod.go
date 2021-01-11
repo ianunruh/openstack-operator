@@ -96,3 +96,14 @@ func HostPathVolume(name, path string) corev1.Volume {
 		},
 	}
 }
+
+func PersistentVolume(name, claimName string) corev1.Volume {
+	return corev1.Volume{
+		Name: name,
+		VolumeSource: corev1.VolumeSource{
+			PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+				ClaimName: claimName,
+			},
+		},
+	}
+}

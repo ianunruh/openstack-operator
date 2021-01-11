@@ -15,3 +15,8 @@ spec:
     name: glance
     secret: glance-db
     cluster: mariadb
+  storage:
+    volume:
+      capacity: 100Gi
+      storageClass: ceph-fs-ssd
+      accessModes: [ReadWriteMany]

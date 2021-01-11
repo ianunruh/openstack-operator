@@ -72,10 +72,29 @@ spec:
                 type: object
               image:
                 type: string
+              storage:
+                properties:
+                  volume:
+                    properties:
+                      accessModes:
+                        items:
+                          type: string
+                        type: array
+                      capacity:
+                        type: string
+                      storageClass:
+                        type: string
+                    required:
+                    - capacity
+                    type: object
+                required:
+                - volume
+                type: object
             required:
             - api
             - database
             - image
+            - storage
             type: object
           status:
             description: GlanceStatus defines the observed state of Glance

@@ -33,6 +33,12 @@ type GlanceSpec struct {
 	API GlanceAPISpec `json:"api"`
 
 	Database MariaDBDatabaseSpec `json:"database"`
+
+	Storage GlanceStorageSpec `json:"storage"`
+}
+
+type GlanceStorageSpec struct {
+	Volume VolumeSpec `json:"volume"`
 }
 
 type GlanceAPISpec struct {

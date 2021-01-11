@@ -107,6 +107,12 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	configHash := template.AppliedHash(cm)
 
+	pvc := glance.PersistentVolumeClaim(instance)
+	controllerutil.SetControllerReference(instance, pvc, r.Scheme)
+	if err := template.EnsurePersistentVolumeClaim(ctx, r.Client, pvc, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	jobs := []*batchv1.Job{
 		glance.DBSyncJob(instance),
 		// glance.BootstrapJob(instance),

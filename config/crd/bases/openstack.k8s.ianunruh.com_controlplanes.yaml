@@ -43,6 +43,10 @@ spec:
                     type: string
                   volume:
                     properties:
+                      accessModes:
+                        items:
+                          type: string
+                        type: array
                       capacity:
                         type: string
                       storageClass:
@@ -61,6 +65,10 @@ spec:
                     type: string
                   volume:
                     properties:
+                      accessModes:
+                        items:
+                          type: string
+                        type: array
                       capacity:
                         type: string
                       storageClass:
@@ -148,6 +156,10 @@ spec:
                     type: string
                   volume:
                     properties:
+                      accessModes:
+                        items:
+                          type: string
+                        type: array
                       capacity:
                         type: string
                       storageClass:
@@ -201,10 +213,29 @@ spec:
                     type: object
                   image:
                     type: string
+                  storage:
+                    properties:
+                      volume:
+                        properties:
+                          accessModes:
+                            items:
+                              type: string
+                            type: array
+                          capacity:
+                            type: string
+                          storageClass:
+                            type: string
+                        required:
+                        - capacity
+                        type: object
+                    required:
+                    - volume
+                    type: object
                 required:
                 - api
                 - database
                 - image
+                - storage
                 type: object
               horizon:
                 description: HorizonSpec defines the desired state of Horizon
