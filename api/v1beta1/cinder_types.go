@@ -23,55 +23,61 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// ControlPlaneSpec defines the desired state of ControlPlane
-type ControlPlaneSpec struct {
+// CinderSpec defines the desired state of Cinder
+type CinderSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Domain string `json:"domain"`
+	Image string `json:"image"`
 
-	Broker   RabbitMQSpec  `json:"broker"`
-	Cache    MemcachedSpec `json:"cache"`
-	Database MariaDBSpec   `json:"database"`
+	API CinderAPISpec `json:"api"`
 
-	Keystone  KeystoneSpec  `json:"keystone"`
-	Glance    GlanceSpec    `json:"glance"`
-	Placement PlacementSpec `json:"placement"`
-	Cinder    CinderSpec    `json:"cinder"`
-	Nova      NovaSpec      `json:"nova"`
-	Neutron   NeutronSpec   `json:"neutron"`
-	Horizon   HorizonSpec   `json:"horizon"`
+	// +optional
+	Scheduler CinderSchedulerSpec `json:"scheduler"`
+
+	Database MariaDBDatabaseSpec `json:"database"`
+
+	Broker RabbitMQUserSpec `json:"broker"`
 }
 
-// ControlPlaneStatus defines the observed state of ControlPlane
-type ControlPlaneStatus struct {
+type CinderAPISpec struct {
+	// +optional
+	Replicas int32        `json:"replicas"`
+	Ingress  *IngressSpec `json:"ingress"`
+}
+
+type CinderSchedulerSpec struct {
+	// +optional
+	Replicas int32 `json:"replicas"`
+}
+
+// CinderStatus defines the observed state of Cinder
+type CinderStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	Ready bool `json:"ready"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// ControlPlane is the Schema for the controlplanes API
-type ControlPlane struct {
+// Cinder is the Schema for the cinders API
+type Cinder struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ControlPlaneSpec   `json:"spec,omitempty"`
-	Status ControlPlaneStatus `json:"status,omitempty"`
+	Spec   CinderSpec   `json:"spec,omitempty"`
+	Status CinderStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// ControlPlaneList contains a list of ControlPlane
-type ControlPlaneList struct {
+// CinderList contains a list of Cinder
+type CinderList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ControlPlane `json:"items"`
+	Items           []Cinder `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&ControlPlane{}, &ControlPlaneList{})
+	SchemeBuilder.Register(&Cinder{}, &CinderList{})
 }

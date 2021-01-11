@@ -72,6 +72,75 @@ spec:
                 - image
                 - volume
                 type: object
+              cinder:
+                description: CinderSpec defines the desired state of Cinder
+                properties:
+                  api:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                        required:
+                        - annotations
+                        - host
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    required:
+                    - ingress
+                    type: object
+                  broker:
+                    description: RabbitMQUserSpec defines the desired state of RabbitMQUser
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                      virtualHost:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    - virtualHost
+                    type: object
+                  database:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  image:
+                    type: string
+                  scheduler:
+                    properties:
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                required:
+                - api
+                - broker
+                - database
+                - image
+                type: object
               database:
                 description: MariaDBSpec defines the desired state of MariaDB
                 properties:
@@ -549,6 +618,7 @@ spec:
             required:
             - broker
             - cache
+            - cinder
             - database
             - domain
             - glance

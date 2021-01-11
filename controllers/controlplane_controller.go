@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/cinder"
 	"github.com/ianunruh/openstack-operator/pkg/controlplane"
 	"github.com/ianunruh/openstack-operator/pkg/glance"
 	"github.com/ianunruh/openstack-operator/pkg/horizon"
@@ -104,6 +105,12 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	pm := controlplane.Placement(instance)
 	controllerutil.SetControllerReference(instance, pm, r.Scheme)
 	if err := placement.EnsurePlacement(ctx, r.Client, pm, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	volume := controlplane.Cinder(instance)
+	controllerutil.SetControllerReference(instance, volume, r.Scheme)
+	if err := cinder.EnsureCinder(ctx, r.Client, volume, log); err != nil {
 		return ctrl.Result{}, err
 	}
 

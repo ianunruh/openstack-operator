@@ -3,7 +3,7 @@ kind: ControlPlane
 metadata:
   name: default
 spec:
-  domain: openstack2.kcloud.zone
+  domain: openstack.kcloud.zone
   broker:
     image: docker.io/bitnami/rabbitmq:3.8.9-debian-10-r58
     volume:
@@ -23,7 +23,7 @@ spec:
     image: registry.kcloud.zone/ops/keystone:37a47821
     api:
       ingress:
-        host: keystone.openstack2.kcloud.zone
+        host: keystone.openstack.kcloud.zone
         annotations:
           external-dns/enabled: "true"
           cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -35,7 +35,7 @@ spec:
     image: registry.kcloud.zone/ops/glance:286f670e
     api:
       ingress:
-        host: glance.openstack2.kcloud.zone
+        host: glance.openstack.kcloud.zone
         annotations:
           external-dns/enabled: "true"
           cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -65,7 +65,7 @@ spec:
     image: registry.kcloud.zone/ops/placement:d8f1ff3a
     api:
       ingress:
-        host: placement.openstack2.kcloud.zone
+        host: placement.openstack.kcloud.zone
         annotations:
           external-dns/enabled: "true"
           cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -77,7 +77,7 @@ spec:
     image: registry.kcloud.zone/ops/nova:3173da3b
     api:
       ingress:
-        host: nova.openstack2.kcloud.zone
+        host: nova.openstack.kcloud.zone
         annotations:
           external-dns/enabled: "true"
           cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -94,7 +94,7 @@ spec:
         virtualHost: nova-cell1
       novncproxy:
         ingress:
-          host: novnc.openstack2.kcloud.zone
+          host: novnc.openstack.kcloud.zone
           annotations:
             external-dns/enabled: "true"
             cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -120,7 +120,7 @@ spec:
     image: registry.kcloud.zone/ops/neutron:9b559abf
     server:
       ingress:
-        host: neutron.openstack2.kcloud.zone
+        host: neutron.openstack.kcloud.zone
         annotations:
           external-dns/enabled: "true"
           cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -149,7 +149,7 @@ spec:
     image: registry.kcloud.zone/ops/horizon:af7b46c8
     server:
       ingress:
-        host: horizon.openstack2.kcloud.zone
+        host: horizon.openstack.kcloud.zone
         annotations:
           external-dns/enabled: "true"
           cert-manager.io/cluster-issuer: letsencrypt-prod

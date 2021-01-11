@@ -39,6 +39,7 @@ openstack resource provider list
 openstack compute service list
 openstack hypervisor list
 openstack network agent list
+openstack volume service list
 ```
 
 To clean up a cluster completely, make sure the persistent volumes are deleted.

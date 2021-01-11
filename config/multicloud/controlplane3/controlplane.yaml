@@ -1,0 +1,51 @@
+apiVersion: openstack.k8s.ianunruh.com/v1beta1
+kind: ControlPlane
+metadata:
+  name: default
+spec:
+  domain: openstack3.kcloud.zone
+  keystone:
+    api:
+      ingress:
+        host: keystone.openstack3.kcloud.zone
+  glance:
+    api:
+      ingress:
+        host: glance.openstack3.kcloud.zone
+  cinder:
+    api:
+      ingress:
+        host: cinder.openstack3.kcloud.zone
+  placement:
+    api:
+      ingress:
+        host: placement.openstack3.kcloud.zone
+  nova:
+    api:
+      ingress:
+        host: nova.openstack3.kcloud.zone
+    cells:
+    - name: cell1
+      database:
+        name: nova_cell1
+        secret: nova-db-cell1
+        cluster: mariadb
+      broker:
+        name: nova-cell1
+        secret: nova-cell1-rabbitmq
+        cluster: rabbitmq
+        virtualHost: nova-cell1
+      novncproxy:
+        ingress:
+          host: novnc.openstack3.kcloud.zone
+          annotations:
+            external-dns/enabled: "true"
+            cert-manager.io/cluster-issuer: letsencrypt-prod
+  neutron:
+    server:
+      ingress:
+        host: neutron.openstack3.kcloud.zone
+  horizon:
+    server:
+      ingress:
+        host: horizon.openstack3.kcloud.zone
