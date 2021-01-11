@@ -44,6 +44,11 @@ spec:
       name: glance
       secret: glance-db
       cluster: mariadb
+    storage:
+      volume:
+        capacity: 100Gi
+        storageClass: ceph-fs-ssd
+        accessModes: [ReadWriteMany]
   cinder:
     image: registry.kcloud.zone/ops/cinder:f07a994f
     api:
@@ -102,6 +107,7 @@ spec:
       image: registry.kcloud.zone/ops/libvirt:4495c89d
     compute:
       nodeSelector:
+        openstack/cloud: openstack
         openstack/compute-node: enabled
     apiDatabase:
       name: nova_api
@@ -126,15 +132,19 @@ spec:
           cert-manager.io/cluster-issuer: letsencrypt-prod
     linuxBridgeAgent:
       nodeSelector:
+        openstack/cloud: openstack
         openstack/network-agent: linuxbridge
     dhcpAgent:
       nodeSelector:
+        openstack/cloud: openstack
         openstack/network-node: enabled
     l3Agent:
       nodeSelector:
+        openstack/cloud: openstack
         openstack/network-node: enabled
     metadataAgent:
       nodeSelector:
+        openstack/cloud: openstack
         openstack/network-node: enabled
     database:
       name: neutron

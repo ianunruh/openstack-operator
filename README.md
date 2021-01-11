@@ -27,6 +27,16 @@ kubectl config set-context --current --namespace=openstack2
 kubectl apply -f config/samples/openstack_v1beta1_controlplane.yaml
 ```
 
+Label the desired compute/network nodes to enable deployment.
+
+```
+kubectl label node compute7 \
+    openstack/cloud=openstack2 \            ## optional if only running single cloud
+    openstack/compute-node=enabled \        ## compute node must be capable of running kvm
+    openstack/network-agent=linuxbridge \   ## required for both compute and network nodes
+    openstack/network-node=enabled          ## compute and network can co-exist on same node
+```
+
 Use the supplied `openrc` file with the Python CLI client.
 
 ```

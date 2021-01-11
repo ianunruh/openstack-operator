@@ -3,30 +3,30 @@ kind: ControlPlane
 metadata:
   name: default
 spec:
-  domain: openstack3.kcloud.zone
+  domain: openstack2.kcloud.zone
   keystone:
     api:
       ingress:
-        host: keystone.openstack3.kcloud.zone
+        host: keystone.openstack2.kcloud.zone
   glance:
     api:
       ingress:
-        host: glance.openstack3.kcloud.zone
+        host: glance.openstack2.kcloud.zone
   cinder:
     api:
       ingress:
-        host: cinder.openstack3.kcloud.zone
+        host: cinder.openstack2.kcloud.zone
   placement:
     api:
       ingress:
-        host: placement.openstack3.kcloud.zone
+        host: placement.openstack2.kcloud.zone
   nova:
     api:
       ingress:
-        host: nova.openstack3.kcloud.zone
+        host: nova.openstack2.kcloud.zone
     compute:
       nodeSelector:
-        openstack/cloud: openstack3
+        openstack/cloud: openstack2
     cells:
     - name: cell1
       database:
@@ -40,27 +40,27 @@ spec:
         virtualHost: nova-cell1
       novncproxy:
         ingress:
-          host: novnc.openstack3.kcloud.zone
+          host: novnc.openstack2.kcloud.zone
           annotations:
             external-dns/enabled: "true"
             cert-manager.io/cluster-issuer: letsencrypt-prod
   neutron:
     server:
       ingress:
-        host: neutron.openstack3.kcloud.zone
+        host: neutron.openstack2.kcloud.zone
     linuxBridgeAgent:
       nodeSelector:
-        openstack/cloud: openstack3
+        openstack/cloud: openstack2
     dhcpAgent:
       nodeSelector:
-        openstack/cloud: openstack3
+        openstack/cloud: openstack2
     l3Agent:
       nodeSelector:
-        openstack/cloud: openstack3
+        openstack/cloud: openstack2
     metadataAgent:
       nodeSelector:
-        openstack/cloud: openstack3
+        openstack/cloud: openstack2
   horizon:
     server:
       ingress:
-        host: horizon.openstack3.kcloud.zone
+        host: horizon.openstack2.kcloud.zone

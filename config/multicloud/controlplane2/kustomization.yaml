@@ -1,0 +1,5 @@
+namespace: openstack2
+bases:
+- ../base
+patchesStrategicMerge:
+- controlplane.yaml
