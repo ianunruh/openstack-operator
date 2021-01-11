@@ -1,5 +1,5 @@
 export OS_IDENTITY_API_VERSION=3
-export OS_AUTH_URL=https://$(k get controlplane default -o 'jsonpath={.spec.keystone.api.ingress.host}')/v3
+export OS_AUTH_URL=https://$(kubectl get controlplane default -o 'jsonpath={.spec.keystone.api.ingress.host}')/v3
 export OS_REGION_NAME=RegionOne
 export OS_PROJECT_NAME=admin
 export OS_PROJECT_DOMAIN_NAME=Default
