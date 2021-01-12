@@ -44,6 +44,8 @@ type RabbitMQUserStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Ready",type=boolean,JSONPath=`.status.ready`
+// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // RabbitMQUser is the Schema for the rabbitmqusers API
 type RabbitMQUser struct {

@@ -43,6 +43,8 @@ type RabbitMQStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Ready",type=boolean,JSONPath=`.status.ready`
+// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // RabbitMQ is the Schema for the rabbitmqs API
 type RabbitMQ struct {
