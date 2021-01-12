@@ -24,6 +24,19 @@ func ClusterStatefulSet(instance *openstackv1beta1.MariaDB, configHash string) *
 
 	runAsUser := int64(1001)
 
+	probe := &corev1.Probe{
+		Handler: corev1.Handler{
+			Exec: &corev1.ExecAction{
+				Command: []string{"bash", "-c", template.MustRenderFile(AppLabel, "probe.sh", nil)},
+			},
+		},
+		FailureThreshold:    3,
+		InitialDelaySeconds: 30,
+		PeriodSeconds:       10,
+		SuccessThreshold:    1,
+		TimeoutSeconds:      1,
+	}
+
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -45,6 +58,8 @@ func ClusterStatefulSet(instance *openstackv1beta1.MariaDB, configHash string) *
 				Ports: []corev1.ContainerPort{
 					{Name: "mysql", ContainerPort: 3306},
 				},
+				LivenessProbe:  probe,
+				ReadinessProbe: probe,
 				VolumeMounts: []corev1.VolumeMount{
 					{
 						Name:      "config",
