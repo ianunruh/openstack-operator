@@ -204,5 +204,6 @@ func (r *CinderReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&openstackv1beta1.KeystoneService{}).
 		Owns(&openstackv1beta1.KeystoneUser{}).
 		Owns(&openstackv1beta1.MariaDBDatabase{}).
+		Owns(&openstackv1beta1.RabbitMQUser{}).
 		Complete(r)
 }
