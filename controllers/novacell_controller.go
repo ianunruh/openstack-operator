@@ -179,6 +179,13 @@ func (r *NovaCellReconciler) reconcileConductor(ctx context.Context, instance *o
 }
 
 func (r *NovaCellReconciler) reconcileMetadata(ctx context.Context, instance *openstackv1beta1.NovaCell, envVars []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
+	extraEnvVars := []corev1.EnvVar{
+		// TODO make this configurable
+		template.SecretEnvVar("OS_NEUTRON__METADATA_PROXY_SHARED_SECRET", "nova", "metadata-proxy-secret"),
+	}
+
+	envVars = append(envVars, extraEnvVars...)
+
 	svc := nova.MetadataService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {

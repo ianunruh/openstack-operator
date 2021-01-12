@@ -228,6 +228,13 @@ func (r *NeutronReconciler) reconcileL3Agent(ctx context.Context, instance *open
 }
 
 func (r *NeutronReconciler) reconcileMetadataAgent(ctx context.Context, instance *openstackv1beta1.Neutron, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	extraEnvVars := []corev1.EnvVar{
+		// TODO make this configurable
+		template.SecretEnvVar("OS_DEFAULT__METADATA_PROXY_SHARED_SECRET", "nova", "metadata-proxy-secret"),
+	}
+
+	envVars = append(envVars, extraEnvVars...)
+
 	ds := neutron.MetadataAgentDaemonSet(instance, envVars, volumes)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {

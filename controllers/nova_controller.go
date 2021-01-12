@@ -121,6 +121,12 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 	configHash := template.AppliedHash(cm)
 
+	secret := nova.Secret(instance)
+	controllerutil.SetControllerReference(instance, secret, r.Scheme)
+	if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	envVars := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),

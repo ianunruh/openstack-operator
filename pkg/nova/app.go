@@ -26,6 +26,15 @@ func ConfigMap(instance *openstackv1beta1.Nova) *corev1.ConfigMap {
 	return cm
 }
 
+func Secret(instance *openstackv1beta1.Nova) *corev1.Secret {
+	labels := template.AppLabels(instance.Name, AppLabel)
+	secret := template.GenericSecret(instance.Name, instance.Namespace, labels)
+
+	secret.StringData["metadata-proxy-secret"] = template.NewPassword()
+
+	return secret
+}
+
 func EnsureNova(ctx context.Context, c client.Client, intended *openstackv1beta1.Nova, log logr.Logger) error {
 	hash, err := template.ObjectHash(intended)
 	if err != nil {
