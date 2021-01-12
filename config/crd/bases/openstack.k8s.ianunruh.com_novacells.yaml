@@ -108,6 +108,11 @@ spec:
             type: object
           status:
             description: NovaCellStatus defines the observed state of NovaCell
+            properties:
+              ready:
+                type: boolean
+            required:
+            - ready
             type: object
         type: object
     served: true

@@ -152,6 +152,13 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
+	if !instance.Status.Ready {
+		instance.Status.Ready = true
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	return ctrl.Result{}, nil
 }
 

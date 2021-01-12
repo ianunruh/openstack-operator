@@ -158,23 +158,23 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
+	for _, cellSpec := range instance.Spec.Cells {
+		cell := nova.Cell(instance, cellSpec)
+		controllerutil.SetControllerReference(instance, cell, r.Scheme)
+		if err := nova.EnsureCell(ctx, r.Client, cell, log); err != nil {
+			return ctrl.Result{}, err
+		} else if !cell.Status.Ready {
+			log.Info("Waiting on NovaCell to be ready", "name", cell.Name)
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		}
+	}
+
 	if err := r.reconcileConductor(ctx, instance, fullEnvVars, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if err := r.reconcileScheduler(ctx, instance, fullEnvVars, volumes, log); err != nil {
 		return ctrl.Result{}, err
-	}
-
-	// TODO wait for deploys to be ready then mark status
-
-	for _, cellSpec := range instance.Spec.Cells {
-		cell := nova.Cell(instance, cellSpec)
-		controllerutil.SetControllerReference(instance, cell, r.Scheme)
-		if err := nova.EnsureCell(ctx, r.Client, cell, log); err != nil {
-			return ctrl.Result{}, err
-		}
-		// TODO wait on cell to be ready
 	}
 
 	if err := r.reconcileLibvirtd(ctx, instance, log); err != nil {
@@ -184,6 +184,8 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	if err := r.reconcileCompute(ctx, instance, envVars, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
+
+	// TODO wait for deploys to be ready then mark status
 
 	return ctrl.Result{}, nil
 }
