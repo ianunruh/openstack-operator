@@ -63,11 +63,45 @@ openstack network agent list
 openstack volume service list
 ```
 
+Launch an instance
+
+```
+source openrc
+
+openstack flavor create m1.test --ram 1024 --disk 1
+
+curl -OL http://download.cirros-cloud.net/0.5.1/cirros-0.5.1-x86_64-disk.img
+openstack image create cirros --public --disk-format qcow2 --file cirros-0.5.1-x86_64-disk.img
+
+openstack network create test1
+openstack subnet create test1 --network test1 --subnet-range 10.91.0.0/24
+
+openstack router create test1
+openstack router add subnet test1 test1
+
+NET_ID=$(openstack network show test1 -f json | jq -r .id)
+openstack server create test1 --image cirros --flavor m1.test --network $NET_ID
+```
+
+Visit the OpenStack dashboard in your browser
+
+```
+# Visit this hostname with /horizon appended
+kubectl get controlplane default -o 'jsonpath={.spec.horizon.server.ingress.host}'
+
+# The domain is "default" and the admin password can be retrieved with
+kubectl get secret keystone -o 'jsonpath={.data.OS_PASSWORD}' | base64 -d
+```
+
 To clean up a cluster completely, make sure the persistent volumes are deleted.
 
 ```
 kubectl delete controlplane default
+
+kubectl delete pvc --all
+# alternatively target specific PVCs
 kubectl delete pvc -l app=mariadb
+kubectl delete pvc -l app=memcached
 kubectl delete pvc -l app=rabbitmq
 ```
 
