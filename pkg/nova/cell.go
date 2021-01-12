@@ -61,28 +61,28 @@ func CellDBSyncJob(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, vol
 	return job
 }
 
-func EnsureCell(ctx context.Context, c client.Client, intended *openstackv1beta1.NovaCell, log logr.Logger) error {
-	hash, err := template.ObjectHash(intended)
+func EnsureCell(ctx context.Context, c client.Client, instance *openstackv1beta1.NovaCell, log logr.Logger) error {
+	intended := instance.DeepCopy()
+	hash, err := template.ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
 
-	found := &openstackv1beta1.NovaCell{}
-	if err := c.Get(ctx, client.ObjectKeyFromObject(intended), found); err != nil {
+	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
 
 		template.SetAppliedHash(intended, hash)
 
-		log.Info("Creating NovaCell", "Name", intended.Name)
-		return c.Create(ctx, intended)
-	} else if !template.MatchesAppliedHash(found, hash) {
-		found.Spec = intended.Spec
-		template.SetAppliedHash(found, hash)
+		log.Info("Creating NovaCell", "Name", instance.Name)
+		return c.Create(ctx, instance)
+	} else if !template.MatchesAppliedHash(instance, hash) {
+		instance.Spec = intended.Spec
+		template.SetAppliedHash(instance, hash)
 
-		log.Info("Updating NovaCell", "Name", intended.Name)
-		return c.Update(ctx, found)
+		log.Info("Updating NovaCell", "Name", instance.Name)
+		return c.Update(ctx, instance)
 	}
 
 	return nil
