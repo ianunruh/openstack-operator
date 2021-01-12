@@ -49,12 +49,14 @@ type NeutronReconciler struct {
 // +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=neutrons,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=neutrons/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=neutrons/finalizers,verbs=update
-// +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;create;update;delete
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;create;update;delete
-// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;create;update;delete
-// +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;create;update;delete
-// +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;create;update;delete
-// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;create;update;delete
+// +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;delete
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;delete
+// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;delete
+// +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;delete
+// +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;delete
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;delete
+// +kubebuilder:rbac:groups=apps,resources=daemonsets,verbs=get;list;watch;create;update;delete
+// +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;watch;create;update;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -242,6 +244,7 @@ func (r *NeutronReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.ConfigMap{}).
 		Owns(&appsv1.DaemonSet{}).
 		Owns(&appsv1.Deployment{}).
+		Owns(&appsv1.StatefulSet{}).
 		Owns(&netv1.Ingress{}).
 		Owns(&batchv1.Job{}).
 		Owns(&corev1.Secret{}).

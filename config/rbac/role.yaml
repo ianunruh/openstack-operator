@@ -9,6 +9,17 @@ rules:
 - apiGroups:
   - apps
   resources:
+  - daemonsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
   - deployments
   verbs:
   - create
@@ -16,6 +27,7 @@ rules:
   - get
   - list
   - update
+  - watch
 - apiGroups:
   - apps
   resources:
@@ -26,6 +38,7 @@ rules:
   - get
   - list
   - update
+  - watch
 - apiGroups:
   - batch
   resources:
@@ -36,6 +49,7 @@ rules:
   - get
   - list
   - update
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -46,6 +60,7 @@ rules:
   - get
   - list
   - update
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -56,6 +71,7 @@ rules:
   - get
   - list
   - update
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -66,6 +82,7 @@ rules:
   - get
   - list
   - update
+  - watch
 - apiGroups:
   - ""
   resources:
@@ -76,16 +93,19 @@ rules:
   - get
   - list
   - update
+  - watch
 - apiGroups:
   - networking.k8s.io
   resources:
   - ingresses
   verbs:
+  - ;create
   - create
   - delete
   - get
   - list
   - update
+  - watch
 - apiGroups:
   - openstack.k8s.ianunruh.com
   resources:
@@ -245,6 +265,32 @@ rules:
 - apiGroups:
   - openstack.k8s.ianunruh.com
   resources:
+  - keystoneusers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - keystoneusers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - keystoneusers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
   - mariadbdatabases
   verbs:
   - create
@@ -349,6 +395,32 @@ rules:
 - apiGroups:
   - openstack.k8s.ianunruh.com
   resources:
+  - nova
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - nova/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - nova/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
   - novacells
   verbs:
   - create
@@ -368,32 +440,6 @@ rules:
   - openstack.k8s.ianunruh.com
   resources:
   - novacells/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - openstack.k8s.ianunruh.com
-  resources:
-  - novas
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - openstack.k8s.ianunruh.com
-  resources:
-  - novas/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - openstack.k8s.ianunruh.com
-  resources:
-  - novas/status
   verbs:
   - get
   - patch
@@ -486,6 +532,7 @@ rules:
   - get
   - list
   - update
+  - watch
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
@@ -496,3 +543,4 @@ rules:
   - get
   - list
   - update
+  - watch

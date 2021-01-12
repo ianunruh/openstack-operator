@@ -139,5 +139,15 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 func (r *ControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&openstackv1beta1.ControlPlane{}).
+		Owns(&openstackv1beta1.Cinder{}).
+		Owns(&openstackv1beta1.Glance{}).
+		Owns(&openstackv1beta1.Horizon{}).
+		Owns(&openstackv1beta1.Keystone{}).
+		Owns(&openstackv1beta1.MariaDB{}).
+		Owns(&openstackv1beta1.Memcached{}).
+		Owns(&openstackv1beta1.Neutron{}).
+		Owns(&openstackv1beta1.Nova{}).
+		Owns(&openstackv1beta1.Placement{}).
+		Owns(&openstackv1beta1.RabbitMQ{}).
 		Complete(r)
 }
