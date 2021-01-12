@@ -20,7 +20,7 @@ spec:
       capacity: 50Gi
       storageClass: ceph-block-ssd
   keystone:
-    image: registry.kcloud.zone/ops/keystone:37a47821
+    image: ianunruh/keystone:latest
     api:
       ingress:
         host: keystone.openstack2.kcloud.zone
@@ -32,7 +32,7 @@ spec:
       secret: keystone-db
       cluster: mariadb
   glance:
-    image: registry.kcloud.zone/ops/glance:286f670e
+    image: ianunruh/glance:latest
     api:
       ingress:
         host: glance.openstack2.kcloud.zone
@@ -50,7 +50,7 @@ spec:
         storageClass: ceph-fs-ssd
         accessModes: [ReadWriteMany]
   cinder:
-    image: registry.kcloud.zone/ops/cinder:f07a994f
+    image: ianunruh/cinder:latest
     api:
       ingress:
         host: cinder.openstack2.kcloud.zone
@@ -67,7 +67,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   placement:
-    image: registry.kcloud.zone/ops/placement:d8f1ff3a
+    image: ianunruh/placement:latest
     api:
       ingress:
         host: placement.openstack2.kcloud.zone
@@ -79,7 +79,7 @@ spec:
       secret: placement-db
       cluster: mariadb
   nova:
-    image: registry.kcloud.zone/ops/nova:3173da3b
+    image: ianunruh/nova:latest
     api:
       ingress:
         host: nova.openstack2.kcloud.zone
@@ -104,7 +104,7 @@ spec:
             external-dns/enabled: "true"
             cert-manager.io/cluster-issuer: letsencrypt-prod
     libvirtd:
-      image: registry.kcloud.zone/ops/libvirt:4495c89d
+      image: ianunruh/libvirtd:latest
     compute:
       nodeSelector:
         openstack/compute-node: enabled
@@ -122,7 +122,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   neutron:
-    image: registry.kcloud.zone/ops/neutron:9b559abf
+    image: ianunruh/neutron:latest
     server:
       ingress:
         host: neutron.openstack2.kcloud.zone
@@ -151,7 +151,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   horizon:
-    image: registry.kcloud.zone/ops/horizon:af7b46c8
+    image: ianunruh/horizon:latest
     server:
       ingress:
         host: horizon.openstack2.kcloud.zone

@@ -12,6 +12,17 @@ later point.
 
 The API will almost certainly have significant changes, so definitely don't use this in production.
 
+## Images
+
+This operator utilizes custom container images based on Ubuntu OpenStack, using the 20.04 release that ships
+with [Ussuri](https://docs.openstack.org/ussuri/).
+
+These images are built from [openstack-operator-images](https://github.com/ianunruh/openstack-operator-images)
+using the Docker Hub automated build process. Currently images are just tagged as `latest`, there may be
+a more stable tag in the future.
+
+Stateful services like MariaDB, Memcached, and RabbitMQ use container images from Bitnami.
+
 ## Development
 
 ```bash
