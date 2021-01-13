@@ -93,9 +93,6 @@ spec:
                             type: object
                           host:
                             type: string
-                        required:
-                        - annotations
-                        - host
                         type: object
                       replicas:
                         format: int32
@@ -144,7 +141,6 @@ spec:
                         type: integer
                     type: object
                 required:
-                - api
                 - broker
                 - database
                 - image
@@ -186,9 +182,6 @@ spec:
                             type: object
                           host:
                             type: string
-                        required:
-                        - annotations
-                        - host
                         type: object
                       replicas:
                         format: int32
@@ -232,7 +225,6 @@ spec:
                     - volume
                     type: object
                 required:
-                - api
                 - database
                 - image
                 - storage
@@ -252,9 +244,6 @@ spec:
                             type: object
                           host:
                             type: string
-                        required:
-                        - annotations
-                        - host
                         type: object
                       replicas:
                         format: int32
@@ -264,7 +253,13 @@ spec:
                     type: object
                 required:
                 - image
-                - server
+                type: object
+              ingress:
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
                 type: object
               keystone:
                 description: KeystoneSpec defines the desired state of Keystone
@@ -279,9 +274,6 @@ spec:
                             type: object
                           host:
                             type: string
-                        required:
-                        - annotations
-                        - host
                         type: object
                       replicas:
                         format: int32
@@ -307,7 +299,6 @@ spec:
                   image:
                     type: string
                 required:
-                - api
                 - database
                 - image
                 type: object
@@ -394,9 +385,6 @@ spec:
                             type: object
                           host:
                             type: string
-                        required:
-                        - annotations
-                        - host
                         type: object
                       replicas:
                         format: int32
@@ -412,7 +400,6 @@ spec:
                 - l3Agent
                 - linuxBridgeAgent
                 - metadataAgent
-                - server
                 type: object
               nova:
                 description: NovaSpec defines the desired state of Nova
@@ -427,9 +414,6 @@ spec:
                             type: object
                           host:
                             type: string
-                        required:
-                        - annotations
-                        - host
                         type: object
                       replicas:
                         format: int32
@@ -545,9 +529,6 @@ spec:
                                   type: object
                                 host:
                                   type: string
-                              required:
-                              - annotations
-                              - host
                               type: object
                             replicas:
                               format: int32
@@ -592,7 +573,6 @@ spec:
                         type: integer
                     type: object
                 required:
-                - api
                 - apiDatabase
                 - broker
                 - cellDatabase
@@ -614,9 +594,6 @@ spec:
                             type: object
                           host:
                             type: string
-                        required:
-                        - annotations
-                        - host
                         type: object
                       replicas:
                         format: int32
@@ -642,7 +619,6 @@ spec:
                   image:
                     type: string
                 required:
-                - api
                 - database
                 - image
                 type: object

@@ -46,9 +46,6 @@ spec:
                         type: object
                       host:
                         type: string
-                    required:
-                    - annotations
-                    - host
                     type: object
                   replicas:
                     format: int32
@@ -96,7 +93,6 @@ spec:
                     type: integer
                 type: object
             required:
-            - api
             - broker
             - database
             - image

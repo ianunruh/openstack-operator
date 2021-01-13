@@ -127,10 +127,14 @@ func (r *PlacementReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
-	ingress := placement.APIIngress(instance)
-	controllerutil.SetControllerReference(instance, ingress, r.Scheme)
-	if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
-		return ctrl.Result{}, err
+	if instance.Spec.API.Ingress == nil {
+		// TODO ensure ingress does not exist
+	} else {
+		ingress := placement.APIIngress(instance)
+		controllerutil.SetControllerReference(instance, ingress, r.Scheme)
+		if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	deploy := placement.APIDeployment(instance, configHash)

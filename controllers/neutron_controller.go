@@ -182,10 +182,14 @@ func (r *NeutronReconciler) reconcileServer(ctx context.Context, instance *opens
 		return err
 	}
 
-	ingress := neutron.ServerIngress(instance)
-	controllerutil.SetControllerReference(instance, ingress, r.Scheme)
-	if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
-		return err
+	if instance.Spec.Server.Ingress == nil {
+		// TODO ensure ingress does not exist
+	} else {
+		ingress := neutron.ServerIngress(instance)
+		controllerutil.SetControllerReference(instance, ingress, r.Scheme)
+		if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
+			return err
+		}
 	}
 
 	deploy := neutron.ServerDeployment(instance, envVars, volumes)

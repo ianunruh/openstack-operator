@@ -30,6 +30,7 @@ type NovaSpec struct {
 
 	Image string `json:"image"`
 
+	// +optional
 	API NovaAPISpec `json:"api"`
 
 	// +optional

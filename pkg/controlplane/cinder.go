@@ -10,6 +10,8 @@ func Cinder(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Cinder {
 	// TODO labels
 	spec := instance.Spec.Cinder
 
+	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "cinder")
+
 	return &openstackv1beta1.Cinder{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "cinder",

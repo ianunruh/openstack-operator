@@ -30,6 +30,7 @@ type GlanceSpec struct {
 
 	Image string `json:"image"`
 
+	// +optional
 	API GlanceAPISpec `json:"api"`
 
 	Database MariaDBDatabaseSpec `json:"database"`

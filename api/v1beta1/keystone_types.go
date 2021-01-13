@@ -30,6 +30,7 @@ type KeystoneSpec struct {
 
 	Image string `json:"image"`
 
+	// +optional
 	API KeystoneAPISpec `json:"api"`
 
 	Database MariaDBDatabaseSpec `json:"database"`

@@ -119,10 +119,14 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	ingress := keystone.APIIngress(instance)
-	controllerutil.SetControllerReference(instance, ingress, r.Scheme)
-	if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
-		return ctrl.Result{}, err
+	if instance.Spec.API.Ingress == nil {
+		// TODO ensure ingress does not exist
+	} else {
+		ingress := keystone.APIIngress(instance)
+		controllerutil.SetControllerReference(instance, ingress, r.Scheme)
+		if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	deploy := keystone.APIDeployment(instance, configHash)

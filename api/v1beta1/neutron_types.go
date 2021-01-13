@@ -30,6 +30,7 @@ type NeutronSpec struct {
 
 	Image string `json:"image"`
 
+	// +optional
 	Server NeutronServerSpec `json:"server"`
 
 	DHCPAgent        NeutronDHCPAgentSpec        `json:"dhcpAgent"`

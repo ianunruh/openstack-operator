@@ -203,10 +203,14 @@ func (r *NovaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1
 		return err
 	}
 
-	ingress := nova.APIIngress(instance)
-	controllerutil.SetControllerReference(instance, ingress, r.Scheme)
-	if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
-		return err
+	if instance.Spec.API.Ingress == nil {
+		// TODO ensure ingress does not exist
+	} else {
+		ingress := nova.APIIngress(instance)
+		controllerutil.SetControllerReference(instance, ingress, r.Scheme)
+		if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
+			return err
+		}
 	}
 
 	deploy := nova.APIDeployment(instance, envVars, volumes)
@@ -273,6 +277,7 @@ func (r *NovaReconciler) reconcileCompute(ctx context.Context, instance *opensta
 
 	extraEnvVars := []corev1.EnvVar{
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", cell.Broker.Secret, "connection"),
+		// TODO make ingress optional
 		template.EnvVar("OS_VNC__NOVNCPROXY_BASE_URL", fmt.Sprintf("https://%s/vnc_auto.html", cell.NoVNCProxy.Ingress.Host)),
 	}
 

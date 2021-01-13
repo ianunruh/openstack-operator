@@ -115,9 +115,6 @@ spec:
                         type: object
                       host:
                         type: string
-                    required:
-                    - annotations
-                    - host
                     type: object
                   replicas:
                     format: int32
@@ -133,7 +130,6 @@ spec:
             - l3Agent
             - linuxBridgeAgent
             - metadataAgent
-            - server
             type: object
           status:
             description: NeutronStatus defines the observed state of Neutron

@@ -10,6 +10,8 @@ func Placement(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Placem
 	// TODO labels
 	spec := instance.Spec.Placement
 
+	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "placement")
+
 	return &openstackv1beta1.Placement{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "placement",

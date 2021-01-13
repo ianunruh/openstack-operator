@@ -53,9 +53,6 @@ spec:
                         type: object
                       host:
                         type: string
-                    required:
-                    - annotations
-                    - host
                     type: object
                   replicas:
                     format: int32
@@ -80,7 +77,6 @@ spec:
               image:
                 type: string
             required:
-            - api
             - database
             - image
             type: object

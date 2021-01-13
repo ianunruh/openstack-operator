@@ -98,9 +98,6 @@ spec:
                         type: object
                       host:
                         type: string
-                    required:
-                    - annotations
-                    - host
                     type: object
                   replicas:
                     format: int32

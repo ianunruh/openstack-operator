@@ -86,10 +86,14 @@ func (r *HorizonReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	ingress := horizon.ServerIngress(instance)
-	controllerutil.SetControllerReference(instance, ingress, r.Scheme)
-	if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
-		return ctrl.Result{}, err
+	if instance.Spec.Server.Ingress == nil {
+		// TODO ensure ingress does not exist
+	} else {
+		ingress := horizon.ServerIngress(instance)
+		controllerutil.SetControllerReference(instance, ingress, r.Scheme)
+		if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	deploy := horizon.ServerDeployment(instance, configHash)

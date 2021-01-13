@@ -30,6 +30,7 @@ type CinderSpec struct {
 
 	Image string `json:"image"`
 
+	// +optional
 	API CinderAPISpec `json:"api"`
 
 	// +optional

@@ -160,10 +160,14 @@ func (r *CinderReconciler) reconcileAPI(ctx context.Context, instance *openstack
 		return err
 	}
 
-	ingress := cinder.APIIngress(instance)
-	controllerutil.SetControllerReference(instance, ingress, r.Scheme)
-	if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
-		return err
+	if instance.Spec.API.Ingress == nil {
+		// TODO ensure ingress does not exist
+	} else {
+		ingress := cinder.APIIngress(instance)
+		controllerutil.SetControllerReference(instance, ingress, r.Scheme)
+		if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
+			return err
+		}
 	}
 
 	deploy := cinder.APIDeployment(instance, envVars, volumes)

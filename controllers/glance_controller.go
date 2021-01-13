@@ -133,10 +133,14 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	ingress := glance.APIIngress(instance)
-	controllerutil.SetControllerReference(instance, ingress, r.Scheme)
-	if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
-		return ctrl.Result{}, err
+	if instance.Spec.API.Ingress == nil {
+		// TODO ensure ingress does not exist
+	} else {
+		ingress := glance.APIIngress(instance)
+		controllerutil.SetControllerReference(instance, ingress, r.Scheme)
+		if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	deploy := glance.APIDeployment(instance, configHash)

@@ -30,6 +30,7 @@ type HorizonSpec struct {
 
 	Image string `json:"image"`
 
+	// +optional
 	Server HorizonServerSpec `json:"server"`
 }
 

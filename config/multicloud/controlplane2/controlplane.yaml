@@ -4,26 +4,7 @@ metadata:
   name: default
 spec:
   domain: openstack2.kcloud.zone
-  keystone:
-    api:
-      ingress:
-        host: keystone.openstack2.kcloud.zone
-  glance:
-    api:
-      ingress:
-        host: glance.openstack2.kcloud.zone
-  cinder:
-    api:
-      ingress:
-        host: cinder.openstack2.kcloud.zone
-  placement:
-    api:
-      ingress:
-        host: placement.openstack2.kcloud.zone
   nova:
-    api:
-      ingress:
-        host: nova.openstack2.kcloud.zone
     compute:
       nodeSelector:
         openstack/cloud: openstack2
@@ -38,16 +19,7 @@ spec:
         secret: nova-cell1-rabbitmq
         cluster: rabbitmq
         virtualHost: nova-cell1
-      novncproxy:
-        ingress:
-          host: novnc.openstack2.kcloud.zone
-          annotations:
-            external-dns/enabled: "true"
-            cert-manager.io/cluster-issuer: letsencrypt-prod
   neutron:
-    server:
-      ingress:
-        host: neutron.openstack2.kcloud.zone
     linuxBridgeAgent:
       nodeSelector:
         openstack/cloud: openstack2
@@ -60,7 +32,3 @@ spec:
     metadataAgent:
       nodeSelector:
         openstack/cloud: openstack2
-  horizon:
-    server:
-      ingress:
-        host: horizon.openstack2.kcloud.zone

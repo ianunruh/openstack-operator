@@ -10,6 +10,8 @@ func Keystone(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Keyston
 	// TODO labels
 	spec := instance.Spec.Keystone
 
+	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "keystone")
+
 	return &openstackv1beta1.Keystone{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone",

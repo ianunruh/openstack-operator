@@ -103,12 +103,16 @@ func APIIngress(instance *openstackv1beta1.Glance) *netv1.Ingress {
 
 	svcName := template.Combine(instance.Name, "api")
 
+	annotations := map[string]string{
+		"nginx.ingress.kubernetes.io/proxy-body-size": "0",
+	}
+
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        template.Combine(instance.Name, "api"),
 			Namespace:   instance.Namespace,
 			Labels:      labels,
-			Annotations: spec.Annotations,
+			Annotations: template.MergeStringMaps(annotations, spec.Annotations),
 		},
 		Spec: netv1.IngressSpec{
 			TLS: []netv1.IngressTLS{

@@ -1,5 +1,7 @@
 # openstack-operator
 
+[![Docker Build](https://img.shields.io/docker/cloud/automated/ianunruh/openstack-operator?style=flat-square)](https://hub.docker.com/r/ianunruh/openstack-operator)
+
 Experimental Kubernetes operator for running OpenStack clouds at scale, built on the Operator framework.
 
 This operator comes batteries-included, provisioning MariaDB, RabbitMQ, and other stateful services required
@@ -22,6 +24,11 @@ using the Docker Hub automated build process. Currently images are just tagged a
 a more stable tag in the future.
 
 Stateful services like MariaDB, Memcached, and RabbitMQ use container images from Bitnami.
+
+## Custom resources
+
+Check out the [Godoc reference](https://pkg.go.dev/github.com/ianunruh/openstack-operator/api/v1beta1#ControlPlaneSpec) or
+the [samples](https://github.com/ianunruh/openstack-operator/tree/master/config/samples).
 
 ## Development
 

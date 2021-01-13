@@ -9,6 +9,8 @@ import (
 func Horizon(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Horizon {
 	spec := instance.Spec.Horizon
 
+	spec.Server.Ingress = ingressDefaults(spec.Server.Ingress, instance, "horizon")
+
 	return &openstackv1beta1.Horizon{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "horizon",

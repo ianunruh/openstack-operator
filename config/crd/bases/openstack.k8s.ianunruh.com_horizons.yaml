@@ -48,9 +48,6 @@ spec:
                         type: object
                       host:
                         type: string
-                    required:
-                    - annotations
-                    - host
                     type: object
                   replicas:
                     format: int32
@@ -60,7 +57,6 @@ spec:
                 type: object
             required:
             - image
-            - server
             type: object
           status:
             description: HorizonStatus defines the observed state of Horizon

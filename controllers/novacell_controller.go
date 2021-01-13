@@ -208,10 +208,14 @@ func (r *NovaCellReconciler) reconcileNoVNCProxy(ctx context.Context, instance *
 		return err
 	}
 
-	ingress := nova.NoVNCProxyIngress(instance)
-	controllerutil.SetControllerReference(instance, ingress, r.Scheme)
-	if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
-		return err
+	if instance.Spec.NoVNCProxy.Ingress == nil {
+		// TODO ensure ingress does not exist
+	} else {
+		ingress := nova.NoVNCProxyIngress(instance)
+		controllerutil.SetControllerReference(instance, ingress, r.Scheme)
+		if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
+			return err
+		}
 	}
 
 	deploy := nova.NoVNCProxyDeployment(instance, envVars, volumes, containerImage)

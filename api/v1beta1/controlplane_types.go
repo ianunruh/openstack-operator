@@ -30,6 +30,9 @@ type ControlPlaneSpec struct {
 
 	Domain string `json:"domain"`
 
+	// +optional
+	Ingress ControlPlaneIngressSpec `json:"ingress"`
+
 	Broker   RabbitMQSpec  `json:"broker"`
 	Cache    MemcachedSpec `json:"cache"`
 	Database MariaDBSpec   `json:"database"`
@@ -41,6 +44,11 @@ type ControlPlaneSpec struct {
 	Nova      NovaSpec      `json:"nova"`
 	Neutron   NeutronSpec   `json:"neutron"`
 	Horizon   HorizonSpec   `json:"horizon"`
+}
+
+type ControlPlaneIngressSpec struct {
+	// +optional
+	Annotations map[string]string `json:"annotations"`
 }
 
 // ControlPlaneStatus defines the observed state of ControlPlane

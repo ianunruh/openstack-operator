@@ -9,6 +9,8 @@ import (
 func Glance(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Glance {
 	spec := instance.Spec.Glance
 
+	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "glance")
+
 	return &openstackv1beta1.Glance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "glance",

@@ -30,6 +30,7 @@ type PlacementSpec struct {
 
 	Image string `json:"image"`
 
+	// +optional
 	API PlacementAPISpec `json:"api"`
 
 	Database MariaDBDatabaseSpec `json:"database"`
