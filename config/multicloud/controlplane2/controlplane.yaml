@@ -8,17 +8,6 @@ spec:
     compute:
       nodeSelector:
         openstack/cloud: openstack2
-    cells:
-    - name: cell1
-      database:
-        name: nova_cell1
-        secret: nova-db-cell1
-        cluster: mariadb
-      broker:
-        name: nova-cell1
-        secret: nova-cell1-rabbitmq
-        cluster: rabbitmq
-        virtualHost: nova-cell1
   neutron:
     linuxBridgeAgent:
       nodeSelector:
