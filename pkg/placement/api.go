@@ -95,44 +95,7 @@ func APIService(instance *openstackv1beta1.Placement) *corev1.Service {
 func APIIngress(instance *openstackv1beta1.Placement) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
-	spec := instance.Spec.API.Ingress
+	name := template.Combine(instance.Name, "api")
 
-	prefixPathType := netv1.PathTypePrefix
-
-	svcName := template.Combine(instance.Name, "api")
-
-	ingress := &netv1.Ingress{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        template.Combine(instance.Name, "api"),
-			Namespace:   instance.Namespace,
-			Labels:      labels,
-			Annotations: spec.Annotations,
-		},
-		Spec: netv1.IngressSpec{
-			TLS: []netv1.IngressTLS{
-				{
-					SecretName: template.Combine(instance.Name, "api-ingress-tls"),
-					Hosts:      []string{spec.Host},
-				},
-			},
-			Rules: []netv1.IngressRule{
-				{
-					Host: spec.Host,
-					IngressRuleValue: netv1.IngressRuleValue{
-						HTTP: &netv1.HTTPIngressRuleValue{
-							Paths: []netv1.HTTPIngressPath{
-								{
-									PathType: &prefixPathType,
-									Path:     "/",
-									Backend:  template.IngressServiceBackend(svcName, "http"),
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-
-	return ingress
+	return template.GenericIngress(name, instance.Namespace, instance.Spec.API.Ingress, labels)
 }
