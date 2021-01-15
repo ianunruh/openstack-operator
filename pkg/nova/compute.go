@@ -12,7 +12,7 @@ const (
 	ComputeComponentLabel = "compute"
 )
 
-func ComputeDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumes []corev1.Volume) *appsv1.DaemonSet {
+func ComputeDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, ComputeComponentLabel)
 
 	runAsRootUser := int64(0)
@@ -32,6 +32,55 @@ func ComputeDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, 
 		template.HostPathVolume("host-sys-fs-cgroup", "/sys/fs/cgroup"),
 		template.HostPathVolume("host-var-lib-libvirt", "/var/lib/libvirt"),
 		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"),
+	}
+
+	extraVolumeMounts := []corev1.VolumeMount{
+		{
+			Name:      "etc-nova",
+			MountPath: "/etc/nova/nova.conf",
+			SubPath:   "nova.conf",
+		},
+		{
+			Name:      "pod-tmp",
+			MountPath: "/tmp",
+		},
+		{
+			Name:      "pod-shared",
+			MountPath: "/tmp/pod-shared",
+		},
+		{
+			Name:      "host-dev",
+			MountPath: "/dev",
+		},
+		{
+			Name:      "host-etc-machine-id",
+			MountPath: "/etc/machine-id",
+			ReadOnly:  true,
+		},
+		{
+			Name:      "host-lib-modules",
+			MountPath: "/lib/modules",
+			ReadOnly:  true,
+		},
+		{
+			Name:      "host-run",
+			MountPath: "/run",
+		},
+		{
+			Name:      "host-sys-fs-cgroup",
+			MountPath: "/sys/fs/cgroup",
+			ReadOnly:  true,
+		},
+		{
+			Name:             "host-var-lib-libvirt",
+			MountPath:        "/var/lib/libvirt",
+			MountPropagation: &mountPropagation,
+		},
+		{
+			Name:             "host-var-lib-nova",
+			MountPath:        "/var/lib/nova",
+			MountPropagation: &mountPropagation,
+		},
 	}
 
 	ds := template.GenericDaemonSet(template.Component{
@@ -84,54 +133,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, 
 					Privileged:             &privileged,
 					ReadOnlyRootFilesystem: &rootOnlyRootFilesystem,
 				},
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-nova",
-						MountPath: "/etc/nova/nova.conf",
-						SubPath:   "nova.conf",
-					},
-					{
-						Name:      "pod-tmp",
-						MountPath: "/tmp",
-					},
-					{
-						Name:      "pod-shared",
-						MountPath: "/tmp/pod-shared",
-					},
-					{
-						Name:      "host-dev",
-						MountPath: "/dev",
-					},
-					{
-						Name:      "host-etc-machine-id",
-						MountPath: "/etc/machine-id",
-						ReadOnly:  true,
-					},
-					{
-						Name:      "host-lib-modules",
-						MountPath: "/lib/modules",
-						ReadOnly:  true,
-					},
-					{
-						Name:      "host-run",
-						MountPath: "/run",
-					},
-					{
-						Name:      "host-sys-fs-cgroup",
-						MountPath: "/sys/fs/cgroup",
-						ReadOnly:  true,
-					},
-					{
-						Name:             "host-var-lib-libvirt",
-						MountPath:        "/var/lib/libvirt",
-						MountPropagation: &mountPropagation,
-					},
-					{
-						Name:             "host-var-lib-nova",
-						MountPath:        "/var/lib/nova",
-						MountPropagation: &mountPropagation,
-					},
-				},
+				VolumeMounts: append(volumeMounts, extraVolumeMounts...),
 			},
 		},
 		Volumes: append(volumes, extraVolumes...),

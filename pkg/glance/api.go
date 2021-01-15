@@ -8,6 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/rookceph"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -42,18 +43,9 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 		template.ConfigMapVolume("etc-glance", instance.Name, nil),
 	}
 
-	if instance.Spec.Storage.RookCeph != nil {
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      "etc-ceph",
-			SubPath:   "ceph.conf",
-			MountPath: "/etc/ceph/ceph.conf",
-		})
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      "etc-ceph",
-			SubPath:   "keyring",
-			MountPath: "/etc/ceph/keyring",
-		})
-		volumes = append(volumes, template.SecretVolume("etc-ceph", instance.Spec.Storage.RookCeph.Secret, nil))
+	if cephSpec := instance.Spec.Storage.RookCeph; cephSpec != nil {
+		volumeMounts = append(volumeMounts, rookceph.ClientVolumeMounts("etc-ceph")...)
+		volumes = append(volumes, template.SecretVolume("etc-ceph", cephSpec.Secret, nil))
 	} else if instance.Spec.Storage.Volume != nil {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      "images",

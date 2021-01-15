@@ -60,5 +60,25 @@ while [[ ! -e /var/run/libvirt/libvirt-sock ]]; do
   fi
 done
 
+if [ -n "${LIBVIRT_CEPH_CINDER_SECRET_UUID}" ] ; then
+  SECRET_XML_PATH=/tmp/libvirt-ceph-secret.xml
+
+  CEPH_CLIENT_KEY=$(awk '/key/{print $3}' /etc/ceph/keyring)
+
+  cat > $SECRET_XML_PATH <<EOF
+<secret ephemeral="no" private="no">
+  <uuid>${LIBVIRT_CEPH_CINDER_SECRET_UUID}</uuid>
+  <usage type="ceph">
+    <name>client.${CEPH_CINDER_USER} secret</name>
+  </usage>
+</secret>
+EOF
+
+  virsh secret-define --file ${SECRET_XML_PATH}
+  virsh secret-set-value --secret ${LIBVIRT_CEPH_CINDER_SECRET_UUID} --base64 ${CEPH_CLIENT_KEY}
+
+  rm $SECRET_XML_PATH
+fi
+
 # Rejoin libvirtd
 wait
