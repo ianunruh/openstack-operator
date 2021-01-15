@@ -94,44 +94,7 @@ func ServerService(instance *openstackv1beta1.Neutron) *corev1.Service {
 func ServerIngress(instance *openstackv1beta1.Neutron) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, ServerComponentLabel)
 
-	spec := instance.Spec.Server.Ingress
+	name := template.Combine(instance.Name, "server")
 
-	prefixPathType := netv1.PathTypePrefix
-
-	svcName := template.Combine(instance.Name, "server")
-
-	ingress := &netv1.Ingress{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        template.Combine(instance.Name, "server"),
-			Namespace:   instance.Namespace,
-			Labels:      labels,
-			Annotations: spec.Annotations,
-		},
-		Spec: netv1.IngressSpec{
-			TLS: []netv1.IngressTLS{
-				{
-					SecretName: template.Combine(instance.Name, "server-ingress-tls"),
-					Hosts:      []string{spec.Host},
-				},
-			},
-			Rules: []netv1.IngressRule{
-				{
-					Host: spec.Host,
-					IngressRuleValue: netv1.IngressRuleValue{
-						HTTP: &netv1.HTTPIngressRuleValue{
-							Paths: []netv1.HTTPIngressPath{
-								{
-									PathType: &prefixPathType,
-									Path:     "/",
-									Backend:  template.IngressServiceBackend(svcName, "http"),
-								},
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-
-	return ingress
+	return template.GenericIngress(name, instance.Namespace, instance.Spec.Server.Ingress, labels)
 }
