@@ -270,6 +270,84 @@ spec:
                 - image
                 - storage
                 type: object
+              heat:
+                description: HeatSpec defines the desired state of Heat
+                properties:
+                  api:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                  broker:
+                    description: RabbitMQUserSpec defines the desired state of RabbitMQUser
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                      virtualHost:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    - virtualHost
+                    type: object
+                  cfn:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                  database:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  engine:
+                    properties:
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                  image:
+                    type: string
+                required:
+                - broker
+                - database
+                - image
+                type: object
               horizon:
                 description: HorizonSpec defines the desired state of Horizon
                 properties:

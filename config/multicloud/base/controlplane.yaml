@@ -130,4 +130,14 @@ spec:
       virtualHost: openstack
   horizon:
     image: ianunruh/horizon:latest
-
+  heat:
+    image: ianunruh/heat:latest
+    database:
+      name: heat
+      secret: heat-db
+      cluster: mariadb
+    broker:
+      name: heat
+      secret: heat-rabbitmq
+      cluster: rabbitmq
+      virtualHost: openstack

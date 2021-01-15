@@ -30,6 +30,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/cinder"
 	"github.com/ianunruh/openstack-operator/pkg/controlplane"
 	"github.com/ianunruh/openstack-operator/pkg/glance"
+	"github.com/ianunruh/openstack-operator/pkg/heat"
 	"github.com/ianunruh/openstack-operator/pkg/horizon"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
@@ -132,6 +133,14 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	controllerutil.SetControllerReference(instance, dashboard, r.Scheme)
 	if err := horizon.EnsureHorizon(ctx, r.Client, dashboard, log); err != nil {
 		return ctrl.Result{}, err
+	}
+
+	if instance.Spec.Heat.Image != "" {
+		orchestration := controlplane.Heat(instance)
+		controllerutil.SetControllerReference(instance, orchestration, r.Scheme)
+		if err := heat.EnsureHeat(ctx, r.Client, orchestration, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	return ctrl.Result{}, nil
