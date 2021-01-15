@@ -34,6 +34,10 @@ func APIDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 		Namespace: instance.Namespace,
 		Labels:    labels,
 		Replicas:  instance.Spec.API.Replicas,
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
+		},
 		Containers: []corev1.Container{
 			{
 				Name:  "api",
