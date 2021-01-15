@@ -26,6 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -36,6 +37,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
+	"github.com/ianunruh/openstack-operator/pkg/rookceph"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -115,6 +117,36 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	configHash := template.AppliedHash(cm)
 
+	if instance.Spec.Volume.Storage.RookCeph != nil {
+		// TODO make this configurable, but for now this assumes that if Ceph is enabled
+		// for Cinder, then it is also enabled for Glance.
+		glance := &openstackv1beta1.Glance{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "glance",
+				Namespace: instance.Namespace,
+			},
+		}
+		if err := r.Client.Get(ctx, client.ObjectKeyFromObject(glance), glance); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		resources := cinder.RookCephResources(instance, glance.Spec.Storage.RookCeph.PoolName)
+		for _, resource := range resources {
+			if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+
+		spec := instance.Spec.Volume.Storage.RookCeph
+		secret, err := rookceph.ClientSecret(r.Client, instance.Namespace, spec.Secret, spec.Namespace, spec.ClientName)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	envVars := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
@@ -145,6 +177,10 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 
 	if err := r.reconcileScheduler(ctx, instance, envVars, volumes, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := r.reconcileVolume(ctx, instance, envVars, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -187,6 +223,22 @@ func (r *CinderReconciler) reconcileScheduler(ctx context.Context, instance *ope
 	}
 
 	sts := cinder.SchedulerStatefulSet(instance, envVars, volumes)
+	controllerutil.SetControllerReference(instance, sts, r.Scheme)
+	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *CinderReconciler) reconcileVolume(ctx context.Context, instance *openstackv1beta1.Cinder, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	svc := cinder.VolumeService(instance)
+	controllerutil.SetControllerReference(instance, svc, r.Scheme)
+	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
+		return err
+	}
+
+	sts := cinder.VolumeStatefulSet(instance, envVars, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err

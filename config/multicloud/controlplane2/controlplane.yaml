@@ -4,6 +4,17 @@ metadata:
   name: default
 spec:
   domain: openstack2.kcloud.zone
+  cinder:
+    volume:
+      storage:
+        rookCeph:
+          clientName: openstack2-cinder
+          poolName: openstack2-cinder-volumes
+  glance:
+    storage:
+      rookCeph:
+        clientName: openstack2-glance
+        poolName: openstack2-glance-images
   nova:
     compute:
       nodeSelector:

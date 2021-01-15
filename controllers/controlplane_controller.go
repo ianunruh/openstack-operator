@@ -108,10 +108,12 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
-	volume := controlplane.Cinder(instance)
-	controllerutil.SetControllerReference(instance, volume, r.Scheme)
-	if err := cinder.EnsureCinder(ctx, r.Client, volume, log); err != nil {
-		return ctrl.Result{}, err
+	if instance.Spec.Cinder.Volume.Storage.RookCeph != nil {
+		volume := controlplane.Cinder(instance)
+		controllerutil.SetControllerReference(instance, volume, r.Scheme)
+		if err := cinder.EnsureCinder(ctx, r.Client, volume, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	compute := controlplane.Nova(instance)

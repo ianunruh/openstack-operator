@@ -10,6 +10,7 @@ import (
 	"text/template"
 
 	"github.com/go-logr/logr"
+	"gopkg.in/ini.v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
@@ -17,6 +18,12 @@ import (
 )
 
 var decUnstructured = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+
+func init() {
+	// pretty much all OpenStack configs need the explicit default section
+	// header, and this package only has one way of doing that
+	ini.DefaultHeader = true
+}
 
 func RenderFile(app, filename string, values interface{}) (string, error) {
 	basePath := os.Getenv("OPERATOR_TEMPLATES")
@@ -105,4 +112,24 @@ func EnsureResource(ctx context.Context, c client.Client, instance *unstructured
 	}
 
 	return nil
+}
+
+func MustOutputINI(file *ini.File) *bytes.Buffer {
+	cfgOut := &bytes.Buffer{}
+	if _, err := file.WriteTo(cfgOut); err != nil {
+		panic(err)
+	}
+	return cfgOut
+}
+
+func MustLoadINI(encoded string) *ini.File {
+	file, err := ini.Load([]byte(encoded))
+	if err != nil {
+		panic(err)
+	}
+	return file
+}
+
+func MustLoadINITemplate(app, filename string, values interface{}) *ini.File {
+	return MustLoadINI(MustRenderFile(app, filename, values))
 }

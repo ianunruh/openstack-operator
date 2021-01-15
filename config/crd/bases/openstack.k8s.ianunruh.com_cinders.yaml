@@ -92,6 +92,36 @@ spec:
                     format: int32
                     type: integer
                 type: object
+              volume:
+                properties:
+                  replicas:
+                    format: int32
+                    type: integer
+                  storage:
+                    properties:
+                      rookCeph:
+                        properties:
+                          clientName:
+                            type: string
+                          deviceClass:
+                            type: string
+                          namespace:
+                            type: string
+                          poolName:
+                            type: string
+                          replicatedSize:
+                            type: integer
+                          secret:
+                            type: string
+                        required:
+                        - replicatedSize
+                        type: object
+                    required:
+                    - rookCeph
+                    type: object
+                required:
+                - storage
+                type: object
             required:
             - broker
             - database

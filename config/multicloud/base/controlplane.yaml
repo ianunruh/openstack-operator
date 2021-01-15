@@ -36,12 +36,24 @@ spec:
       secret: glance-db
       cluster: mariadb
     storage:
-      volume:
-        capacity: 100Gi
-        storageClass: ceph-fs-ssd
-        accessModes: [ReadWriteMany]
+      rookCeph:
+        namespace: rook-ceph
+        clientName: openstack-glance
+        secret: glance-ceph
+        poolName: openstack-glance-images
+        deviceClass: ssd
+        replicatedSize: 2
   cinder:
     image: ianunruh/cinder:latest
+    volume:
+      storage:
+        rookCeph:
+          namespace: rook-ceph
+          clientName: openstack-cinder
+          secret: cinder-ceph
+          poolName: openstack-cinder-volumes
+          deviceClass: ssd
+          replicatedSize: 2
     database:
       name: cinder
       secret: cinder-db

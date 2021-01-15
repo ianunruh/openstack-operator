@@ -21,7 +21,17 @@ func ConfigMap(instance *openstackv1beta1.Cinder) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["cinder.conf"] = template.MustRenderFile(AppLabel, "cinder.conf", nil)
+	cfg := template.MustLoadINITemplate(AppLabel, "cinder.conf", nil)
+
+	cephSpec := instance.Spec.Volume.Storage.RookCeph
+	if cephSpec != nil {
+		cfg.Section("").NewKey("enabled_backends", "ceph")
+
+		cfg.Section("ceph").NewKey("rbd_pool", cephSpec.PoolName)
+		cfg.Section("ceph").NewKey("rbd_user", cephSpec.ClientName)
+	}
+
+	cm.Data["cinder.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm
 }

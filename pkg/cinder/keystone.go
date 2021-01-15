@@ -15,6 +15,7 @@ func KeystoneServices(instance *openstackv1beta1.Cinder) []*openstackv1beta1.Key
 	return []*openstackv1beta1.KeystoneService{
 		{
 			ObjectMeta: metav1.ObjectMeta{
+				// TODO it appears that v2 is deprecated now and this can probs be removed
 				Name:      template.Combine(instance.Name, "v2"),
 				Namespace: instance.Namespace,
 				Labels:    labels,

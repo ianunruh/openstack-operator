@@ -1,12 +1,10 @@
 package glance
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 
 	"github.com/go-logr/logr"
-	"gopkg.in/ini.v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -23,30 +21,20 @@ func ConfigMap(instance *openstackv1beta1.Glance) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cfg := template.MustRenderFile(AppLabel, "glance-api.conf", nil)
-	cfgFile, err := ini.Load([]byte(cfg))
-	if err != nil {
-		panic(err)
-	}
+	cfg := template.MustLoadINITemplate(AppLabel, "glance-api.conf", nil)
 
 	cephSpec := instance.Spec.Storage.RookCeph
 	if cephSpec != nil {
-		cfgFile.Section("").NewKey("enabled_backends", "ceph:rbd")
-		// cfgFile.Section("").NewKey("show_image_direct_url", "true")
+		cfg.Section("").NewKey("enabled_backends", "ceph:rbd")
+		// cfg.Section("").NewKey("show_image_direct_url", "true")
 
-		cfgFile.Section("glance_store").NewKey("default_backend", "ceph")
+		cfg.Section("glance_store").NewKey("default_backend", "ceph")
 
-		cfgFile.Section("ceph").NewKey("rbd_store_pool", cephSpec.PoolName)
-		cfgFile.Section("ceph").NewKey("rbd_store_user", cephSpec.ClientName)
+		cfg.Section("ceph").NewKey("rbd_store_pool", cephSpec.PoolName)
+		cfg.Section("ceph").NewKey("rbd_store_user", cephSpec.ClientName)
 	}
 
-	ini.DefaultHeader = true
-	cfgOut := &bytes.Buffer{}
-	if _, err := cfgFile.WriteTo(cfgOut); err != nil {
-		panic(err)
-	}
-
-	cm.Data["glance-api.conf"] = cfgOut.String()
+	cm.Data["glance-api.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm
 }

@@ -94,7 +94,7 @@ Visit the OpenStack dashboard in your browser
 
 ```
 # Visit this hostname with /horizon appended
-kubectl get controlplane default -o 'jsonpath={.spec.horizon.server.ingress.host}'
+kubectl get horizon horizon -o 'jsonpath={.spec.server.ingress.host}'
 
 # The domain is "default" and the admin password can be retrieved with
 kubectl get secret keystone -o 'jsonpath={.data.OS_PASSWORD}' | base64 -d

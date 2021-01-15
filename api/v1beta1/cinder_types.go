@@ -36,6 +36,9 @@ type CinderSpec struct {
 	// +optional
 	Scheduler CinderSchedulerSpec `json:"scheduler"`
 
+	// +optional
+	Volume CinderVolumeSpec `json:"volume"`
+
 	Database MariaDBDatabaseSpec `json:"database"`
 
 	Broker RabbitMQUserSpec `json:"broker"`
@@ -50,6 +53,17 @@ type CinderAPISpec struct {
 type CinderSchedulerSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas"`
+}
+
+type CinderVolumeSpec struct {
+	// +optional
+	Replicas int32 `json:"replicas"`
+
+	Storage CinderVolumeStorageSpec `json:"storage"`
+}
+
+type CinderVolumeStorageSpec struct {
+	RookCeph *RookCephSpec `json:"rookCeph"`
 }
 
 // CinderStatus defines the observed state of Cinder
