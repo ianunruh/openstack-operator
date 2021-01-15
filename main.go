@@ -206,6 +206,14 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Cinder")
 		os.Exit(1)
 	}
+	if err = (&controllers.HeatReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("Heat"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Heat")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {

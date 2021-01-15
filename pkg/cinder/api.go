@@ -19,8 +19,6 @@ const (
 func APIDeployment(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
-	env = append(env, template.EnvVar("OS_DEFAULT__ENABLED_APIS", "osapi_compute"))
-
 	probe := &corev1.Probe{
 		Handler: corev1.Handler{
 			HTTPGet: &corev1.HTTPGetAction{
