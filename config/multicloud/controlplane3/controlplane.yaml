@@ -4,6 +4,16 @@ metadata:
   name: default
 spec:
   domain: openstack3.kcloud.zone
+  glance:
+    storage:
+      rookCeph:
+        namespace: rook-ceph
+        clientName: openstack3-glance
+        secret: glance-ceph
+        poolName: openstack3-glance-images
+        deviceClass: ssd
+        replicatedSize: 2
+      volume: null
   nova:
     compute:
       nodeSelector:

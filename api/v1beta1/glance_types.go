@@ -39,7 +39,10 @@ type GlanceSpec struct {
 }
 
 type GlanceStorageSpec struct {
-	Volume VolumeSpec `json:"volume"`
+	// +optional
+	RookCeph *RookCephSpec `json:"rookCeph"`
+	// +optional
+	Volume *VolumeSpec `json:"volume"`
 }
 
 type GlanceAPISpec struct {

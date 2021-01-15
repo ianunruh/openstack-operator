@@ -1,0 +1,8 @@
+apiVersion: ceph.rook.io/v1
+kind: CephClient
+metadata:
+  name: {{ .Name }}
+spec:
+  caps:
+    mon: {{ .Caps.mon }}
+    osd: {{ .Caps.osd }}

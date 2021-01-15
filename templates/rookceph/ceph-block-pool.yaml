@@ -1,0 +1,8 @@
+apiVersion: ceph.rook.io/v1
+kind: CephBlockPool
+metadata:
+  name: {{ .Name }}
+spec:
+  failureDomain: {{ .FailureDomain }}
+  replicated:
+    size: {{ .ReplicatedSize }}

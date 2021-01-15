@@ -208,6 +208,23 @@ spec:
                     type: string
                   storage:
                     properties:
+                      rookCeph:
+                        properties:
+                          clientName:
+                            type: string
+                          deviceClass:
+                            type: string
+                          namespace:
+                            type: string
+                          poolName:
+                            type: string
+                          replicatedSize:
+                            type: integer
+                          secret:
+                            type: string
+                        required:
+                        - replicatedSize
+                        type: object
                       volume:
                         properties:
                           accessModes:
@@ -221,8 +238,6 @@ spec:
                         required:
                         - capacity
                         type: object
-                    required:
-                    - volume
                     type: object
                 required:
                 - database

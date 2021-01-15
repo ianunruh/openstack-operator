@@ -28,10 +28,48 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 		},
 	}
 
+	runAsUser := int64(64062)
+
+	volumeMounts := []corev1.VolumeMount{
+		{
+			Name:      "etc-glance",
+			SubPath:   "glance-api.conf",
+			MountPath: "/etc/glance/glance-api.conf",
+		},
+	}
+
+	volumes := []corev1.Volume{
+		template.ConfigMapVolume("etc-glance", instance.Name, nil),
+	}
+
+	if instance.Spec.Storage.RookCeph != nil {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      "etc-ceph",
+			SubPath:   "ceph.conf",
+			MountPath: "/etc/ceph/ceph.conf",
+		})
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      "etc-ceph",
+			SubPath:   "keyring",
+			MountPath: "/etc/ceph/keyring",
+		})
+		volumes = append(volumes, template.SecretVolume("etc-ceph", instance.Spec.Storage.RookCeph.Secret, nil))
+	} else if instance.Spec.Storage.Volume != nil {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      "images",
+			MountPath: "/var/lib/glance/images",
+		})
+		volumes = append(volumes, template.PersistentVolume("images", instance.Name))
+	}
+
 	deploy := template.GenericDeployment(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
 		Replicas:  instance.Spec.API.Replicas,
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &runAsUser,
+			FSGroup:   &runAsUser,
+		},
 		Containers: []corev1.Container{
 			{
 				Name:  "api",
@@ -50,23 +88,10 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 				},
 				LivenessProbe:  probe,
 				ReadinessProbe: probe,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-glance",
-						SubPath:   "glance-api.conf",
-						MountPath: "/etc/glance/glance-api.conf",
-					},
-					{
-						Name:      "images",
-						MountPath: "/var/lib/glance/images",
-					},
-				},
+				VolumeMounts:   volumeMounts,
 			},
 		},
-		Volumes: []corev1.Volume{
-			template.ConfigMapVolume("etc-glance", instance.Name, nil),
-			template.PersistentVolume("images", instance.Name),
-		},
+		Volumes: volumes,
 	})
 
 	deploy.Name = template.Combine(instance.Name, "api")
