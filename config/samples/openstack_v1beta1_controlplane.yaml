@@ -3,7 +3,11 @@ kind: ControlPlane
 metadata:
   name: default
 spec:
-  domain: openstack2.kcloud.zone
+  domain: openstack.kcloud.zone
+  ingress:
+    annotations:
+      external-dns/enabled: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
   broker:
     image: docker.io/bitnami/rabbitmq:3.8.9-debian-10-r58
     volume:
@@ -22,24 +26,13 @@ spec:
   keystone:
     image: ianunruh/keystone:latest
     api:
-      ingress:
-        host: keystone.openstack2.kcloud.zone
-        annotations:
-          external-dns/enabled: "true"
-          cert-manager.io/cluster-issuer: letsencrypt-prod
+      replicas: 2
     database:
       name: keystone
       secret: keystone-db
       cluster: mariadb
   glance:
     image: ianunruh/glance:latest
-    api:
-      ingress:
-        host: glance.openstack2.kcloud.zone
-        annotations:
-          external-dns/enabled: "true"
-          cert-manager.io/cluster-issuer: letsencrypt-prod
-          nginx.ingress.kubernetes.io/proxy-body-size: "0"
     database:
       name: glance
       secret: glance-db
@@ -49,43 +42,14 @@ spec:
         capacity: 100Gi
         storageClass: ceph-fs-ssd
         accessModes: [ReadWriteMany]
-  cinder:
-    image: ianunruh/cinder:latest
-    api:
-      ingress:
-        host: cinder.openstack2.kcloud.zone
-        annotations:
-          external-dns/enabled: "true"
-          cert-manager.io/cluster-issuer: letsencrypt-prod
-    database:
-      name: cinder
-      secret: cinder-db
-      cluster: mariadb
-    broker:
-      name: cinder
-      secret: cinder-rabbitmq
-      cluster: rabbitmq
-      virtualHost: openstack
   placement:
     image: ianunruh/placement:latest
-    api:
-      ingress:
-        host: placement.openstack2.kcloud.zone
-        annotations:
-          external-dns/enabled: "true"
-          cert-manager.io/cluster-issuer: letsencrypt-prod
     database:
       name: placement
       secret: placement-db
       cluster: mariadb
   nova:
     image: ianunruh/nova:latest
-    api:
-      ingress:
-        host: nova.openstack2.kcloud.zone
-        annotations:
-          external-dns/enabled: "true"
-          cert-manager.io/cluster-issuer: letsencrypt-prod
     cells:
     - name: cell1
       database:
@@ -97,16 +61,11 @@ spec:
         secret: nova-cell1-rabbitmq
         cluster: rabbitmq
         virtualHost: nova-cell1
-      novncproxy:
-        ingress:
-          host: novnc.openstack2.kcloud.zone
-          annotations:
-            external-dns/enabled: "true"
-            cert-manager.io/cluster-issuer: letsencrypt-prod
     libvirtd:
       image: ianunruh/libvirtd:latest
     compute:
       nodeSelector:
+        openstack/cloud: openstack
         openstack/compute-node: enabled
     apiDatabase:
       name: nova_api
@@ -123,23 +82,21 @@ spec:
       virtualHost: openstack
   neutron:
     image: ianunruh/neutron:latest
-    server:
-      ingress:
-        host: neutron.openstack2.kcloud.zone
-        annotations:
-          external-dns/enabled: "true"
-          cert-manager.io/cluster-issuer: letsencrypt-prod
     linuxBridgeAgent:
       nodeSelector:
+        openstack/cloud: openstack
         openstack/network-agent: linuxbridge
     dhcpAgent:
       nodeSelector:
+        openstack/cloud: openstack
         openstack/network-node: enabled
     l3Agent:
       nodeSelector:
+        openstack/cloud: openstack
         openstack/network-node: enabled
     metadataAgent:
       nodeSelector:
+        openstack/cloud: openstack
         openstack/network-node: enabled
     database:
       name: neutron
@@ -152,11 +109,4 @@ spec:
       virtualHost: openstack
   horizon:
     image: ianunruh/horizon:latest
-    server:
-      ingress:
-        host: horizon.openstack2.kcloud.zone
-        annotations:
-          external-dns/enabled: "true"
-          cert-manager.io/cluster-issuer: letsencrypt-prod
-          nginx.ingress.kubernetes.io/proxy-body-size: "0"
 

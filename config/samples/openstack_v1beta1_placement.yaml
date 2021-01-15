@@ -3,7 +3,7 @@ kind: Placement
 metadata:
   name: placement
 spec:
-  image: registry.kcloud.zone/ops/placement:286f670e
+  image: ianunruh/placement:latest
   api:
     replicas: 2
     ingress:

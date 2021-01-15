@@ -54,8 +54,9 @@ type NovaSpec struct {
 
 type NovaAPISpec struct {
 	// +optional
-	Replicas int32        `json:"replicas"`
-	Ingress  *IngressSpec `json:"ingress"`
+	Replicas int32 `json:"replicas"`
+	// +optional
+	Ingress *IngressSpec `json:"ingress"`
 }
 
 type NovaConductorSpec struct {
@@ -70,8 +71,9 @@ type NovaMetadataSpec struct {
 
 type NovaNoVNCProxySpec struct {
 	// +optional
-	Replicas int32        `json:"replicas"`
-	Ingress  *IngressSpec `json:"ingress"`
+	Replicas int32 `json:"replicas"`
+	// +optional
+	Ingress *IngressSpec `json:"ingress"`
 }
 
 type NovaSchedulerSpec struct {

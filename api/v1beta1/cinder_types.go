@@ -46,8 +46,9 @@ type CinderSpec struct {
 
 type CinderAPISpec struct {
 	// +optional
-	Replicas int32        `json:"replicas"`
-	Ingress  *IngressSpec `json:"ingress"`
+	Replicas int32 `json:"replicas"`
+	// +optional
+	Ingress *IngressSpec `json:"ingress"`
 }
 
 type CinderSchedulerSpec struct {

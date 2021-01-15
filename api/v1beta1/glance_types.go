@@ -47,8 +47,9 @@ type GlanceStorageSpec struct {
 
 type GlanceAPISpec struct {
 	// +optional
-	Replicas int32        `json:"replicas"`
-	Ingress  *IngressSpec `json:"ingress"`
+	Replicas int32 `json:"replicas"`
+	// +optional
+	Ingress *IngressSpec `json:"ingress"`
 }
 
 // GlanceStatus defines the observed state of Glance

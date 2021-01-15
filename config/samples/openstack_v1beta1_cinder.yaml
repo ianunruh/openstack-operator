@@ -3,7 +3,7 @@ kind: Cinder
 metadata:
   name: cinder
 spec:
-  image: registry.kcloud.zone/ops/cinder:f07a994f
+  image: ianunruh/cinder:latest
   api:
     replicas: 2
     ingress:

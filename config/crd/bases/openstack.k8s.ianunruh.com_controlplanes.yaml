@@ -97,8 +97,6 @@ spec:
                       replicas:
                         format: int32
                         type: integer
-                    required:
-                    - ingress
                     type: object
                   broker:
                     description: RabbitMQUserSpec defines the desired state of RabbitMQUser
@@ -216,8 +214,6 @@ spec:
                       replicas:
                         format: int32
                         type: integer
-                    required:
-                    - ingress
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -293,8 +289,6 @@ spec:
                       replicas:
                         format: int32
                         type: integer
-                    required:
-                    - ingress
                     type: object
                 required:
                 - image
@@ -323,8 +317,6 @@ spec:
                       replicas:
                         format: int32
                         type: integer
-                    required:
-                    - ingress
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -434,8 +426,6 @@ spec:
                       replicas:
                         format: int32
                         type: integer
-                    required:
-                    - ingress
                     type: object
                 required:
                 - broker
@@ -463,8 +453,6 @@ spec:
                       replicas:
                         format: int32
                         type: integer
-                    required:
-                    - ingress
                     type: object
                   apiDatabase:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -578,8 +566,6 @@ spec:
                             replicas:
                               format: int32
                               type: integer
-                          required:
-                          - ingress
                           type: object
                       required:
                       - broker
@@ -643,8 +629,6 @@ spec:
                       replicas:
                         format: int32
                         type: integer
-                    required:
-                    - ingress
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -670,7 +654,6 @@ spec:
             required:
             - broker
             - cache
-            - cinder
             - database
             - domain
             - glance

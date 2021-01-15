@@ -119,8 +119,6 @@ spec:
                   replicas:
                     format: int32
                     type: integer
-                required:
-                - ingress
                 type: object
             required:
             - broker

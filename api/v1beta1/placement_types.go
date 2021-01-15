@@ -38,8 +38,9 @@ type PlacementSpec struct {
 
 type PlacementAPISpec struct {
 	// +optional
-	Replicas int32        `json:"replicas"`
-	Ingress  *IngressSpec `json:"ingress"`
+	Replicas int32 `json:"replicas"`
+	// +optional
+	Ingress *IngressSpec `json:"ingress"`
 }
 
 // PlacementStatus defines the observed state of Placement

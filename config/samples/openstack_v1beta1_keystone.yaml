@@ -3,7 +3,7 @@ kind: Keystone
 metadata:
   name: keystone
 spec:
-  image: registry.kcloud.zone/ops/keystone:37a47821
+  image: ianunruh/keystone:latest
   api:
     replicas: 2
     ingress:

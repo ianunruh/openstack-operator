@@ -3,7 +3,7 @@ kind: Neutron
 metadata:
   name: neutron
 spec:
-  image: registry.kcloud.zone/ops/neutron:9b559abf
+  image: ianunruh/neutron:latest
   server:
     replicas: 2
     ingress:

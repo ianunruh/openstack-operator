@@ -45,8 +45,9 @@ type NeutronSpec struct {
 
 type NeutronServerSpec struct {
 	// +optional
-	Replicas int32        `json:"replicas"`
-	Ingress  *IngressSpec `json:"ingress"`
+	Replicas int32 `json:"replicas"`
+	// +optional
+	Ingress *IngressSpec `json:"ingress"`
 }
 
 type NeutronLinuxBridgeAgentSpec struct {

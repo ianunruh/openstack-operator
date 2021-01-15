@@ -40,10 +40,11 @@ type ControlPlaneSpec struct {
 	Keystone  KeystoneSpec  `json:"keystone"`
 	Glance    GlanceSpec    `json:"glance"`
 	Placement PlacementSpec `json:"placement"`
-	Cinder    CinderSpec    `json:"cinder"`
-	Nova      NovaSpec      `json:"nova"`
-	Neutron   NeutronSpec   `json:"neutron"`
-	Horizon   HorizonSpec   `json:"horizon"`
+	// +optional
+	Cinder  CinderSpec  `json:"cinder"`
+	Nova    NovaSpec    `json:"nova"`
+	Neutron NeutronSpec `json:"neutron"`
+	Horizon HorizonSpec `json:"horizon"`
 }
 
 type ControlPlaneIngressSpec struct {

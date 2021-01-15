@@ -36,8 +36,9 @@ type HorizonSpec struct {
 
 type HorizonServerSpec struct {
 	// +optional
-	Replicas int32        `json:"replicas"`
-	Ingress  *IngressSpec `json:"ingress"`
+	Replicas int32 `json:"replicas"`
+	// +optional
+	Ingress *IngressSpec `json:"ingress"`
 }
 
 // HorizonStatus defines the observed state of Horizon

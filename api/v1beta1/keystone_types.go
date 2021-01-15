@@ -38,8 +38,9 @@ type KeystoneSpec struct {
 
 type KeystoneAPISpec struct {
 	// +optional
-	Replicas int32        `json:"replicas"`
-	Ingress  *IngressSpec `json:"ingress"`
+	Replicas int32 `json:"replicas"`
+	// +optional
+	Ingress *IngressSpec `json:"ingress"`
 }
 
 // KeystoneStatus defines the observed state of Keystone

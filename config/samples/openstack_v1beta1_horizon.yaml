@@ -3,7 +3,7 @@ kind: Horizon
 metadata:
   name: horizon
 spec:
-  image: registry.kcloud.zone/ops/horizon:af7b46c8
+  image: ianunruh/horizon:latest
   server:
     replicas: 2
     ingress:

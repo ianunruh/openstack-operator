@@ -50,8 +50,6 @@ spec:
                   replicas:
                     format: int32
                     type: integer
-                required:
-                - ingress
                 type: object
               database:
                 description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase

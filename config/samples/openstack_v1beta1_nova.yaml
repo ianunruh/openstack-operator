@@ -3,7 +3,7 @@ kind: Nova
 metadata:
   name: nova
 spec:
-  image: registry.kcloud.zone/ops/nova:3173da3b
+  image: ianunruh/nova:latest
   api:
     replicas: 2
     ingress:
@@ -14,7 +14,7 @@ spec:
   scheduler:
     replicas: 2
   libvirtd:
-    image: registry.kcloud.zone/ops/libvirt:4495c89d
+    image: ianunruh/libvirtd:latest
   compute:
     nodeSelector:
       openstack/compute-node: enabled
