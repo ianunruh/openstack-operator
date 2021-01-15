@@ -17,6 +17,10 @@ const (
 	AppLabel = "cinder"
 )
 
+var (
+	appUID = int64(64061)
+)
+
 func ConfigMap(instance *openstackv1beta1.Cinder) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)

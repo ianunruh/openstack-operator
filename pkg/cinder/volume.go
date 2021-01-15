@@ -16,8 +16,6 @@ const (
 func VolumeStatefulSet(instance *openstackv1beta1.Cinder, envVars []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, VolumeComponentLabel)
 
-	runAsUser := int64(64061)
-
 	volumeMounts := []corev1.VolumeMount{
 		{
 			Name:      "etc-cinder",
@@ -45,8 +43,8 @@ func VolumeStatefulSet(instance *openstackv1beta1.Cinder, envVars []corev1.EnvVa
 		Labels:    labels,
 		Replicas:  instance.Spec.Volume.Replicas,
 		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &runAsUser,
-			FSGroup:   &runAsUser,
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Containers: []corev1.Container{
 			{
