@@ -27,6 +27,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -37,6 +38,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 	"github.com/ianunruh/openstack-operator/pkg/nova"
 	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
+	"github.com/ianunruh/openstack-operator/pkg/rookceph"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -114,6 +116,20 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
+	cinder := &openstackv1beta1.Cinder{
+		// TODO make this configurable
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "cinder",
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cinder), cinder); err != nil {
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		cinder = nil
+	}
+
 	cm := nova.ConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
 	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
@@ -183,11 +199,11 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileLibvirtd(ctx, instance, log); err != nil {
+	if err := r.reconcileLibvirtd(ctx, instance, cinder, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileCompute(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileCompute(ctx, instance, cinder, envVars, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -254,7 +270,7 @@ func (r *NovaReconciler) reconcileScheduler(ctx context.Context, instance *opens
 	return nil
 }
 
-func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openstackv1beta1.Nova, log logr.Logger) error {
+func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder, log logr.Logger) error {
 	cm := nova.LibvirtdConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
 	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
@@ -262,7 +278,25 @@ func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openst
 	}
 	configHash := template.AppliedHash(cm)
 
-	ds := nova.LibvirtdDaemonSet(instance, configHash)
+	envVars := []corev1.EnvVar{
+		template.EnvVar("CONFIG_HASH", configHash),
+	}
+
+	var (
+		volumeMounts []corev1.VolumeMount
+		volumes      []corev1.Volume
+	)
+
+	if cinder != nil {
+		if cephSpec := cinder.Spec.Volume.Storage.RookCeph; cephSpec != nil {
+			volumeMounts = append(volumeMounts, rookceph.ClientVolumeMounts("etc-ceph")...)
+			volumes = append(volumes, template.SecretVolume("etc-ceph", cephSpec.Secret, nil))
+			envVars = append(envVars, template.EnvVar("LIBVIRT_CEPH_CINDER_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
+			envVars = append(envVars, template.EnvVar("CEPH_CINDER_USER", cephSpec.ClientName))
+		}
+	}
+
+	ds := nova.LibvirtdDaemonSet(instance, envVars, volumeMounts, volumes)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err
@@ -271,7 +305,7 @@ func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openst
 	return nil
 }
 
-func (r *NovaReconciler) reconcileCompute(ctx context.Context, instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NovaReconciler) reconcileCompute(ctx context.Context, instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	// TODO make this configurable
 	cell := instance.Spec.Cells[0]
 
@@ -281,9 +315,20 @@ func (r *NovaReconciler) reconcileCompute(ctx context.Context, instance *opensta
 		template.EnvVar("OS_VNC__NOVNCPROXY_BASE_URL", fmt.Sprintf("https://%s/vnc_auto.html", cell.NoVNCProxy.Ingress.Host)),
 	}
 
+	var volumeMounts []corev1.VolumeMount
+
+	if cinder != nil {
+		if cephSpec := cinder.Spec.Volume.Storage.RookCeph; cephSpec != nil {
+			volumeMounts = append(volumeMounts, rookceph.ClientVolumeMounts("etc-ceph")...)
+			volumes = append(volumes, template.SecretVolume("etc-ceph", cephSpec.Secret, nil))
+			envVars = append(envVars, template.EnvVar("OS_LIBVIRT__RBD_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
+			envVars = append(envVars, template.EnvVar("OS_LIBVIRT__RBD_USER", cephSpec.ClientName))
+		}
+	}
+
 	envVars = append(envVars, extraEnvVars...)
 
-	ds := nova.ComputeDaemonSet(instance, envVars, volumes)
+	ds := nova.ComputeDaemonSet(instance, envVars, volumeMounts, volumes)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err

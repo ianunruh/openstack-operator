@@ -6,6 +6,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/rookceph"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -24,18 +25,9 @@ func VolumeStatefulSet(instance *openstackv1beta1.Cinder, envVars []corev1.EnvVa
 		},
 	}
 
-	if instance.Spec.Volume.Storage.RookCeph != nil {
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      "etc-ceph",
-			SubPath:   "ceph.conf",
-			MountPath: "/etc/ceph/ceph.conf",
-		})
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      "etc-ceph",
-			SubPath:   "keyring",
-			MountPath: "/etc/ceph/keyring",
-		})
-		volumes = append(volumes, template.SecretVolume("etc-ceph", instance.Spec.Volume.Storage.RookCeph.Secret, nil))
+	if cephSpec := instance.Spec.Volume.Storage.RookCeph; cephSpec != nil {
+		volumeMounts = append(volumeMounts, rookceph.ClientVolumeMounts("etc-ceph")...)
+		volumes = append(volumes, template.SecretVolume("etc-ceph", cephSpec.Secret, nil))
 	}
 
 	sts := template.GenericStatefulSet(template.Component{
