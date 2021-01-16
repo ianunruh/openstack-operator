@@ -417,6 +417,69 @@ spec:
                 - database
                 - image
                 type: object
+              magnum:
+                description: MagnumSpec defines the desired state of Magnum
+                properties:
+                  api:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                  broker:
+                    description: RabbitMQUserSpec defines the desired state of RabbitMQUser
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                      virtualHost:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    - virtualHost
+                    type: object
+                  conductor:
+                    properties:
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                  database:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  image:
+                    type: string
+                required:
+                - broker
+                - database
+                - image
+                type: object
               neutron:
                 description: NeutronSpec defines the desired state of Neutron
                 properties:

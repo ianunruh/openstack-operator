@@ -19,6 +19,7 @@ resources:
 - bases/openstack.k8s.ianunruh.com_memcacheds.yaml
 - bases/openstack.k8s.ianunruh.com_cinders.yaml
 - bases/openstack.k8s.ianunruh.com_heats.yaml
+- bases/openstack.k8s.ianunruh.com_magnums.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
@@ -41,6 +42,7 @@ patchesStrategicMerge:
 #- patches/webhook_in_memcacheds.yaml
 #- patches/webhook_in_cinders.yaml
 #- patches/webhook_in_heats.yaml
+#- patches/webhook_in_magnums.yaml
 # +kubebuilder:scaffold:crdkustomizewebhookpatch
 
 # [CERTMANAGER] To enable webhook, uncomment all the sections with [CERTMANAGER] prefix.
@@ -62,6 +64,7 @@ patchesStrategicMerge:
 #- patches/cainjection_in_memcacheds.yaml
 #- patches/cainjection_in_cinders.yaml
 #- patches/cainjection_in_heats.yaml
+#- patches/cainjection_in_magnums.yaml
 # +kubebuilder:scaffold:crdkustomizecainjectionpatch
 
 # the following config is for teaching kustomize how to do kustomization for CRDs.

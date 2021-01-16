@@ -58,6 +58,8 @@ kubectl label node compute7 \
 Use the supplied `openrc` file with the Python CLI client.
 
 ```
+pip install osc-placement python-heatclient python-magnumclient python-openstackclient
+
 source openrc
 
 openstack token issue
@@ -68,6 +70,8 @@ openstack compute service list
 openstack hypervisor list
 openstack network agent list
 openstack volume service list
+openstack orchestration service list
+openstack coe service list
 ```
 
 Launch an instance

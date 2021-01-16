@@ -33,6 +33,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/heat"
 	"github.com/ianunruh/openstack-operator/pkg/horizon"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
+	"github.com/ianunruh/openstack-operator/pkg/magnum"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 	"github.com/ianunruh/openstack-operator/pkg/memcached"
 	"github.com/ianunruh/openstack-operator/pkg/neutron"
@@ -139,6 +140,14 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		orchestration := controlplane.Heat(instance)
 		controllerutil.SetControllerReference(instance, orchestration, r.Scheme)
 		if err := heat.EnsureHeat(ctx, r.Client, orchestration, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	if instance.Spec.Magnum.Image != "" {
+		containerInfra := controlplane.Magnum(instance)
+		controllerutil.SetControllerReference(instance, containerInfra, r.Scheme)
+		if err := magnum.EnsureMagnum(ctx, r.Client, containerInfra, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
