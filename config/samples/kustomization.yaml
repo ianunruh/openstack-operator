@@ -15,4 +15,5 @@ resources:
 - openstack_v1beta1_neutron.yaml
 - openstack_v1beta1_memcached.yaml
 - openstack_v1beta1_cinder.yaml
+- openstack_v1beta1_magnum.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

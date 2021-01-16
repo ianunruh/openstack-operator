@@ -141,3 +141,14 @@ spec:
       secret: heat-rabbitmq
       cluster: rabbitmq
       virtualHost: openstack
+  magnum:
+    image: ianunruh/magnum:latest
+    database:
+      name: magnum
+      secret: magnum-db
+      cluster: mariadb
+    broker:
+      name: magnum
+      secret: magnum-rabbitmq
+      cluster: rabbitmq
+      virtualHost: openstack
