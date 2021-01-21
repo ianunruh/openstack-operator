@@ -23,70 +23,63 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// ControlPlaneSpec defines the desired state of ControlPlane
-type ControlPlaneSpec struct {
+// BarbicanSpec defines the desired state of Barbican
+type BarbicanSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Domain string `json:"domain"`
+	Image string `json:"image"`
 
 	// +optional
-	Ingress ControlPlaneIngressSpec `json:"ingress"`
+	API BarbicanAPISpec `json:"api"`
 
-	Broker   RabbitMQSpec  `json:"broker"`
-	Cache    MemcachedSpec `json:"cache"`
-	Database MariaDBSpec   `json:"database"`
+	// +optional
+	Worker BarbicanWorkerSpec `json:"scheduler"`
 
-	Keystone  KeystoneSpec  `json:"keystone"`
-	Glance    GlanceSpec    `json:"glance"`
-	Placement PlacementSpec `json:"placement"`
-	// +optional
-	Cinder  CinderSpec  `json:"cinder"`
-	Nova    NovaSpec    `json:"nova"`
-	Neutron NeutronSpec `json:"neutron"`
-	Horizon HorizonSpec `json:"horizon"`
-	// +optional
-	Heat HeatSpec `json:"heat"`
-	// +optional
-	Magnum MagnumSpec `json:"magnum"`
-	// +optional
-	Barbican BarbicanSpec `json:"barbican"`
+	Database MariaDBDatabaseSpec `json:"database"`
+
+	Broker RabbitMQUserSpec `json:"broker"`
 }
 
-type ControlPlaneIngressSpec struct {
+type BarbicanAPISpec struct {
 	// +optional
-	Annotations map[string]string `json:"annotations"`
+	Replicas int32 `json:"replicas"`
+	// +optional
+	Ingress *IngressSpec `json:"ingress"`
 }
 
-// ControlPlaneStatus defines the observed state of ControlPlane
-type ControlPlaneStatus struct {
+type BarbicanWorkerSpec struct {
+	// +optional
+	Replicas int32 `json:"replicas"`
+}
+
+// BarbicanStatus defines the observed state of Barbican
+type BarbicanStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	Ready bool `json:"ready"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// ControlPlane is the Schema for the controlplanes API
-type ControlPlane struct {
+// Barbican is the Schema for the barbicans API
+type Barbican struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ControlPlaneSpec   `json:"spec,omitempty"`
-	Status ControlPlaneStatus `json:"status,omitempty"`
+	Spec   BarbicanSpec   `json:"spec,omitempty"`
+	Status BarbicanStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// ControlPlaneList contains a list of ControlPlane
-type ControlPlaneList struct {
+// BarbicanList contains a list of Barbican
+type BarbicanList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ControlPlane `json:"items"`
+	Items           []Barbican `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&ControlPlane{}, &ControlPlaneList{})
+	SchemeBuilder.Register(&Barbican{}, &BarbicanList{})
 }

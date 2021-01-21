@@ -27,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/barbican"
 	"github.com/ianunruh/openstack-operator/pkg/cinder"
 	"github.com/ianunruh/openstack-operator/pkg/controlplane"
 	"github.com/ianunruh/openstack-operator/pkg/glance"
@@ -134,6 +135,14 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	controllerutil.SetControllerReference(instance, dashboard, r.Scheme)
 	if err := horizon.EnsureHorizon(ctx, r.Client, dashboard, log); err != nil {
 		return ctrl.Result{}, err
+	}
+
+	if instance.Spec.Barbican.Image != "" {
+		keyManager := controlplane.Barbican(instance)
+		controllerutil.SetControllerReference(instance, keyManager, r.Scheme)
+		if err := barbican.EnsureBarbican(ctx, r.Client, keyManager, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	if instance.Spec.Heat.Image != "" {

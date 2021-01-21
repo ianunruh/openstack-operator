@@ -152,3 +152,14 @@ spec:
       secret: magnum-rabbitmq
       cluster: rabbitmq
       virtualHost: openstack
+  barbican:
+    image: ianunruh/barbican:latest
+    database:
+      name: barbican
+      secret: barbican-db
+      cluster: mariadb
+    broker:
+      name: barbican
+      secret: barbican-rabbitmq
+      cluster: rabbitmq
+      virtualHost: openstack

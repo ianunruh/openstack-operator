@@ -36,6 +36,69 @@ spec:
           spec:
             description: ControlPlaneSpec defines the desired state of ControlPlane
             properties:
+              barbican:
+                description: BarbicanSpec defines the desired state of Barbican
+                properties:
+                  api:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                  broker:
+                    description: RabbitMQUserSpec defines the desired state of RabbitMQUser
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                      virtualHost:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    - virtualHost
+                    type: object
+                  database:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  image:
+                    type: string
+                  scheduler:
+                    properties:
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                required:
+                - broker
+                - database
+                - image
+                type: object
               broker:
                 description: RabbitMQSpec defines the desired state of RabbitMQ
                 properties:
