@@ -37,7 +37,8 @@ func KeystoneUser(instance *openstackv1beta1.Placement) *openstackv1beta1.Keysto
 			Labels:    labels,
 		},
 		Spec: openstackv1beta1.KeystoneUserSpec{
-			Secret: template.Combine(instance.Name, "keystone"),
+			Secret:  template.Combine(instance.Name, "keystone"),
+			Project: "service",
 		},
 	}
 }

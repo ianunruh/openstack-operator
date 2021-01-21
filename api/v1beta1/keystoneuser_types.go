@@ -29,6 +29,18 @@ type KeystoneUserSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	Secret string `json:"secret"`
+
+	// +optional
+	Roles []string `json:"roles"`
+
+	// +optional
+	Domain string `json:"domain"`
+
+	// +optional
+	Project string `json:"project"`
+
+	// +optional
+	ProjectDomain string `json:"projectDomain"`
 }
 
 // KeystoneUserStatus defines the observed state of KeystoneUser

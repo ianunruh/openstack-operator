@@ -52,7 +52,26 @@ func KeystoneUser(instance *openstackv1beta1.Heat) *openstackv1beta1.KeystoneUse
 			Labels:    labels,
 		},
 		Spec: openstackv1beta1.KeystoneUserSpec{
-			Secret: template.Combine(instance.Name, "keystone"),
+			Secret:  template.Combine(instance.Name, "keystone"),
+			Project: "service",
+		},
+	}
+}
+
+func KeystoneStackUser(instance *openstackv1beta1.Heat) *openstackv1beta1.KeystoneUser {
+	labels := template.AppLabels(instance.Name, AppLabel)
+
+	name := template.Combine(instance.Name, "stack")
+
+	return &openstackv1beta1.KeystoneUser{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: instance.Namespace,
+			Labels:    labels,
+		},
+		Spec: openstackv1beta1.KeystoneUserSpec{
+			Secret: template.Combine(name, "keystone"),
+			Domain: "heat",
 		},
 	}
 }

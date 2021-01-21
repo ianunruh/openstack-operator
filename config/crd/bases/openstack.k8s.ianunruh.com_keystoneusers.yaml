@@ -43,6 +43,16 @@ spec:
           spec:
             description: KeystoneUserSpec defines the desired state of KeystoneUser
             properties:
+              domain:
+                type: string
+              project:
+                type: string
+              projectDomain:
+                type: string
+              roles:
+                items:
+                  type: string
+                type: array
               secret:
                 type: string
             required:

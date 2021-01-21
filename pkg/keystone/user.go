@@ -3,6 +3,7 @@ package keystone
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -29,6 +30,9 @@ func UserJob(instance *openstackv1beta1.KeystoneUser, containerImage, adminSecre
 					"-c",
 					template.MustRenderFile(AppLabel, "user-setup.py", nil),
 				},
+				Env: []corev1.EnvVar{
+					template.EnvVar("SVC_ROLES", strings.Join(instance.Spec.Roles, ",")),
+				},
 				EnvFrom: []corev1.EnvFromSource{
 					template.EnvFromSecret(adminSecret),
 					template.EnvFromSecretPrefixed(instance.Spec.Secret, "SVC_"),
@@ -46,13 +50,23 @@ func UserSecret(instance *openstackv1beta1.KeystoneUser) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
 
+	domainName := instance.Spec.Domain
+	if domainName == "" {
+		domainName = "Default"
+	}
+
+	projectDomainName := instance.Spec.ProjectDomain
+	if projectDomainName == "" {
+		projectDomainName = domainName
+	}
+
 	secret.StringData = map[string]string{
 		"OS_IDENTITY_API_VERSION": "3",
 		"OS_AUTH_URL":             "http://keystone-api:5000/v3",
 		"OS_REGION_NAME":          "RegionOne",
-		"OS_PROJECT_DOMAIN_NAME":  "Default",
-		"OS_USER_DOMAIN_NAME":     "Default",
-		"OS_PROJECT_NAME":         "service",
+		"OS_PROJECT_DOMAIN_NAME":  projectDomainName,
+		"OS_USER_DOMAIN_NAME":     domainName,
+		"OS_PROJECT_NAME":         instance.Spec.Project,
 		"OS_USERNAME":             instance.Name,
 		"OS_PASSWORD":             template.NewPassword(),
 	}
