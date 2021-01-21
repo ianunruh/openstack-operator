@@ -102,8 +102,19 @@ func (r *MagnumReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	controllerutil.SetControllerReference(instance, keystoneUser, r.Scheme)
 	if err := keystone.EnsureUser(ctx, r.Client, keystoneUser, log); err != nil {
 		return ctrl.Result{}, err
-	} else if !keystoneUser.Status.Ready {
+	}
+
+	keystoneStackUser := magnum.KeystoneStackUser(instance)
+	controllerutil.SetControllerReference(instance, keystoneStackUser, r.Scheme)
+	if err := keystone.EnsureUser(ctx, r.Client, keystoneStackUser, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if !keystoneUser.Status.Ready {
 		log.Info("Waiting on Keystone user to be available", "name", keystoneUser.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+	} else if !keystoneStackUser.Status.Ready {
+		log.Info("Waiting on Keystone user to be available", "name", keystoneStackUser.Name)
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
@@ -117,6 +128,7 @@ func (r *MagnumReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	envVars := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
+		template.SecretEnvVar("OS_TRUST__TRUSTEE_DOMAIN_ADMIN_PASSWORD", keystoneStackUser.Spec.Secret, "OS_PASSWORD"),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 	}
