@@ -1,0 +1,8 @@
+export OS_IDENTITY_API_VERSION=3
+export OS_AUTH_URL=https://$(kubectl get keystone keystone -o 'jsonpath={.spec.api.ingress.host}')/v3
+export OS_REGION_NAME=RegionOne
+export OS_PROJECT_NAME=demo
+export OS_PROJECT_DOMAIN_NAME=Default
+export OS_USER_DOMAIN_NAME=Default
+export OS_USERNAME=demo
+export OS_PASSWORD=$(kubectl get secret demo-keystone -o 'jsonpath={.data.OS_PASSWORD}' | base64 -d)

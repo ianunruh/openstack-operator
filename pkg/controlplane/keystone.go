@@ -20,3 +20,17 @@ func Keystone(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Keyston
 		Spec: spec,
 	}
 }
+
+func DemoKeystoneUser(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.KeystoneUser {
+	return &openstackv1beta1.KeystoneUser{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "demo",
+			Namespace: instance.Namespace,
+		},
+		Spec: openstackv1beta1.KeystoneUserSpec{
+			Secret:  "demo-keystone",
+			Project: "demo",
+			Roles:   []string{"heat_stack_owner"},
+		},
+	}
+}
