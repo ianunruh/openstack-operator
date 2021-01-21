@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -26,6 +27,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -73,6 +75,16 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
+	ks := &openstackv1beta1.Keystone{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "keystone",
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(ks), ks); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	db := heat.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
 	if err := mariadb.EnsureDatabase(ctx, r.Client, db, log); err != nil {
@@ -105,6 +117,8 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
+	// TODO need to create heat_stack_user role
+
 	keystoneStackUser := heat.KeystoneStackUser(instance)
 	controllerutil.SetControllerReference(instance, keystoneStackUser, r.Scheme)
 	if err := keystone.EnsureUser(ctx, r.Client, keystoneStackUser, log); err != nil {
@@ -128,6 +142,7 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	envVars := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
+		template.EnvVar("OS_CLIENTS_KEYSTONE__AUTH_URI", fmt.Sprintf("https://%s", ks.Spec.API.Ingress.Host)),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DEFAULT__STACK_DOMAIN_ADMIN_PASSWORD", keystoneStackUser.Spec.Secret, "OS_PASSWORD"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
