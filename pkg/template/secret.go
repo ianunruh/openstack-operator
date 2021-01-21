@@ -2,6 +2,8 @@ package template
 
 import (
 	"context"
+	"encoding/base64"
+	"math/rand"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -24,6 +26,14 @@ func GenericSecret(name, namespace string, labels map[string]string) *corev1.Sec
 
 func NewPassword() string {
 	return utilrand.String(20)
+}
+
+func NewFernetKey() string {
+	data := make([]byte, 32)
+	for i := 0; i < 32; i++ {
+		data[i] = byte(rand.Intn(10))
+	}
+	return base64.StdEncoding.EncodeToString(data)
 }
 
 func CreateSecret(ctx context.Context, c client.Client, instance *corev1.Secret, log logr.Logger) error {

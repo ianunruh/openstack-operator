@@ -1,9 +1,7 @@
 package keystone
 
 import (
-	"encoding/base64"
 	"fmt"
-	"math/rand"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -40,15 +38,7 @@ func adminSecret(name, namespace string, labels map[string]string) *corev1.Secre
 
 func fernetSecret(name, namespace string, labels map[string]string) *corev1.Secret {
 	secret := template.GenericSecret(name, namespace, labels)
-	secret.StringData["0"] = newFernetKey()
-	secret.StringData["1"] = newFernetKey()
+	secret.StringData["0"] = template.NewFernetKey()
+	secret.StringData["1"] = template.NewFernetKey()
 	return secret
-}
-
-func newFernetKey() string {
-	data := make([]byte, 32)
-	for i := 0; i < 32; i++ {
-		data[i] = byte(rand.Intn(10))
-	}
-	return base64.StdEncoding.EncodeToString(data)
 }
