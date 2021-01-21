@@ -152,6 +152,12 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 	}
 
+	demoUser := controlplane.DemoKeystoneUser(instance)
+	controllerutil.SetControllerReference(instance, demoUser, r.Scheme)
+	if err := keystone.EnsureUser(ctx, r.Client, demoUser, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{}, nil
 }
 
