@@ -3,9 +3,9 @@ package template
 import "strings"
 
 const (
-	AppLabel       = "app"
-	InstanceLabel  = "instance"
-	ComponentLabel = "component"
+	AppLabel       = "app.kubernetes.io/name"
+	ComponentLabel = "app.kubernetes.io/component"
+	InstanceLabel  = "app.kubernetes.io/instance"
 )
 
 func Labels(instance, app, component string) map[string]string {
