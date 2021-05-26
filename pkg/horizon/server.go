@@ -70,19 +70,11 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 
 func ServerService(instance *openstackv1beta1.Horizon) *corev1.Service {
 	labels := template.Labels(instance.Name, AppLabel, ServerComponentLabel)
+	name := template.Combine(instance.Name, "server")
 
-	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      template.Combine(instance.Name, "server"),
-			Namespace: instance.Namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.ServiceSpec{
-			Selector: labels,
-			Ports: []corev1.ServicePort{
-				{Name: "http", Port: 80},
-			},
-		},
+	svc := template.GenericService(name, instance.Namespace, labels)
+	svc.Spec.Ports = []corev1.ServicePort{
+		{Name: "http", Port: 80},
 	}
 
 	return svc

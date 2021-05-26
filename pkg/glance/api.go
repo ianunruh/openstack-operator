@@ -93,19 +93,11 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 
 func APIService(instance *openstackv1beta1.Glance) *corev1.Service {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
+	name := template.Combine(instance.Name, "api")
 
-	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      template.Combine(instance.Name, "api"),
-			Namespace: instance.Namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.ServiceSpec{
-			Selector: labels,
-			Ports: []corev1.ServicePort{
-				{Name: "http", Port: 9292},
-			},
-		},
+	svc := template.GenericService(name, instance.Namespace, labels)
+	svc.Spec.Ports = []corev1.ServicePort{
+		{Name: "http", Port: 9292},
 	}
 
 	return svc

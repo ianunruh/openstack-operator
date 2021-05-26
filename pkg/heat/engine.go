@@ -3,7 +3,6 @@ package heat
 import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/template"
@@ -52,18 +51,10 @@ func EngineStatefulSet(instance *openstackv1beta1.Heat, envVars []corev1.EnvVar,
 
 func EngineService(instance *openstackv1beta1.Heat) *corev1.Service {
 	labels := template.Labels(instance.Name, AppLabel, EngineComponentLabel)
+	name := template.Combine(instance.Name, "engine", "headless")
 
-	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      template.Combine(instance.Name, "engine", "headless"),
-			Namespace: instance.Namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.ServiceSpec{
-			Selector:  labels,
-			ClusterIP: corev1.ClusterIPNone,
-		},
-	}
+	svc := template.GenericService(name, instance.Namespace, labels)
+	svc.Spec.ClusterIP = corev1.ClusterIPNone
 
 	return svc
 }

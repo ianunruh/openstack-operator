@@ -4,7 +4,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
@@ -71,19 +70,11 @@ func CFNDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 
 func CFNService(instance *openstackv1beta1.Heat) *corev1.Service {
 	labels := template.Labels(instance.Name, AppLabel, CFNComponentLabel)
+	name := template.Combine(instance.Name, "cfn")
 
-	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      template.Combine(instance.Name, "cfn"),
-			Namespace: instance.Namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.ServiceSpec{
-			Selector: labels,
-			Ports: []corev1.ServicePort{
-				{Name: "http", Port: 8000},
-			},
-		},
+	svc := template.GenericService(name, instance.Namespace, labels)
+	svc.Spec.Ports = []corev1.ServicePort{
+		{Name: "http", Port: 8000},
 	}
 
 	return svc

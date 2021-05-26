@@ -3,7 +3,6 @@ package nova
 import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/template"
@@ -49,18 +48,10 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 
 func ConductorService(name, namespace string) *corev1.Service {
 	labels := template.Labels(name, AppLabel, ConductorComponentLabel)
+	name = template.Combine(name, "api")
 
-	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      template.Combine(name, "conductor", "headless"),
-			Namespace: namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.ServiceSpec{
-			Selector:  labels,
-			ClusterIP: corev1.ClusterIPNone,
-		},
-	}
+	svc := template.GenericService(name, namespace, labels)
+	svc.Spec.ClusterIP = corev1.ClusterIPNone
 
 	return svc
 }

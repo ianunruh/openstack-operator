@@ -52,19 +52,11 @@ func NoVNCProxyDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvV
 
 func NoVNCProxyService(instance *openstackv1beta1.NovaCell) *corev1.Service {
 	labels := template.Labels(instance.Name, AppLabel, NoVNCProxyComponentLabel)
+	name := template.Combine(instance.Name, "novncproxy")
 
-	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      template.Combine(instance.Name, "novncproxy"),
-			Namespace: instance.Namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.ServiceSpec{
-			Selector: labels,
-			Ports: []corev1.ServicePort{
-				{Name: "http", Port: 6080},
-			},
-		},
+	svc := template.GenericService(name, instance.Namespace, labels)
+	svc.Spec.Ports = []corev1.ServicePort{
+		{Name: "http", Port: 6080},
 	}
 
 	return svc

@@ -133,22 +133,13 @@ func ClusterStatefulSet(instance *openstackv1beta1.RabbitMQ, configHash string) 
 func ClusterService(instance *openstackv1beta1.RabbitMQ) *corev1.Service {
 	labels := template.Labels(instance.Name, AppLabel, ClusterComponentLabel)
 
-	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name,
-			Namespace: instance.Namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.ServiceSpec{
-			Selector: labels,
-			Ports: []corev1.ServicePort{
-				{Name: "amqp", Port: 5672},
-				{Name: "dist", Port: 25672},
-				{Name: "epmd", Port: 4369},
-				{Name: "metrics", Port: 9419},
-				{Name: "stats", Port: 15672},
-			},
-		},
+	svc := template.GenericService(instance.Name, instance.Namespace, labels)
+	svc.Spec.Ports = []corev1.ServicePort{
+		{Name: "amqp", Port: 5672},
+		{Name: "dist", Port: 25672},
+		{Name: "epmd", Port: 4369},
+		{Name: "metrics", Port: 9419},
+		{Name: "stats", Port: 15672},
 	}
 
 	return svc

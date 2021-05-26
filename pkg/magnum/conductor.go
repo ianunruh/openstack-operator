@@ -3,7 +3,6 @@ package magnum
 import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/template"
@@ -52,18 +51,10 @@ func ConductorStatefulSet(instance *openstackv1beta1.Magnum, envVars []corev1.En
 
 func ConductorService(instance *openstackv1beta1.Magnum) *corev1.Service {
 	labels := template.Labels(instance.Name, AppLabel, ConductorComponentLabel)
+	name := template.Combine(instance.Name, "conductor", "headless")
 
-	svc := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      template.Combine(instance.Name, "conductor", "headless"),
-			Namespace: instance.Namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.ServiceSpec{
-			Selector:  labels,
-			ClusterIP: corev1.ClusterIPNone,
-		},
-	}
+	svc := template.GenericService(name, instance.Namespace, labels)
+	svc.Spec.ClusterIP = corev1.ClusterIPNone
 
 	return svc
 }
