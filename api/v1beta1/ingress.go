@@ -6,4 +6,7 @@ type IngressSpec struct {
 
 	// +optional
 	Annotations map[string]string `json:"annotations"`
+
+	// +optional
+	TLSSecretName string `json:"tlsSecretName"`
 }

@@ -55,6 +55,11 @@ func IngressServiceBackend(svcName, portName string) netv1.IngressBackend {
 func GenericIngress(name, namespace string, spec *openstackv1beta1.IngressSpec, labels map[string]string) *netv1.Ingress {
 	prefixPathType := netv1.PathTypePrefix
 
+	tlsSecretName := spec.TLSSecretName
+	if tlsSecretName == "" {
+		tlsSecretName = Combine(name, "ingress-tls")
+	}
+
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        name,
@@ -65,7 +70,7 @@ func GenericIngress(name, namespace string, spec *openstackv1beta1.IngressSpec, 
 		Spec: netv1.IngressSpec{
 			TLS: []netv1.IngressTLS{
 				{
-					SecretName: Combine(name, "ingress-tls"),
+					SecretName: tlsSecretName,
 					Hosts:      []string{spec.Host},
 				},
 			},

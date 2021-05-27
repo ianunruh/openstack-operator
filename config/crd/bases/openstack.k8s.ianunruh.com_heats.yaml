@@ -46,6 +46,8 @@ spec:
                         type: object
                       host:
                         type: string
+                      tlsSecretName:
+                        type: string
                     type: object
                   replicas:
                     format: int32
@@ -77,6 +79,8 @@ spec:
                           type: string
                         type: object
                       host:
+                        type: string
+                      tlsSecretName:
                         type: string
                     type: object
                   replicas:
