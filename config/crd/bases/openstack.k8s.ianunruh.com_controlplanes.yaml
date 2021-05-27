@@ -452,6 +452,8 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  tlsSecretName:
+                    type: string
                 type: object
               keystone:
                 description: KeystoneSpec defines the desired state of Keystone

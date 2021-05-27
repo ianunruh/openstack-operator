@@ -56,6 +56,9 @@ type ControlPlaneSpec struct {
 type ControlPlaneIngressSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
+
+	// +optional
+	TLSSecretName string `json:"tlsSecretName"`
 }
 
 // ControlPlaneStatus defines the observed state of ControlPlane

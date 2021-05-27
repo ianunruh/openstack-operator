@@ -20,5 +20,9 @@ func ingressDefaults(spec *openstackv1beta1.IngressSpec, instance *openstackv1be
 		spec.Host = fmt.Sprintf("%s.%s", name, instance.Spec.Domain)
 	}
 
+	if spec.TLSSecretName == "" {
+		spec.TLSSecretName = common.TLSSecretName
+	}
+
 	return spec
 }
