@@ -67,7 +67,7 @@ func ClusterStatefulSet(instance *openstackv1beta1.Memcached) *appsv1.StatefulSe
 func ClusterService(instance *openstackv1beta1.Memcached) *corev1.Service {
 	labels := template.Labels(instance.Name, AppLabel, ClusterComponentLabel)
 
-	svc := template.GenericService(instance.Name, instance.Name, labels)
+	svc := template.GenericService(instance.Name, instance.Namespace, labels)
 	svc.Spec.Ports = []corev1.ServicePort{
 		{Name: "memcached", Port: 11211},
 	}

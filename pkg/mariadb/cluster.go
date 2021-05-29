@@ -86,7 +86,7 @@ func ClusterStatefulSet(instance *openstackv1beta1.MariaDB, configHash string) *
 func ClusterService(instance *openstackv1beta1.MariaDB) *corev1.Service {
 	labels := template.Labels(instance.Name, AppLabel, ClusterComponentLabel)
 
-	svc := template.GenericService(instance.Name, instance.Name, labels)
+	svc := template.GenericService(instance.Name, instance.Namespace, labels)
 	svc.Spec.Ports = []corev1.ServicePort{
 		{Name: "mysql", Port: 3306},
 	}
