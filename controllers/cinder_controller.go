@@ -116,7 +116,7 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	configHash := template.AppliedHash(cm)
 
-	if err := r.reconcileSecrets(ctx, instance, log); err != nil {
+	if err := r.reconcileRookCeph(ctx, instance, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -162,7 +162,7 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	return ctrl.Result{}, nil
 }
 
-func (r *CinderReconciler) reconcileSecrets(ctx context.Context, instance *openstackv1beta1.Cinder, log logr.Logger) error {
+func (r *CinderReconciler) reconcileRookCeph(ctx context.Context, instance *openstackv1beta1.Cinder, log logr.Logger) error {
 	// TODO make this configurable
 	glance := &openstackv1beta1.Glance{
 		ObjectMeta: metav1.ObjectMeta{

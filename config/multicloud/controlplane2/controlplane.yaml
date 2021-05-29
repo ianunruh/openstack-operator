@@ -6,25 +6,15 @@ spec:
   domain: openstack2.kcloud.zone
   cinder:
     backends:
-    - name: ceph-ssd
-      volumeBackendName: ceph-ssd
+    - name: ceph
+      volumeBackendName: ceph
       ceph:
-        poolName: openstack2-cinder-volumes-ssd
+        poolName: openstack2-cinder-volumes
         clientName: openstack2-cinder
         secret: cinder-ceph
         rook:
           namespace: rook-ceph
           deviceClass: ssd
-          replicatedSize: 2
-    - name: ceph-hdd
-      volumeBackendName: ceph-hdd
-      ceph:
-        poolName: openstack2-cinder-volumes-hdd
-        clientName: openstack2-cinder
-        secret: cinder-ceph
-        rook:
-          namespace: rook-ceph
-          deviceClass: hdd
           replicatedSize: 2
   glance:
     backends:

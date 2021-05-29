@@ -48,25 +48,15 @@ spec:
   cinder:
     image: ianunruh/cinder:latest
     backends:
-    - name: ceph-ssd
-      volumeBackendName: ceph-ssd
+    - name: ceph
+      volumeBackendName: ceph
       ceph:
-        poolName: openstack-cinder-volumes-ssd
+        poolName: openstack-cinder-volumes
         clientName: openstack-cinder
         secret: cinder-ceph
         rook:
           namespace: rook-ceph
           deviceClass: ssd
-          replicatedSize: 2
-    - name: ceph-hdd
-      volumeBackendName: ceph-hdd
-      ceph:
-        poolName: openstack-cinder-volumes-hdd
-        clientName: openstack-cinder
-        secret: cinder-ceph
-        rook:
-          namespace: rook-ceph
-          deviceClass: hdd
           replicatedSize: 2
     database:
       name: cinder
