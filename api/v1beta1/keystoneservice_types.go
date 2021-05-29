@@ -20,14 +20,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // KeystoneServiceSpec defines the desired state of KeystoneService
 type KeystoneServiceSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
 	Name string `json:"name"`
 
 	Type string `json:"type"`
@@ -38,14 +32,16 @@ type KeystoneServiceSpec struct {
 
 // KeystoneServiceStatus defines the observed state of KeystoneService
 type KeystoneServiceStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
 	Ready bool `json:"ready"`
+
+	// +optional
+	SetupJobHash string `json:"setupJobHash"`
 }
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Ready",type=boolean,JSONPath=`.status.ready`
+// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // KeystoneService is the Schema for the keystoneservices API
 type KeystoneService struct {

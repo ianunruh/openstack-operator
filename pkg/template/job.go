@@ -20,3 +20,8 @@ func CreateJob(ctx context.Context, c client.Client, instance *batchv1.Job, log 
 	}
 	return nil
 }
+
+func DeleteJob(ctx context.Context, c client.Client, instance *batchv1.Job, log logr.Logger) error {
+	log.Info("Deleting Job", "Name", instance.Name)
+	return c.Delete(ctx, instance)
+}

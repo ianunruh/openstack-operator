@@ -48,13 +48,6 @@ type KeystoneServiceReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the KeystoneService object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.7.0/pkg/reconcile
 func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
 
@@ -82,15 +75,27 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	job := keystone.ServiceJob(instance, cluster.Spec.Image, cluster.Name)
 	controllerutil.SetControllerReference(instance, job, r.Scheme)
-	if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
+	jobHash, err := template.ObjectHash(job)
+	if err != nil {
 		return ctrl.Result{}, err
-	} else if job.Status.CompletionTime == nil {
-		log.Info("Waiting on job completion", "name", job.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	} else if !instance.Status.Ready {
-		instance.Status.Ready = true
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
+	}
+
+	if jobHash != instance.Status.SetupJobHash {
+		if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
 			return ctrl.Result{}, err
+		} else if job.Status.CompletionTime == nil {
+			log.Info("Waiting on job completion", "name", job.Name)
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		} else {
+			if err := template.DeleteJob(ctx, r.Client, job, log); err != nil {
+				return ctrl.Result{}, err
+			}
+
+			instance.Status.Ready = true
+			instance.Status.SetupJobHash = jobHash
+			if err := r.Client.Status().Update(ctx, instance); err != nil {
+				return ctrl.Result{}, err
+			}
 		}
 	}
 
