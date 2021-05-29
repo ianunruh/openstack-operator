@@ -48,7 +48,7 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 
 func ConductorService(name, namespace string) *corev1.Service {
 	labels := template.Labels(name, AppLabel, ConductorComponentLabel)
-	name = template.Combine(name, "api")
+	name = template.Combine(name, "conductor")
 
 	svc := template.GenericService(name, namespace, labels)
 	svc.Spec.ClusterIP = corev1.ClusterIPNone

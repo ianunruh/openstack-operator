@@ -39,7 +39,7 @@ type clientSecretKeyringOptions struct {
 }
 
 func ClientSecret(c client.Client, namespace, name, rookNamespace, clientName string) (*corev1.Secret, error) {
-	keySecretName := template.Combine(clientName, "client-key")
+	keySecretName := template.Combine("rook-ceph-client", clientName)
 	keySecret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      keySecretName,

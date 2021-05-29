@@ -24,7 +24,7 @@ func RookCephResources(instance *openstackv1beta1.Cinder, imagePool string) []*u
 			Name: spec.ClientName,
 			Caps: map[string]string{
 				"mon": "profile rbd",
-				"osd": strings.Join(caps, " "),
+				"osd": strings.Join(caps, ", "),
 			},
 		}),
 		rookceph.BlockPool(spec.Namespace, rookceph.BlockPoolOptions{
