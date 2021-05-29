@@ -30,7 +30,7 @@ type RabbitMQSpec struct {
 
 	Image string `json:"image"`
 
-	Volume VolumeSpec `json:"volume"`
+	Volume *VolumeSpec `json:"volume"`
 }
 
 // RabbitMQStatus defines the observed state of RabbitMQ

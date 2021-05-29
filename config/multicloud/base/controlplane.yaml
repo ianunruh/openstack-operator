@@ -35,24 +35,38 @@ spec:
       name: glance
       secret: glance-db
       cluster: mariadb
-    storage:
-      rookCeph:
-        namespace: rook-ceph
+    backends:
+    - name: ceph-ssd
+      ceph:
+        poolName: openstack-glance-images
         clientName: openstack-glance
         secret: glance-ceph
-        poolName: openstack-glance-images
-        deviceClass: ssd
-        replicatedSize: 2
+        rook:
+          namespace: rook-ceph
+          deviceClass: ssd
+          replicatedSize: 2
   cinder:
     image: ianunruh/cinder:latest
-    volume:
-      storage:
-        rookCeph:
+    backends:
+    - name: ceph-ssd
+      volumeBackendName: ceph-ssd
+      ceph:
+        poolName: openstack-cinder-volumes-ssd
+        clientName: openstack-cinder
+        secret: cinder-ceph
+        rook:
           namespace: rook-ceph
-          clientName: openstack-cinder
-          secret: cinder-ceph
-          poolName: openstack-cinder-volumes
           deviceClass: ssd
+          replicatedSize: 2
+    - name: ceph-hdd
+      volumeBackendName: ceph-hdd
+      ceph:
+        poolName: openstack-cinder-volumes-hdd
+        clientName: openstack-cinder
+        secret: cinder-ceph
+        rook:
+          namespace: rook-ceph
+          deviceClass: hdd
           replicatedSize: 2
     database:
       name: cinder

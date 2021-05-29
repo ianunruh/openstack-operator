@@ -3,6 +3,8 @@ package cinder
 import (
 	"context"
 	"fmt"
+	"path/filepath"
+	"strings"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -27,13 +29,26 @@ func ConfigMap(instance *openstackv1beta1.Cinder) *corev1.ConfigMap {
 
 	cfg := template.MustLoadINITemplate(AppLabel, "cinder.conf", nil)
 
-	cephSpec := instance.Spec.Volume.Storage.RookCeph
-	if cephSpec != nil {
-		cfg.Section("").NewKey("enabled_backends", "ceph")
+	var backendNames []string
 
-		cfg.Section("ceph").NewKey("rbd_pool", cephSpec.PoolName)
-		cfg.Section("ceph").NewKey("rbd_user", cephSpec.ClientName)
+	for _, backend := range instance.Spec.Backends {
+		section := cfg.Section(backend.Name)
+		section.NewKey("volume_backend_name", backend.VolumeBackendName)
+
+		if cephSpec := backend.Ceph; cephSpec != nil {
+			section.NewKey("rbd_ceph_conf", filepath.Join("/etc/ceph", cephSpec.Secret, "ceph.conf"))
+			// TODO support multiple secret UUIDs
+			section.NewKey("rbd_secret_uuid", "74a0b63e-041d-4040-9398-3704e4cf8260")
+			section.NewKey("rbd_pool", cephSpec.PoolName)
+			section.NewKey("rbd_user", cephSpec.ClientName)
+			section.NewKey("report_discard_supported", "true")
+			section.NewKey("volume_driver", "cinder.volume.drivers.rbd.RBDDriver")
+		}
+
+		backendNames = append(backendNames, backend.Name)
 	}
+
+	cfg.Section("").NewKey("enabled_backends", strings.Join(backendNames, ","))
 
 	cm.Data["cinder.conf"] = template.MustOutputINI(cfg).String()
 

@@ -3,6 +3,8 @@ package glance
 import (
 	"context"
 	"fmt"
+	"path/filepath"
+	"strings"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -23,16 +25,40 @@ func ConfigMap(instance *openstackv1beta1.Glance) *corev1.ConfigMap {
 
 	cfg := template.MustLoadINITemplate(AppLabel, "glance-api.conf", nil)
 
-	cephSpec := instance.Spec.Storage.RookCeph
-	if cephSpec != nil {
-		cfg.Section("").NewKey("enabled_backends", "ceph:rbd")
-		// cfg.Section("").NewKey("show_image_direct_url", "true")
+	var (
+		backendNames   []string
+		defaultBackend string
+	)
 
-		cfg.Section("glance_store").NewKey("default_backend", "ceph")
+	for _, backend := range instance.Spec.Backends {
+		var backendType string
 
-		cfg.Section("ceph").NewKey("rbd_store_pool", cephSpec.PoolName)
-		cfg.Section("ceph").NewKey("rbd_store_user", cephSpec.ClientName)
+		section := cfg.Section(backend.Name)
+
+		if cephSpec := backend.Ceph; cephSpec != nil {
+			backendType = "rbd"
+
+			section.NewKey("rbd_store_pool", cephSpec.PoolName)
+			section.NewKey("rbd_store_user", cephSpec.ClientName)
+			section.NewKey("rbd_store_ceph_conf", filepath.Join("/etc/ceph", cephSpec.Secret, "ceph.conf"))
+
+			// TODO if cinder has a ceph backend, then enable this
+			// cfg.Section("").NewKey("show_image_direct_url", "true")
+		} else if pvcSpec := backend.PVC; pvcSpec != nil {
+			backendType = "file"
+
+			section.NewKey("filesystem_store_datadir", imageBackendPath(backend.Name))
+		}
+
+		backendNames = append(backendNames, fmt.Sprintf("%s:%s", backend.Name, backendType))
+
+		if backend.Default || defaultBackend == "" {
+			defaultBackend = backend.Name
+		}
 	}
+
+	cfg.Section("").NewKey("enabled_backends", strings.Join(backendNames, ","))
+	cfg.Section("glance_store").NewKey("default_backend", defaultBackend)
 
 	cm.Data["glance-api.conf"] = template.MustOutputINI(cfg).String()
 
@@ -64,4 +90,8 @@ func EnsureGlance(ctx context.Context, c client.Client, intended *openstackv1bet
 	}
 
 	return nil
+}
+
+func imageBackendPath(name string) string {
+	return template.Combine("/var/lib/glance/images", name)
 }

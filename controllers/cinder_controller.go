@@ -37,7 +37,6 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
-	"github.com/ianunruh/openstack-operator/pkg/rookceph"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -117,34 +116,8 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	configHash := template.AppliedHash(cm)
 
-	if instance.Spec.Volume.Storage.RookCeph != nil {
-		// TODO make this configurable, but for now this assumes that if Ceph is enabled
-		// for Cinder, then it is also enabled for Glance.
-		glance := &openstackv1beta1.Glance{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "glance",
-				Namespace: instance.Namespace,
-			},
-		}
-		if err := r.Client.Get(ctx, client.ObjectKeyFromObject(glance), glance); err != nil {
-			return ctrl.Result{}, err
-		}
-
-		resources := cinder.RookCephResources(instance, glance.Spec.Storage.RookCeph.PoolName)
-		for _, resource := range resources {
-			if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
-				return ctrl.Result{}, err
-			}
-		}
-
-		spec := instance.Spec.Volume.Storage.RookCeph
-		secret, err := rookceph.ClientSecret(r.Client, instance.Namespace, spec.Secret, spec.Namespace, spec.ClientName)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
-			return ctrl.Result{}, err
-		}
+	if err := r.reconcileSecrets(ctx, instance, log); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	envVars := []corev1.EnvVar{
@@ -187,6 +160,47 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	// TODO wait for deploys to be ready then mark status
 
 	return ctrl.Result{}, nil
+}
+
+func (r *CinderReconciler) reconcileSecrets(ctx context.Context, instance *openstackv1beta1.Cinder, log logr.Logger) error {
+	// TODO make this configurable
+	glance := &openstackv1beta1.Glance{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "glance",
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(glance), glance); err != nil {
+		return err
+	}
+
+	var imagePools []string
+	for _, backend := range glance.Spec.Backends {
+		if backend.Ceph == nil {
+			continue
+		}
+		imagePools = append(imagePools, backend.Ceph.PoolName)
+	}
+
+	resources := cinder.RookCephResources(instance, imagePools)
+	for _, resource := range resources {
+		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+			return err
+		}
+	}
+
+	secrets, err := cinder.RookCephSecrets(ctx, r.Client, instance)
+	if err != nil {
+		return err
+	}
+	for _, secret := range secrets {
+		controllerutil.SetControllerReference(instance, secret, r.Scheme)
+		if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (r *CinderReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Cinder, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {

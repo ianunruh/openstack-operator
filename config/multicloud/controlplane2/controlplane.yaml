@@ -5,16 +5,38 @@ metadata:
 spec:
   domain: openstack2.kcloud.zone
   cinder:
-    volume:
-      storage:
-        rookCeph:
-          clientName: openstack2-cinder
-          poolName: openstack2-cinder-volumes
+    backends:
+    - name: ceph-ssd
+      volumeBackendName: ceph-ssd
+      ceph:
+        poolName: openstack2-cinder-volumes-ssd
+        clientName: openstack2-cinder
+        secret: cinder-ceph
+        rook:
+          namespace: rook-ceph
+          deviceClass: ssd
+          replicatedSize: 2
+    - name: ceph-hdd
+      volumeBackendName: ceph-hdd
+      ceph:
+        poolName: openstack2-cinder-volumes-hdd
+        clientName: openstack2-cinder
+        secret: cinder-ceph
+        rook:
+          namespace: rook-ceph
+          deviceClass: hdd
+          replicatedSize: 2
   glance:
-    storage:
-      rookCeph:
-        clientName: openstack2-glance
+    backends:
+    - name: ceph-ssd
+      ceph:
         poolName: openstack2-glance-images
+        clientName: openstack2-glance
+        secret: glance-ceph
+        rook:
+          namespace: rook-ceph
+          deviceClass: ssd
+          replicatedSize: 2
   nova:
     compute:
       nodeSelector:

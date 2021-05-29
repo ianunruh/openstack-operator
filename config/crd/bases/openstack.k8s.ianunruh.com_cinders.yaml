@@ -53,6 +53,44 @@ spec:
                     format: int32
                     type: integer
                 type: object
+              backends:
+                items:
+                  properties:
+                    ceph:
+                      properties:
+                        clientName:
+                          type: string
+                        poolName:
+                          type: string
+                        rook:
+                          properties:
+                            deviceClass:
+                              type: string
+                            namespace:
+                              type: string
+                            replicatedSize:
+                              type: integer
+                          required:
+                          - namespace
+                          - replicatedSize
+                          type: object
+                        secret:
+                          type: string
+                      required:
+                      - clientName
+                      - poolName
+                      - rook
+                      - secret
+                      type: object
+                    name:
+                      type: string
+                    volumeBackendName:
+                      type: string
+                  required:
+                  - name
+                  - volumeBackendName
+                  type: object
+                type: array
               broker:
                 description: RabbitMQUserSpec defines the desired state of RabbitMQUser
                 properties:
@@ -97,30 +135,6 @@ spec:
                   replicas:
                     format: int32
                     type: integer
-                  storage:
-                    properties:
-                      rookCeph:
-                        properties:
-                          clientName:
-                            type: string
-                          deviceClass:
-                            type: string
-                          namespace:
-                            type: string
-                          poolName:
-                            type: string
-                          replicatedSize:
-                            type: integer
-                          secret:
-                            type: string
-                        required:
-                        - replicatedSize
-                        type: object
-                    required:
-                    - rookCeph
-                    type: object
-                required:
-                - storage
                 type: object
             required:
             - broker

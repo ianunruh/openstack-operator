@@ -1,17 +1,17 @@
 package v1beta1
 
-type RookCephSpec struct {
-	// +optional
-	Namespace string `json:"namespace"`
-
-	// +optional
+type CephSpec struct {
 	PoolName string `json:"poolName"`
 
-	// +optional
 	ClientName string `json:"clientName"`
 
-	// +optional
 	Secret string `json:"secret"`
+
+	Rook *RookCephSpec `json:"rook"`
+}
+
+type RookCephSpec struct {
+	Namespace string `json:"namespace"`
 
 	// +optional
 	DeviceClass string `json:"deviceClass"`

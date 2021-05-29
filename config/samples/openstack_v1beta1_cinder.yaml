@@ -13,14 +13,15 @@ spec:
         cert-manager.io/cluster-issuer: letsencrypt-prod
   scheduler:
     replicas: 2
-  volume:
-    replicas: 2
-    storage:
-      rookCeph:
+  backends:
+  - name: ceph-ssd
+    volumeBackendName: ceph-ssd
+    ceph:
+      poolName: openstack-cinder-volumes
+      clientName: openstack-cinder
+      secret: cinder-ceph
+      rook:
         namespace: rook-ceph
-        clientName: openstack-cinder
-        secret: cinder-ceph
-        poolName: openstack-cinder-volumes
         deviceClass: ssd
         replicatedSize: 2
   database:

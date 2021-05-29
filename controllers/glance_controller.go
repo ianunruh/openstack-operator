@@ -35,7 +35,6 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/glance"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
-	"github.com/ianunruh/openstack-operator/pkg/rookceph"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -108,28 +107,15 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	configHash := template.AppliedHash(cm)
 
-	if instance.Spec.Storage.Volume != nil {
-		pvc := glance.PersistentVolumeClaim(instance)
+	for _, pvc := range glance.PersistentVolumeClaims(instance) {
 		controllerutil.SetControllerReference(instance, pvc, r.Scheme)
 		if err := template.EnsurePersistentVolumeClaim(ctx, r.Client, pvc, log); err != nil {
 			return ctrl.Result{}, err
 		}
-	} else if instance.Spec.Storage.RookCeph != nil {
-		resources := glance.RookCephResources(instance)
-		for _, resource := range resources {
-			if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
-				return ctrl.Result{}, err
-			}
-		}
+	}
 
-		spec := instance.Spec.Storage.RookCeph
-		secret, err := rookceph.ClientSecret(r.Client, instance.Namespace, spec.Secret, spec.Namespace, spec.ClientName)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
-			return ctrl.Result{}, err
-		}
+	if err := r.reconcileRookCeph(ctx, instance, log); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	jobs := []*batchv1.Job{
@@ -170,6 +156,28 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	// TODO wait for deploy to be ready then mark status
 
 	return ctrl.Result{}, nil
+}
+
+func (r *GlanceReconciler) reconcileRookCeph(ctx context.Context, instance *openstackv1beta1.Glance, log logr.Logger) error {
+	resources := glance.RookCephResources(instance)
+	for _, resource := range resources {
+		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+			return err
+		}
+	}
+
+	secrets, err := glance.RookCephSecrets(ctx, r.Client, instance)
+	if err != nil {
+		return err
+	}
+	for _, secret := range secrets {
+		controllerutil.SetControllerReference(instance, secret, r.Scheme)
+		if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

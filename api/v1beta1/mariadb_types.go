@@ -30,7 +30,7 @@ type MariaDBSpec struct {
 
 	Image string `json:"image"`
 
-	Volume VolumeSpec `json:"volume"`
+	Volume *VolumeSpec `json:"volume"`
 }
 
 // MariaDBStatus defines the observed state of MariaDB

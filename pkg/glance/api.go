@@ -42,15 +42,19 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 		template.ConfigMapVolume("etc-glance", instance.Name, nil),
 	}
 
-	if cephSpec := instance.Spec.Storage.RookCeph; cephSpec != nil {
-		volumeMounts = append(volumeMounts, rookceph.ClientVolumeMounts("etc-ceph")...)
-		volumes = append(volumes, template.SecretVolume("etc-ceph", cephSpec.Secret, nil))
-	} else if instance.Spec.Storage.Volume != nil {
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      "images",
-			MountPath: "/var/lib/glance/images",
-		})
-		volumes = append(volumes, template.PersistentVolume("images", instance.Name))
+	cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
+	for _, backend := range instance.Spec.Backends {
+		if cephSpec := backend.Ceph; cephSpec != nil {
+			cephSecrets.Append(cephSpec.Secret)
+		} else if pvcSpec := backend.PVC; pvcSpec != nil {
+			pvcName := template.Combine(instance.Name, backend.Name)
+
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{
+				Name:      "images",
+				MountPath: imageBackendPath(backend.Name),
+			})
+			volumes = append(volumes, template.PersistentVolume("images", pvcName))
+		}
 	}
 
 	deploy := template.GenericDeployment(template.Component{

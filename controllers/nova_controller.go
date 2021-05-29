@@ -288,11 +288,11 @@ func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openst
 	)
 
 	if cinder != nil {
-		if cephSpec := cinder.Spec.Volume.Storage.RookCeph; cephSpec != nil {
-			volumeMounts = append(volumeMounts, rookceph.ClientVolumeMounts("etc-ceph")...)
-			volumes = append(volumes, template.SecretVolume("etc-ceph", cephSpec.Secret, nil))
-			envVars = append(envVars, template.EnvVar("LIBVIRT_CEPH_CINDER_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
-			envVars = append(envVars, template.EnvVar("CEPH_CINDER_USER", cephSpec.ClientName))
+		cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
+		for _, backend := range cinder.Spec.Backends {
+			if cephSpec := backend.Ceph; cephSpec != nil {
+				cephSecrets.Append(cephSpec.Secret)
+			}
 		}
 	}
 
@@ -318,11 +318,15 @@ func (r *NovaReconciler) reconcileCompute(ctx context.Context, instance *opensta
 	var volumeMounts []corev1.VolumeMount
 
 	if cinder != nil {
-		if cephSpec := cinder.Spec.Volume.Storage.RookCeph; cephSpec != nil {
-			volumeMounts = append(volumeMounts, rookceph.ClientVolumeMounts("etc-ceph")...)
-			volumes = append(volumes, template.SecretVolume("etc-ceph", cephSpec.Secret, nil))
-			envVars = append(envVars, template.EnvVar("OS_LIBVIRT__RBD_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
-			envVars = append(envVars, template.EnvVar("OS_LIBVIRT__RBD_USER", cephSpec.ClientName))
+		cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
+		for _, backend := range cinder.Spec.Backends {
+			if cephSpec := backend.Ceph; cephSpec != nil {
+				cephSecrets.Append(cephSpec.Secret)
+
+				// TODO sort these out
+				// envVars = append(envVars, template.EnvVar("OS_LIBVIRT__RBD_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
+				// envVars = append(envVars, template.EnvVar("OS_LIBVIRT__RBD_USER", cephSpec.ClientName))
+			}
 		}
 	}
 

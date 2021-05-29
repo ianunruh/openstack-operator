@@ -3,6 +3,7 @@ package rookceph
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -29,8 +30,9 @@ func Client(namespace string, opts ClientOptions) *unstructured.Unstructured {
 }
 
 type clientSecretOptions struct {
-	MonHost    string
 	ClientName string
+	MonHost    string
+	SecretName string
 }
 
 type clientSecretKeyringOptions struct {
@@ -38,64 +40,99 @@ type clientSecretKeyringOptions struct {
 	Keyring    string
 }
 
-func ClientSecret(c client.Client, namespace, name, rookNamespace, clientName string) (*corev1.Secret, error) {
-	keySecretName := template.Combine("rook-ceph-client", clientName)
-	keySecret := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      keySecretName,
-			Namespace: rookNamespace,
-		},
-	}
-	if err := c.Get(context.TODO(), client.ObjectKeyFromObject(keySecret), keySecret); err != nil {
-		return nil, err
+func ClientSecret(name, namespace, clientName string, keyring []byte, monHosts []string) *corev1.Secret {
+	// TODO labels
+	secret := template.GenericSecret(name, namespace, nil)
+
+	secret.StringData = map[string]string{
+		"ceph.conf": template.MustRenderFile(AppLabel, "ceph.conf", clientSecretOptions{
+			ClientName: clientName,
+			MonHost:    strings.Join(monHosts, ","),
+			SecretName: name,
+		}),
+		"keyring": template.MustRenderFile(AppLabel, "keyring", clientSecretKeyringOptions{
+			ClientName: clientName,
+			Keyring:    string(keyring),
+		}),
 	}
 
-	keyring, ok := keySecret.Data[clientName]
-	if !ok {
-		return nil, fmt.Errorf("expected ceph client secret %s to have key %s", keySecretName, clientName)
-	}
+	return secret
+}
 
+func GetCephMonitorAddrs(ctx context.Context, c client.Client, namespace string) ([]string, error) {
 	monLabels := labels.Set{"ceph_daemon_type": "mon"}
 
 	var monServices corev1.ServiceList
-	if err := c.List(context.TODO(), &monServices, &client.ListOptions{
-		Namespace:     rookNamespace,
+	if err := c.List(ctx, &monServices, &client.ListOptions{
+		Namespace:     namespace,
 		LabelSelector: monLabels.AsSelector(),
 	}); err != nil {
 		return nil, err
 	}
 
-	var monHosts []string
+	var addrs []string
 	for _, svc := range monServices.Items {
-		monHosts = append(monHosts, svc.Spec.ClusterIP)
+		addrs = append(addrs, svc.Spec.ClusterIP)
 	}
 
-	// TODO labels
-	secret := template.GenericSecret(name, namespace, nil)
-
-	secret.StringData["ceph.conf"] = template.MustRenderFile(AppLabel, "ceph.conf", clientSecretOptions{
-		MonHost:    strings.Join(monHosts, ","),
-		ClientName: clientName,
-	})
-	secret.StringData["keyring"] = template.MustRenderFile(AppLabel, "keyring", clientSecretKeyringOptions{
-		ClientName: clientName,
-		Keyring:    string(keyring),
-	})
-
-	return secret, nil
+	return addrs, nil
 }
 
-func ClientVolumeMounts(name string) []corev1.VolumeMount {
+func GetCephClientSecret(ctx context.Context, c client.Client, name, namespace string) ([]byte, error) {
+	keySecretName := template.Combine("rook-ceph-client", name)
+
+	keySecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      keySecretName,
+			Namespace: namespace,
+		},
+	}
+	if err := c.Get(ctx, client.ObjectKeyFromObject(keySecret), keySecret); err != nil {
+		return nil, err
+	}
+
+	keyring, ok := keySecret.Data[name]
+	if !ok {
+		return nil, fmt.Errorf("expected ceph client secret %s to have key %s", keySecretName, name)
+	}
+
+	return keyring, nil
+}
+
+func NewClientSecretAppender(volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount) *ClientSecretAppender {
+	return &ClientSecretAppender{
+		seenSecrets: make(map[string]bool),
+
+		volumes:      volumes,
+		volumeMounts: volumeMounts,
+	}
+}
+
+type ClientSecretAppender struct {
+	seenSecrets map[string]bool
+
+	volumes      *[]corev1.Volume
+	volumeMounts *[]corev1.VolumeMount
+}
+
+func (c *ClientSecretAppender) Append(name string) {
+	mountPath := filepath.Join("/etc/ceph", name)
+
+	*c.volumeMounts = append(*c.volumeMounts, ClientVolumeMounts(name, mountPath)...)
+	*c.volumes = append(*c.volumes, template.SecretVolume(name, name, nil))
+}
+
+func ClientVolumeMounts(name, path string) []corev1.VolumeMount {
 	return []corev1.VolumeMount{
 		{
 			Name:      name,
 			SubPath:   "ceph.conf",
-			MountPath: "/etc/ceph/ceph.conf",
+			MountPath: filepath.Join(path, "ceph.conf"),
 		},
 		{
 			Name:      name,
 			SubPath:   "keyring",
-			MountPath: "/etc/ceph/keyring",
+			MountPath: filepath.Join(path, "keyring"),
 		},
 	}
 }

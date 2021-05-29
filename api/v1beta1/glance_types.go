@@ -20,14 +20,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // GlanceSpec defines the desired state of Glance
 type GlanceSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
 	Image string `json:"image"`
 
 	// +optional
@@ -35,14 +29,21 @@ type GlanceSpec struct {
 
 	Database MariaDBDatabaseSpec `json:"database"`
 
-	Storage GlanceStorageSpec `json:"storage"`
+	// +optional
+	Backends []GlanceBackendSpec `json:"backends"`
 }
 
-type GlanceStorageSpec struct {
+type GlanceBackendSpec struct {
+	Name string `json:"name"`
+
 	// +optional
-	RookCeph *RookCephSpec `json:"rookCeph"`
+	Default bool `json:"default"`
+
 	// +optional
-	Volume *VolumeSpec `json:"volume"`
+	Ceph *CephSpec `json:"ceph"`
+
+	// +optional
+	PVC *VolumeSpec `json:"pvc"`
 }
 
 type GlanceAPISpec struct {
@@ -54,8 +55,6 @@ type GlanceAPISpec struct {
 
 // GlanceStatus defines the observed state of Glance
 type GlanceStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 }
 
 // +kubebuilder:object:root=true

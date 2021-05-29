@@ -24,9 +24,11 @@ func VolumeStatefulSet(instance *openstackv1beta1.Cinder, envVars []corev1.EnvVa
 		},
 	}
 
-	if cephSpec := instance.Spec.Volume.Storage.RookCeph; cephSpec != nil {
-		volumeMounts = append(volumeMounts, rookceph.ClientVolumeMounts("etc-ceph")...)
-		volumes = append(volumes, template.SecretVolume("etc-ceph", cephSpec.Secret, nil))
+	cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
+	for _, backend := range instance.Spec.Backends {
+		if cephSpec := backend.Ceph; cephSpec != nil {
+			cephSecrets.Append(cephSpec.Secret)
+		}
 	}
 
 	sts := template.GenericStatefulSet(template.Component{

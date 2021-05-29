@@ -15,8 +15,9 @@ spec:
     name: glance
     secret: glance-db
     cluster: mariadb
-  storage:
-    volume:
+  backends:
+  - name: ssd
+    pvc:
       capacity: 100Gi
       storageClass: ceph-fs-ssd
       accessModes: [ReadWriteMany]

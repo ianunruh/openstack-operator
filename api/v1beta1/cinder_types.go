@@ -20,14 +20,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // CinderSpec defines the desired state of Cinder
 type CinderSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
 	Image string `json:"image"`
 
 	// +optional
@@ -39,9 +33,21 @@ type CinderSpec struct {
 	// +optional
 	Volume CinderVolumeSpec `json:"volume"`
 
+	// +optional
+	Backends []CinderBackendSpec `json:"backends"`
+
 	Database MariaDBDatabaseSpec `json:"database"`
 
 	Broker RabbitMQUserSpec `json:"broker"`
+}
+
+type CinderBackendSpec struct {
+	Name string `json:"name"`
+
+	VolumeBackendName string `json:"volumeBackendName"`
+
+	// +optional
+	Ceph *CephSpec `json:"ceph"`
 }
 
 type CinderAPISpec struct {
@@ -59,18 +65,10 @@ type CinderSchedulerSpec struct {
 type CinderVolumeSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas"`
-
-	Storage CinderVolumeStorageSpec `json:"storage"`
-}
-
-type CinderVolumeStorageSpec struct {
-	RookCeph *RookCephSpec `json:"rookCeph"`
 }
 
 // CinderStatus defines the observed state of Cinder
 type CinderStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
 }
 
 // +kubebuilder:object:root=true

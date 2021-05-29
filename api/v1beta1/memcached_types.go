@@ -28,8 +28,8 @@ type MemcachedSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	Image  string     `json:"image"`
-	Volume VolumeSpec `json:"volume"`
+	Image  string      `json:"image"`
+	Volume *VolumeSpec `json:"volume"`
 }
 
 // MemcachedStatus defines the observed state of Memcached
