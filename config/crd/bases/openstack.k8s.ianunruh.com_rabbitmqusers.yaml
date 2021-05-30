@@ -62,6 +62,8 @@ spec:
             properties:
               ready:
                 type: boolean
+              setupJobHash:
+                type: string
             required:
             - ready
             type: object

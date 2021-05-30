@@ -90,19 +90,16 @@ func (r *RabbitMQUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	job := rabbitmq.UserJob(instance, cluster.Spec.Image, cluster.Name, cluster.Name)
 	controllerutil.SetControllerReference(instance, job, r.Scheme)
-	if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
-		return ctrl.Result{}, err
-	} else if job.Status.CompletionTime == nil {
-		log.Info("Waiting on job completion", "name", job.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	} else if !instance.Status.Ready {
-		instance.Status.Ready = true
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
 
-	return ctrl.Result{}, nil
+	runner := template.NewJobRunner(ctx, r.Client, job, log)
+	runner.CheckStatus(func(hash string) bool {
+		return instance.Status.SetupJobHash == hash
+	})
+	runner.UpdateStatus(func(hash string) {
+		instance.Status.Ready = true
+		instance.Status.SetupJobHash = hash
+	})
+	return runner.Run(instance)
 }
 
 // SetupWithManager sets up the controller with the Manager.
