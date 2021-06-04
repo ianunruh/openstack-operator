@@ -46,6 +46,9 @@ type NeutronServerSpec struct {
 
 type NeutronLinuxBridgeAgentSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector"`
+
+	// +optional
+	PhysicalInterfaceMappings []string `json:"physicalInterfaceMappings"`
 }
 
 type NeutronDHCPAgentSpec struct {

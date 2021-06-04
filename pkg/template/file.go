@@ -25,7 +25,7 @@ func init() {
 	ini.DefaultHeader = true
 }
 
-func RenderFile(app, filename string, values interface{}) (string, error) {
+func ReadFile(app, filename string) (string, error) {
 	basePath := os.Getenv("OPERATOR_TEMPLATES")
 	if basePath == "" {
 		basePath = "templates"
@@ -37,7 +37,22 @@ func RenderFile(app, filename string, values interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	file := string(b)
+	return string(b), nil
+}
+
+func MustReadFile(app, filename string) string {
+	out, err := ReadFile(app, filename)
+	if err != nil {
+		panic(err)
+	}
+	return out
+}
+
+func RenderFile(app, filename string, values interface{}) (string, error) {
+	file, err := ReadFile(app, filename)
+	if err != nil {
+		return "", err
+	}
 
 	var buff bytes.Buffer
 	tmpl, err := template.New("tmp").Parse(file)
@@ -114,15 +129,7 @@ func EnsureResource(ctx context.Context, c client.Client, instance *unstructured
 	return nil
 }
 
-func MustOutputINI(file *ini.File) *bytes.Buffer {
-	cfgOut := &bytes.Buffer{}
-	if _, err := file.WriteTo(cfgOut); err != nil {
-		panic(err)
-	}
-	return cfgOut
-}
-
-func MustLoadINI(encoded string) *ini.File {
+func MustParseINI(encoded string) *ini.File {
 	file, err := ini.Load([]byte(encoded))
 	if err != nil {
 		panic(err)
@@ -131,5 +138,17 @@ func MustLoadINI(encoded string) *ini.File {
 }
 
 func MustLoadINITemplate(app, filename string, values interface{}) *ini.File {
-	return MustLoadINI(MustRenderFile(app, filename, values))
+	return MustParseINI(MustRenderFile(app, filename, values))
+}
+
+func MustLoadINI(app, filename string) *ini.File {
+	return MustParseINI(MustReadFile(app, filename))
+}
+
+func MustOutputINI(file *ini.File) *bytes.Buffer {
+	cfgOut := &bytes.Buffer{}
+	if _, err := file.WriteTo(cfgOut); err != nil {
+		panic(err)
+	}
+	return cfgOut
 }

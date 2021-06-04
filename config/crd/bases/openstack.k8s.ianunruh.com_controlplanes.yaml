@@ -652,6 +652,10 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      physicalInterfaceMappings:
+                        items:
+                          type: string
+                        type: array
                     required:
                     - nodeSelector
                     type: object
