@@ -135,18 +135,10 @@ func (r *MagnumReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		template.ConfigMapVolume("etc-magnum", cm.Name, nil),
 	}
 
-	jobs := []*batchv1.Job{
-		magnum.DBSyncJob(instance, envVars, volumes),
-		// magnum.BootstrapJob(instance),
-	}
-	for _, job := range jobs {
-		controllerutil.SetControllerReference(instance, job, r.Scheme)
-		if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
-			return ctrl.Result{}, err
-		} else if job.Status.CompletionTime == nil {
-			log.Info("Waiting on job completion", "name", job.Name)
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-		}
+	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs.Add(&instance.Status.DBSyncJobHash, magnum.DBSyncJob(instance, envVars, volumes))
+	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	if err := r.reconcileAPI(ctx, instance, envVars, volumes, log); err != nil {

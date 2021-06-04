@@ -116,6 +116,9 @@ spec:
             type: object
           status:
             description: HeatStatus defines the observed state of Heat
+            properties:
+              dbSyncJobHash:
+                type: string
             type: object
         type: object
     served: true

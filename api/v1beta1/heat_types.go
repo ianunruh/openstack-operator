@@ -52,6 +52,8 @@ type HeatEngineSpec struct {
 
 // HeatStatus defines the observed state of Heat
 type HeatStatus struct {
+	// +optional
+	DBSyncJobHash string `json:"dbSyncJobHash"`
 }
 
 // +kubebuilder:object:root=true

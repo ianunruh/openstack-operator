@@ -123,18 +123,11 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		template.ConfigMapVolume("etc-nova", cm.Name, nil),
 	}
 
-	jobs := []*batchv1.Job{
-		nova.CellDBSyncJob(instance, envVars, volumes, cluster.Spec.Image),
-		// nova.BootstrapJob(instance),
-	}
-	for _, job := range jobs {
-		controllerutil.SetControllerReference(instance, job, r.Scheme)
-		if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
-			return ctrl.Result{}, err
-		} else if job.Status.CompletionTime == nil {
-			log.Info("Waiting on job completion", "name", job.Name)
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-		}
+	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs.Add(&instance.Status.DBSyncJobHash,
+		nova.CellDBSyncJob(instance, envVars, volumes, cluster.Spec.Image))
+	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	if err := r.reconcileConductor(ctx, instance, envVars, volumes, cluster.Spec.Image, log); err != nil {

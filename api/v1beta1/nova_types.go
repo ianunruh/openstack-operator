@@ -85,6 +85,8 @@ type NovaComputeSpec struct {
 
 // NovaStatus defines the observed state of Nova
 type NovaStatus struct {
+	// +optional
+	DBSyncJobHash string `json:"dbSyncJobHash"`
 }
 
 // +kubebuilder:object:root=true

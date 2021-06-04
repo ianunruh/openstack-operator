@@ -83,6 +83,10 @@ spec:
           status:
             description: KeystoneStatus defines the observed state of Keystone
             properties:
+              bootstrapJobHash:
+                type: string
+              dbSyncJobHash:
+                type: string
               ready:
                 type: boolean
             required:

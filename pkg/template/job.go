@@ -7,6 +7,7 @@ import (
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -26,7 +27,8 @@ func CreateJob(ctx context.Context, c client.Client, instance *batchv1.Job, log 
 
 func DeleteJob(ctx context.Context, c client.Client, instance *batchv1.Job, log logr.Logger) error {
 	log.Info("Deleting Job", "Name", instance.Name)
-	return c.Delete(ctx, instance)
+	return c.Delete(ctx, instance,
+		client.PropagationPolicy(metav1.DeletePropagationBackground))
 }
 
 func NewJobRunner(ctx context.Context, c client.Client, log logr.Logger) *JobRunner {

@@ -111,18 +111,10 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	jobs := []*batchv1.Job{
-		glance.DBSyncJob(instance),
-		// glance.BootstrapJob(instance),
-	}
-	for _, job := range jobs {
-		controllerutil.SetControllerReference(instance, job, r.Scheme)
-		if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
-			return ctrl.Result{}, err
-		} else if job.Status.CompletionTime == nil {
-			log.Info("Waiting on job completion", "name", job.Name)
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-		}
+	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs.Add(&instance.Status.DBSyncJobHash, glance.DBSyncJob(instance))
+	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	service := glance.APIService(instance)

@@ -159,18 +159,10 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		template.ConfigMapVolume("etc-nova", cm.Name, nil),
 	}
 
-	jobs := []*batchv1.Job{
-		nova.DBSyncJob(instance, fullEnvVars, volumes),
-		// nova.BootstrapJob(instance),
-	}
-	for _, job := range jobs {
-		controllerutil.SetControllerReference(instance, job, r.Scheme)
-		if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
-			return ctrl.Result{}, err
-		} else if job.Status.CompletionTime == nil {
-			log.Info("Waiting on job completion", "name", job.Name)
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-		}
+	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs.Add(&instance.Status.DBSyncJobHash, nova.DBSyncJob(instance, fullEnvVars, volumes))
+	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	if err := r.reconcileAPI(ctx, instance, fullEnvVars, volumes, log); err != nil {

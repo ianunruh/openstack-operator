@@ -212,6 +212,9 @@ spec:
             type: object
           status:
             description: NovaStatus defines the observed state of Nova
+            properties:
+              dbSyncJobHash:
+                type: string
             type: object
         type: object
     served: true

@@ -40,6 +40,12 @@ type KeystoneAPISpec struct {
 // KeystoneStatus defines the observed state of Keystone
 type KeystoneStatus struct {
 	Ready bool `json:"ready"`
+
+	// +optional
+	BootstrapJobHash string `json:"bootstrapJobHash"`
+
+	// +optional
+	DBSyncJobHash string `json:"dbSyncJobHash"`
 }
 
 // +kubebuilder:object:root=true

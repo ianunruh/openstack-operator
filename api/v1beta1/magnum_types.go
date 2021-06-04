@@ -49,6 +49,8 @@ type MagnumConductorSpec struct {
 
 // MagnumStatus defines the observed state of Magnum
 type MagnumStatus struct {
+	// +optional
+	DBSyncJobHash string `json:"dbSyncJobHash"`
 }
 
 // +kubebuilder:object:root=true

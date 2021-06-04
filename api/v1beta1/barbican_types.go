@@ -49,6 +49,8 @@ type BarbicanWorkerSpec struct {
 
 // BarbicanStatus defines the observed state of Barbican
 type BarbicanStatus struct {
+	// +optional
+	DBSyncJobHash string `json:"dbSyncJobHash"`
 }
 
 // +kubebuilder:object:root=true

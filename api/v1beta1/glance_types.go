@@ -55,6 +55,8 @@ type GlanceAPISpec struct {
 
 // GlanceStatus defines the observed state of Glance
 type GlanceStatus struct {
+	// +optional
+	DBSyncJobHash string `json:"dbSyncJobHash"`
 }
 
 // +kubebuilder:object:root=true

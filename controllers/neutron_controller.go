@@ -131,18 +131,10 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		template.ConfigMapVolume("etc-neutron", cm.Name, nil),
 	}
 
-	jobs := []*batchv1.Job{
-		neutron.DBSyncJob(instance, fullEnvVars, volumes),
-		// neutron.BootstrapJob(instance),
-	}
-	for _, job := range jobs {
-		controllerutil.SetControllerReference(instance, job, r.Scheme)
-		if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
-			return ctrl.Result{}, err
-		} else if job.Status.CompletionTime == nil {
-			log.Info("Waiting on job completion", "name", job.Name)
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-		}
+	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs.Add(&instance.Status.DBSyncJobHash, neutron.DBSyncJob(instance, fullEnvVars, volumes))
+	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	if err := r.reconcileServer(ctx, instance, serverEnvVars, volumes, log); err != nil {

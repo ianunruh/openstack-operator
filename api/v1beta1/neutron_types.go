@@ -65,6 +65,8 @@ type NeutronMetadataAgentSpec struct {
 
 // NeutronStatus defines the observed state of Neutron
 type NeutronStatus struct {
+	// +optional
+	DBSyncJobHash string `json:"dbSyncJobHash"`
 }
 
 // +kubebuilder:object:root=true

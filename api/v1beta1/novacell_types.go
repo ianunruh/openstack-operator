@@ -41,6 +41,9 @@ type NovaCellSpec struct {
 // NovaCellStatus defines the observed state of NovaCell
 type NovaCellStatus struct {
 	Ready bool `json:"ready"`
+
+	// +optional
+	DBSyncJobHash string `json:"dbSyncJobHash"`
 }
 
 // +kubebuilder:object:root=true
