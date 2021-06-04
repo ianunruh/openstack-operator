@@ -81,18 +81,11 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	job := mariadb.DatabaseJob(instance, cluster.Spec.Image, cluster.Name, cluster.Name)
-	controllerutil.SetControllerReference(instance, job, r.Scheme)
-
-	runner := template.NewJobRunner(ctx, r.Client, job, log)
-	runner.CheckStatus(func(hash string) bool {
-		return instance.Status.SetupJobHash == hash
-	})
-	runner.UpdateStatus(func(hash string) {
-		instance.Status.Ready = true
-		instance.Status.SetupJobHash = hash
-	})
-	return runner.Run(instance)
+	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs.Add(&instance.Status.SetupJobHash,
+		mariadb.DatabaseJob(instance, cluster.Spec.Image, cluster.Name, cluster.Name))
+	jobs.SetReady(&instance.Status.Ready)
+	return jobs.Run(instance)
 }
 
 // SetupWithManager sets up the controller with the Manager.

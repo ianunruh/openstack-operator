@@ -39,6 +39,8 @@ type PlacementAPISpec struct {
 
 // PlacementStatus defines the observed state of Placement
 type PlacementStatus struct {
+	// +optional
+	DBSyncJobHash string `json:"dbSyncJobHash"`
 }
 
 // +kubebuilder:object:root=true

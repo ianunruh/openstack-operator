@@ -28,7 +28,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
@@ -73,18 +72,11 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
-	job := keystone.ServiceJob(instance, cluster.Spec.Image, cluster.Name)
-	controllerutil.SetControllerReference(instance, job, r.Scheme)
-
-	runner := template.NewJobRunner(ctx, r.Client, job, log)
-	runner.CheckStatus(func(hash string) bool {
-		return instance.Status.SetupJobHash == hash
-	})
-	runner.UpdateStatus(func(hash string) {
-		instance.Status.Ready = true
-		instance.Status.SetupJobHash = hash
-	})
-	return runner.Run(instance)
+	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs.Add(&instance.Status.SetupJobHash,
+		keystone.ServiceJob(instance, cluster.Spec.Image, cluster.Name))
+	jobs.SetReady(&instance.Status.Ready)
+	return jobs.Run(instance)
 }
 
 // SetupWithManager sets up the controller with the Manager.

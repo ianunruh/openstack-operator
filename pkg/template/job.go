@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 func CreateJob(ctx context.Context, c client.Client, instance *batchv1.Job, log logr.Logger) error {
@@ -28,63 +29,75 @@ func DeleteJob(ctx context.Context, c client.Client, instance *batchv1.Job, log 
 	return c.Delete(ctx, instance)
 }
 
-func NewJobRunner(ctx context.Context, c client.Client, instance *batchv1.Job, log logr.Logger) *JobRunner {
+func NewJobRunner(ctx context.Context, c client.Client, log logr.Logger) *JobRunner {
 	return &JobRunner{
-		ctx:      ctx,
-		client:   c,
-		instance: instance,
-		log:      log,
+		ctx:    ctx,
+		client: c,
+		log:    log,
 	}
 }
 
-type CheckStatusFunc func(hash string) bool
-type UpdateStatusFunc func(hash string)
-
 type JobRunner struct {
-	ctx      context.Context
-	client   client.Client
-	instance *batchv1.Job
-	log      logr.Logger
+	ctx    context.Context
+	client client.Client
+	log    logr.Logger
 
-	checkStatus  CheckStatusFunc
-	updateStatus UpdateStatusFunc
+	jobs       []jobHashField
+	readyField *bool
 }
 
-func (r *JobRunner) CheckStatus(fn CheckStatusFunc) *JobRunner {
-	r.checkStatus = fn
-	return r
+func (r *JobRunner) Add(hashField *string, job *batchv1.Job) {
+	r.jobs = append(r.jobs, jobHashField{
+		Job:       job,
+		HashField: hashField,
+	})
 }
 
-func (r *JobRunner) UpdateStatus(fn UpdateStatusFunc) *JobRunner {
-	r.updateStatus = fn
-	return r
+func (r *JobRunner) SetReady(readyField *bool) {
+	r.readyField = readyField
 }
 
 func (r *JobRunner) Run(owner client.Object) (ctrl.Result, error) {
-	jobHash, err := ObjectHash(r.instance)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
+	for i, jh := range r.jobs {
+		job := jh.Job
 
-	if r.checkStatus(jobHash) {
-		return ctrl.Result{}, nil
-	}
+		controllerutil.SetControllerReference(owner, job, r.client.Scheme())
 
-	if err := CreateJob(r.ctx, r.client, r.instance, r.log); err != nil {
-		return ctrl.Result{}, err
-	} else if r.instance.Status.CompletionTime == nil {
-		r.log.Info("Waiting on job completion", "name", r.instance.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	}
+		jobHash, err := ObjectHash(job)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 
-	if err := DeleteJob(r.ctx, r.client, r.instance, r.log); err != nil {
-		return ctrl.Result{}, err
-	}
+		if *jh.HashField == jobHash {
+			return ctrl.Result{}, nil
+		}
 
-	r.updateStatus(jobHash)
-	if err := r.client.Status().Update(r.ctx, owner); err != nil {
-		return ctrl.Result{}, err
+		if err := CreateJob(r.ctx, r.client, job, r.log); err != nil {
+			return ctrl.Result{}, err
+		} else if job.Status.CompletionTime == nil {
+			r.log.Info("Waiting on job completion", "name", job.Name)
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		}
+
+		if err := DeleteJob(r.ctx, r.client, job, r.log); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		*jh.HashField = jobHash
+
+		if i == len(r.jobs) {
+			*r.readyField = true
+		}
+
+		if err := r.client.Status().Update(r.ctx, owner); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	return ctrl.Result{}, nil
+}
+
+type jobHashField struct {
+	Job       *batchv1.Job
+	HashField *string
 }
