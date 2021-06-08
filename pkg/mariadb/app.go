@@ -15,7 +15,7 @@ func ConfigMap(instance *openstackv1beta1.MariaDB) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["my.cnf"] = template.MustRenderFile(AppLabel, "my.cnf", nil)
+	cm.Data["my.cnf"] = template.MustReadFile(AppLabel, "my.cnf")
 
 	return cm
 }

@@ -97,7 +97,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, 
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustRenderFile(AppLabel, "compute-init.sh", nil),
+					template.MustReadFile(AppLabel, "compute-init.sh"),
 				},
 				Env: []corev1.EnvVar{
 					template.EnvVar("NOVA_USER_UID", "64060"),

@@ -22,12 +22,12 @@ func ConfigMap(instance *openstackv1beta1.Neutron) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["dhcp_agent.ini"] = template.MustRenderFile(AppLabel, "dhcp_agent.ini", nil)
-	cm.Data["l3_agent.ini"] = template.MustRenderFile(AppLabel, "l3_agent.ini", nil)
+	cm.Data["dhcp_agent.ini"] = template.MustReadFile(AppLabel, "dhcp_agent.ini")
+	cm.Data["l3_agent.ini"] = template.MustReadFile(AppLabel, "l3_agent.ini")
 	cm.Data["linuxbridge_agent.ini"] = linuxBridgeAgentCfg(instance.Spec.LinuxBridgeAgent)
-	cm.Data["metadata_agent.ini"] = template.MustRenderFile(AppLabel, "metadata_agent.ini", nil)
-	cm.Data["ml2_conf.ini"] = template.MustRenderFile(AppLabel, "ml2_conf.ini", nil)
-	cm.Data["neutron.conf"] = template.MustRenderFile(AppLabel, "neutron.conf", nil)
+	cm.Data["metadata_agent.ini"] = template.MustReadFile(AppLabel, "metadata_agent.ini")
+	cm.Data["ml2_conf.ini"] = template.MustReadFile(AppLabel, "ml2_conf.ini")
+	cm.Data["neutron.conf"] = template.MustReadFile(AppLabel, "neutron.conf")
 
 	return cm
 }

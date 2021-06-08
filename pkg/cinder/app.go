@@ -27,7 +27,7 @@ func ConfigMap(instance *openstackv1beta1.Cinder) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cfg := template.MustLoadINITemplate(AppLabel, "cinder.conf", nil)
+	cfg := template.MustLoadINI(AppLabel, "cinder.conf")
 
 	var backendNames []string
 

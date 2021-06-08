@@ -21,7 +21,7 @@ func ConfigMap(instance *openstackv1beta1.Nova) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["nova.conf"] = template.MustRenderFile(AppLabel, "nova.conf", nil)
+	cm.Data["nova.conf"] = template.MustReadFile(AppLabel, "nova.conf")
 
 	return cm
 }

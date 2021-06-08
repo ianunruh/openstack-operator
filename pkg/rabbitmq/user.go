@@ -28,7 +28,7 @@ func UserJob(instance *openstackv1beta1.RabbitMQUser, containerImage, databaseHo
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustRenderFile(AppLabel, "user-setup.sh", nil),
+					template.MustReadFile(AppLabel, "user-setup.sh"),
 				},
 				Env: []corev1.EnvVar{
 					template.SecretEnvVar("RABBITMQ_ADMIN_CONNECTION", adminSecret, "connection"),

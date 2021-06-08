@@ -79,7 +79,7 @@ func LinuxBridgeAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustRenderFile(AppLabel, "linuxbridge-agent-init-modules.sh", nil),
+					template.MustReadFile(AppLabel, "linuxbridge-agent-init-modules.sh"),
 				},
 				VolumeMounts: []corev1.VolumeMount{
 					{
@@ -105,7 +105,7 @@ func LinuxBridgeAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustRenderFile(AppLabel, "linuxbridge-agent-init.sh", nil),
+					template.MustReadFile(AppLabel, "linuxbridge-agent-init.sh"),
 				},
 				VolumeMounts: volumeMounts,
 				SecurityContext: &corev1.SecurityContext{

@@ -41,7 +41,7 @@ func CellDBSyncJob(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, vol
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustRenderFile(AppLabel, "cell-db-sync.sh", nil),
+					template.MustReadFile(AppLabel, "cell-db-sync.sh"),
 				},
 				Env: env,
 				VolumeMounts: []corev1.VolumeMount{

@@ -21,7 +21,7 @@ func ConfigMap(instance *openstackv1beta1.Keystone) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["keystone.conf"] = template.MustRenderFile(AppLabel, "keystone.conf", nil)
+	cm.Data["keystone.conf"] = template.MustReadFile(AppLabel, "keystone.conf")
 
 	return cm
 }

@@ -27,7 +27,7 @@ func ServiceJob(instance *openstackv1beta1.KeystoneService, containerImage, admi
 				Command: []string{
 					"python3",
 					"-c",
-					template.MustRenderFile(AppLabel, "service-setup.py", nil),
+					template.MustReadFile(AppLabel, "service-setup.py"),
 				},
 				EnvFrom: []corev1.EnvFromSource{
 					template.EnvFromSecret(adminSecret),

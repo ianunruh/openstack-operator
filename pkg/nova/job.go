@@ -21,7 +21,7 @@ func DBSyncJob(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []c
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustRenderFile(AppLabel, "db-sync.sh", nil),
+					template.MustReadFile(AppLabel, "db-sync.sh"),
 				},
 				Env: env,
 				VolumeMounts: []corev1.VolumeMount{

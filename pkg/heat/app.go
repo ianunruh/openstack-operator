@@ -25,7 +25,7 @@ func ConfigMap(instance *openstackv1beta1.Heat) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["heat.conf"] = template.MustRenderFile(AppLabel, "heat.conf", nil)
+	cm.Data["heat.conf"] = template.MustReadFile(AppLabel, "heat.conf")
 
 	return cm
 }

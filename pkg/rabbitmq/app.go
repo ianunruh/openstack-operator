@@ -17,7 +17,7 @@ func ConfigMap(instance *openstackv1beta1.RabbitMQ) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["rabbitmq.conf"] = template.MustRenderFile(AppLabel, "rabbitmq.conf", nil)
+	cm.Data["rabbitmq.conf"] = template.MustReadFile(AppLabel, "rabbitmq.conf")
 
 	return cm
 }

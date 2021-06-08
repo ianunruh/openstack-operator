@@ -28,7 +28,7 @@ func UserJob(instance *openstackv1beta1.KeystoneUser, containerImage, adminSecre
 				Command: []string{
 					"python3",
 					"-c",
-					template.MustRenderFile(AppLabel, "user-setup.py", nil),
+					template.MustReadFile(AppLabel, "user-setup.py"),
 				},
 				Env: []corev1.EnvVar{
 					template.EnvVar("SVC_ROLES", strings.Join(instance.Spec.Roles, ",")),

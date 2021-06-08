@@ -21,7 +21,7 @@ func ConfigMap(instance *openstackv1beta1.Horizon) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["local_settings.py"] = template.MustRenderFile(AppLabel, "local_settings.py", nil)
+	cm.Data["local_settings.py"] = template.MustReadFile(AppLabel, "local_settings.py")
 
 	return cm
 }

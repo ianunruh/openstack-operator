@@ -23,7 +23,7 @@ func ConfigMap(instance *openstackv1beta1.Glance) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cfg := template.MustLoadINITemplate(AppLabel, "glance-api.conf", nil)
+	cfg := template.MustLoadINI(AppLabel, "glance-api.conf")
 
 	var (
 		backendNames   []string

@@ -26,7 +26,7 @@ func ClusterStatefulSet(instance *openstackv1beta1.MariaDB, configHash string) *
 	probe := &corev1.Probe{
 		Handler: corev1.Handler{
 			Exec: &corev1.ExecAction{
-				Command: []string{"bash", "-c", template.MustRenderFile(AppLabel, "probe.sh", nil)},
+				Command: []string{"bash", "-c", template.MustReadFile(AppLabel, "probe.sh")},
 			},
 		},
 		FailureThreshold:    3,

@@ -17,8 +17,8 @@ func LibvirtdConfigMap(instance *openstackv1beta1.Nova) *corev1.ConfigMap {
 	name := template.Combine(instance.Name, "libvirtd")
 	cm := template.GenericConfigMap(name, instance.Namespace, labels)
 
-	cm.Data["libvirtd.conf"] = template.MustRenderFile(AppLabel, "libvirtd.conf", nil)
-	cm.Data["qemu.conf"] = template.MustRenderFile(AppLabel, "qemu.conf", nil)
+	cm.Data["libvirtd.conf"] = template.MustReadFile(AppLabel, "libvirtd.conf")
+	cm.Data["qemu.conf"] = template.MustReadFile(AppLabel, "qemu.conf")
 
 	return cm
 }
@@ -126,7 +126,7 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar,
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustRenderFile(AppLabel, "libvirtd-start.sh", nil),
+					template.MustReadFile(AppLabel, "libvirtd-start.sh"),
 				},
 				Lifecycle: &corev1.Lifecycle{
 					PreStop: &corev1.Handler{

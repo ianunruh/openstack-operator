@@ -26,7 +26,7 @@ func BootstrapJob(instance *openstackv1beta1.Keystone) *batchv1.Job {
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustRenderFile(AppLabel, "bootstrap.sh", nil),
+					template.MustReadFile(AppLabel, "bootstrap.sh"),
 				},
 				Env: []corev1.EnvVar{
 					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
