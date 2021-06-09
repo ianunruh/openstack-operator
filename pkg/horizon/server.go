@@ -22,7 +22,7 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 		Handler: corev1.Handler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path: "/horizon/auth/login/",
-				Port: intstr.FromInt(80),
+				Port: intstr.FromInt(8080),
 			},
 		},
 		InitialDelaySeconds: 10,
@@ -73,7 +73,7 @@ func ServerService(instance *openstackv1beta1.Horizon) *corev1.Service {
 
 	svc := template.GenericService(name, instance.Namespace, labels)
 	svc.Spec.Ports = []corev1.ServicePort{
-		{Name: "http", Port: 80},
+		{Name: "http", Port: 8080},
 	}
 
 	return svc
