@@ -3,75 +3,160 @@ layout: go.kubebuilder.io/v3
 projectName: openstack-operator
 repo: github.com/ianunruh/openstack-operator
 resources:
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: ControlPlane
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: MariaDB
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: MariaDBDatabase
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: Keystone
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: KeystoneService
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: KeystoneUser
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: Glance
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: Placement
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: RabbitMQ
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: RabbitMQUser
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: Nova
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: NovaCell
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: Neutron
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: Memcached
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: Cinder
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: Magnum
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-- crdVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
   group: openstack
   kind: Barbican
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
-version: 3-alpha
+version: "3"
 plugins:
   manifests.sdk.operatorframework.io/v2: {}
   scorecard.sdk.operatorframework.io/v2: {}
