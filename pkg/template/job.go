@@ -71,7 +71,7 @@ func (r *JobRunner) Run(owner client.Object) (ctrl.Result, error) {
 		}
 
 		if *jh.HashField == jobHash {
-			return ctrl.Result{}, nil
+			continue
 		}
 
 		if err := CreateJob(r.ctx, r.client, job, r.log); err != nil {
@@ -87,7 +87,7 @@ func (r *JobRunner) Run(owner client.Object) (ctrl.Result, error) {
 
 		*jh.HashField = jobHash
 
-		if i == len(r.jobs) {
+		if i == len(r.jobs)-1 && r.readyField != nil {
 			*r.readyField = true
 		}
 
