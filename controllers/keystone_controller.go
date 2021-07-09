@@ -94,7 +94,7 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.DBSyncJobHash, keystone.DBSyncJob(instance))
-	jobs.Add(&instance.Status.BootstrapJobHash, keystone.DBSyncJob(instance))
+	jobs.Add(&instance.Status.BootstrapJobHash, keystone.BootstrapJob(instance))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
