@@ -127,7 +127,7 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		cinder = nil
 	}
 
-	cm := nova.ConfigMap(instance)
+	cm := nova.ConfigMap(instance, cinder)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
 	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
 		return ctrl.Result{}, err
@@ -282,9 +282,9 @@ func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openst
 			if cephSpec := backend.Ceph; cephSpec != nil {
 				cephSecrets.Append(cephSpec.Secret)
 
-				// TODO sort these out
-				// envVars = append(envVars, template.EnvVar("LIBVIRT_CEPH_CINDER_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
-				// envVars = append(envVars, template.EnvVar("CEPH_CINDER_USER", cephSpec.ClientName))
+				// TODO support multiple ceph backends
+				envVars = append(envVars, template.EnvVar("LIBVIRT_CEPH_CINDER_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
+				envVars = append(envVars, template.EnvVar("CEPH_CINDER_USER", cephSpec.ClientName))
 			}
 		}
 	}
@@ -316,9 +316,9 @@ func (r *NovaReconciler) reconcileCompute(ctx context.Context, instance *opensta
 			if cephSpec := backend.Ceph; cephSpec != nil {
 				cephSecrets.Append(cephSpec.Secret)
 
-				// TODO sort these out
-				// envVars = append(envVars, template.EnvVar("OS_LIBVIRT__RBD_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
-				// envVars = append(envVars, template.EnvVar("OS_LIBVIRT__RBD_USER", cephSpec.ClientName))
+				// TODO support multiple ceph backends
+				envVars = append(envVars, template.EnvVar("OS_LIBVIRT__RBD_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
+				envVars = append(envVars, template.EnvVar("OS_LIBVIRT__RBD_USER", cephSpec.ClientName))
 			}
 		}
 	}

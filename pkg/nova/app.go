@@ -17,11 +17,23 @@ const (
 	AppLabel = "nova"
 )
 
-func ConfigMap(instance *openstackv1beta1.Nova) *corev1.ConfigMap {
+func ConfigMap(instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["nova.conf"] = template.MustReadFile(AppLabel, "nova.conf")
+	cfg := template.MustLoadINI(AppLabel, "nova.conf")
+
+	if cinder != nil {
+		for _, backend := range cinder.Spec.Backends {
+			if cephSpec := backend.Ceph; cephSpec != nil {
+				// TODO support multiple ceph backends
+				cfg.Section("libvirt").NewKey("rbd_secret_uuid", "74a0b63e-041d-4040-9398-3704e4cf8260")
+				cfg.Section("libvirt").NewKey("rbd_user", cephSpec.ClientName)
+			}
+		}
+	}
+
+	cm.Data["nova.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm
 }
