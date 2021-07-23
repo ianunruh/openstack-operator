@@ -62,9 +62,8 @@ func ClientSecret(name, namespace, clientName string, keyring []byte, monHosts [
 func GetCephMonitorAddrs(ctx context.Context, c client.Client, namespace string) ([]string, error) {
 	monLabels := labels.Set{"ceph_daemon_type": "mon"}
 
-	// TODO prefer mon svc IPs if they exist
-	var monPods corev1.PodList
-	if err := c.List(ctx, &monPods, &client.ListOptions{
+	var monServices corev1.ServiceList
+	if err := c.List(ctx, &monServices, &client.ListOptions{
 		Namespace:     namespace,
 		LabelSelector: monLabels.AsSelector(),
 	}); err != nil {
@@ -72,8 +71,8 @@ func GetCephMonitorAddrs(ctx context.Context, c client.Client, namespace string)
 	}
 
 	var addrs []string
-	for _, pod := range monPods.Items {
-		addrs = append(addrs, pod.Status.PodIP)
+	for _, svc := range monServices.Items {
+		addrs = append(addrs, svc.Spec.ClusterIP)
 	}
 
 	return addrs, nil
