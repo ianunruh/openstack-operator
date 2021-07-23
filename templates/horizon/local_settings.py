@@ -8,6 +8,8 @@ from openstack_dashboard.settings import HORIZON_CONFIG
 
 DEBUG = False
 
+OPENSTACK_ENDPOINT_TYPE = 'internalURL'
+
 # This setting controls whether or not compression is enabled. Disabling
 # compression makes Horizon considerably slower, but makes it much easier
 # to debug JS and CSS changes
