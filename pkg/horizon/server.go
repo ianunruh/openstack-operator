@@ -85,6 +85,7 @@ func ServerIngress(instance *openstackv1beta1.Horizon) *netv1.Ingress {
 
 	ingress := template.GenericIngress(name, instance.Namespace, instance.Spec.Server.Ingress, labels)
 	ingress.Annotations = template.MergeStringMaps(ingress.Annotations, map[string]string{
+		"nginx.ingress.kubernetes.io/app-root":        "/horizon",
 		"nginx.ingress.kubernetes.io/proxy-body-size": "0",
 	})
 
