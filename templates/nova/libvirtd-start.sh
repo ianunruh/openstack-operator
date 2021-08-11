@@ -18,10 +18,10 @@ fi
 
 rm -f /var/run/libvirtd.pid
 
-# if [[ -c /dev/kvm ]]; then
-#     chmod 660 /dev/kvm
-#     chown root:kvm /dev/kvm
-# fi
+if [[ -c /dev/kvm ]]; then
+    chmod 660 /dev/kvm
+    chown root:kvm /dev/kvm
+fi
 
 #Setup Cgroups to use when breaking out of Kubernetes defined groups
 CGROUPS=""
@@ -63,7 +63,7 @@ done
 if [ -n "${LIBVIRT_CEPH_CINDER_SECRET_UUID}" ] ; then
   SECRET_XML_PATH=/tmp/libvirt-ceph-secret.xml
 
-  CEPH_CLIENT_KEY=$(awk '/key/{print $3}' /etc/ceph/keyring)
+  CEPH_CLIENT_KEY=$(awk '/key/{print $3}' /etc/ceph/${CEPH_CINDER_SECRET}/keyring)
 
   cat > $SECRET_XML_PATH <<EOF
 <secret ephemeral="no" private="no">

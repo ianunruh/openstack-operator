@@ -285,6 +285,7 @@ func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openst
 				// TODO support multiple ceph backends
 				envVars = append(envVars, template.EnvVar("LIBVIRT_CEPH_CINDER_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
 				envVars = append(envVars, template.EnvVar("CEPH_CINDER_USER", cephSpec.ClientName))
+				envVars = append(envVars, template.EnvVar("CEPH_CINDER_SECRET", cephSpec.Secret))
 			}
 		}
 	}
