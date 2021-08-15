@@ -29,6 +29,10 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 		TimeoutSeconds:      5,
 	}
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-neutron", "/etc/neutron/neutron.conf", "neutron.conf"),
+	}
+
 	deploy := template.GenericDeployment(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -40,7 +44,6 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 				Command: []string{
 					"neutron-server",
 					"--config-file=/etc/neutron/neutron.conf",
-					"--config-file=/etc/neutron/plugins/ml2/ml2_conf.ini",
 				},
 				Env: env,
 				Ports: []corev1.ContainerPort{
@@ -48,18 +51,7 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 				},
 				LivenessProbe:  probe,
 				ReadinessProbe: probe,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-neutron",
-						MountPath: "/etc/neutron/neutron.conf",
-						SubPath:   "neutron.conf",
-					},
-					{
-						Name:      "etc-neutron",
-						MountPath: "/etc/neutron/plugins/ml2/ml2_conf.ini",
-						SubPath:   "ml2_conf.ini",
-					},
-				},
+				VolumeMounts:   volumeMounts,
 			},
 		},
 		Volumes: volumes,

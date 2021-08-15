@@ -22,6 +22,20 @@ func FieldEnvVar(name, fieldPath string) corev1.EnvVar {
 	}
 }
 
+func ConfigMapEnvVar(name, cmName, cmKey string) corev1.EnvVar {
+	return corev1.EnvVar{
+		Name: name,
+		ValueFrom: &corev1.EnvVarSource{
+			ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+				LocalObjectReference: corev1.LocalObjectReference{
+					Name: cmName,
+				},
+				Key: cmKey,
+			},
+		},
+	}
+}
+
 func SecretEnvVar(name, secretName, secretKey string) corev1.EnvVar {
 	return corev1.EnvVar{
 		Name: name,
@@ -31,6 +45,16 @@ func SecretEnvVar(name, secretName, secretKey string) corev1.EnvVar {
 					Name: secretName,
 				},
 				Key: secretKey,
+			},
+		},
+	}
+}
+
+func EnvFromConfigMap(name string) corev1.EnvFromSource {
+	return corev1.EnvFromSource{
+		ConfigMapRef: &corev1.ConfigMapEnvSource{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: name,
 			},
 		},
 	}
@@ -105,5 +129,38 @@ func PersistentVolume(name, claimName string) corev1.Volume {
 				ClaimName: claimName,
 			},
 		},
+	}
+}
+
+func VolumeMount(name, mountPath string) corev1.VolumeMount {
+	return corev1.VolumeMount{
+		Name:      name,
+		MountPath: mountPath,
+	}
+}
+
+func SubPathVolumeMount(name, mountPath, subPath string) corev1.VolumeMount {
+	return corev1.VolumeMount{
+		Name:      name,
+		MountPath: mountPath,
+		SubPath:   subPath,
+	}
+}
+
+func BidirectionalVolumeMount(name, mountPath string) corev1.VolumeMount {
+	bidirectional := corev1.MountPropagationBidirectional
+
+	return corev1.VolumeMount{
+		Name:             name,
+		MountPath:        mountPath,
+		MountPropagation: &bidirectional,
+	}
+}
+
+func ReadOnlyVolumeMount(name, mountPath string) corev1.VolumeMount {
+	return corev1.VolumeMount{
+		Name:      name,
+		MountPath: mountPath,
+		ReadOnly:  true,
 	}
 }

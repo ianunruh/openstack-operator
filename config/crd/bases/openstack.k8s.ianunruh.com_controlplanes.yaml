@@ -626,39 +626,8 @@ spec:
                     - name
                     - secret
                     type: object
-                  dhcpAgent:
-                    properties:
-                      nodeSelector:
-                        additionalProperties:
-                          type: string
-                        type: object
-                    required:
-                    - nodeSelector
-                    type: object
                   image:
                     type: string
-                  l3Agent:
-                    properties:
-                      nodeSelector:
-                        additionalProperties:
-                          type: string
-                        type: object
-                    required:
-                    - nodeSelector
-                    type: object
-                  linuxBridgeAgent:
-                    properties:
-                      nodeSelector:
-                        additionalProperties:
-                          type: string
-                        type: object
-                      physicalInterfaceMappings:
-                        items:
-                          type: string
-                        type: array
-                    required:
-                    - nodeSelector
-                    type: object
                   metadataAgent:
                     properties:
                       nodeSelector:
@@ -688,10 +657,7 @@ spec:
                 required:
                 - broker
                 - database
-                - dhcpAgent
                 - image
-                - l3Agent
-                - linuxBridgeAgent
                 - metadataAgent
                 type: object
               nova:

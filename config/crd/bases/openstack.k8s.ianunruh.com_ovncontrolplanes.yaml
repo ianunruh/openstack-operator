@@ -6,20 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: neutrons.openstack.k8s.ianunruh.com
+  name: ovncontrolplanes.openstack.k8s.ianunruh.com
 spec:
   group: openstack.k8s.ianunruh.com
   names:
-    kind: Neutron
-    listKind: NeutronList
-    plural: neutrons
-    singular: neutron
+    kind: OVNControlPlane
+    listKind: OVNControlPlaneList
+    plural: ovncontrolplanes
+    singular: ovncontrolplane
   scope: Namespaced
   versions:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Neutron is the Schema for the neutrons API
+        description: OVNControlPlane is the Schema for the ovncontrolplanes API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,42 +34,11 @@ spec:
           metadata:
             type: object
           spec:
-            description: NeutronSpec defines the desired state of Neutron
+            description: OVNControlPlaneSpec defines the desired state of OVNControlPlane
             properties:
-              broker:
-                description: RabbitMQUserSpec defines the desired state of RabbitMQUser
-                properties:
-                  cluster:
-                    type: string
-                  name:
-                    type: string
-                  secret:
-                    type: string
-                  virtualHost:
-                    type: string
-                required:
-                - cluster
-                - name
-                - secret
-                - virtualHost
-                type: object
-              database:
-                description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
-                properties:
-                  cluster:
-                    type: string
-                  name:
-                    type: string
-                  secret:
-                    type: string
-                required:
-                - cluster
-                - name
-                - secret
-                type: object
               image:
                 type: string
-              metadataAgent:
+              node:
                 properties:
                   nodeSelector:
                     additionalProperties:
@@ -78,34 +47,50 @@ spec:
                 required:
                 - nodeSelector
                 type: object
-              server:
+              ovsdbNorth:
                 properties:
-                  ingress:
+                  volume:
                     properties:
-                      annotations:
-                        additionalProperties:
+                      accessModes:
+                        items:
                           type: string
-                        type: object
-                      host:
+                        type: array
+                      capacity:
                         type: string
-                      tlsSecretName:
+                      storageClass:
                         type: string
+                    required:
+                    - capacity
                     type: object
-                  replicas:
-                    format: int32
-                    type: integer
+                required:
+                - volume
+                type: object
+              ovsdbSouth:
+                properties:
+                  volume:
+                    properties:
+                      accessModes:
+                        items:
+                          type: string
+                        type: array
+                      capacity:
+                        type: string
+                      storageClass:
+                        type: string
+                    required:
+                    - capacity
+                    type: object
+                required:
+                - volume
                 type: object
             required:
-            - broker
-            - database
             - image
-            - metadataAgent
+            - node
+            - ovsdbNorth
+            - ovsdbSouth
             type: object
           status:
-            description: NeutronStatus defines the observed state of Neutron
-            properties:
-              dbSyncJobHash:
-                type: string
+            description: OVNControlPlaneStatus defines the observed state of OVNControlPlane
             type: object
         type: object
     served: true

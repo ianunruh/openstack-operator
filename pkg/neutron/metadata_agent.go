@@ -15,19 +15,16 @@ const (
 func MetadataAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, MetadataAgentComponentLabel)
 
-	shareProcessNamespace := true
-
-	readOnlyRootFilesystem := true
 	privileged := true
 
-	mountPropagation := corev1.MountPropagationBidirectional
-
 	extraVolumes := []corev1.Volume{
-		template.EmptyDirVolume("pod-tmp"),
-		template.EmptyDirVolume("pod-shared"),
-		template.EmptyDirVolume("pod-var-lib-neutron"),
 		template.HostPathVolume("host-run-netns", "/run/netns"),
-		template.HostPathVolume("host-var-lib-neutron-metadata-proxy", "/var/lib/neutron/metadata-proxy"),
+	}
+
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-neutron", "/etc/neutron/neutron.conf", "neutron.conf"),
+		template.SubPathVolumeMount("etc-neutron", "/etc/neutron/neutron_ovn_metadata_agent.ini", "neutron_ovn_metadata_agent.ini"),
+		template.BidirectionalVolumeMount("host-run-netns", "/run/netns"),
 	}
 
 	ds := template.GenericDaemonSet(template.Component{
@@ -39,54 +36,15 @@ func MetadataAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.Env
 				Name:  "agent",
 				Image: instance.Spec.Image,
 				Command: []string{
-					"neutron-metadata-agent",
+					"neutron-ovn-metadata-agent",
 					"--config-file=/etc/neutron/neutron.conf",
-					"--config-file=/etc/neutron/plugins/ml2/ml2_conf.ini",
-					"--config-file=/etc/neutron/metadata_agent.ini",
+					"--config-file=/etc/neutron/neutron_ovn_metadata_agent.ini",
 				},
 				Env: env,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-neutron",
-						MountPath: "/etc/neutron/neutron.conf",
-						SubPath:   "neutron.conf",
-					},
-					{
-						Name:      "etc-neutron",
-						MountPath: "/etc/neutron/plugins/ml2/ml2_conf.ini",
-						SubPath:   "ml2_conf.ini",
-					},
-					{
-						Name:      "etc-neutron",
-						MountPath: "/etc/neutron/metadata_agent.ini",
-						SubPath:   "metadata_agent.ini",
-					},
-					{
-						Name:      "pod-tmp",
-						MountPath: "/tmp",
-					},
-					{
-						Name:      "pod-shared",
-						MountPath: "/tmp/pod-shared",
-					},
-					{
-						Name:      "pod-var-lib-neutron",
-						MountPath: "/var/lib/neutron",
-					},
-					{
-						Name:             "host-run-netns",
-						MountPath:        "/run/netns",
-						MountPropagation: &mountPropagation,
-					},
-					{
-						Name:      "host-var-lib-neutron-metadata-proxy",
-						MountPath: "/var/lib/neutron/metadata-proxy",
-					},
-				},
 				SecurityContext: &corev1.SecurityContext{
-					Privileged:             &privileged,
-					ReadOnlyRootFilesystem: &readOnlyRootFilesystem,
+					Privileged: &privileged,
 				},
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: append(volumes, extraVolumes...),
@@ -96,7 +54,6 @@ func MetadataAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.Env
 
 	ds.Spec.Template.Spec.DNSPolicy = corev1.DNSClusterFirstWithHostNet
 	ds.Spec.Template.Spec.HostNetwork = true
-	ds.Spec.Template.Spec.ShareProcessNamespace = &shareProcessNamespace
 
 	return ds
 }

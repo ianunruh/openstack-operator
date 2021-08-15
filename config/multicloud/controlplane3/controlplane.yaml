@@ -32,15 +32,6 @@ spec:
       nodeSelector:
         openstack/cloud: openstack3
   neutron:
-    linuxBridgeAgent:
-      nodeSelector:
-        openstack/cloud: openstack3
-    dhcpAgent:
-      nodeSelector:
-        openstack/cloud: openstack3
-    l3Agent:
-      nodeSelector:
-        openstack/cloud: openstack3
     metadataAgent:
       nodeSelector:
         openstack/cloud: openstack3

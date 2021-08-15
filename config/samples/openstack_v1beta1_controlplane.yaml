@@ -83,18 +83,6 @@ spec:
       virtualHost: openstack
   neutron:
     image: ianunruh/neutron:latest
-    linuxBridgeAgent:
-      nodeSelector:
-        openstack/cloud: openstack
-        openstack/network-agent: linuxbridge
-    dhcpAgent:
-      nodeSelector:
-        openstack/cloud: openstack
-        openstack/network-node: enabled
-    l3Agent:
-      nodeSelector:
-        openstack/cloud: openstack
-        openstack/network-node: enabled
     metadataAgent:
       nodeSelector:
         openstack/cloud: openstack

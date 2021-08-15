@@ -1,5 +1,9 @@
 domain: k8s.ianunruh.com
-layout: go.kubebuilder.io/v3
+layout:
+- go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
 projectName: openstack-operator
 repo: github.com/ianunruh/openstack-operator
 resources:
@@ -156,7 +160,13 @@ resources:
   kind: Barbican
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
+  group: openstack
+  kind: OVNControlPlane
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
+  version: v1beta1
 version: "3"
-plugins:
-  manifests.sdk.operatorframework.io/v2: {}
-  scorecard.sdk.operatorframework.io/v2: {}
