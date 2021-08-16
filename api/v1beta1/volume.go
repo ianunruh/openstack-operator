@@ -10,5 +10,5 @@ type VolumeSpec struct {
 	StorageClass *string `json:"storageClass,omitempty"`
 
 	// +optional
-	AccessModes []corev1.PersistentVolumeAccessMode `json:"accessModes,omitEmpty"`
+	AccessModes []corev1.PersistentVolumeAccessMode `json:"accessModes,omitempty"`
 }
