@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/util/rand"
 )
 
@@ -29,6 +30,10 @@ func SetAppliedHash(obj metav1.Object, hash string) {
 		obj.SetAnnotations(ann)
 	}
 	ann[AppliedHashAnnotation] = hash
+}
+
+func SetAppliedHashUnstructured(instance *unstructured.Unstructured, hash string) {
+	unstructured.SetNestedField(instance.UnstructuredContent(), hash, "metadata", "annotations", AppliedHashAnnotation)
 }
 
 // ObjectHash creates a deep object hash and return it as a safe encoded string

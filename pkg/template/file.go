@@ -119,7 +119,7 @@ func EnsureResource(ctx context.Context, c client.Client, instance *unstructured
 			return err
 		}
 
-		SetAppliedHash(instance, hash)
+		SetAppliedHashUnstructured(instance, hash)
 
 		log.Info("Creating Resource", fields...)
 		return c.Create(ctx, instance)
@@ -130,7 +130,8 @@ func EnsureResource(ctx context.Context, c client.Client, instance *unstructured
 		}
 
 		unstructured.SetNestedMap(instance.UnstructuredContent(), intendedSpec, "spec")
-		SetAppliedHash(instance, hash)
+
+		SetAppliedHashUnstructured(instance, hash)
 
 		log.Info("Updating Resource", fields...)
 		return c.Update(ctx, instance)
