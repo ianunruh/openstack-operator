@@ -1,0 +1,16 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Name }}
+spec:
+  isCA: true
+  commonName: {{ .Name }}
+  secretName: {{ .SecretName }}
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: {{ .IssuerName }}
+    kind: Issuer
+    group: cert-manager.io

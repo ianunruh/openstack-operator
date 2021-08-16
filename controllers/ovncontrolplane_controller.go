@@ -63,6 +63,11 @@ func (r *OVNControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
+	pkiResources := ovn.PKIResources(instance)
+	if err := template.EnsureResources(ctx, r.Client, pkiResources, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	ovsdbNorthSvc, err := r.reconcileOVSDB(ctx, instance, ovn.OVSDBNorth, log)
 	if err != nil {
 		return ctrl.Result{}, err
