@@ -45,6 +45,8 @@ type ControlPlaneSpec struct {
 	Magnum MagnumSpec `json:"magnum"`
 	// +optional
 	Barbican BarbicanSpec `json:"barbican"`
+
+	OVN OVNControlPlaneSpec `json:"ovn"`
 }
 
 type ControlPlaneIngressSpec struct {

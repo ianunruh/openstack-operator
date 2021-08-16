@@ -39,6 +39,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/memcached"
 	"github.com/ianunruh/openstack-operator/pkg/neutron"
 	"github.com/ianunruh/openstack-operator/pkg/nova"
+	"github.com/ianunruh/openstack-operator/pkg/ovn"
 	"github.com/ianunruh/openstack-operator/pkg/placement"
 	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
 )
@@ -65,6 +66,12 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		if errors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
+		return ctrl.Result{}, err
+	}
+
+	ovnControlPlane := controlplane.OVNControlPlane(instance)
+	controllerutil.SetControllerReference(instance, ovnControlPlane, r.Scheme)
+	if err := ovn.EnsureControlPlane(ctx, r.Client, ovnControlPlane, log); err != nil {
 		return ctrl.Result{}, err
 	}
 

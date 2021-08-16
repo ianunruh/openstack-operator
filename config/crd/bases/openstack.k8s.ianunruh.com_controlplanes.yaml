@@ -840,6 +840,70 @@ spec:
                 - image
                 - libvirtd
                 type: object
+              ovn:
+                description: OVNControlPlaneSpec defines the desired state of OVNControlPlane
+                properties:
+                  image:
+                    type: string
+                  node:
+                    properties:
+                      bridgeMappings:
+                        items:
+                          type: string
+                        type: array
+                      bridgePorts:
+                        items:
+                          type: string
+                        type: array
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    required:
+                    - nodeSelector
+                    type: object
+                  ovsdbNorth:
+                    properties:
+                      volume:
+                        properties:
+                          accessModes:
+                            items:
+                              type: string
+                            type: array
+                          capacity:
+                            type: string
+                          storageClass:
+                            type: string
+                        required:
+                        - capacity
+                        type: object
+                    required:
+                    - volume
+                    type: object
+                  ovsdbSouth:
+                    properties:
+                      volume:
+                        properties:
+                          accessModes:
+                            items:
+                              type: string
+                            type: array
+                          capacity:
+                            type: string
+                          storageClass:
+                            type: string
+                        required:
+                        - capacity
+                        type: object
+                    required:
+                    - volume
+                    type: object
+                required:
+                - image
+                - node
+                - ovsdbNorth
+                - ovsdbSouth
+                type: object
               placement:
                 description: PlacementSpec defines the desired state of Placement
                 properties:
@@ -891,6 +955,7 @@ spec:
             - keystone
             - neutron
             - nova
+            - ovn
             - placement
             type: object
           status:
