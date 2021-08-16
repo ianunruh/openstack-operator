@@ -40,6 +40,14 @@ spec:
                 type: string
               node:
                 properties:
+                  bridgeMappings:
+                    items:
+                      type: string
+                    type: array
+                  bridgePorts:
+                    items:
+                      type: string
+                    type: array
                   nodeSelector:
                     additionalProperties:
                       type: string

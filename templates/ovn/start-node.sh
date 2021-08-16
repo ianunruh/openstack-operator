@@ -17,6 +17,7 @@ trap quit SIGTERM
 # TODO wait for vswitchd to start
 sleep 5
 
+NIC=`ip -4 route | grep default | awk 'BEGIN{FS="dev "}{print $2}' | cut -d" " -f1`
 OVN_NODE_IP=`ip -4 -o addr show "${NIC}" | awk 'BEGIN{FS="inet "}{print $2}' | cut -d" " -f1 | cut -d"/" -f1`
 
 ovs-vsctl set open . external_ids:hostname=${HOSTNAME}

@@ -1,6 +1,8 @@
 package ovn
 
 import (
+	"strings"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -14,6 +16,18 @@ const (
 
 func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, OVSNodeComponentLabel)
+
+	env := []corev1.EnvVar{
+		template.FieldEnvVar("HOSTNAME", "spec.nodeName"),
+	}
+
+	cfg := instance.Spec.Node
+	if len(cfg.BridgeMappings) > 0 {
+		env = append(env,
+			template.EnvVar("BRIDGE_MAPPINGS", strings.Join(cfg.BridgeMappings, ",")),
+			template.EnvVar("BRIDGE_PORTS", strings.Join(cfg.BridgePorts, ",")),
+			template.EnvVar("GATEWAY", "true"))
+	}
 
 	privileged := true
 
@@ -30,14 +44,7 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane) *appsv1.Daemon
 					"-c",
 					template.MustReadFile(AppLabel, "start-node.sh"),
 				},
-				Env: []corev1.EnvVar{
-					// TODO make configurable
-					template.EnvVar("NIC", "eno1"),
-					template.EnvVar("BRIDGE_MAPPINGS", "external:br-ex"),
-					template.EnvVar("BRIDGE_PORTS", "br-ex:vlan3000"),
-					template.EnvVar("GATEWAY", "true"),
-					template.FieldEnvVar("HOSTNAME", "spec.nodeName"),
-				},
+				Env: env,
 				EnvFrom: []corev1.EnvFromSource{
 					template.EnvFromConfigMap(template.Combine(instance.Name, "ovsdb")),
 				},

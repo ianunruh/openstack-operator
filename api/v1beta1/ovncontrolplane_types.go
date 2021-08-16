@@ -36,6 +36,12 @@ type OVSDBSpec struct {
 
 type OVNNodeSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector"`
+
+	// +optional
+	BridgeMappings []string `json:"bridgeMappings"`
+
+	// +optional
+	BridgePorts []string `json:"bridgePorts"`
 }
 
 // OVNControlPlaneStatus defines the observed state of OVNControlPlane

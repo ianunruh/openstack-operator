@@ -7,6 +7,10 @@ spec:
   node:
     nodeSelector:
       openstack/network-agent: ovn
+    bridgeMappings:
+    - external:br-ex
+    bridgePorts:
+    - br-ex:vlan3000
   ovsdbNorth:
     volume:
       capacity: 20Gi
