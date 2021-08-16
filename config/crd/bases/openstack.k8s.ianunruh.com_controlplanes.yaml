@@ -840,6 +840,95 @@ spec:
                 - image
                 - libvirtd
                 type: object
+              octavia:
+                description: OctaviaSpec defines the desired state of Octavia
+                properties:
+                  amphora:
+                    properties:
+                      imageURL:
+                        type: string
+                    required:
+                    - imageURL
+                    type: object
+                  api:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                          tlsSecretName:
+                            type: string
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                  broker:
+                    description: RabbitMQUserSpec defines the desired state of RabbitMQUser
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                      virtualHost:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    - virtualHost
+                    type: object
+                  database:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  healthManager:
+                    properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    required:
+                    - nodeSelector
+                    type: object
+                  housekeeping:
+                    properties:
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                  image:
+                    type: string
+                  worker:
+                    properties:
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                required:
+                - amphora
+                - broker
+                - database
+                - healthManager
+                - image
+                type: object
               ovn:
                 description: OVNControlPlaneSpec defines the desired state of OVNControlPlane
                 properties:

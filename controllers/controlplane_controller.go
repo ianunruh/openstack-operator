@@ -39,6 +39,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/memcached"
 	"github.com/ianunruh/openstack-operator/pkg/neutron"
 	"github.com/ianunruh/openstack-operator/pkg/nova"
+	"github.com/ianunruh/openstack-operator/pkg/octavia"
 	"github.com/ianunruh/openstack-operator/pkg/ovn"
 	"github.com/ianunruh/openstack-operator/pkg/placement"
 	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
@@ -157,6 +158,14 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		containerInfra := controlplane.Magnum(instance)
 		controllerutil.SetControllerReference(instance, containerInfra, r.Scheme)
 		if err := magnum.EnsureMagnum(ctx, r.Client, containerInfra, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	if instance.Spec.Octavia.Image != "" {
+		loadBalancer := controlplane.Octavia(instance)
+		controllerutil.SetControllerReference(instance, loadBalancer, r.Scheme)
+		if err := octavia.EnsureOctavia(ctx, r.Client, loadBalancer, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}

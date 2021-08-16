@@ -1,0 +1,24 @@
+# permissions for end users to edit octavia.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: octavia-editor-role
+rules:
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - octavia
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - octavia/status
+  verbs:
+  - get

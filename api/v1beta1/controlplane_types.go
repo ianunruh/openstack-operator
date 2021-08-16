@@ -47,6 +47,9 @@ type ControlPlaneSpec struct {
 	Barbican BarbicanSpec `json:"barbican"`
 
 	OVN OVNControlPlaneSpec `json:"ovn"`
+
+	// +optional
+	Octavia OctaviaSpec `json:"octavia"`
 }
 
 type ControlPlaneIngressSpec struct {

@@ -18,4 +18,5 @@ resources:
 - openstack_v1beta1_magnum.yaml
 - openstack_v1beta1_barbican.yaml
 - openstack_v1beta1_ovncontrolplane.yaml
+- openstack_v1beta1_octavia.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples
