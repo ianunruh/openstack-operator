@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/go-logr/logr"
@@ -55,10 +56,13 @@ func RenderFile(app, filename string, values interface{}) (string, error) {
 	}
 
 	var buff bytes.Buffer
-	tmpl, err := template.New("tmp").Parse(file)
+	tmpl, err := template.New("tmp").Funcs(template.FuncMap{
+		"StringsJoin": strings.Join,
+	}).Parse(file)
 	if err != nil {
 		return "", err
 	}
+
 	err = tmpl.Execute(&buff, values)
 	if err != nil {
 		return "", err

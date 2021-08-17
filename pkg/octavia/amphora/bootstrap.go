@@ -1,4 +1,4 @@
-package octavia
+package amphora
 
 import (
 	"context"
@@ -25,7 +25,7 @@ const (
 	amphoraSecurityGroupName = "amphora"
 )
 
-func BootstrapAmphora(ctx context.Context, instance *openstackv1beta1.Octavia, c client.Client, log logr.Logger) error {
+func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client.Client, log logr.Logger) error {
 	adminSecret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      template.Combine(instance.Name, "keystone"),
@@ -68,7 +68,7 @@ func BootstrapAmphora(ctx context.Context, instance *openstackv1beta1.Octavia, c
 		return err
 	}
 
-	b := &Bootstrap{
+	b := &bootstrap{
 		client:   c,
 		instance: instance,
 		log:      log,
@@ -81,7 +81,7 @@ func BootstrapAmphora(ctx context.Context, instance *openstackv1beta1.Octavia, c
 	return b.EnsureAll(ctx)
 }
 
-type Bootstrap struct {
+type bootstrap struct {
 	client   client.Client
 	instance *openstackv1beta1.Octavia
 	log      logr.Logger
@@ -91,7 +91,7 @@ type Bootstrap struct {
 	network *gophercloud.ServiceClient
 }
 
-func (b *Bootstrap) EnsureAll(ctx context.Context) error {
+func (b *bootstrap) EnsureAll(ctx context.Context) error {
 	if err := b.EnsureFlavor(ctx); err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func (b *Bootstrap) EnsureAll(ctx context.Context) error {
 	return nil
 }
 
-func (b *Bootstrap) EnsureFlavor(ctx context.Context) error {
+func (b *bootstrap) EnsureFlavor(ctx context.Context) error {
 	if b.instance.Status.Amphora.FlavorID != "" {
 		return nil
 	}
@@ -141,7 +141,7 @@ func (b *Bootstrap) EnsureFlavor(ctx context.Context) error {
 	return nil
 }
 
-func (b *Bootstrap) EnsureImage(ctx context.Context) error {
+func (b *bootstrap) EnsureImage(ctx context.Context) error {
 	if b.instance.Status.Amphora.ImageProjectID != "" {
 		return nil
 	}
@@ -153,7 +153,7 @@ func (b *Bootstrap) EnsureImage(ctx context.Context) error {
 	return nil
 }
 
-func (b *Bootstrap) EnsureKeypair(ctx context.Context) error {
+func (b *bootstrap) EnsureKeypair(ctx context.Context) error {
 	result := keypairs.Get(b.compute, amphoraKeypairName, keypairs.GetOpts{})
 	if err := result.Err; err != nil {
 		if _, ok := err.(gophercloud.ErrDefault404); !ok {
@@ -169,8 +169,9 @@ func (b *Bootstrap) EnsureKeypair(ctx context.Context) error {
 	return nil
 }
 
-func (b *Bootstrap) EnsureNetwork(ctx context.Context) error {
+func (b *bootstrap) EnsureNetwork(ctx context.Context) error {
 	if len(b.instance.Status.Amphora.NetworkIDs) > 0 {
+		// TODO check if current exists, otherwise recreate
 		return nil
 	}
 
@@ -197,7 +198,7 @@ func (b *Bootstrap) EnsureNetwork(ctx context.Context) error {
 	return nil
 }
 
-func (b *Bootstrap) EnsureSecurityGroup(ctx context.Context) error {
+func (b *bootstrap) EnsureSecurityGroup(ctx context.Context) error {
 	if len(b.instance.Status.Amphora.SecurityGroupIDs) > 0 {
 		return nil
 	}

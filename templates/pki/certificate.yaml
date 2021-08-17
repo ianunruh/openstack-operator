@@ -5,9 +5,10 @@ metadata:
   name: {{ .Name }}
   namespace: {{ .Namespace }}
 spec:
-  isCA: true
+  isCA: {{ .IsCA }}
   commonName: {{ .Name }}
   secretName: {{ .SecretName }}
+  usages: [{{ StringsJoin .Usages ", " }}]
   privateKey:
     algorithm: ECDSA
     size: 256

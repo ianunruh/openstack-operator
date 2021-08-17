@@ -17,11 +17,12 @@ func PKIResources(instance *openstackv1beta1.OVNControlPlane) []*unstructured.Un
 }
 
 func CARootCertificate(instance *openstackv1beta1.OVNControlPlane) *unstructured.Unstructured {
-	return pki.CARootCertificate(pki.CertificateParams{
+	return pki.Certificate(pki.CertificateParams{
 		Name:       template.Combine(instance.Name, "ca-root"),
 		Namespace:  instance.Namespace,
 		SecretName: template.Combine(instance.Name, "ca-root"),
 		IssuerName: template.Combine(instance.Name, "self-signed"),
+		IsCA:       true,
 	})
 }
 

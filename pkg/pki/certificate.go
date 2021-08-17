@@ -11,9 +11,11 @@ type CertificateParams struct {
 	Namespace  string
 	SecretName string
 	IssuerName string
+	IsCA       bool
+	Usages     []string
 }
 
-func CARootCertificate(params CertificateParams) *unstructured.Unstructured {
-	manifest := template.MustRenderFile("pki", "certificate-ca-root.yaml", params)
+func Certificate(params CertificateParams) *unstructured.Unstructured {
+	manifest := template.MustRenderFile("pki", "certificate.yaml", params)
 	return template.MustDecodeManifest(manifest)
 }
