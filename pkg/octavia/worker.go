@@ -24,9 +24,10 @@ func WorkerDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, v
 	volumes = append(volumes, amphora.Volumes(instance)...)
 
 	deploy := template.GenericDeployment(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Replicas:  instance.Spec.Worker.Replicas,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		Replicas:     instance.Spec.Worker.Replicas,
+		NodeSelector: instance.Spec.Worker.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
 			RunAsUser: &appUID,
 			FSGroup:   &appUID,
@@ -50,6 +51,9 @@ func WorkerDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, v
 	})
 
 	deploy.Name = template.Combine(instance.Name, "worker")
+
+	deploy.Spec.Template.Spec.DNSPolicy = corev1.DNSClusterFirstWithHostNet
+	deploy.Spec.Template.Spec.HostNetwork = true
 
 	return deploy
 }

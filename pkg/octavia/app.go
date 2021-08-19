@@ -3,6 +3,7 @@ package octavia
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -18,7 +19,7 @@ const (
 )
 
 var (
-	appUID = int64(101)
+	appUID = int64(102)
 )
 
 func ConfigMap(instance *openstackv1beta1.Octavia) *corev1.ConfigMap {
@@ -27,12 +28,19 @@ func ConfigMap(instance *openstackv1beta1.Octavia) *corev1.ConfigMap {
 
 	cfg := template.MustLoadINI(AppLabel, "octavia.conf")
 
-	// TODO implement me
-	cfg.Section("controller_worker").NewKey("amp_image_owner_id", "")
-	cfg.Section("controller_worker").NewKey("amp_image_tag", "amphora")
-	cfg.Section("controller_worker").NewKey("amp_ssh_key_name", "")
-	cfg.Section("controller_worker").NewKey("amp_secgroup_list", "")
-	cfg.Section("controller_worker").NewKey("amp_boot_network_list", "")
+	amphora := instance.Status.Amphora
+
+	var healthManagerAddrs []string
+	for _, port := range amphora.HealthPorts {
+		healthManagerAddrs = append(healthManagerAddrs, fmt.Sprintf("%s:5555", port.IPAddress))
+	}
+
+	cfg.Section("controller_worker").NewKey("amp_flavor_id", amphora.FlavorID)
+	cfg.Section("controller_worker").NewKey("amp_image_owner_id", amphora.ImageProjectID)
+	cfg.Section("controller_worker").NewKey("amp_secgroup_list", strings.Join(amphora.SecurityGroupIDs, ","))
+	cfg.Section("controller_worker").NewKey("amp_boot_network_list", strings.Join(amphora.NetworkIDs, ","))
+
+	cfg.Section("health_manager").NewKey("controller_ip_port_list", strings.Join(healthManagerAddrs, ","))
 
 	cm.Data["octavia.conf"] = template.MustOutputINI(cfg).String()
 

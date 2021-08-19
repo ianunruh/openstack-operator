@@ -22,11 +22,13 @@ spec:
         cert-manager.io/cluster-issuer: letsencrypt-prod
   healthManager:
     nodeSelector:
-      openstack/network-node: enabled
+      openstack/octavia-controller: enabled
   housekeeping:
-    replicas: 1
+    nodeSelector:
+      openstack/octavia-controller: enabled
   worker:
-    replicas: 1
+    nodeSelector:
+      openstack/octavia-controller: enabled
   database:
     name: octavia
     secret: octavia-db

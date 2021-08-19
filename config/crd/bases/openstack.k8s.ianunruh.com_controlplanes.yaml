@@ -910,17 +910,29 @@ spec:
                     type: object
                   housekeeping:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
+                    required:
+                    - nodeSelector
                     type: object
                   image:
                     type: string
                   worker:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
+                    required:
+                    - nodeSelector
                     type: object
                 required:
                 - amphora

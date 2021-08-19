@@ -17,6 +17,10 @@ const (
 func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
+	}
+
 	probe := &corev1.Probe{
 		Handler: corev1.Handler{
 			HTTPGet: &corev1.HTTPGetAction{
@@ -51,13 +55,7 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 				},
 				LivenessProbe:  probe,
 				ReadinessProbe: probe,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-octavia",
-						SubPath:   "octavia.conf",
-						MountPath: "/etc/octavia/octavia.conf",
-					},
-				},
+				VolumeMounts:   volumeMounts,
 			},
 		},
 		Volumes: volumes,

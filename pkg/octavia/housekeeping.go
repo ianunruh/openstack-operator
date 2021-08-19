@@ -24,9 +24,10 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 	volumes = append(volumes, amphora.Volumes(instance)...)
 
 	deploy := template.GenericDeployment(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Replicas:  instance.Spec.Housekeeping.Replicas,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		Replicas:     instance.Spec.Housekeeping.Replicas,
+		NodeSelector: instance.Spec.Housekeeping.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
 			RunAsUser: &appUID,
 			FSGroup:   &appUID,
@@ -53,6 +54,9 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 	})
 
 	deploy.Name = template.Combine(instance.Name, "housekeeping")
+
+	deploy.Spec.Template.Spec.DNSPolicy = corev1.DNSClusterFirstWithHostNet
+	deploy.Spec.Template.Spec.HostNetwork = true
 
 	return deploy
 }

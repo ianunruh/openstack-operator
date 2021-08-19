@@ -102,17 +102,29 @@ spec:
                 type: object
               housekeeping:
                 properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   replicas:
                     format: int32
                     type: integer
+                required:
+                - nodeSelector
                 type: object
               image:
                 type: string
               worker:
                 properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   replicas:
                     format: int32
                     type: integer
+                required:
+                - nodeSelector
                 type: object
             required:
             - amphora
@@ -128,6 +140,25 @@ spec:
                 properties:
                   flavorID:
                     type: string
+                  healthPorts:
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        ipAddress:
+                          type: string
+                        macAddress:
+                          type: string
+                      required:
+                      - id
+                      - ipAddress
+                      - macAddress
+                      type: object
+                    type: array
+                  healthSecurityGroupIDs:
+                    items:
+                      type: string
+                    type: array
                   imageProjectID:
                     type: string
                   networkIDs:

@@ -117,14 +117,19 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err := keystone.EnsureUser(ctx, r.Client, keystoneUser, log); err != nil {
 		return ctrl.Result{}, err
 	}
+
+	if err := octavia.EnsureKeystoneRoles(ctx, instance, r.Client); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	if !keystoneUser.Status.Ready {
 		log.Info("Waiting on Keystone user to be available", "name", keystoneUser.Name)
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
-	// if err := amphora.Bootstrap(ctx, instance, r.Client, log); err != nil {
-	// 	return ctrl.Result{}, err
-	// }
+	if err := amphora.Bootstrap(ctx, instance, r.Client, log); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	cm := octavia.ConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
@@ -199,9 +204,9 @@ func (r *OctaviaReconciler) reconcileAPI(ctx context.Context, instance *openstac
 }
 
 func (r *OctaviaReconciler) reconcileHealthManager(ctx context.Context, instance *openstackv1beta1.Octavia, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
-	deploy := octavia.HealthManagerDeployment(instance, envVars, volumes)
-	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
-	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
+	ds := octavia.HealthManagerDaemonSet(instance, envVars, volumes)
+	controllerutil.SetControllerReference(instance, ds, r.Scheme)
+	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err
 	}
 

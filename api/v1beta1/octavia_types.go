@@ -58,11 +58,15 @@ type OctaviaHealthManagerSpec struct {
 }
 
 type OctaviaHousekeepingSpec struct {
+	NodeSelector map[string]string `json:"nodeSelector"`
+
 	// +optional
 	Replicas int32 `json:"replicas"`
 }
 
 type OctaviaWorkerSpec struct {
+	NodeSelector map[string]string `json:"nodeSelector"`
+
 	// +optional
 	Replicas int32 `json:"replicas"`
 }
@@ -88,6 +92,18 @@ type OctaviaAmphoraStatus struct {
 
 	// +optional
 	SecurityGroupIDs []string `json:"securityGroupIDs,omitempty"`
+
+	// +optional
+	HealthPorts []OctaviaAmphoraHealthPort `json:"healthPorts,omitempty"`
+
+	// +optional
+	HealthSecurityGroupIDs []string `json:"healthSecurityGroupIDs,omitempty"`
+}
+
+type OctaviaAmphoraHealthPort struct {
+	ID         string `json:"id"`
+	MACAddress string `json:"macAddress"`
+	IPAddress  string `json:"ipAddress"`
 }
 
 //+kubebuilder:object:root=true

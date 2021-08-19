@@ -13,17 +13,34 @@ const (
 	HealthManagerComponentLabel = "health-manager"
 )
 
-func HealthManagerDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
+func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, HealthManagerComponentLabel)
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
 	}
 
+	// openvswitch volumes
+	initVolumeMounts := []corev1.VolumeMount{
+		template.VolumeMount("host-var-run-openvswitch", "/var/run/openvswitch"),
+	}
+	volumeMounts = append(volumeMounts, initVolumeMounts...)
+	volumes = append(volumes,
+		template.HostPathVolume("host-var-run-openvswitch", "/var/run/openvswitch"))
+
+	// pki volumes
 	volumeMounts = append(volumeMounts, amphora.VolumeMounts(instance)...)
 	volumes = append(volumes, amphora.Volumes(instance)...)
 
-	deploy := template.GenericDeployment(template.Component{
+	// TODO support multiple replicas of health manager
+	port := instance.Status.Amphora.HealthPorts[0]
+
+	env = append(env,
+		template.EnvVar("OS_HEALTH_MANAGER__BIND_IP", port.IPAddress))
+
+	privileged := true
+
+	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
 		NodeSelector: instance.Spec.HealthManager.NodeSelector,
@@ -33,6 +50,23 @@ func HealthManagerDeployment(instance *openstackv1beta1.Octavia, env []corev1.En
 		// },
 		InitContainers: []corev1.Container{
 			amphora.InitContainer(instance.Spec.Image, volumeMounts),
+			{
+				Name:  "init-port",
+				Image: instance.Spec.Image,
+				Command: []string{
+					"bash",
+					"-c",
+					template.MustReadFile(AppLabel, "init-health-manager-port.sh"),
+				},
+				Env: []corev1.EnvVar{
+					template.EnvVar("HM_PORT_ID", port.ID),
+					template.EnvVar("HM_PORT_MAC", port.MACAddress),
+				},
+				SecurityContext: &corev1.SecurityContext{
+					Privileged: &privileged,
+				},
+				VolumeMounts: initVolumeMounts,
+			},
 		},
 		Containers: []corev1.Container{
 			{
@@ -42,14 +76,20 @@ func HealthManagerDeployment(instance *openstackv1beta1.Octavia, env []corev1.En
 					"octavia-health-manager",
 					"--config-file=/etc/octavia/octavia.conf",
 				},
-				Env:          env,
+				Env: env,
+				SecurityContext: &corev1.SecurityContext{
+					Privileged: &privileged,
+				},
 				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: volumes,
 	})
 
-	deploy.Name = template.Combine(instance.Name, "health-manager")
+	ds.Name = template.Combine(instance.Name, "health-manager")
 
-	return deploy
+	ds.Spec.Template.Spec.DNSPolicy = corev1.DNSClusterFirstWithHostNet
+	ds.Spec.Template.Spec.HostNetwork = true
+
+	return ds
 }
