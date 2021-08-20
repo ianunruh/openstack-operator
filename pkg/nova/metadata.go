@@ -24,7 +24,7 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 	// 			Port: intstr.FromInt(8775),
 	// 		},
 	// 	},
-	// 	InitialDelaySeconds: 10,
+	// 	InitialDelaySeconds: 5,
 	// 	PeriodSeconds:       10,
 	// 	TimeoutSeconds:      5,
 	// }
@@ -49,8 +49,8 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 8775},
 				},
-				// LivenessProbe:  probe,
-				// ReadinessProbe: probe,
+				// LivenessProbe: probe,
+				// StartupProbe:  probe,
 				VolumeMounts: volumeMounts,
 			},
 		},

@@ -25,7 +25,7 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 				Port: intstr.FromInt(8080),
 			},
 		},
-		InitialDelaySeconds: 10,
+		InitialDelaySeconds: 5,
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,
 	}
@@ -54,9 +54,9 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 80},
 				},
-				LivenessProbe:  probe,
-				ReadinessProbe: probe,
-				VolumeMounts:   volumeMounts,
+				LivenessProbe: probe,
+				StartupProbe:  probe,
+				VolumeMounts:  volumeMounts,
 			},
 		},
 		Volumes: volumes,

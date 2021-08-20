@@ -24,7 +24,7 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 				Port: intstr.FromInt(9696),
 			},
 		},
-		InitialDelaySeconds: 10,
+		InitialDelaySeconds: 5,
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,
 	}
@@ -49,9 +49,9 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 9696},
 				},
-				LivenessProbe:  probe,
-				ReadinessProbe: probe,
-				VolumeMounts:   volumeMounts,
+				LivenessProbe: probe,
+				StartupProbe:  probe,
+				VolumeMounts:  volumeMounts,
 			},
 		},
 		Volumes: volumes,

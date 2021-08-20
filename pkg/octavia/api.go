@@ -28,7 +28,7 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 				Port: intstr.FromInt(9876),
 			},
 		},
-		InitialDelaySeconds: 10,
+		InitialDelaySeconds: 5,
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,
 	}
@@ -53,9 +53,9 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 9876},
 				},
-				LivenessProbe:  probe,
-				ReadinessProbe: probe,
-				VolumeMounts:   volumeMounts,
+				LivenessProbe: probe,
+				StartupProbe:  probe,
+				VolumeMounts:  volumeMounts,
 			},
 		},
 		Volumes: volumes,

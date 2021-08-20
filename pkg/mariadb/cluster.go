@@ -57,8 +57,8 @@ func ClusterStatefulSet(instance *openstackv1beta1.MariaDB, configHash string) *
 				Ports: []corev1.ContainerPort{
 					{Name: "mysql", ContainerPort: 3306},
 				},
-				LivenessProbe:  probe,
-				ReadinessProbe: probe,
+				LivenessProbe: probe,
+				StartupProbe:  probe,
 				VolumeMounts: []corev1.VolumeMount{
 					{
 						Name:      "config",

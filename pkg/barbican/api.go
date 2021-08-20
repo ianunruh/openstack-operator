@@ -25,7 +25,7 @@ func APIDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, vol
 				Port: intstr.FromInt(9311),
 			},
 		},
-		InitialDelaySeconds: 10,
+		InitialDelaySeconds: 5,
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,
 	}
@@ -48,9 +48,9 @@ func APIDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, vol
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 9311},
 				},
-				LivenessProbe:  probe,
-				ReadinessProbe: probe,
-				VolumeMounts:   volumeMounts,
+				LivenessProbe: probe,
+				StartupProbe:  probe,
+				VolumeMounts:  volumeMounts,
 			},
 		},
 		Volumes: volumes,

@@ -25,7 +25,7 @@ func APIDeployment(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volum
 				Port: intstr.FromInt(8776),
 			},
 		},
-		InitialDelaySeconds: 10,
+		InitialDelaySeconds: 5,
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,
 	}
@@ -48,9 +48,9 @@ func APIDeployment(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volum
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 8776},
 				},
-				LivenessProbe:  probe,
-				ReadinessProbe: probe,
-				VolumeMounts:   volumeMounts,
+				LivenessProbe: probe,
+				StartupProbe:  probe,
+				VolumeMounts:  volumeMounts,
 			},
 		},
 		Volumes: volumes,

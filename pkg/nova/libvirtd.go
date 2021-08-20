@@ -37,6 +37,9 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, vol
 				Command: []string{"bash", "-c", "/usr/bin/virsh list"},
 			},
 		},
+		InitialDelaySeconds: 5,
+		PeriodSeconds:       10,
+		TimeoutSeconds:      5,
 	}
 
 	extraVolumeMounts := []corev1.VolumeMount{
@@ -95,9 +98,9 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, vol
 						},
 					},
 				},
-				Env:            env,
-				ReadinessProbe: probe,
-				LivenessProbe:  probe,
+				Env:           env,
+				LivenessProbe: probe,
+				StartupProbe:  probe,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 				},

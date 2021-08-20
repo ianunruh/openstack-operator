@@ -26,9 +26,10 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 				Port: intstr.FromInt(9292),
 			},
 		},
+		InitialDelaySeconds: 5,
+		PeriodSeconds:       10,
+		TimeoutSeconds:      5,
 	}
-
-	runAsUser := int64(64062)
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-glance", "/etc/glance/glance-api.conf", "glance-api.conf"),
@@ -58,8 +59,8 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 		Labels:    labels,
 		Replicas:  instance.Spec.API.Replicas,
 		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &runAsUser,
-			FSGroup:   &runAsUser,
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Containers: []corev1.Container{
 			{
@@ -77,9 +78,9 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 9292},
 				},
-				LivenessProbe:  probe,
-				ReadinessProbe: probe,
-				VolumeMounts:   volumeMounts,
+				LivenessProbe: probe,
+				StartupProbe:  probe,
+				VolumeMounts:  volumeMounts,
 			},
 		},
 		Volumes: volumes,
