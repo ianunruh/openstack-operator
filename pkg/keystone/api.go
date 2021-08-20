@@ -15,7 +15,7 @@ const (
 	APIComponentLabel = "api"
 )
 
-func APIDeployment(instance *openstackv1beta1.Keystone, configHash string) *appsv1.Deployment {
+func APIDeployment(instance *openstackv1beta1.Keystone, volumes []corev1.Volume, configHash string) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	probe := &corev1.Probe{
@@ -28,6 +28,12 @@ func APIDeployment(instance *openstackv1beta1.Keystone, configHash string) *apps
 		InitialDelaySeconds: 10,
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,
+	}
+
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-keystone", "/etc/keystone/keystone.conf", "keystone.conf"),
+		template.VolumeMount("credential-keys", "/etc/keystone/credential-keys"),
+		template.VolumeMount("fernet-keys", "/etc/keystone/fernet-keys"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -49,28 +55,10 @@ func APIDeployment(instance *openstackv1beta1.Keystone, configHash string) *apps
 				},
 				LivenessProbe:  probe,
 				ReadinessProbe: probe,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-keystone",
-						SubPath:   "keystone.conf",
-						MountPath: "/etc/keystone/keystone.conf",
-					},
-					{
-						Name:      "credential-keys",
-						MountPath: "/etc/keystone/credential-keys",
-					},
-					{
-						Name:      "fernet-keys",
-						MountPath: "/etc/keystone/fernet-keys",
-					},
-				},
+				VolumeMounts:   volumeMounts,
 			},
 		},
-		Volumes: []corev1.Volume{
-			template.ConfigMapVolume("etc-keystone", instance.Name, nil),
-			template.SecretVolume("credential-keys", template.Combine(instance.Name, "credential-keys"), nil),
-			template.SecretVolume("fernet-keys", template.Combine(instance.Name, "fernet-keys"), nil),
-		},
+		Volumes: volumes,
 	})
 
 	deploy.Name = template.Combine(instance.Name, "api")

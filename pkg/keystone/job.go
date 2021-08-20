@@ -10,11 +10,16 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func BootstrapJob(instance *openstackv1beta1.Keystone) *batchv1.Job {
+func BootstrapJob(instance *openstackv1beta1.Keystone, volumes []corev1.Volume) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
 
 	apiURL := fmt.Sprintf("https://%s/v3", instance.Spec.API.Ingress.Host)
 	apiInternalURL := fmt.Sprintf("http://%s-api.%s.svc:5000/v3", instance.Name, instance.Namespace)
+
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-keystone", "/etc/keystone/keystone.conf", "keystone.conf"),
+		template.VolumeMount("fernet-keys", "/etc/keystone/fernet-keys"),
+	}
 
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,
@@ -35,23 +40,10 @@ func BootstrapJob(instance *openstackv1beta1.Keystone) *batchv1.Job {
 					template.EnvVar("KEYSTONE_API_INTERNAL_URL", apiInternalURL),
 					template.EnvVar("KEYSTONE_REGION", "RegionOne"),
 				},
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-keystone",
-						SubPath:   "keystone.conf",
-						MountPath: "/etc/keystone/keystone.conf",
-					},
-					{
-						Name:      "fernet-keys",
-						MountPath: "/etc/keystone/fernet-keys",
-					},
-				},
+				VolumeMounts: volumeMounts,
 			},
 		},
-		Volumes: []corev1.Volume{
-			template.ConfigMapVolume("etc-keystone", instance.Name, nil),
-			template.SecretVolume("fernet-keys", template.Combine(instance.Name, "fernet-keys"), nil),
-		},
+		Volumes: volumes,
 	})
 
 	job.Name = template.Combine(instance.Name, "bootstrap")
@@ -59,8 +51,12 @@ func BootstrapJob(instance *openstackv1beta1.Keystone) *batchv1.Job {
 	return job
 }
 
-func DBSyncJob(instance *openstackv1beta1.Keystone) *batchv1.Job {
+func DBSyncJob(instance *openstackv1beta1.Keystone, volumes []corev1.Volume) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
+
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-keystone", "/etc/keystone/keystone.conf", "keystone.conf"),
+	}
 
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,
@@ -76,18 +72,10 @@ func DBSyncJob(instance *openstackv1beta1.Keystone) *batchv1.Job {
 				Env: []corev1.EnvVar{
 					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 				},
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-keystone",
-						SubPath:   "keystone.conf",
-						MountPath: "/etc/keystone/keystone.conf",
-					},
-				},
+				VolumeMounts: volumeMounts,
 			},
 		},
-		Volumes: []corev1.Volume{
-			template.ConfigMapVolume("etc-keystone", instance.Name, nil),
-		},
+		Volumes: volumes,
 	})
 
 	job.Name = template.Combine(instance.Name, "db-sync")

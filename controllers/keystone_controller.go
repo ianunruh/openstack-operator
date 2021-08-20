@@ -92,9 +92,15 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 	configHash := template.AppliedHash(cm)
 
+	volumes := []corev1.Volume{
+		template.ConfigMapVolume("etc-keystone", instance.Name, nil),
+		template.SecretVolume("credential-keys", template.Combine(instance.Name, "credential-keys"), nil),
+		template.SecretVolume("fernet-keys", template.Combine(instance.Name, "fernet-keys"), nil),
+	}
+
 	jobs := template.NewJobRunner(ctx, r.Client, log)
-	jobs.Add(&instance.Status.DBSyncJobHash, keystone.DBSyncJob(instance))
-	jobs.Add(&instance.Status.BootstrapJobHash, keystone.BootstrapJob(instance))
+	jobs.Add(&instance.Status.DBSyncJobHash, keystone.DBSyncJob(instance, volumes))
+	jobs.Add(&instance.Status.BootstrapJobHash, keystone.BootstrapJob(instance, volumes))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
@@ -115,7 +121,7 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		}
 	}
 
-	deploy := keystone.APIDeployment(instance, configHash)
+	deploy := keystone.APIDeployment(instance, volumes, configHash)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err
