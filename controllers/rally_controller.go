@@ -108,12 +108,19 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-rally", cm.Name, nil),
+		template.PersistentVolume("data", pvc.Name),
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.DBSyncJobHash, rally.DBSyncJob(instance, envVars, volumes))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
+	}
+
+	runnerJob := rally.TaskRunnerJob(instance, keystoneUser, envVars, volumes)
+	controllerutil.SetControllerReference(instance, runnerJob, r.Scheme)
+	if err := template.CreateJob(ctx, r.Client, runnerJob, log); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
