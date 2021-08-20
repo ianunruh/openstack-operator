@@ -32,6 +32,10 @@ func DBSyncJob(instance *openstackv1beta1.Glance) *batchv1.Job {
 				VolumeMounts: volumeMounts,
 			},
 		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
+		},
 		Volumes: []corev1.Volume{
 			template.ConfigMapVolume("etc-glance", instance.Name, nil),
 		},
