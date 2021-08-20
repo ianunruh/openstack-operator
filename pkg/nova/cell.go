@@ -51,6 +51,10 @@ func CellDBSyncJob(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, vol
 				VolumeMounts: volumeMounts,
 			},
 		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
+		},
 		Volumes: volumes,
 	})
 

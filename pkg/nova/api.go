@@ -56,6 +56,10 @@ func APIDeployment(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes
 				VolumeMounts:  volumeMounts,
 			},
 		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
+		},
 		Volumes: volumes,
 	})
 

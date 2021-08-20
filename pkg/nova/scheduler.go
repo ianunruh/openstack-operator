@@ -35,6 +35,10 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvV
 				VolumeMounts: volumeMounts,
 			},
 		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
+		},
 		Volumes: volumes,
 	})
 

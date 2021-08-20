@@ -36,6 +36,10 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 				VolumeMounts: volumeMounts,
 			},
 		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
+		},
 		Volumes: volumes,
 	})
 
