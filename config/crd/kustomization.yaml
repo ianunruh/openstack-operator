@@ -23,6 +23,7 @@ resources:
 - bases/openstack.k8s.ianunruh.com_barbicans.yaml
 - bases/openstack.k8s.ianunruh.com_ovncontrolplanes.yaml
 - bases/openstack.k8s.ianunruh.com_octavia.yaml
+- bases/openstack.k8s.ianunruh.com_rallies.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:
@@ -49,6 +50,7 @@ patchesStrategicMerge:
 #- patches/webhook_in_barbicans.yaml
 #- patches/webhook_in_ovncontrolplanes.yaml
 #- patches/webhook_in_octavia.yaml
+#- patches/webhook_in_rallies.yaml
 # +kubebuilder:scaffold:crdkustomizewebhookpatch
 
 # [CERTMANAGER] To enable webhook, uncomment all the sections with [CERTMANAGER] prefix.
@@ -74,6 +76,7 @@ patchesStrategicMerge:
 #- patches/cainjection_in_barbicans.yaml
 #- patches/cainjection_in_ovncontrolplanes.yaml
 #- patches/cainjection_in_octavia.yaml
+#- patches/cainjection_in_rallies.yaml
 # +kubebuilder:scaffold:crdkustomizecainjectionpatch
 
 # the following config is for teaching kustomize how to do kustomization for CRDs.

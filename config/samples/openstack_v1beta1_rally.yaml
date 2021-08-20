@@ -1,0 +1,13 @@
+apiVersion: openstack.k8s.ianunruh.com/v1beta1
+kind: Rally
+metadata:
+  name: rally
+spec:
+  image: xrally/xrally-openstack:2.1.0
+  data:
+    capacity: 20Gi
+    storageClass: ceph-block-ssd
+  database:
+    name: rally
+    secret: rally-db
+    cluster: mariadb
