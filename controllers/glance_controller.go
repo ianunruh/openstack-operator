@@ -157,7 +157,7 @@ func (r *GlanceReconciler) reconcileRookCeph(ctx context.Context, instance *open
 	}
 	for _, secret := range secrets {
 		controllerutil.SetControllerReference(instance, secret, r.Scheme)
-		if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
+		if err := template.EnsureSecret(ctx, r.Client, secret, log); err != nil {
 			return err
 		}
 	}

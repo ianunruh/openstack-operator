@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -43,6 +44,8 @@ type clientSecretKeyringOptions struct {
 func ClientSecret(name, namespace, clientName string, keyring []byte, monHosts []string) *corev1.Secret {
 	// TODO labels
 	secret := template.GenericSecret(name, namespace, nil)
+
+	sort.Strings(monHosts)
 
 	secret.StringData = map[string]string{
 		"ceph.conf": template.MustRenderFile(AppLabel, "ceph.conf", clientSecretOptions{
