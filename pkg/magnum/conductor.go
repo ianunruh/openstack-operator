@@ -12,8 +12,12 @@ const (
 	ConductorComponentLabel = "conductor"
 )
 
-func ConductorStatefulSet(instance *openstackv1beta1.Magnum, envVars []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
+func ConductorStatefulSet(instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, ConductorComponentLabel)
+
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-magnum", "/etc/magnum/magnum.conf", "magnum.conf"),
+	}
 
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace: instance.Namespace,
@@ -31,14 +35,8 @@ func ConductorStatefulSet(instance *openstackv1beta1.Magnum, envVars []corev1.En
 					"magnum-conductor",
 					"--config-file=/etc/magnum/magnum.conf",
 				},
-				Env: envVars,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-magnum",
-						SubPath:   "magnum.conf",
-						MountPath: "/etc/magnum/magnum.conf",
-					},
-				},
+				Env:          env,
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: volumes,

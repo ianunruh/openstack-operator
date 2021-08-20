@@ -29,6 +29,10 @@ func APIDeployment(instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volum
 		TimeoutSeconds:      5,
 	}
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-magnum", "/etc/magnum/magnum.conf", "magnum.conf"),
+	}
+
 	deploy := template.GenericDeployment(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -51,13 +55,7 @@ func APIDeployment(instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volum
 				},
 				LivenessProbe:  probe,
 				ReadinessProbe: probe,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-magnum",
-						SubPath:   "magnum.conf",
-						MountPath: "/etc/magnum/magnum.conf",
-					},
-				},
+				VolumeMounts:   volumeMounts,
 			},
 		},
 		Volumes: volumes,
