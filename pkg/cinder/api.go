@@ -30,6 +30,10 @@ func APIDeployment(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volum
 		TimeoutSeconds:      5,
 	}
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-cinder", "/etc/cinder/cinder.conf", "cinder.conf"),
+	}
+
 	deploy := template.GenericDeployment(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -46,13 +50,7 @@ func APIDeployment(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volum
 				},
 				LivenessProbe:  probe,
 				ReadinessProbe: probe,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-cinder",
-						SubPath:   "cinder.conf",
-						MountPath: "/etc/cinder/cinder.conf",
-					},
-				},
+				VolumeMounts:   volumeMounts,
 			},
 		},
 		Volumes: volumes,

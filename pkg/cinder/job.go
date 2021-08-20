@@ -11,6 +11,10 @@ import (
 func DBSyncJob(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-cinder", "/etc/cinder/cinder.conf", "cinder.conf"),
+	}
+
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -23,14 +27,8 @@ func DBSyncJob(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes [
 					"-c",
 					template.MustReadFile(AppLabel, "db-sync.sh"),
 				},
-				Env: env,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-cinder",
-						SubPath:   "cinder.conf",
-						MountPath: "/etc/cinder/cinder.conf",
-					},
-				},
+				Env:          env,
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: volumes,

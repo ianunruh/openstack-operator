@@ -12,8 +12,12 @@ const (
 	SchedulerComponentLabel = "scheduler"
 )
 
-func SchedulerStatefulSet(instance *openstackv1beta1.Cinder, envVars []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
+func SchedulerStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, SchedulerComponentLabel)
+
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-cinder", "/etc/cinder/cinder.conf", "cinder.conf"),
+	}
 
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace: instance.Namespace,
@@ -31,14 +35,8 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Cinder, envVars []corev1.En
 					"cinder-scheduler",
 					"--config-file=/etc/cinder/cinder.conf",
 				},
-				Env: envVars,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-cinder",
-						SubPath:   "cinder.conf",
-						MountPath: "/etc/cinder/cinder.conf",
-					},
-				},
+				Env:          env,
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: volumes,

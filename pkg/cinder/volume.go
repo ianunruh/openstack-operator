@@ -13,15 +13,11 @@ const (
 	VolumeComponentLabel = "volume"
 )
 
-func VolumeStatefulSet(instance *openstackv1beta1.Cinder, envVars []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
+func VolumeStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, VolumeComponentLabel)
 
 	volumeMounts := []corev1.VolumeMount{
-		{
-			Name:      "etc-cinder",
-			SubPath:   "cinder.conf",
-			MountPath: "/etc/cinder/cinder.conf",
-		},
+		template.SubPathVolumeMount("etc-cinder", "/etc/cinder/cinder.conf", "cinder.conf"),
 	}
 
 	cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
@@ -47,7 +43,7 @@ func VolumeStatefulSet(instance *openstackv1beta1.Cinder, envVars []corev1.EnvVa
 					"cinder-volume",
 					"--config-file=/etc/cinder/cinder.conf",
 				},
-				Env:          envVars,
+				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
 		},
