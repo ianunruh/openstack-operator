@@ -31,11 +31,7 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 	runAsUser := int64(64062)
 
 	volumeMounts := []corev1.VolumeMount{
-		{
-			Name:      "etc-glance",
-			SubPath:   "glance-api.conf",
-			MountPath: "/etc/glance/glance-api.conf",
-		},
+		template.SubPathVolumeMount("etc-glance", "/etc/glance/glance-api.conf", "glance-api.conf"),
 	}
 
 	volumes := []corev1.Volume{

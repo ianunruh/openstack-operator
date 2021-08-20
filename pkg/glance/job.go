@@ -11,6 +11,10 @@ import (
 func DBSyncJob(instance *openstackv1beta1.Glance) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-glance", "/etc/glance/glance-api.conf", "glance-api.conf"),
+	}
+
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -25,13 +29,7 @@ func DBSyncJob(instance *openstackv1beta1.Glance) *batchv1.Job {
 				Env: []corev1.EnvVar{
 					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 				},
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-glance",
-						SubPath:   "glance-api.conf",
-						MountPath: "/etc/glance/glance-api.conf",
-					},
-				},
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: []corev1.Volume{
