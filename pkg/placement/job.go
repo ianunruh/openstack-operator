@@ -8,7 +8,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func DBSyncJob(instance *openstackv1beta1.Placement, volumes []corev1.Volume) *batchv1.Job {
+func DBSyncJob(instance *openstackv1beta1.Placement, env []corev1.EnvVar, volumes []corev1.Volume) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
 
 	volumeMounts := []corev1.VolumeMount{
@@ -27,11 +27,13 @@ func DBSyncJob(instance *openstackv1beta1.Placement, volumes []corev1.Volume) *b
 					"db",
 					"sync",
 				},
-				Env: []corev1.EnvVar{
-					template.SecretEnvVar("OS_PLACEMENT_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
-				},
+				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
+		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})
