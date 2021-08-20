@@ -12,8 +12,12 @@ const (
 	EngineComponentLabel = "engine"
 )
 
-func EngineStatefulSet(instance *openstackv1beta1.Heat, envVars []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
+func EngineStatefulSet(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, EngineComponentLabel)
+
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-heat", "/etc/heat/heat.conf", "heat.conf"),
+	}
 
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace: instance.Namespace,
@@ -31,14 +35,8 @@ func EngineStatefulSet(instance *openstackv1beta1.Heat, envVars []corev1.EnvVar,
 					"heat-engine",
 					"--config-file=/etc/heat/heat.conf",
 				},
-				Env: envVars,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-heat",
-						SubPath:   "heat.conf",
-						MountPath: "/etc/heat/heat.conf",
-					},
-				},
+				Env:          env,
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: volumes,

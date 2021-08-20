@@ -29,6 +29,10 @@ func CFNDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 		TimeoutSeconds:      5,
 	}
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-heat", "/etc/heat/heat.conf", "heat.conf"),
+	}
+
 	deploy := template.GenericDeployment(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -51,13 +55,7 @@ func CFNDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 				},
 				LivenessProbe:  probe,
 				ReadinessProbe: probe,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-heat",
-						SubPath:   "heat.conf",
-						MountPath: "/etc/heat/heat.conf",
-					},
-				},
+				VolumeMounts:   volumeMounts,
 			},
 		},
 		Volumes: volumes,

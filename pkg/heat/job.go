@@ -11,6 +11,10 @@ import (
 func DBSyncJob(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []corev1.Volume) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-heat", "/etc/heat/heat.conf", "heat.conf"),
+	}
+
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -23,14 +27,8 @@ func DBSyncJob(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []c
 					"-c",
 					template.MustReadFile(AppLabel, "db-sync.sh"),
 				},
-				Env: env,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-heat",
-						SubPath:   "heat.conf",
-						MountPath: "/etc/heat/heat.conf",
-					},
-				},
+				Env:          env,
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: volumes,
