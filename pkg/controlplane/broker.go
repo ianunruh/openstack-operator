@@ -7,12 +7,16 @@ import (
 )
 
 func Broker(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.RabbitMQ {
+	spec := instance.Spec.Broker
+
+	spec.Management.Ingress = ingressDefaults(spec.Management.Ingress, instance, "rabbitmq")
+
 	// TODO labels
 	return &openstackv1beta1.RabbitMQ{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "rabbitmq",
 			Namespace: instance.Namespace,
 		},
-		Spec: instance.Spec.Broker,
+		Spec: spec,
 	}
 }

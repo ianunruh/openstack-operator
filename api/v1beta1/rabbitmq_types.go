@@ -25,6 +25,14 @@ type RabbitMQSpec struct {
 	Image string `json:"image"`
 
 	Volume *VolumeSpec `json:"volume"`
+
+	// +optional
+	Management RabbitMQManagementSpec `json:"management"`
+}
+
+type RabbitMQManagementSpec struct {
+	// +optional
+	Ingress *IngressSpec `json:"ingress"`
 }
 
 // RabbitMQStatus defines the observed state of RabbitMQ

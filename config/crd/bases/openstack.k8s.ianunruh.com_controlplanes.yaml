@@ -106,6 +106,20 @@ spec:
                 properties:
                   image:
                     type: string
+                  management:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                          tlsSecretName:
+                            type: string
+                        type: object
+                    type: object
                   volume:
                     properties:
                       accessModes:

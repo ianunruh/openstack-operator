@@ -7,6 +7,7 @@ import (
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -140,6 +141,16 @@ func ClusterHeadlessService(instance *openstackv1beta1.RabbitMQ) *corev1.Service
 	svc.Spec.ClusterIP = corev1.ClusterIPNone
 
 	return svc
+}
+
+func ClusterManagementIngress(instance *openstackv1beta1.RabbitMQ) *netv1.Ingress {
+	labels := template.Labels(instance.Name, AppLabel, ClusterComponentLabel)
+
+	ingress := template.GenericIngress(instance.Name, instance.Namespace, instance.Spec.Management.Ingress, labels)
+
+	ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Port.Name = "stats"
+
+	return ingress
 }
 
 func EnsureCluster(ctx context.Context, c client.Client, intended *openstackv1beta1.RabbitMQ, log logr.Logger) error {

@@ -105,6 +105,16 @@ func (r *RabbitMQReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		}
 	}
 
+	if instance.Spec.Management.Ingress == nil {
+		// TODO ensure ingress does not exist
+	} else {
+		ingress := rabbitmq.ClusterManagementIngress(instance)
+		controllerutil.SetControllerReference(instance, ingress, r.Scheme)
+		if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	return ctrl.Result{}, nil
 }
 
