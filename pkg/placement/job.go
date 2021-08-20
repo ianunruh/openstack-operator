@@ -8,8 +8,12 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func DBSyncJob(instance *openstackv1beta1.Placement) *batchv1.Job {
+func DBSyncJob(instance *openstackv1beta1.Placement, volumes []corev1.Volume) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
+
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-placement", "/etc/placement/placement.conf", "placement.conf"),
+	}
 
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,
@@ -26,18 +30,10 @@ func DBSyncJob(instance *openstackv1beta1.Placement) *batchv1.Job {
 				Env: []corev1.EnvVar{
 					template.SecretEnvVar("OS_PLACEMENT_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 				},
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-placement",
-						SubPath:   "placement.conf",
-						MountPath: "/etc/placement/placement.conf",
-					},
-				},
+				VolumeMounts: volumeMounts,
 			},
 		},
-		Volumes: []corev1.Volume{
-			template.ConfigMapVolume("etc-placement", instance.Name, nil),
-		},
+		Volumes: volumes,
 	})
 
 	job.Name = template.Combine(instance.Name, "db-sync")

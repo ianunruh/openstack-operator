@@ -15,7 +15,7 @@ const (
 	APIComponentLabel = "api"
 )
 
-func APIDeployment(instance *openstackv1beta1.Placement, configHash string) *appsv1.Deployment {
+func APIDeployment(instance *openstackv1beta1.Placement, volumes []corev1.Volume, configHash string) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	keystoneSecret := template.Combine(instance.Name, "keystone")
@@ -30,6 +30,10 @@ func APIDeployment(instance *openstackv1beta1.Placement, configHash string) *app
 		InitialDelaySeconds: 10,
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,
+	}
+
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-placement", "/etc/placement/placement.conf", "placement.conf"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -52,18 +56,10 @@ func APIDeployment(instance *openstackv1beta1.Placement, configHash string) *app
 				},
 				LivenessProbe:  probe,
 				ReadinessProbe: probe,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-placement",
-						SubPath:   "placement.conf",
-						MountPath: "/etc/placement/placement.conf",
-					},
-				},
+				VolumeMounts:   volumeMounts,
 			},
 		},
-		Volumes: []corev1.Volume{
-			template.ConfigMapVolume("etc-placement", instance.Name, nil),
-		},
+		Volumes: volumes,
 	})
 
 	deploy.Name = template.Combine(instance.Name, "api")

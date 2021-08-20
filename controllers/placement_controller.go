@@ -100,8 +100,12 @@ func (r *PlacementReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 	configHash := template.AppliedHash(cm)
 
+	volumes := []corev1.Volume{
+		template.ConfigMapVolume("etc-placement", instance.Name, nil),
+	}
+
 	jobs := template.NewJobRunner(ctx, r.Client, log)
-	jobs.Add(&instance.Status.DBSyncJobHash, placement.DBSyncJob(instance))
+	jobs.Add(&instance.Status.DBSyncJobHash, placement.DBSyncJob(instance, volumes))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
@@ -122,7 +126,7 @@ func (r *PlacementReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 	}
 
-	deploy := placement.APIDeployment(instance, configHash)
+	deploy := placement.APIDeployment(instance, volumes, configHash)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err
