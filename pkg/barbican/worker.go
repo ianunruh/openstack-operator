@@ -15,6 +15,10 @@ const (
 func WorkerDeployment(instance *openstackv1beta1.Barbican, envVars []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, WorkerComponentLabel)
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-barbican", "/etc/barbican/barbican.conf", "barbican.conf"),
+	}
+
 	deploy := template.GenericDeployment(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -31,14 +35,8 @@ func WorkerDeployment(instance *openstackv1beta1.Barbican, envVars []corev1.EnvV
 					"barbican-worker",
 					"--config-file=/etc/barbican/barbican.conf",
 				},
-				Env: envVars,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-barbican",
-						SubPath:   "barbican.conf",
-						MountPath: "/etc/barbican/barbican.conf",
-					},
-				},
+				Env:          envVars,
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: volumes,
