@@ -16,6 +16,10 @@ const (
 func NoVNCProxyDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, NoVNCProxyComponentLabel)
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
+	}
+
 	deploy := template.GenericDeployment(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -32,13 +36,7 @@ func NoVNCProxyDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvV
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 6080},
 				},
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-nova",
-						SubPath:   "nova.conf",
-						MountPath: "/etc/nova/nova.conf",
-					},
-				},
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: volumes,

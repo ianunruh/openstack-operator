@@ -12,8 +12,12 @@ const (
 	ConductorComponentLabel = "conductor"
 )
 
-func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaConductorSpec, envVars []corev1.EnvVar, volumes []corev1.Volume, containerImage string) *appsv1.StatefulSet {
+func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaConductorSpec, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string) *appsv1.StatefulSet {
 	labels := template.Labels(name, AppLabel, ConductorComponentLabel)
+
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
+	}
 
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace: namespace,
@@ -28,14 +32,8 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 					"--config-file=/etc/nova/nova.conf",
 					"--debug",
 				},
-				Env: envVars,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-nova",
-						SubPath:   "nova.conf",
-						MountPath: "/etc/nova/nova.conf",
-					},
-				},
+				Env:          env,
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: volumes,

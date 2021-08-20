@@ -23,15 +23,13 @@ func LibvirtdConfigMap(instance *openstackv1beta1.Nova) *corev1.ConfigMap {
 	return cm
 }
 
-func LibvirtdDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume) *appsv1.DaemonSet {
+func LibvirtdDaemonSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, LibvirtdComponentLabel)
 
 	configMapName := template.Combine(instance.Name, "libvirtd")
 
 	runAsRootUser := int64(0)
 	privileged := true
-
-	mountPropagation := corev1.MountPropagationBidirectional
 
 	probe := &corev1.Probe{
 		Handler: corev1.Handler{
@@ -42,60 +40,18 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar,
 	}
 
 	extraVolumeMounts := []corev1.VolumeMount{
-		{
-			Name:      "etc-libvirt",
-			MountPath: "/etc/libvirt/libvirtd.conf",
-			SubPath:   "libvirtd.conf",
-		},
-		{
-			Name:      "etc-libvirt",
-			MountPath: "/etc/libvirt/qemu.conf",
-			SubPath:   "qemu.conf",
-		},
-		{
-			Name:      "pod-tmp",
-			MountPath: "/tmp",
-		},
-		{
-			Name:      "host-dev",
-			MountPath: "/dev",
-		},
-		{
-			Name:      "host-etc-libvirt-qemu",
-			MountPath: "/etc/libvirt/qemu",
-		},
-		{
-			Name:      "host-etc-machine-id",
-			MountPath: "/etc/machine-id",
-			ReadOnly:  true,
-		},
-		{
-			Name:      "host-lib-modules",
-			MountPath: "/lib/modules",
-			ReadOnly:  true,
-		},
-		{
-			Name:      "host-run",
-			MountPath: "/run",
-		},
-		{
-			Name:      "host-sys-fs-cgroup",
-			MountPath: "/sys/fs/cgroup",
-		},
-		{
-			Name:             "host-var-lib-libvirt",
-			MountPath:        "/var/lib/libvirt",
-			MountPropagation: &mountPropagation,
-		},
-		{
-			Name:             "host-var-lib-nova",
-			MountPath:        "/var/lib/nova",
-			MountPropagation: &mountPropagation,
-		},
-		{
-			Name:      "host-var-log-libvirt",
-			MountPath: "/var/log/libvirt",
-		},
+		template.SubPathVolumeMount("etc-libvirt", "/etc/libvirt/libvirtd.conf", "libvirtd.conf"),
+		template.SubPathVolumeMount("etc-libvirt", "/etc/libvirt/qemu.conf", "qemu.conf"),
+		template.VolumeMount("pod-tmp", "/tmp"),
+		template.VolumeMount("host-dev", "/dev"),
+		template.VolumeMount("host-etc-libvirt-qemu", "/etc/libvirt/qemu"),
+		template.ReadOnlyVolumeMount("host-etc-machine-id", "/etc/machine-id"),
+		template.ReadOnlyVolumeMount("host-lib-modules", "/lib/modules"),
+		template.VolumeMount("host-run", "/run"),
+		template.VolumeMount("host-sys-fs-cgroup", "/sys/fs/cgroup"),
+		template.BidirectionalVolumeMount("host-var-lib-libvirt", "/var/lib/libvirt"),
+		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
+		template.VolumeMount("host-var-log-libvirt", "/var/log/libvirt"),
 	}
 
 	extraVolumes := []corev1.Volume{
@@ -139,7 +95,7 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar,
 						},
 					},
 				},
-				Env:            envVars,
+				Env:            env,
 				ReadinessProbe: probe,
 				LivenessProbe:  probe,
 				SecurityContext: &corev1.SecurityContext{

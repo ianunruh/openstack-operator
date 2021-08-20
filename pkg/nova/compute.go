@@ -12,7 +12,7 @@ const (
 	ComputeComponentLabel = "compute"
 )
 
-func ComputeDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume) *appsv1.DaemonSet {
+func ComputeDaemonSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, ComputeComponentLabel)
 
 	runAsRootUser := int64(0)
@@ -20,7 +20,23 @@ func ComputeDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, 
 	privileged := true
 	rootOnlyRootFilesystem := true
 
-	mountPropagation := corev1.MountPropagationBidirectional
+	initVolumeMounts := []corev1.VolumeMount{
+		template.VolumeMount("pod-shared", "/tmp/pod-shared"),
+		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
+	}
+
+	extraVolumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
+		template.VolumeMount("pod-tmp", "/tmp"),
+		template.VolumeMount("pod-shared", "/tmp/pod-shared"),
+		template.VolumeMount("host-dev", "/dev"),
+		template.ReadOnlyVolumeMount("host-etc-machine-id", "/etc/machine-id"),
+		template.ReadOnlyVolumeMount("host-lib-modules", "/lib/modules"),
+		template.VolumeMount("host-run", "/run"),
+		template.ReadOnlyVolumeMount("host-sys-fs-cgroup", "/sys/fs/cgroup"),
+		template.BidirectionalVolumeMount("host-var-lib-libvirt", "/var/lib/libvirt"),
+		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
+	}
 
 	extraVolumes := []corev1.Volume{
 		template.EmptyDirVolume("pod-tmp"),
@@ -32,55 +48,6 @@ func ComputeDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, 
 		template.HostPathVolume("host-sys-fs-cgroup", "/sys/fs/cgroup"),
 		template.HostPathVolume("host-var-lib-libvirt", "/var/lib/libvirt"),
 		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"),
-	}
-
-	extraVolumeMounts := []corev1.VolumeMount{
-		{
-			Name:      "etc-nova",
-			MountPath: "/etc/nova/nova.conf",
-			SubPath:   "nova.conf",
-		},
-		{
-			Name:      "pod-tmp",
-			MountPath: "/tmp",
-		},
-		{
-			Name:      "pod-shared",
-			MountPath: "/tmp/pod-shared",
-		},
-		{
-			Name:      "host-dev",
-			MountPath: "/dev",
-		},
-		{
-			Name:      "host-etc-machine-id",
-			MountPath: "/etc/machine-id",
-			ReadOnly:  true,
-		},
-		{
-			Name:      "host-lib-modules",
-			MountPath: "/lib/modules",
-			ReadOnly:  true,
-		},
-		{
-			Name:      "host-run",
-			MountPath: "/run",
-		},
-		{
-			Name:      "host-sys-fs-cgroup",
-			MountPath: "/sys/fs/cgroup",
-			ReadOnly:  true,
-		},
-		{
-			Name:             "host-var-lib-libvirt",
-			MountPath:        "/var/lib/libvirt",
-			MountPropagation: &mountPropagation,
-		},
-		{
-			Name:             "host-var-lib-nova",
-			MountPath:        "/var/lib/nova",
-			MountPropagation: &mountPropagation,
-		},
 	}
 
 	ds := template.GenericDaemonSet(template.Component{
@@ -106,17 +73,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, 
 					RunAsUser:  &runAsRootUser,
 					Privileged: &privileged,
 				},
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "pod-shared",
-						MountPath: "/tmp/pod-shared",
-					},
-					{
-						Name:             "host-var-lib-nova",
-						MountPath:        "/var/lib/nova",
-						MountPropagation: &mountPropagation,
-					},
-				},
+				VolumeMounts: initVolumeMounts,
 			},
 		},
 		Containers: []corev1.Container{
@@ -128,7 +85,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, 
 					"--config-file=/etc/nova/nova.conf",
 					"--config-file=/tmp/pod-shared/nova-hypervisor.conf",
 				},
-				Env: envVars,
+				Env: env,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged:             &privileged,
 					ReadOnlyRootFilesystem: &rootOnlyRootFilesystem,

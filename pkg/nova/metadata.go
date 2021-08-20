@@ -29,6 +29,10 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 	// 	TimeoutSeconds:      5,
 	// }
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
+	}
+
 	deploy := template.GenericDeployment(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -47,13 +51,7 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 				},
 				// LivenessProbe:  probe,
 				// ReadinessProbe: probe,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-nova",
-						SubPath:   "nova.conf",
-						MountPath: "/etc/nova/nova.conf",
-					},
-				},
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: volumes,

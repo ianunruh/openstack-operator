@@ -15,6 +15,10 @@ const (
 func SchedulerStatefulSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, SchedulerComponentLabel)
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
+	}
+
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -27,14 +31,8 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvV
 					"nova-scheduler",
 					"--config-file=/etc/nova/nova.conf",
 				},
-				Env: envVars,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-nova",
-						SubPath:   "nova.conf",
-						MountPath: "/etc/nova/nova.conf",
-					},
-				},
+				Env:          envVars,
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: volumes,

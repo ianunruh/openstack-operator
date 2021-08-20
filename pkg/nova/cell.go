@@ -31,6 +31,10 @@ func Cell(instance *openstackv1beta1.Nova, spec openstackv1beta1.NovaCellSpec) *
 func CellDBSyncJob(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
+	}
+
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -43,14 +47,8 @@ func CellDBSyncJob(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, vol
 					"-c",
 					template.MustReadFile(AppLabel, "cell-db-sync.sh"),
 				},
-				Env: env,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-nova",
-						SubPath:   "nova.conf",
-						MountPath: "/etc/nova/nova.conf",
-					},
-				},
+				Env:          env,
+				VolumeMounts: volumeMounts,
 			},
 		},
 		Volumes: volumes,
