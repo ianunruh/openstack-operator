@@ -38,6 +38,8 @@ type RabbitMQUserStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Cluster",type=string,JSONPath=`.spec.cluster`
+// +kubebuilder:printcolumn:name="Vhost",type=string,JSONPath=`.spec.virtualHost`
 // +kubebuilder:printcolumn:name="Ready",type=boolean,JSONPath=`.status.ready`
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 

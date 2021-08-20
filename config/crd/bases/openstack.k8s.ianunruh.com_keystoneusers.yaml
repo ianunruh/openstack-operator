@@ -17,6 +17,12 @@ spec:
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
+    - jsonPath: .spec.project
+      name: Project
+      type: string
+    - jsonPath: .spec.domain
+      name: Domain
+      type: string
     - jsonPath: .status.ready
       name: Ready
       type: boolean
