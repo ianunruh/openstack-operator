@@ -54,6 +54,10 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 				VolumeMounts:  volumeMounts,
 			},
 		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
+		},
 		Volumes: volumes,
 	})
 
