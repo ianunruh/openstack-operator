@@ -977,6 +977,16 @@ spec:
                     required:
                     - nodeSelector
                     type: object
+                  northd:
+                    properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
                   ovsdbNorth:
                     properties:
                       volume:

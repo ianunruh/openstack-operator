@@ -28,6 +28,9 @@ type OVNControlPlaneSpec struct {
 	OVSDBSouth *OVSDBSpec `json:"ovsdbSouth"`
 
 	Node *OVNNodeSpec `json:"node"`
+
+	// +optional
+	Northd OVNNorthdSpec `json:"northd,omitempty"`
 }
 
 type OVSDBSpec struct {
@@ -42,6 +45,14 @@ type OVNNodeSpec struct {
 
 	// +optional
 	BridgePorts []string `json:"bridgePorts"`
+}
+
+type OVNNorthdSpec struct {
+	// +optional
+	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 // OVNControlPlaneStatus defines the observed state of OVNControlPlane
