@@ -12,7 +12,7 @@ const (
 	WorkerComponentLabel = "worker"
 )
 
-func WorkerDeployment(instance *openstackv1beta1.Barbican, envVars []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
+func WorkerDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, WorkerComponentLabel)
 
 	volumeMounts := []corev1.VolumeMount{
@@ -23,10 +23,6 @@ func WorkerDeployment(instance *openstackv1beta1.Barbican, envVars []corev1.EnvV
 		Namespace: instance.Namespace,
 		Labels:    labels,
 		Replicas:  instance.Spec.Worker.Replicas,
-		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &appUID,
-			FSGroup:   &appUID,
-		},
 		Containers: []corev1.Container{
 			{
 				Name:  "worker",
@@ -35,9 +31,13 @@ func WorkerDeployment(instance *openstackv1beta1.Barbican, envVars []corev1.EnvV
 					"barbican-worker",
 					"--config-file=/etc/barbican/barbican.conf",
 				},
-				Env:          envVars,
+				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
+		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})
