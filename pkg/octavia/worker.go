@@ -28,10 +28,6 @@ func WorkerDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, v
 		Labels:       labels,
 		Replicas:     instance.Spec.Worker.Replicas,
 		NodeSelector: instance.Spec.Worker.NodeSelector,
-		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &appUID,
-			FSGroup:   &appUID,
-		},
 		InitContainers: []corev1.Container{
 			amphora.InitContainer(instance.Spec.Image, volumeMounts),
 		},
@@ -46,6 +42,10 @@ func WorkerDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, v
 				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
+		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})

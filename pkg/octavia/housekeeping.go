@@ -28,10 +28,6 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 		Labels:       labels,
 		Replicas:     instance.Spec.Housekeeping.Replicas,
 		NodeSelector: instance.Spec.Housekeeping.NodeSelector,
-		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &appUID,
-			FSGroup:   &appUID,
-		},
 		InitContainers: []corev1.Container{
 			amphora.InitContainer(instance.Spec.Image, volumeMounts),
 		},
@@ -49,6 +45,10 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 				},
 				VolumeMounts: volumeMounts,
 			},
+		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})
