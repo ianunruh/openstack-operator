@@ -55,6 +55,8 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 
 	deploy.Name = template.Combine(instance.Name, "housekeeping")
 
+	deploy.Spec.Strategy.Type = appsv1.RecreateDeploymentStrategyType
+
 	deploy.Spec.Template.Spec.DNSPolicy = corev1.DNSClusterFirstWithHostNet
 	deploy.Spec.Template.Spec.HostNetwork = true
 
