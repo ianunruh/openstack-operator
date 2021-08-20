@@ -55,10 +55,7 @@ func OVSDBStatefulSet(instance *openstackv1beta1.OVNControlPlane, component stri
 				LivenessProbe: probe,
 				StartupProbe:  probe,
 				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "data",
-						MountPath: "/var/lib/ovn",
-					},
+					template.VolumeMount("data", "/var/lib/ovn"),
 				},
 			},
 		},
