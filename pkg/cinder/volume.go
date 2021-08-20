@@ -31,10 +31,6 @@ func VolumeStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, v
 		Namespace: instance.Namespace,
 		Labels:    labels,
 		Replicas:  instance.Spec.Volume.Replicas,
-		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &appUID,
-			FSGroup:   &appUID,
-		},
 		Containers: []corev1.Container{
 			{
 				Name:  "volume",
@@ -46,6 +42,10 @@ func VolumeStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, v
 				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
+		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})

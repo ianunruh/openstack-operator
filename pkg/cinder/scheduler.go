@@ -23,10 +23,6 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar
 		Namespace: instance.Namespace,
 		Labels:    labels,
 		Replicas:  instance.Spec.Scheduler.Replicas,
-		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &appUID,
-			FSGroup:   &appUID,
-		},
 		Containers: []corev1.Container{
 			{
 				Name:  "scheduler",
@@ -38,6 +34,10 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar
 				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
+		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})
