@@ -30,6 +30,14 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 		TimeoutSeconds:      5,
 	}
 
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-horizon", "/etc/openstack-dashboard/local_settings.py", "local_settings.py"),
+	}
+
+	volumes := []corev1.Volume{
+		template.ConfigMapVolume("etc-horizon", instance.Name, nil),
+	}
+
 	deploy := template.GenericDeployment(template.Component{
 		Namespace: instance.Namespace,
 		Labels:    labels,
@@ -48,18 +56,10 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 				},
 				LivenessProbe:  probe,
 				ReadinessProbe: probe,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "etc-horizon",
-						SubPath:   "local_settings.py",
-						MountPath: "/etc/openstack-dashboard/local_settings.py",
-					},
-				},
+				VolumeMounts:   volumeMounts,
 			},
 		},
-		Volumes: []corev1.Volume{
-			template.ConfigMapVolume("etc-horizon", instance.Name, nil),
-		},
+		Volumes: volumes,
 	})
 
 	deploy.Name = template.Combine(instance.Name, "server")
