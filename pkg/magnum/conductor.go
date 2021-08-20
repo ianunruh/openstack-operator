@@ -23,10 +23,6 @@ func ConductorStatefulSet(instance *openstackv1beta1.Magnum, env []corev1.EnvVar
 		Namespace: instance.Namespace,
 		Labels:    labels,
 		Replicas:  instance.Spec.Conductor.Replicas,
-		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &appUID,
-			FSGroup:   &appUID,
-		},
 		Containers: []corev1.Container{
 			{
 				Name:  "conductor",
@@ -38,6 +34,10 @@ func ConductorStatefulSet(instance *openstackv1beta1.Magnum, env []corev1.EnvVar
 				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
+		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})
