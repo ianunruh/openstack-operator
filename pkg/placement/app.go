@@ -17,6 +17,10 @@ const (
 	AppLabel = "placement"
 )
 
+var (
+	appUID = int64(42482)
+)
+
 func ConfigMap(instance *openstackv1beta1.Placement) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)

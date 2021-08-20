@@ -17,6 +17,10 @@ const (
 	AppLabel = "neutron"
 )
 
+var (
+	appUID = int64(42435)
+)
+
 func ConfigMap(instance *openstackv1beta1.Neutron) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)

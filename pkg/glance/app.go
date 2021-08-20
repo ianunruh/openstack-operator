@@ -19,6 +19,10 @@ const (
 	AppLabel = "glance"
 )
 
+var (
+	appUID = int64(42415)
+)
+
 func ConfigMap(instance *openstackv1beta1.Glance) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)

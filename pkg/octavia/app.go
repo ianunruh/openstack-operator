@@ -19,7 +19,7 @@ const (
 )
 
 var (
-	appUID = int64(102)
+	appUID = int64(42437)
 )
 
 func ConfigMap(instance *openstackv1beta1.Octavia) *corev1.ConfigMap {

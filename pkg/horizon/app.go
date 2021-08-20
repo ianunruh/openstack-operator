@@ -17,6 +17,10 @@ const (
 	AppLabel = "horizon"
 )
 
+var (
+	appUID = int64(42420)
+)
+
 func ConfigMap(instance *openstackv1beta1.Horizon) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)

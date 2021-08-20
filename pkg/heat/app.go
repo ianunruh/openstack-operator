@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	appUID = int64(101)
+	appUID = int64(42418)
 )
 
 func ConfigMap(instance *openstackv1beta1.Heat) *corev1.ConfigMap {

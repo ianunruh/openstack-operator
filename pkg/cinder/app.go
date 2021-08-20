@@ -20,7 +20,7 @@ const (
 )
 
 var (
-	appUID = int64(64061)
+	appUID = int64(42407)
 )
 
 func ConfigMap(instance *openstackv1beta1.Cinder) *corev1.ConfigMap {

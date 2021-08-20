@@ -17,6 +17,10 @@ const (
 	AppLabel = "keystone"
 )
 
+var (
+	appUID = int64(42425)
+)
+
 func ConfigMap(instance *openstackv1beta1.Keystone) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
