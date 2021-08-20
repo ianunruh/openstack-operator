@@ -23,10 +23,6 @@ func EngineStatefulSet(instance *openstackv1beta1.Heat, env []corev1.EnvVar, vol
 		Namespace: instance.Namespace,
 		Labels:    labels,
 		Replicas:  instance.Spec.Engine.Replicas,
-		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &appUID,
-			FSGroup:   &appUID,
-		},
 		Containers: []corev1.Container{
 			{
 				Name:  "engine",
@@ -38,6 +34,10 @@ func EngineStatefulSet(instance *openstackv1beta1.Heat, env []corev1.EnvVar, vol
 				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
+		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})
