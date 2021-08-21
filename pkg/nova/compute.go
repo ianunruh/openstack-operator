@@ -1,6 +1,8 @@
 package nova
 
 import (
+	"strconv"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -16,7 +18,6 @@ func ComputeDaemonSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volu
 	labels := template.Labels(instance.Name, AppLabel, ComputeComponentLabel)
 
 	runAsRootUser := int64(0)
-	runAsNovaUser := int64(64060)
 	privileged := true
 	rootOnlyRootFilesystem := true
 
@@ -55,7 +56,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volu
 		Labels:       labels,
 		NodeSelector: instance.Spec.Compute.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &runAsNovaUser,
+			RunAsUser: &appUID,
 		},
 		InitContainers: []corev1.Container{
 			{
@@ -67,7 +68,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volu
 					template.MustReadFile(AppLabel, "compute-init.sh"),
 				},
 				Env: []corev1.EnvVar{
-					template.EnvVar("NOVA_USER_UID", "64060"),
+					template.EnvVar("NOVA_USER_UID", strconv.Itoa(int(appUID))),
 				},
 				SecurityContext: &corev1.SecurityContext{
 					RunAsUser:  &runAsRootUser,
