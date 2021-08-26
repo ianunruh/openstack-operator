@@ -47,16 +47,20 @@ func ClientSecret(name, namespace, clientName string, keyring []byte, monHosts [
 
 	sort.Strings(monHosts)
 
-	secret.StringData = map[string]string{
-		"ceph.conf": template.MustRenderFile(AppLabel, "ceph.conf", clientSecretOptions{
-			ClientName: clientName,
-			MonHost:    strings.Join(monHosts, ","),
-			SecretName: name,
-		}),
-		"keyring": template.MustRenderFile(AppLabel, "keyring", clientSecretKeyringOptions{
-			ClientName: clientName,
-			Keyring:    string(keyring),
-		}),
+	cephConf := template.MustRenderFile(AppLabel, "ceph.conf", clientSecretOptions{
+		ClientName: clientName,
+		MonHost:    strings.Join(monHosts, ","),
+		SecretName: name,
+	})
+
+	keyringFile := template.MustRenderFile(AppLabel, "keyring", clientSecretKeyringOptions{
+		ClientName: clientName,
+		Keyring:    string(keyring),
+	})
+
+	secret.Data = map[string][]byte{
+		"ceph.conf": []byte(cephConf),
+		"keyring":   []byte(keyringFile),
 	}
 
 	return secret
