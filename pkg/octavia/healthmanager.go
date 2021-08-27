@@ -39,15 +39,12 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 		template.EnvVar("OS_HEALTH_MANAGER__BIND_IP", port.IPAddress))
 
 	privileged := true
+	runAsRootUser := int64(0)
 
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
 		NodeSelector: instance.Spec.HealthManager.NodeSelector,
-		// SecurityContext: &corev1.PodSecurityContext{
-		// 	RunAsUser: &appUID,
-		// 	FSGroup:   &appUID,
-		// },
 		InitContainers: []corev1.Container{
 			amphora.InitContainer(instance.Spec.Image, volumeMounts),
 			{
@@ -64,6 +61,7 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 				},
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
+					RunAsUser:  &runAsRootUser,
 				},
 				VolumeMounts: initVolumeMounts,
 			},
@@ -76,12 +74,13 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 					"octavia-health-manager",
 					"--config-file=/etc/octavia/octavia.conf",
 				},
-				Env: env,
-				SecurityContext: &corev1.SecurityContext{
-					Privileged: &privileged,
-				},
+				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
+		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})
