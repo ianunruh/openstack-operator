@@ -43,6 +43,10 @@ func BootstrapJob(instance *openstackv1beta1.Keystone, volumes []corev1.Volume) 
 				VolumeMounts: volumeMounts,
 			},
 		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
+		},
 		Volumes: volumes,
 	})
 
@@ -74,6 +78,10 @@ func DBSyncJob(instance *openstackv1beta1.Keystone, volumes []corev1.Volume) *ba
 				},
 				VolumeMounts: volumeMounts,
 			},
+		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})
