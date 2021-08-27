@@ -29,8 +29,11 @@ import (
 
 const (
 	amphoraImageName   = "amphora"
+	amphoraImageTag    = "amphora"
 	amphoraKeypairName = "amphora"
 	amphoraNetworkName = "octavia-lb-mgmt"
+
+	imageSourceProperty = "source"
 )
 
 func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client.Client, log logr.Logger) error {
@@ -169,34 +172,16 @@ func (b *bootstrap) EnsureFlavor(ctx context.Context) error {
 }
 
 func (b *bootstrap) EnsureImage(ctx context.Context) error {
-	if b.instance.Status.Amphora.ImageProjectID != "" {
-		return nil
-	}
-
-	b.log.Info("Creating image", "name", amphoraImageName)
-	image, err := images.Create(b.image, images.CreateOpts{
-		Name:            amphoraImageName,
-		Tags:            []string{"amphora"},
-		ContainerFormat: "bare",
-		DiskFormat:      "qcow2",
-	}).Extract()
-	if err != nil {
-		return err
-	}
-
 	imageURL := b.instance.Spec.Amphora.ImageURL
 
-	b.log.Info("Uploading image",
-		"name", image.Name,
-		"url", imageURL)
-	data, err := fetchImage(imageURL)
+	image, err := b.getCurrentImage(ctx, imageURL)
 	if err != nil {
 		return err
-	}
-	defer data.Close()
-
-	if err := imagedata.Upload(b.image, image.ID, data).Err; err != nil {
-		return err
+	} else if image == nil {
+		image, err = b.uploadImage(ctx, imageURL)
+		if err != nil {
+			return err
+		}
 	}
 
 	b.instance.Status.Amphora.ImageProjectID = image.Owner
@@ -204,6 +189,61 @@ func (b *bootstrap) EnsureImage(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+func (b *bootstrap) getCurrentImage(ctx context.Context, imageURL string) (*images.Image, error) {
+	pager := images.List(b.image, images.ListOpts{
+		Tags: []string{amphoraImageTag},
+	})
+
+	page, err := pager.AllPages()
+	if err != nil {
+		return nil, err
+	}
+
+	images, err := images.ExtractImages(page)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, image := range images {
+		if image.Properties[imageSourceProperty] == imageURL {
+			return &image, nil
+		}
+	}
+
+	return nil, nil
+}
+
+func (b *bootstrap) uploadImage(ctx context.Context, imageURL string) (*images.Image, error) {
+	b.log.Info("Creating image", "name", amphoraImageName)
+	image, err := images.Create(b.image, images.CreateOpts{
+		Name:            amphoraImageName,
+		Tags:            []string{amphoraImageTag},
+		ContainerFormat: "bare",
+		DiskFormat:      "qcow2",
+		Properties: map[string]string{
+			imageSourceProperty: imageURL,
+		},
+	}).Extract()
+	if err != nil {
+		return nil, err
+	}
+
+	b.log.Info("Uploading image",
+		"name", image.Name,
+		"url", imageURL)
+	data, err := fetchImage(imageURL)
+	if err != nil {
+		return nil, err
+	}
+	defer data.Close()
+
+	if err := imagedata.Upload(b.image, image.ID, data).Err; err != nil {
+		return nil, err
+	}
+
+	return image, nil
 }
 
 func (b *bootstrap) EnsureKeypair(ctx context.Context) error {
