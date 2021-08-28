@@ -70,6 +70,7 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 					template.EnvVar("CONFIG_HASH", configHash),
 					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 					template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneSecret, "OS_PASSWORD"),
+					template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 				},
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 9292},

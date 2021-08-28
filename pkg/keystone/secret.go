@@ -16,6 +16,7 @@ func Secrets(instance *openstackv1beta1.Keystone) []*corev1.Secret {
 		adminSecret(instance.Name, instance.Namespace, labels, instance.Spec.API.Ingress),
 		fernetSecret(template.Combine(instance.Name, "credential-keys"), instance.Namespace, labels),
 		fernetSecret(template.Combine(instance.Name, "fernet-keys"), instance.Namespace, labels),
+		memcacheSecret(template.Combine(instance.Name, "memcache"), instance.Namespace, labels),
 	}
 }
 
@@ -47,5 +48,11 @@ func fernetSecret(name, namespace string, labels map[string]string) *corev1.Secr
 	secret := template.GenericSecret(name, namespace, labels)
 	secret.StringData["0"] = template.NewFernetKey()
 	secret.StringData["1"] = template.NewFernetKey()
+	return secret
+}
+
+func memcacheSecret(name, namespace string, labels map[string]string) *corev1.Secret {
+	secret := template.GenericSecret(name, namespace, labels)
+	secret.StringData["secret-key"] = template.NewPassword()
 	return secret
 }

@@ -104,6 +104,7 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
+		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 	}
 
 	volumes := []corev1.Volume{

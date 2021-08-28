@@ -115,6 +115,7 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		template.SecretEnvVar("OS_API_DATABASE__CONNECTION", cluster.Spec.APIDatabase.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneSecret, "OS_PASSWORD"),
+		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 		template.SecretEnvVar("OS_PLACEMENT__PASSWORD", "placement-keystone", "OS_PASSWORD"),
 		template.SecretEnvVar("OS_NEUTRON__PASSWORD", "neutron-keystone", "OS_PASSWORD"),
 	}

@@ -143,6 +143,7 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	envVars := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
+		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 		template.SecretEnvVar("OS_PLACEMENT__PASSWORD", "placement-keystone", "OS_PASSWORD"),
 		template.SecretEnvVar("OS_NEUTRON__PASSWORD", "neutron-keystone", "OS_PASSWORD"),
 	}

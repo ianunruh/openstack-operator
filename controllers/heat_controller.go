@@ -143,6 +143,7 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DEFAULT__STACK_DOMAIN_ADMIN_PASSWORD", keystoneStackUser.Spec.Secret, "OS_PASSWORD"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
+		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 		template.SecretEnvVar("OS_TRUSTEE__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 	}
