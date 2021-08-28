@@ -1,0 +1,32 @@
+apiVersion: openstack.k8s.ianunruh.com/v1beta1
+kind: Manila
+metadata:
+  name: manila
+spec:
+  image: registry.kcloud.io/kcloud/openstack-operator-images/manila:latest
+  api:
+    replicas: 2
+    ingress:
+      host: manila.openstack.k8s.kcloud.zone
+      annotations:
+        external-dns/enabled: "true"
+        cert-manager.io/cluster-issuer: letsencrypt-prod
+  scheduler:
+    replicas: 1
+  backends:
+  - name: cephfs
+    shareBackendName: cephfs
+    ceph:
+      clientName: openstack-manila
+      secret: manila-ceph
+      rook:
+        namespace: rook-ceph
+  database:
+    name: manila
+    secret: manila-db
+    cluster: mariadb
+  broker:
+    name: manila
+    secret: manila-rabbitmq
+    cluster: rabbitmq
+    virtualHost: openstack

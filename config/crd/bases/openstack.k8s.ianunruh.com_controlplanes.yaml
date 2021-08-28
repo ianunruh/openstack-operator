@@ -605,6 +605,109 @@ spec:
                 - database
                 - image
                 type: object
+              manila:
+                description: ManilaSpec defines the desired state of Manila
+                properties:
+                  api:
+                    properties:
+                      ingress:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          host:
+                            type: string
+                          tlsSecretName:
+                            type: string
+                        type: object
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                  backends:
+                    items:
+                      properties:
+                        ceph:
+                          properties:
+                            clientName:
+                              type: string
+                            rook:
+                              properties:
+                                namespace:
+                                  type: string
+                              required:
+                              - namespace
+                              type: object
+                            secret:
+                              type: string
+                          required:
+                          - clientName
+                          - rook
+                          - secret
+                          type: object
+                        name:
+                          type: string
+                        shareBackendName:
+                          type: string
+                      required:
+                      - ceph
+                      - name
+                      - shareBackendName
+                      type: object
+                    type: array
+                  broker:
+                    description: RabbitMQUserSpec defines the desired state of RabbitMQUser
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                      virtualHost:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    - virtualHost
+                    type: object
+                  database:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  image:
+                    type: string
+                  scheduler:
+                    properties:
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                  share:
+                    properties:
+                      replicas:
+                        format: int32
+                        type: integer
+                    type: object
+                required:
+                - backends
+                - broker
+                - database
+                - image
+                type: object
               neutron:
                 description: NeutronSpec defines the desired state of Neutron
                 properties:

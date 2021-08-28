@@ -381,6 +381,32 @@ rules:
 - apiGroups:
   - openstack.k8s.ianunruh.com
   resources:
+  - manilas
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - manilas/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
+  - manilas/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - openstack.k8s.ianunruh.com
+  resources:
   - mariadbdatabases
   verbs:
   - create

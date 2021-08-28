@@ -4,5 +4,15 @@ metadata:
   name: {{ .Name }}
 spec:
   caps:
+{{if .Caps.mds}}
+    mds: {{ .Caps.mds }}
+{{end}}
+{{if .Caps.mgr}}
+    mgr: {{ .Caps.mgr }}
+{{end}}
+{{if .Caps.mon}}
     mon: {{ .Caps.mon }}
+{{end}}
+{{if .Caps.osd}}
     osd: {{ .Caps.osd }}
+{{end}}

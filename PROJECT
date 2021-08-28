@@ -187,4 +187,13 @@ resources:
   kind: Rally
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: k8s.ianunruh.com
+  group: openstack
+  kind: Manila
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
+  version: v1beta1
 version: "3"

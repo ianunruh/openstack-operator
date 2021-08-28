@@ -35,6 +35,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/horizon"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/magnum"
+	"github.com/ianunruh/openstack-operator/pkg/manila"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 	"github.com/ianunruh/openstack-operator/pkg/memcached"
 	"github.com/ianunruh/openstack-operator/pkg/neutron"
@@ -166,6 +167,14 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		loadBalancer := controlplane.Octavia(instance)
 		controllerutil.SetControllerReference(instance, loadBalancer, r.Scheme)
 		if err := octavia.EnsureOctavia(ctx, r.Client, loadBalancer, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	if instance.Spec.Manila.Image != "" {
+		sfs := controlplane.Manila(instance)
+		controllerutil.SetControllerReference(instance, sfs, r.Scheme)
+		if err := manila.EnsureManila(ctx, r.Client, sfs, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}

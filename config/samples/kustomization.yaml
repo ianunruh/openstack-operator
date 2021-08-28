@@ -20,4 +20,5 @@ resources:
 - openstack_v1beta1_ovncontrolplane.yaml
 - openstack_v1beta1_octavia.yaml
 - openstack_v1beta1_rally.yaml
+- openstack_v1beta1_manila.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

@@ -50,6 +50,9 @@ type ControlPlaneSpec struct {
 
 	// +optional
 	Octavia OctaviaSpec `json:"octavia"`
+
+	// +optional
+	Manila ManilaSpec `json:"manila"`
 }
 
 type ControlPlaneIngressSpec struct {
