@@ -145,9 +145,9 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 	}
 
-	envVars = append(envVars, keystone.AuthTokenEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
-	envVars = append(envVars, keystone.AuthTokenEnv("OS_NEUTRON__", "neutron-keystone")...)
-	envVars = append(envVars, keystone.AuthTokenEnv("OS_PLACEMENT__", "placement-keystone")...)
+	envVars = append(envVars, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
+	envVars = append(envVars, keystone.ClientEnv("OS_NEUTRON__", "neutron-keystone")...)
+	envVars = append(envVars, keystone.ClientEnv("OS_PLACEMENT__", "placement-keystone")...)
 
 	dbEnvVars := []corev1.EnvVar{
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),

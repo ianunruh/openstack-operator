@@ -124,9 +124,9 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		template.ConfigMapEnvVar("OS_OVN__OVN_NB_CONNECTION", "ovn-ovsdb", "OVN_NB_CONNECTION"),
 	}
 
-	envVars = append(envVars, keystone.AuthTokenEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
-	envVars = append(envVars, keystone.AuthTokenEnv("OS_NOVA__", "nova-keystone")...)
-	envVars = append(envVars, keystone.AuthTokenEnv("OS_PLACEMENT__", "placement-keystone")...)
+	envVars = append(envVars, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
+	envVars = append(envVars, keystone.ClientEnv("OS_NOVA__", "nova-keystone")...)
+	envVars = append(envVars, keystone.ClientEnv("OS_PLACEMENT__", "placement-keystone")...)
 
 	serverEnvVars := append(envVars, fullEnvVars...)
 

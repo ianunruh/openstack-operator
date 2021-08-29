@@ -73,7 +73,7 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
-	secret := keystone.UserSecret(instance)
+	secret := keystone.UserSecret(instance, cluster)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
 	if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
 		return ctrl.Result{}, err
