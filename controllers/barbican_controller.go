@@ -120,12 +120,13 @@ func (r *BarbicanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	envVars := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.EnvVar("OS_DEFAULT__HOST_HREF", fmt.Sprintf("https://%s", instance.Spec.API.Ingress.Host)),
-		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DEFAULT__SQL_CONNECTION", instance.Spec.Database.Secret, "connection"),
 		template.SecretEnvVar("OS_SIMPLE_CRYPTO_PLUGIN__KEK", instance.Name, "kek"),
 	}
+
+	envVars = append(envVars, keystone.AuthTokenEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-barbican", cm.Name, nil),
