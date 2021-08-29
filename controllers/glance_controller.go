@@ -100,6 +100,17 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	configHash := template.AppliedHash(cm)
 
+	envVars := []corev1.EnvVar{
+		template.EnvVar("CONFIG_HASH", configHash),
+		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
+		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
+		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
+	}
+
+	volumes := []corev1.Volume{
+		template.ConfigMapVolume("etc-glance", instance.Name, nil),
+	}
+
 	for _, pvc := range glance.PersistentVolumeClaims(instance) {
 		controllerutil.SetControllerReference(instance, pvc, r.Scheme)
 		if err := template.EnsurePersistentVolumeClaim(ctx, r.Client, pvc, log); err != nil {
@@ -112,7 +123,7 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
-	jobs.Add(&instance.Status.DBSyncJobHash, glance.DBSyncJob(instance))
+	jobs.Add(&instance.Status.DBSyncJobHash, glance.DBSyncJob(instance, envVars, volumes))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
@@ -133,7 +144,7 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		}
 	}
 
-	deploy := glance.APIDeployment(instance, configHash)
+	deploy := glance.APIDeployment(instance, envVars, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err

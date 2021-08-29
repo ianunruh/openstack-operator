@@ -15,10 +15,8 @@ const (
 	APIComponentLabel = "api"
 )
 
-func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1.Deployment {
+func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
-
-	keystoneSecret := template.Combine(instance.Name, "keystone")
 
 	probe := &corev1.Probe{
 		Handler: corev1.Handler{
@@ -33,10 +31,6 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-glance", "/etc/glance/glance-api.conf", "glance-api.conf"),
-	}
-
-	volumes := []corev1.Volume{
-		template.ConfigMapVolume("etc-glance", instance.Name, nil),
 	}
 
 	cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
@@ -69,12 +63,7 @@ func APIDeployment(instance *openstackv1beta1.Glance, configHash string) *appsv1
 					"glance-api",
 					"--config-file=/etc/glance/glance-api.conf",
 				},
-				Env: []corev1.EnvVar{
-					template.EnvVar("CONFIG_HASH", configHash),
-					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
-					template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneSecret, "OS_PASSWORD"),
-					template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
-				},
+				Env: env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 9292},
 				},

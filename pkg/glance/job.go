@@ -8,7 +8,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func DBSyncJob(instance *openstackv1beta1.Glance) *batchv1.Job {
+func DBSyncJob(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volumes []corev1.Volume) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
 
 	volumeMounts := []corev1.VolumeMount{
@@ -26,9 +26,7 @@ func DBSyncJob(instance *openstackv1beta1.Glance) *batchv1.Job {
 					"glance-manage",
 					"db_sync",
 				},
-				Env: []corev1.EnvVar{
-					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
-				},
+				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
 		},
@@ -36,9 +34,7 @@ func DBSyncJob(instance *openstackv1beta1.Glance) *batchv1.Job {
 			RunAsUser: &appUID,
 			FSGroup:   &appUID,
 		},
-		Volumes: []corev1.Volume{
-			template.ConfigMapVolume("etc-glance", instance.Name, nil),
-		},
+		Volumes: volumes,
 	})
 
 	job.Name = template.Combine(instance.Name, "db-sync")
