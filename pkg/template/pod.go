@@ -2,6 +2,7 @@ package template
 
 import (
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func EnvVar(name, value string) corev1.EnvVar {
@@ -162,5 +163,21 @@ func ReadOnlyVolumeMount(name, mountPath string) corev1.VolumeMount {
 		Name:      name,
 		MountPath: mountPath,
 		ReadOnly:  true,
+	}
+}
+
+func NodePodAntiAffinity(labels map[string]string) *corev1.PodAntiAffinity {
+	return &corev1.PodAntiAffinity{
+		PreferredDuringSchedulingIgnoredDuringExecution: []corev1.WeightedPodAffinityTerm{
+			{
+				Weight: 100,
+				PodAffinityTerm: corev1.PodAffinityTerm{
+					LabelSelector: &metav1.LabelSelector{
+						MatchLabels: labels,
+					},
+					TopologyKey: "kubernetes.io/hostname",
+				},
+			},
+		},
 	}
 }

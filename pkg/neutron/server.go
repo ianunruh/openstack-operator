@@ -37,6 +37,9 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 		Namespace: instance.Namespace,
 		Labels:    labels,
 		Replicas:  instance.Spec.Server.Replicas,
+		Affinity: &corev1.Affinity{
+			PodAntiAffinity: template.NodePodAntiAffinity(labels),
+		},
 		Containers: []corev1.Container{
 			{
 				Name:  "server",

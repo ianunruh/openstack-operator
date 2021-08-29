@@ -11,6 +11,7 @@ type Component struct {
 	Namespace            string
 	Labels               map[string]string
 	Replicas             int32
+	Affinity             *corev1.Affinity
 	NodeSelector         map[string]string
 	InitContainers       []corev1.Container
 	Containers           []corev1.Container
@@ -37,6 +38,7 @@ func GenericDaemonSet(component Component) *appsv1.DaemonSet {
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
+					Affinity:        component.Affinity,
 					Containers:      component.Containers,
 					InitContainers:  component.InitContainers,
 					NodeSelector:    component.NodeSelector,
@@ -72,6 +74,7 @@ func GenericDeployment(component Component) *appsv1.Deployment {
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
+					Affinity:        component.Affinity,
 					Containers:      component.Containers,
 					InitContainers:  component.InitContainers,
 					NodeSelector:    component.NodeSelector,
@@ -98,6 +101,7 @@ func GenericJob(component Component) *batchv1.Job {
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
+					Affinity:        component.Affinity,
 					Containers:      component.Containers,
 					InitContainers:  component.InitContainers,
 					NodeSelector:    component.NodeSelector,
@@ -135,6 +139,7 @@ func GenericStatefulSet(component Component) *appsv1.StatefulSet {
 					Labels: labels,
 				},
 				Spec: corev1.PodSpec{
+					Affinity:        component.Affinity,
 					Containers:      component.Containers,
 					InitContainers:  component.InitContainers,
 					NodeSelector:    component.NodeSelector,

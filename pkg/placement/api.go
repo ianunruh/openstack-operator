@@ -38,6 +38,9 @@ func APIDeployment(instance *openstackv1beta1.Placement, env []corev1.EnvVar, vo
 		Namespace: instance.Namespace,
 		Labels:    labels,
 		Replicas:  instance.Spec.API.Replicas,
+		Affinity: &corev1.Affinity{
+			PodAntiAffinity: template.NodePodAntiAffinity(labels),
+		},
 		Containers: []corev1.Container{
 			{
 				Name:      "api",
