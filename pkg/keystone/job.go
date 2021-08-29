@@ -10,7 +10,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func BootstrapJob(instance *openstackv1beta1.Keystone, volumes []corev1.Volume) *batchv1.Job {
+func BootstrapJob(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, volumes []corev1.Volume) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
 
 	apiURL := fmt.Sprintf("https://%s/v3", instance.Spec.API.Ingress.Host)
@@ -19,6 +19,13 @@ func BootstrapJob(instance *openstackv1beta1.Keystone, volumes []corev1.Volume) 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-keystone", "/etc/keystone/keystone.conf", "keystone.conf"),
 		template.VolumeMount("fernet-keys", "/etc/keystone/fernet-keys"),
+	}
+
+	extraEnv := []corev1.EnvVar{
+		template.SecretEnvVar("KEYSTONE_ADMIN_PASSWORD", instance.Name, "OS_PASSWORD"),
+		template.EnvVar("KEYSTONE_API_URL", apiURL),
+		template.EnvVar("KEYSTONE_API_INTERNAL_URL", apiInternalURL),
+		template.EnvVar("KEYSTONE_REGION", "RegionOne"),
 	}
 
 	job := template.GenericJob(template.Component{
@@ -33,13 +40,7 @@ func BootstrapJob(instance *openstackv1beta1.Keystone, volumes []corev1.Volume) 
 					"-c",
 					template.MustReadFile(AppLabel, "bootstrap.sh"),
 				},
-				Env: []corev1.EnvVar{
-					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
-					template.SecretEnvVar("KEYSTONE_ADMIN_PASSWORD", instance.Name, "OS_PASSWORD"),
-					template.EnvVar("KEYSTONE_API_URL", apiURL),
-					template.EnvVar("KEYSTONE_API_INTERNAL_URL", apiInternalURL),
-					template.EnvVar("KEYSTONE_REGION", "RegionOne"),
-				},
+				Env:          append(env, extraEnv...),
 				VolumeMounts: volumeMounts,
 			},
 		},
@@ -55,7 +56,7 @@ func BootstrapJob(instance *openstackv1beta1.Keystone, volumes []corev1.Volume) 
 	return job
 }
 
-func DBSyncJob(instance *openstackv1beta1.Keystone, volumes []corev1.Volume) *batchv1.Job {
+func DBSyncJob(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, volumes []corev1.Volume) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
 
 	volumeMounts := []corev1.VolumeMount{
@@ -73,9 +74,7 @@ func DBSyncJob(instance *openstackv1beta1.Keystone, volumes []corev1.Volume) *ba
 					"keystone-manage",
 					"db_sync",
 				},
-				Env: []corev1.EnvVar{
-					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
-				},
+				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
 		},

@@ -15,7 +15,7 @@ const (
 	APIComponentLabel = "api"
 )
 
-func APIDeployment(instance *openstackv1beta1.Keystone, volumes []corev1.Volume, configHash string) *appsv1.Deployment {
+func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	probe := &corev1.Probe{
@@ -46,10 +46,7 @@ func APIDeployment(instance *openstackv1beta1.Keystone, volumes []corev1.Volume,
 				Image:     instance.Spec.Image,
 				Command:   httpd.Command(),
 				Lifecycle: httpd.Lifecycle(),
-				Env: []corev1.EnvVar{
-					template.EnvVar("CONFIG_HASH", configHash),
-					template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
-				},
+				Env:       env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 5000},
 				},

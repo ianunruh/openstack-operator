@@ -92,6 +92,11 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 	configHash := template.AppliedHash(cm)
 
+	envVars := []corev1.EnvVar{
+		template.EnvVar("CONFIG_HASH", configHash),
+		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
+	}
+
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-keystone", instance.Name, nil),
 		template.SecretVolume("credential-keys", template.Combine(instance.Name, "credential-keys"), nil),
@@ -99,8 +104,8 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
-	jobs.Add(&instance.Status.DBSyncJobHash, keystone.DBSyncJob(instance, volumes))
-	jobs.Add(&instance.Status.BootstrapJobHash, keystone.BootstrapJob(instance, volumes))
+	jobs.Add(&instance.Status.DBSyncJobHash, keystone.DBSyncJob(instance, envVars, volumes))
+	jobs.Add(&instance.Status.BootstrapJobHash, keystone.BootstrapJob(instance, envVars, volumes))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
@@ -121,7 +126,7 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		}
 	}
 
-	deploy := keystone.APIDeployment(instance, volumes, configHash)
+	deploy := keystone.APIDeployment(instance, envVars, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err
