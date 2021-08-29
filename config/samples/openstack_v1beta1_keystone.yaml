@@ -15,3 +15,8 @@ spec:
     name: keystone
     secret: keystone-db
     cluster: mariadb
+  broker:
+    name: keystone
+    secret: keystone-rabbitmq
+    cluster: rabbitmq
+    virtualHost: openstack

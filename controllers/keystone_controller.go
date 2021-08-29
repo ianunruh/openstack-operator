@@ -34,6 +34,7 @@ import (
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
+	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -77,6 +78,15 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
+	brokerUser := keystone.BrokerUser(instance)
+	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
+	if err := rabbitmq.EnsureUser(ctx, r.Client, brokerUser, log); err != nil {
+		return ctrl.Result{}, err
+	} else if !brokerUser.Status.Ready {
+		log.Info("Waiting on broker to be available", "name", brokerUser.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+	}
+
 	secrets := keystone.Secrets(instance)
 	for _, secret := range secrets {
 		controllerutil.SetControllerReference(instance, secret, r.Scheme)
@@ -94,6 +104,7 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	envVars := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
+		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 	}
 

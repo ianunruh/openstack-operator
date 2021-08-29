@@ -60,6 +60,23 @@ spec:
                     format: int32
                     type: integer
                 type: object
+              broker:
+                description: RabbitMQUserSpec defines the desired state of RabbitMQUser
+                properties:
+                  cluster:
+                    type: string
+                  name:
+                    type: string
+                  secret:
+                    type: string
+                  virtualHost:
+                    type: string
+                required:
+                - cluster
+                - name
+                - secret
+                - virtualHost
+                type: object
               database:
                 description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
                 properties:
@@ -77,6 +94,7 @@ spec:
               image:
                 type: string
             required:
+            - broker
             - database
             - image
             type: object
