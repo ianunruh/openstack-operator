@@ -95,16 +95,6 @@ func MustDecodeManifest(encoded string) *unstructured.Unstructured {
 	return resource
 }
 
-func EnsureResources(ctx context.Context, c client.Client, resources []*unstructured.Unstructured, log logr.Logger) error {
-	for _, instance := range resources {
-		if err := EnsureResource(ctx, c, instance, log); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func EnsureResource(ctx context.Context, c client.Client, instance *unstructured.Unstructured, log logr.Logger) error {
 	intended := instance.DeepCopy()
 	hash, err := ObjectHash(intended)

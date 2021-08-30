@@ -84,8 +84,11 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	pkiResources := amphora.PKIResources(instance)
-	if err := template.EnsureResources(ctx, r.Client, pkiResources, log); err != nil {
-		return ctrl.Result{}, err
+	for _, resource := range pkiResources {
+		controllerutil.SetControllerReference(instance, resource, r.Scheme)
+		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	db := octavia.Database(instance)

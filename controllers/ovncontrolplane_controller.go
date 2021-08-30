@@ -64,8 +64,11 @@ func (r *OVNControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	pkiResources := ovn.PKIResources(instance)
-	if err := template.EnsureResources(ctx, r.Client, pkiResources, log); err != nil {
-		return ctrl.Result{}, err
+	for _, resource := range pkiResources {
+		controllerutil.SetControllerReference(instance, resource, r.Scheme)
+		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	ovsdbNorthSvc, err := r.reconcileOVSDB(ctx, instance, ovn.OVSDBNorth, log)
@@ -79,6 +82,7 @@ func (r *OVNControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	ovsdbConnConfigMap := ovn.OVSDBConnectionConfigMap(instance, ovsdbNorthSvc, ovsdbSouthSvc)
+	controllerutil.SetControllerReference(instance, ovsdbConnConfigMap, r.Scheme)
 	if err := template.EnsureConfigMap(ctx, r.Client, ovsdbConnConfigMap, log); err != nil {
 		return ctrl.Result{}, err
 	}
