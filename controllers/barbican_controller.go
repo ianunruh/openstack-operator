@@ -117,7 +117,7 @@ func (r *BarbicanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 	configHash := template.AppliedHash(cm)
 
-	envVars := []corev1.EnvVar{
+	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.EnvVar("OS_DEFAULT__HOST_HREF", fmt.Sprintf("https://%s", instance.Spec.API.Ingress.Host)),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
@@ -126,23 +126,23 @@ func (r *BarbicanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		template.SecretEnvVar("OS_SIMPLE_CRYPTO_PLUGIN__KEK", instance.Name, "kek"),
 	}
 
-	envVars = append(envVars, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
+	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-barbican", cm.Name, nil),
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
-	jobs.Add(&instance.Status.DBSyncJobHash, barbican.DBSyncJob(instance, envVars, volumes))
+	jobs.Add(&instance.Status.DBSyncJobHash, barbican.DBSyncJob(instance, env, volumes))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileWorker(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileWorker(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -151,7 +151,7 @@ func (r *BarbicanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	return ctrl.Result{}, nil
 }
 
-func (r *BarbicanReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Barbican, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *BarbicanReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Barbican, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := barbican.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -168,7 +168,7 @@ func (r *BarbicanReconciler) reconcileAPI(ctx context.Context, instance *opensta
 		}
 	}
 
-	deploy := barbican.APIDeployment(instance, envVars, volumes)
+	deploy := barbican.APIDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
@@ -177,8 +177,8 @@ func (r *BarbicanReconciler) reconcileAPI(ctx context.Context, instance *opensta
 	return nil
 }
 
-func (r *BarbicanReconciler) reconcileWorker(ctx context.Context, instance *openstackv1beta1.Barbican, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
-	deploy := barbican.WorkerDeployment(instance, envVars, volumes)
+func (r *BarbicanReconciler) reconcileWorker(ctx context.Context, instance *openstackv1beta1.Barbican, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	deploy := barbican.WorkerDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err

@@ -146,7 +146,7 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	configHash := template.AppliedHash(cm)
 
-	envVars := []corev1.EnvVar{
+	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
@@ -154,32 +154,32 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 	}
 
-	envVars = append(envVars, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
-	envVars = append(envVars, keystone.ClientEnv("OS_SERVICE_AUTH__", keystoneUser.Spec.Secret)...)
+	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
+	env = append(env, keystone.ClientEnv("OS_SERVICE_AUTH__", keystoneUser.Spec.Secret)...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-octavia", cm.Name, nil),
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
-	jobs.Add(&instance.Status.DBSyncJobHash, octavia.DBSyncJob(instance, envVars, volumes))
+	jobs.Add(&instance.Status.DBSyncJobHash, octavia.DBSyncJob(instance, env, volumes))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileHealthManager(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileHealthManager(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileHousekeeping(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileHousekeeping(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileWorker(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileWorker(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -188,7 +188,7 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	return ctrl.Result{}, nil
 }
 
-func (r *OctaviaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Octavia, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *OctaviaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := octavia.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -205,7 +205,7 @@ func (r *OctaviaReconciler) reconcileAPI(ctx context.Context, instance *openstac
 		}
 	}
 
-	deploy := octavia.APIDeployment(instance, envVars, volumes)
+	deploy := octavia.APIDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
@@ -214,8 +214,8 @@ func (r *OctaviaReconciler) reconcileAPI(ctx context.Context, instance *openstac
 	return nil
 }
 
-func (r *OctaviaReconciler) reconcileHealthManager(ctx context.Context, instance *openstackv1beta1.Octavia, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
-	ds := octavia.HealthManagerDaemonSet(instance, envVars, volumes)
+func (r *OctaviaReconciler) reconcileHealthManager(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	ds := octavia.HealthManagerDaemonSet(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err
@@ -224,8 +224,8 @@ func (r *OctaviaReconciler) reconcileHealthManager(ctx context.Context, instance
 	return nil
 }
 
-func (r *OctaviaReconciler) reconcileHousekeeping(ctx context.Context, instance *openstackv1beta1.Octavia, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
-	deploy := octavia.HousekeepingDeployment(instance, envVars, volumes)
+func (r *OctaviaReconciler) reconcileHousekeeping(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	deploy := octavia.HousekeepingDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
@@ -234,8 +234,8 @@ func (r *OctaviaReconciler) reconcileHousekeeping(ctx context.Context, instance 
 	return nil
 }
 
-func (r *OctaviaReconciler) reconcileWorker(ctx context.Context, instance *openstackv1beta1.Octavia, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
-	deploy := octavia.WorkerDeployment(instance, envVars, volumes)
+func (r *OctaviaReconciler) reconcileWorker(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	deploy := octavia.WorkerDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err

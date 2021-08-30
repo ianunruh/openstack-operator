@@ -110,7 +110,7 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	keystoneSecret := template.Combine(cluster.Name, "keystone")
 
-	envVars := []corev1.EnvVar{
+	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_API_DATABASE__CONNECTION", cluster.Spec.APIDatabase.Secret, "connection"),
@@ -118,9 +118,9 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 	}
 
-	envVars = append(envVars, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneSecret)...)
-	envVars = append(envVars, keystone.ClientEnv("OS_NEUTRON__", "neutron-keystone")...)
-	envVars = append(envVars, keystone.ClientEnv("OS_PLACEMENT__", "placement-keystone")...)
+	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneSecret)...)
+	env = append(env, keystone.ClientEnv("OS_NEUTRON__", "neutron-keystone")...)
+	env = append(env, keystone.ClientEnv("OS_PLACEMENT__", "placement-keystone")...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-nova", cm.Name, nil),
@@ -128,20 +128,20 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.DBSyncJobHash,
-		nova.CellDBSyncJob(instance, envVars, volumes, cluster.Spec.Image))
+		nova.CellDBSyncJob(instance, env, volumes, cluster.Spec.Image))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
 
-	if err := r.reconcileConductor(ctx, instance, envVars, volumes, cluster.Spec.Image, log); err != nil {
+	if err := r.reconcileConductor(ctx, instance, env, volumes, cluster.Spec.Image, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileMetadata(ctx, instance, envVars, volumes, cluster.Spec.Image, log); err != nil {
+	if err := r.reconcileMetadata(ctx, instance, env, volumes, cluster.Spec.Image, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileNoVNCProxy(ctx, instance, envVars, volumes, cluster.Spec.Image, log); err != nil {
+	if err := r.reconcileNoVNCProxy(ctx, instance, env, volumes, cluster.Spec.Image, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -155,14 +155,14 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	return ctrl.Result{}, nil
 }
 
-func (r *NovaCellReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.NovaCell, envVars []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
+func (r *NovaCellReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
 	svc := nova.ConductorService(instance.Name, instance.Namespace)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
 		return err
 	}
 
-	sts := nova.ConductorStatefulSet(instance.Name, instance.Namespace, instance.Spec.Conductor, envVars, volumes, containerImage)
+	sts := nova.ConductorStatefulSet(instance.Name, instance.Namespace, instance.Spec.Conductor, env, volumes, containerImage)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
@@ -171,13 +171,13 @@ func (r *NovaCellReconciler) reconcileConductor(ctx context.Context, instance *o
 	return nil
 }
 
-func (r *NovaCellReconciler) reconcileMetadata(ctx context.Context, instance *openstackv1beta1.NovaCell, envVars []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
+func (r *NovaCellReconciler) reconcileMetadata(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
 	extraEnvVars := []corev1.EnvVar{
 		// TODO make this configurable
 		template.SecretEnvVar("OS_NEUTRON__METADATA_PROXY_SHARED_SECRET", "nova", "metadata-proxy-secret"),
 	}
 
-	envVars = append(envVars, extraEnvVars...)
+	env = append(env, extraEnvVars...)
 
 	svc := nova.MetadataService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
@@ -185,7 +185,7 @@ func (r *NovaCellReconciler) reconcileMetadata(ctx context.Context, instance *op
 		return err
 	}
 
-	deploy := nova.MetadataDeployment(instance, envVars, volumes, containerImage)
+	deploy := nova.MetadataDeployment(instance, env, volumes, containerImage)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
@@ -194,7 +194,7 @@ func (r *NovaCellReconciler) reconcileMetadata(ctx context.Context, instance *op
 	return nil
 }
 
-func (r *NovaCellReconciler) reconcileNoVNCProxy(ctx context.Context, instance *openstackv1beta1.NovaCell, envVars []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
+func (r *NovaCellReconciler) reconcileNoVNCProxy(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
 	svc := nova.NoVNCProxyService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -211,7 +211,7 @@ func (r *NovaCellReconciler) reconcileNoVNCProxy(ctx context.Context, instance *
 		}
 	}
 
-	deploy := nova.NoVNCProxyDeployment(instance, envVars, volumes, containerImage)
+	deploy := nova.NoVNCProxyDeployment(instance, env, volumes, containerImage)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err

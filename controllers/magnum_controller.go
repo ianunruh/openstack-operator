@@ -122,7 +122,7 @@ func (r *MagnumReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	configHash := template.AppliedHash(cm)
 
-	envVars := []corev1.EnvVar{
+	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_KEYSTONE_AUTH__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
@@ -131,24 +131,24 @@ func (r *MagnumReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 	}
 
-	envVars = append(envVars, keystone.ClientEnv("OS_KEYSTONE_AUTH__", keystoneUser.Spec.Secret)...)
-	envVars = append(envVars, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
+	env = append(env, keystone.ClientEnv("OS_KEYSTONE_AUTH__", keystoneUser.Spec.Secret)...)
+	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-magnum", cm.Name, nil),
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
-	jobs.Add(&instance.Status.DBSyncJobHash, magnum.DBSyncJob(instance, envVars, volumes))
+	jobs.Add(&instance.Status.DBSyncJobHash, magnum.DBSyncJob(instance, env, volumes))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileConductor(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileConductor(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -157,7 +157,7 @@ func (r *MagnumReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	return ctrl.Result{}, nil
 }
 
-func (r *MagnumReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Magnum, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *MagnumReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := magnum.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -174,7 +174,7 @@ func (r *MagnumReconciler) reconcileAPI(ctx context.Context, instance *openstack
 		}
 	}
 
-	deploy := magnum.APIDeployment(instance, envVars, volumes)
+	deploy := magnum.APIDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
@@ -183,14 +183,14 @@ func (r *MagnumReconciler) reconcileAPI(ctx context.Context, instance *openstack
 	return nil
 }
 
-func (r *MagnumReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.Magnum, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *MagnumReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := magnum.ConductorService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
 		return err
 	}
 
-	sts := magnum.ConductorStatefulSet(instance, envVars, volumes)
+	sts := magnum.ConductorStatefulSet(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err

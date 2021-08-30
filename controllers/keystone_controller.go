@@ -102,7 +102,7 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 	configHash := template.AppliedHash(cm)
 
-	envVars := []corev1.EnvVar{
+	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
@@ -115,8 +115,8 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
-	jobs.Add(&instance.Status.DBSyncJobHash, keystone.DBSyncJob(instance, envVars, volumes))
-	jobs.Add(&instance.Status.BootstrapJobHash, keystone.BootstrapJob(instance, envVars, volumes))
+	jobs.Add(&instance.Status.DBSyncJobHash, keystone.DBSyncJob(instance, env, volumes))
+	jobs.Add(&instance.Status.BootstrapJobHash, keystone.BootstrapJob(instance, env, volumes))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
@@ -137,7 +137,7 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		}
 	}
 
-	deploy := keystone.APIDeployment(instance, envVars, volumes)
+	deploy := keystone.APIDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err

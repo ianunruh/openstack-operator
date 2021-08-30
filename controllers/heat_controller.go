@@ -137,7 +137,7 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 	configHash := template.AppliedHash(cm)
 
-	envVars := []corev1.EnvVar{
+	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.EnvVar("OS_CLIENTS_KEYSTONE__AUTH_URI", fmt.Sprintf("https://%s", ks.Spec.API.Ingress.Host)),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
@@ -147,28 +147,28 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 	}
 
-	envVars = append(envVars, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
-	envVars = append(envVars, keystone.ClientEnv("OS_TRUSTEE__", keystoneUser.Spec.Secret)...)
+	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
+	env = append(env, keystone.ClientEnv("OS_TRUSTEE__", keystoneUser.Spec.Secret)...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-heat", cm.Name, nil),
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
-	jobs.Add(&instance.Status.DBSyncJobHash, heat.DBSyncJob(instance, envVars, volumes))
+	jobs.Add(&instance.Status.DBSyncJobHash, heat.DBSyncJob(instance, env, volumes))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileCFN(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileCFN(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileEngine(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileEngine(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -177,7 +177,7 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	return ctrl.Result{}, nil
 }
 
-func (r *HeatReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Heat, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *HeatReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := heat.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -194,7 +194,7 @@ func (r *HeatReconciler) reconcileAPI(ctx context.Context, instance *openstackv1
 		}
 	}
 
-	deploy := heat.APIDeployment(instance, envVars, volumes)
+	deploy := heat.APIDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
@@ -203,7 +203,7 @@ func (r *HeatReconciler) reconcileAPI(ctx context.Context, instance *openstackv1
 	return nil
 }
 
-func (r *HeatReconciler) reconcileCFN(ctx context.Context, instance *openstackv1beta1.Heat, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *HeatReconciler) reconcileCFN(ctx context.Context, instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := heat.CFNService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -220,7 +220,7 @@ func (r *HeatReconciler) reconcileCFN(ctx context.Context, instance *openstackv1
 		}
 	}
 
-	deploy := heat.CFNDeployment(instance, envVars, volumes)
+	deploy := heat.CFNDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
@@ -229,14 +229,14 @@ func (r *HeatReconciler) reconcileCFN(ctx context.Context, instance *openstackv1
 	return nil
 }
 
-func (r *HeatReconciler) reconcileEngine(ctx context.Context, instance *openstackv1beta1.Heat, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *HeatReconciler) reconcileEngine(ctx context.Context, instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := heat.EngineService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
 		return err
 	}
 
-	sts := heat.EngineStatefulSet(instance, envVars, volumes)
+	sts := heat.EngineStatefulSet(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err

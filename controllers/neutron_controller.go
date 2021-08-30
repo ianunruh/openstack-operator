@@ -112,7 +112,7 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	configHash := template.AppliedHash(cm)
 
-	envVars := []corev1.EnvVar{
+	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.ConfigMapEnvVar("OS_OVN__OVN_SB_CONNECTION", "ovn-ovsdb", "OVN_SB_CONNECTION"),
 	}
@@ -124,11 +124,11 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		template.ConfigMapEnvVar("OS_OVN__OVN_NB_CONNECTION", "ovn-ovsdb", "OVN_NB_CONNECTION"),
 	}
 
-	envVars = append(envVars, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
-	envVars = append(envVars, keystone.ClientEnv("OS_NOVA__", "nova-keystone")...)
-	envVars = append(envVars, keystone.ClientEnv("OS_PLACEMENT__", "placement-keystone")...)
+	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
+	env = append(env, keystone.ClientEnv("OS_NOVA__", "nova-keystone")...)
+	env = append(env, keystone.ClientEnv("OS_PLACEMENT__", "placement-keystone")...)
 
-	serverEnvVars := append(envVars, fullEnvVars...)
+	serverEnvVars := append(env, fullEnvVars...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-neutron", cm.Name, nil),
@@ -144,7 +144,7 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileMetadataAgent(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileMetadataAgent(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -153,7 +153,7 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	return ctrl.Result{}, nil
 }
 
-func (r *NeutronReconciler) reconcileServer(ctx context.Context, instance *openstackv1beta1.Neutron, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NeutronReconciler) reconcileServer(ctx context.Context, instance *openstackv1beta1.Neutron, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := neutron.ServerService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -170,7 +170,7 @@ func (r *NeutronReconciler) reconcileServer(ctx context.Context, instance *opens
 		}
 	}
 
-	deploy := neutron.ServerDeployment(instance, envVars, volumes)
+	deploy := neutron.ServerDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
@@ -179,15 +179,15 @@ func (r *NeutronReconciler) reconcileServer(ctx context.Context, instance *opens
 	return nil
 }
 
-func (r *NeutronReconciler) reconcileMetadataAgent(ctx context.Context, instance *openstackv1beta1.Neutron, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NeutronReconciler) reconcileMetadataAgent(ctx context.Context, instance *openstackv1beta1.Neutron, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	extraEnvVars := []corev1.EnvVar{
 		// TODO make this configurable
 		template.SecretEnvVar("OS_DEFAULT__METADATA_PROXY_SHARED_SECRET", "nova", "metadata-proxy-secret"),
 	}
 
-	envVars = append(envVars, extraEnvVars...)
+	env = append(env, extraEnvVars...)
 
-	ds := neutron.MetadataAgentDaemonSet(instance, envVars, volumes)
+	ds := neutron.MetadataAgentDaemonSet(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err

@@ -140,14 +140,14 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
-	envVars := []corev1.EnvVar{
+	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 	}
 
-	envVars = append(envVars, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
-	envVars = append(envVars, keystone.ClientEnv("OS_NEUTRON__", "neutron-keystone")...)
-	envVars = append(envVars, keystone.ClientEnv("OS_PLACEMENT__", "placement-keystone")...)
+	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
+	env = append(env, keystone.ClientEnv("OS_NEUTRON__", "neutron-keystone")...)
+	env = append(env, keystone.ClientEnv("OS_PLACEMENT__", "placement-keystone")...)
 
 	dbEnvVars := []corev1.EnvVar{
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
@@ -155,7 +155,7 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.CellDatabase.Secret, "connection"),
 	}
 
-	fullEnvVars := append(envVars, dbEnvVars...)
+	fullEnvVars := append(env, dbEnvVars...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-nova", cm.Name, nil),
@@ -194,7 +194,7 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileCompute(ctx, instance, cinder, envVars, volumes, log); err != nil {
+	if err := r.reconcileCompute(ctx, instance, cinder, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -203,7 +203,7 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	return ctrl.Result{}, nil
 }
 
-func (r *NovaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NovaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := nova.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -220,7 +220,7 @@ func (r *NovaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1
 		}
 	}
 
-	deploy := nova.APIDeployment(instance, envVars, volumes)
+	deploy := nova.APIDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
@@ -229,14 +229,14 @@ func (r *NovaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1
 	return nil
 }
 
-func (r *NovaReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NovaReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := nova.ConductorService(instance.Name, instance.Namespace)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
 		return err
 	}
 
-	sts := nova.ConductorStatefulSet(instance.Name, instance.Namespace, instance.Spec.Conductor, envVars, volumes, instance.Spec.Image)
+	sts := nova.ConductorStatefulSet(instance.Name, instance.Namespace, instance.Spec.Conductor, env, volumes, instance.Spec.Image)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
@@ -245,14 +245,14 @@ func (r *NovaReconciler) reconcileConductor(ctx context.Context, instance *opens
 	return nil
 }
 
-func (r *NovaReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NovaReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := nova.SchedulerService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
 		return err
 	}
 
-	sts := nova.SchedulerStatefulSet(instance, envVars, volumes)
+	sts := nova.SchedulerStatefulSet(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
@@ -269,7 +269,7 @@ func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openst
 	}
 	configHash := template.AppliedHash(cm)
 
-	envVars := []corev1.EnvVar{
+	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 	}
 
@@ -285,14 +285,14 @@ func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openst
 				cephSecrets.Append(cephSpec.Secret)
 
 				// TODO support multiple ceph backends
-				envVars = append(envVars, template.EnvVar("LIBVIRT_CEPH_CINDER_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
-				envVars = append(envVars, template.EnvVar("CEPH_CINDER_USER", cephSpec.ClientName))
-				envVars = append(envVars, template.EnvVar("CEPH_CINDER_SECRET", cephSpec.Secret))
+				env = append(env, template.EnvVar("LIBVIRT_CEPH_CINDER_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
+				env = append(env, template.EnvVar("CEPH_CINDER_USER", cephSpec.ClientName))
+				env = append(env, template.EnvVar("CEPH_CINDER_SECRET", cephSpec.Secret))
 			}
 		}
 	}
 
-	ds := nova.LibvirtdDaemonSet(instance, envVars, volumeMounts, volumes)
+	ds := nova.LibvirtdDaemonSet(instance, env, volumeMounts, volumes)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err
@@ -301,7 +301,7 @@ func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openst
 	return nil
 }
 
-func (r *NovaReconciler) reconcileCompute(ctx context.Context, instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NovaReconciler) reconcileCompute(ctx context.Context, instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	// TODO make this configurable
 	cell := instance.Spec.Cells[0]
 
@@ -320,15 +320,15 @@ func (r *NovaReconciler) reconcileCompute(ctx context.Context, instance *opensta
 				cephSecrets.Append(cephSpec.Secret)
 
 				// TODO support multiple ceph backends
-				envVars = append(envVars, template.EnvVar("OS_LIBVIRT__RBD_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
-				envVars = append(envVars, template.EnvVar("OS_LIBVIRT__RBD_USER", cephSpec.ClientName))
+				env = append(env, template.EnvVar("OS_LIBVIRT__RBD_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
+				env = append(env, template.EnvVar("OS_LIBVIRT__RBD_USER", cephSpec.ClientName))
 			}
 		}
 	}
 
-	envVars = append(envVars, extraEnvVars...)
+	env = append(env, extraEnvVars...)
 
-	ds := nova.ComputeDaemonSet(instance, envVars, volumeMounts, volumes)
+	ds := nova.ComputeDaemonSet(instance, env, volumeMounts, volumes)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err

@@ -117,34 +117,34 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	envVars := []corev1.EnvVar{
+	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 	}
 
-	envVars = append(envVars, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
+	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-cinder", cm.Name, nil),
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
-	jobs.Add(&instance.Status.DBSyncJobHash, cinder.DBSyncJob(instance, envVars, volumes))
+	jobs.Add(&instance.Status.DBSyncJobHash, cinder.DBSyncJob(instance, env, volumes))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileScheduler(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileScheduler(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileVolume(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileVolume(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -194,7 +194,7 @@ func (r *CinderReconciler) reconcileRookCeph(ctx context.Context, instance *open
 	return nil
 }
 
-func (r *CinderReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Cinder, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *CinderReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := cinder.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -211,7 +211,7 @@ func (r *CinderReconciler) reconcileAPI(ctx context.Context, instance *openstack
 		}
 	}
 
-	deploy := cinder.APIDeployment(instance, envVars, volumes)
+	deploy := cinder.APIDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
@@ -220,14 +220,14 @@ func (r *CinderReconciler) reconcileAPI(ctx context.Context, instance *openstack
 	return nil
 }
 
-func (r *CinderReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Cinder, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *CinderReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := cinder.SchedulerService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
 		return err
 	}
 
-	sts := cinder.SchedulerStatefulSet(instance, envVars, volumes)
+	sts := cinder.SchedulerStatefulSet(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
@@ -236,14 +236,14 @@ func (r *CinderReconciler) reconcileScheduler(ctx context.Context, instance *ope
 	return nil
 }
 
-func (r *CinderReconciler) reconcileVolume(ctx context.Context, instance *openstackv1beta1.Cinder, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *CinderReconciler) reconcileVolume(ctx context.Context, instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := cinder.VolumeService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
 		return err
 	}
 
-	sts := cinder.VolumeStatefulSet(instance, envVars, volumes)
+	sts := cinder.VolumeStatefulSet(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err

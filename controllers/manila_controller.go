@@ -116,7 +116,7 @@ func (r *ManilaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	envVars := []corev1.EnvVar{
+	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_KEYSTONE_AUTH__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
@@ -124,27 +124,27 @@ func (r *ManilaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 	}
 
-	envVars = append(envVars, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
+	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-manila", cm.Name, nil),
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
-	jobs.Add(&instance.Status.DBSyncJobHash, manila.DBSyncJob(instance, envVars, volumes))
+	jobs.Add(&instance.Status.DBSyncJobHash, manila.DBSyncJob(instance, env, volumes))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileScheduler(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileScheduler(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileShare(ctx, instance, envVars, volumes, log); err != nil {
+	if err := r.reconcileShare(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -153,7 +153,7 @@ func (r *ManilaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	return ctrl.Result{}, nil
 }
 
-func (r *ManilaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Manila, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *ManilaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Manila, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := manila.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -170,7 +170,7 @@ func (r *ManilaReconciler) reconcileAPI(ctx context.Context, instance *openstack
 		}
 	}
 
-	deploy := manila.APIDeployment(instance, envVars, volumes)
+	deploy := manila.APIDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
@@ -179,14 +179,14 @@ func (r *ManilaReconciler) reconcileAPI(ctx context.Context, instance *openstack
 	return nil
 }
 
-func (r *ManilaReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Manila, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *ManilaReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Manila, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := manila.SchedulerService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
 		return err
 	}
 
-	sts := manila.SchedulerStatefulSet(instance, envVars, volumes)
+	sts := manila.SchedulerStatefulSet(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
@@ -195,14 +195,14 @@ func (r *ManilaReconciler) reconcileScheduler(ctx context.Context, instance *ope
 	return nil
 }
 
-func (r *ManilaReconciler) reconcileShare(ctx context.Context, instance *openstackv1beta1.Manila, envVars []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *ManilaReconciler) reconcileShare(ctx context.Context, instance *openstackv1beta1.Manila, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := manila.ShareService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
 		return err
 	}
 
-	sts := manila.ShareStatefulSet(instance, envVars, volumes)
+	sts := manila.ShareStatefulSet(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err

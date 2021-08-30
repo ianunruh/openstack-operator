@@ -12,7 +12,7 @@ const (
 	SchedulerComponentLabel = "scheduler"
 )
 
-func SchedulerStatefulSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
+func SchedulerStatefulSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, SchedulerComponentLabel)
 
 	volumeMounts := []corev1.VolumeMount{
@@ -31,7 +31,7 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Nova, envVars []corev1.EnvV
 					"nova-scheduler",
 					"--config-file=/etc/nova/nova.conf",
 				},
-				Env:          envVars,
+				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
 		},
