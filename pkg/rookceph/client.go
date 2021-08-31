@@ -69,17 +69,35 @@ func ClientSecret(name, namespace, clientName string, keyring []byte, monHosts [
 func GetCephMonitorAddrs(ctx context.Context, c client.Client, namespace string) ([]string, error) {
 	monLabels := labels.Set{"ceph_daemon_type": "mon"}
 
-	var monServices corev1.ServiceList
-	if err := c.List(ctx, &monServices, &client.ListOptions{
+	listOpts := &client.ListOptions{
 		Namespace:     namespace,
 		LabelSelector: monLabels.AsSelector(),
-	}); err != nil {
+	}
+
+	var monServices corev1.ServiceList
+	if err := c.List(ctx, &monServices, listOpts); err != nil {
 		return nil, err
 	}
 
 	var addrs []string
-	for _, svc := range monServices.Items {
-		addrs = append(addrs, svc.Spec.ClusterIP)
+
+	if len(monServices.Items) > 0 {
+		for _, svc := range monServices.Items {
+			addrs = append(addrs, svc.Spec.ClusterIP)
+		}
+
+		return addrs, nil
+	}
+
+	// in rook-ceph clusters using host networking, no mon services are created.
+	// fallback to mon pods
+	var monPods corev1.PodList
+	if err := c.List(ctx, &monPods, listOpts); err != nil {
+		return nil, err
+	}
+
+	for _, pod := range monPods.Items {
+		addrs = append(addrs, pod.Status.PodIP)
 	}
 
 	return addrs, nil
