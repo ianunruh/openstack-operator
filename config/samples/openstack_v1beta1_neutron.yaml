@@ -3,11 +3,11 @@ kind: Neutron
 metadata:
   name: neutron
 spec:
-  image: ianunruh/neutron:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/neutron:latest
   server:
     replicas: 2
     ingress:
-      host: neutron.openstack2.kcloud.zone
+      host: neutron.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod

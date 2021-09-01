@@ -3,11 +3,11 @@ kind: Manila
 metadata:
   name: manila
 spec:
-  image: registry.kcloud.io/kcloud/openstack-operator-images/manila:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/manila:latest
   api:
     replicas: 2
     ingress:
-      host: manila.openstack.k8s.kcloud.zone
+      host: manila.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod

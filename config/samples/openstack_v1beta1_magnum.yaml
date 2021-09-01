@@ -3,11 +3,11 @@ kind: Magnum
 metadata:
   name: magnum
 spec:
-  image: ianunruh/magnum:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/magnum:latest
   api:
     replicas: 2
     ingress:
-      host: magnum.openstack2.kcloud.zone
+      host: magnum.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod

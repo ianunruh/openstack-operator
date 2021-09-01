@@ -3,7 +3,7 @@ kind: ControlPlane
 metadata:
   name: default
 spec:
-  domain: openstack3.kcloud.zone
+  domain: openstack3.k8s.example.com
   cinder:
     backends:
     - name: ceph

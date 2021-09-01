@@ -3,7 +3,7 @@ kind: ControlPlane
 metadata:
   name: default
 spec:
-  domain: openstack.kcloud.zone
+  domain: openstack.k8s.example.com
   ingress:
     annotations:
       external-dns/enabled: "true"
@@ -24,13 +24,18 @@ spec:
       capacity: 50Gi
       storageClass: ceph-block-ssd
   keystone:
-    image: ianunruh/keystone:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/keystone:latest
     database:
       name: keystone
       secret: keystone-db
       cluster: mariadb
+    broker:
+      name: keystone
+      secret: keystone-rabbitmq
+      cluster: rabbitmq
+      virtualHost: openstack
   glance:
-    image: ianunruh/glance:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/glance:latest
     database:
       name: glance
       secret: glance-db
@@ -46,7 +51,7 @@ spec:
           deviceClass: ssd
           replicatedSize: 2
   cinder:
-    image: ianunruh/cinder:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/cinder:latest
     backends:
     - name: ceph
       volumeBackendName: ceph
@@ -68,13 +73,13 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   placement:
-    image: ianunruh/placement:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/placement:latest
     database:
       name: placement
       secret: placement-db
       cluster: mariadb
   nova:
-    image: ianunruh/nova:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/nova:latest
     cells:
     - name: cell1
       database:
@@ -87,7 +92,7 @@ spec:
         cluster: rabbitmq
         virtualHost: nova-cell1
     libvirtd:
-      image: ianunruh/libvirtd:latest
+      image: ghcr.io/ianunruh/openstack-operator-images/libvirtd:latest
     compute:
       nodeSelector:
         openstack/cloud: openstack
@@ -106,7 +111,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   neutron:
-    image: ianunruh/neutron:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/neutron:latest
     metadataAgent:
       nodeSelector:
         openstack/cloud: openstack
@@ -120,10 +125,24 @@ spec:
       secret: neutron-rabbitmq
       cluster: rabbitmq
       virtualHost: openstack
+  ovn:
+    image: ghcr.io/ianunruh/openstack-operator-images/neutron:latest
+    node:
+      nodeSelector:
+        openstack/cloud: openstack
+        openstack/network-agent: ovn
+    ovsdbNorth:
+      volume:
+        capacity: 20Gi
+        storageClass: ceph-block-ssd
+    ovsdbSouth:
+      volume:
+        capacity: 20Gi
+        storageClass: ceph-block-ssd
   horizon:
-    image: ianunruh/horizon:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/horizon:latest
   heat:
-    image: ianunruh/heat:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/heat:latest
     database:
       name: heat
       secret: heat-db
@@ -134,7 +153,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   magnum:
-    image: ianunruh/magnum:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/magnum:latest
     database:
       name: magnum
       secret: magnum-db
@@ -145,7 +164,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   barbican:
-    image: ianunruh/barbican:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/barbican:latest
     database:
       name: barbican
       secret: barbican-db

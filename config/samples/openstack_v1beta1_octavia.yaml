@@ -3,20 +3,13 @@ kind: Octavia
 metadata:
   name: octavia
 spec:
-  image: ianunruh/octavia:latest
-  api:
-    replicas: 2
-    ingress:
-      host: octavia.openstack2.kcloud.zone
-      annotations:
-        external-dns/enabled: "true"
-        cert-manager.io/cluster-issuer: letsencrypt-prod
+  image: ghcr.io/ianunruh/openstack-operator-images/octavia:latest
   amphora:
     imageURL: https://tarballs.opendev.org/openstack/octavia/test-images/test-only-amphora-x64-haproxy-ubuntu-focal.qcow2
   api:
     replicas: 2
     ingress:
-      host: octavia.openstack2.kcloud.zone
+      host: octavia.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod

@@ -3,11 +3,11 @@ kind: Placement
 metadata:
   name: placement
 spec:
-  image: ianunruh/placement:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/placement:latest
   api:
     replicas: 2
     ingress:
-      host: placement.openstack2.kcloud.zone
+      host: placement.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod

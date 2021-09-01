@@ -5,5 +5,5 @@ metadata:
 spec:
   name: glance
   type: image
-  publicURL: https://glance.openstack2.kcloud.zone
+  publicURL: https://glance.openstack.k8s.example.com
   internalURL: http://glance.openstack2.svc:9292

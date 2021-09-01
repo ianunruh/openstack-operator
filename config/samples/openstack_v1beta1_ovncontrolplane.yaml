@@ -3,7 +3,7 @@ kind: OVNControlPlane
 metadata:
   name: ovn
 spec:
-  image: registry.kcloud.io/kcloud/openstack-operator-images/neutron:b6bd70b335eacf263f46b297672607bca24459cb
+  image: ghcr.io/ianunruh/openstack-operator-images/neutron:latest
   node:
     nodeSelector:
       openstack/network-agent: ovn

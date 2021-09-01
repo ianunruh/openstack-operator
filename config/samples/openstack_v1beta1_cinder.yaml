@@ -3,11 +3,11 @@ kind: Cinder
 metadata:
   name: cinder
 spec:
-  image: ianunruh/cinder:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/cinder:latest
   api:
     replicas: 2
     ingress:
-      host: cinder.openstack2.kcloud.zone
+      host: cinder.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod

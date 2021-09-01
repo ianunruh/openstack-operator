@@ -3,11 +3,11 @@ kind: Glance
 metadata:
   name: glance
 spec:
-  image: ianunruh/glance:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/glance:latest
   api:
     replicas: 2
     ingress:
-      host: glance.openstack2.kcloud.zone
+      host: glance.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod

@@ -15,7 +15,7 @@ spec:
   novncproxy:
     replicas: 2
     ingress:
-      host: novnc.openstack2.kcloud.zone
+      host: novnc.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod

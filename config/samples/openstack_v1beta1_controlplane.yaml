@@ -3,7 +3,7 @@ kind: ControlPlane
 metadata:
   name: default
 spec:
-  domain: openstack.kcloud.zone
+  domain: openstack.k8s.example.com
   ingress:
     annotations:
       external-dns/enabled: "true"
@@ -24,7 +24,7 @@ spec:
       capacity: 50Gi
       storageClass: ceph-block-ssd
   keystone:
-    image: ianunruh/keystone:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/keystone:latest
     api:
       replicas: 2
     database:
@@ -37,7 +37,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   glance:
-    image: ianunruh/glance:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/glance:latest
     database:
       name: glance
       secret: glance-db
@@ -49,13 +49,13 @@ spec:
         storageClass: ceph-fs-ssd
         accessModes: [ReadWriteMany]
   placement:
-    image: ianunruh/placement:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/placement:latest
     database:
       name: placement
       secret: placement-db
       cluster: mariadb
   nova:
-    image: ianunruh/nova:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/nova:latest
     cells:
     - name: cell1
       database:
@@ -68,7 +68,7 @@ spec:
         cluster: rabbitmq
         virtualHost: nova-cell1
     libvirtd:
-      image: ianunruh/libvirtd:latest
+      image: ghcr.io/ianunruh/openstack-operator-images/libvirtd:latest
     compute:
       nodeSelector:
         openstack/cloud: openstack
@@ -87,7 +87,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   neutron:
-    image: ianunruh/neutron:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/neutron:latest
     metadataAgent:
       nodeSelector:
         openstack/cloud: openstack
@@ -102,7 +102,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   ovn:
-    image: registry.kcloud.io/kcloud/openstack-operator-images/neutron:b6bd70b335eacf263f46b297672607bca24459cb
+    image: ghcr.io/ianunruh/openstack-operator-images/neutron:latest
     node:
       nodeSelector:
         openstack/cloud: openstack
@@ -116,4 +116,4 @@ spec:
         capacity: 20Gi
         storageClass: ceph-block-ssd
   horizon:
-    image: ianunruh/horizon:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/horizon:latest

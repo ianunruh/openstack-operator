@@ -3,18 +3,18 @@ kind: Nova
 metadata:
   name: nova
 spec:
-  image: ianunruh/nova:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/nova:latest
   api:
     replicas: 2
     ingress:
-      host: nova.openstack2.kcloud.zone
+      host: nova.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
   scheduler:
     replicas: 2
   libvirtd:
-    image: ianunruh/libvirtd:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/libvirtd:latest
   compute:
     nodeSelector:
       openstack/compute-node: enabled

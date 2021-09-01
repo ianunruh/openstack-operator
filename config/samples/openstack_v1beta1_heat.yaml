@@ -3,18 +3,18 @@ kind: Heat
 metadata:
   name: heat
 spec:
-  image: ianunruh/heat:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/heat:latest
   api:
     replicas: 2
     ingress:
-      host: heat.openstack2.kcloud.zone
+      host: heat.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
   cfn:
     replicas: 2
     ingress:
-      host: heat-cfn.openstack2.kcloud.zone
+      host: heat-cfn.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod

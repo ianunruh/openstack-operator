@@ -3,11 +3,11 @@ kind: Horizon
 metadata:
   name: horizon
 spec:
-  image: ianunruh/horizon:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/horizon:latest
   server:
     replicas: 2
     ingress:
-      host: horizon.openstack2.kcloud.zone
+      host: horizon.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod

@@ -3,11 +3,11 @@ kind: Keystone
 metadata:
   name: keystone
 spec:
-  image: ianunruh/keystone:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/keystone:latest
   api:
     replicas: 2
     ingress:
-      host: keystone.openstack2.kcloud.zone
+      host: keystone.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod

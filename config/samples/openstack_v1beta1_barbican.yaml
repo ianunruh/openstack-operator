@@ -3,11 +3,11 @@ kind: Barbican
 metadata:
   name: barbican
 spec:
-  image: ianunruh/barbican:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/barbican:latest
   api:
     replicas: 2
     ingress:
-      host: barbican.openstack2.kcloud.zone
+      host: barbican.openstack.k8s.example.com
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
