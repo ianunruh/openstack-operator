@@ -12,15 +12,39 @@ The initial goal of this operator is to allow for provisioning multiple clouds i
 for testing and development purposes. Production operations, also known as "day 2" operations, may come at a
 later point.
 
+This operator deploys an [OVN](https://www.ovn.org/en/architecture/) control plane to provide
+scalable network virtualization.
+
 The API will almost certainly have significant changes, so definitely don't use this in production.
+
+## Components
+
+Supports deploying a "minimal" OpenStack cloud with the following components.
+
+* Keystone (identity)
+* Glance (image registry)
+* Placement (resource allocation)
+* Nova (compute)
+* Neutron + OVN (networking)
+* Horizon (dashboard)
+
+Also supports the following optional components.
+
+* Barbican (secrets)
+* Cinder (block storage)
+* Heat (orchestration)
+* Magnum (container engine orchestration)
+* Manila (filesystem storage)
+* Octavia (load balancing)
+* Rally (benchmarking)
 
 ## Images
 
 This operator utilizes custom container images based on Ubuntu OpenStack, using the 20.04 release that ships
-with [Ussuri](https://docs.openstack.org/ussuri/).
+with [Wallaby](https://docs.openstack.org/wallaby/).
 
 These images are built from [openstack-operator-images](https://github.com/ianunruh/openstack-operator-images)
-using the Docker Hub automated build process. Currently images are just tagged as `latest`, there may be
+using GitHub Actions for CI. Currently images are just tagged as `latest`, there may be
 a more stable tag in the future.
 
 Stateful services like MariaDB, Memcached, and RabbitMQ use container images from Bitnami.
@@ -40,7 +64,7 @@ make install
 make run
 
 # Optionally, switch to the namespace you wish to test in
-kubectl config set-context --current --namespace=openstack2
+kubectl config set-context --current --namespace=openstack
 
 kubectl apply -f config/samples/openstack_v1beta1_controlplane.yaml
 ```
@@ -49,16 +73,15 @@ Label the desired compute/network nodes to enable deployment.
 
 ```
 kubectl label node compute7 \
-    openstack/cloud=openstack2 \            ## optional if only running single cloud
-    openstack/compute-node=enabled \        ## compute node must be capable of running kvm
-    openstack/network-agent=linuxbridge \   ## required for both compute and network nodes
-    openstack/network-node=enabled          ## compute and network can co-exist on same node
+    openstack/cloud=openstack \           ## optional if only running single cloud
+    openstack/compute-node=enabled \      ## compute node must be capable of running KVM
+    openstack/network-agent=ovn           ## only one network agent supported currently
 ```
 
 Use the supplied `openrc` file with the Python CLI client.
 
 ```
-pip install osc-placement python-heatclient python-magnumclient python-openstackclient
+pip install osc-placement python-heatclient python-magnumclient python-manilaclient python-openstackclient
 
 source openrc
 
@@ -118,9 +141,18 @@ kubectl delete pvc -l app=rabbitmq
 
 Ingress secrets will also remain until manually cleaned up.
 
+Compute hosts need additional cleanup. It's recommended that hosts are rebooted
+after tearing down the cluster, as there will be leftover networking state, such
+as network namespaces, iptables rules, and OVS data paths.
+
+```
+pkill -f "OpenStack Nova"
+rm -rf /var/lib/nova /var/lib/libvirt /var/run/openvswitch /var/lib/openvswitch
+```
+
 ## Requirements
 
-Tested on Kubernetes 1.19 and later, but may work with earlier versions.
+Tested on Kubernetes 1.21 and later, but may work with earlier versions.
 
 * cert-manager
 * ingress-nginx
