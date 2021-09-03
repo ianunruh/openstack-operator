@@ -29,7 +29,8 @@ spec:
         - /manager
         args:
         - --leader-elect
-        image: ghcr.io/ianunruh/openstack-operator:latest
+        image: ghcr.io/ianunruh/openstack-operator:master
+        imagePullPolicy: Always
         name: manager
         securityContext:
           allowPrivilegeEscalation: false
