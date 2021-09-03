@@ -1,7 +1,5 @@
 # openstack-operator
 
-[![Docker Build](https://img.shields.io/docker/cloud/automated/ianunruh/openstack-operator?style=flat-square)](https://hub.docker.com/r/ianunruh/openstack-operator)
-
 Experimental Kubernetes operator for running OpenStack clouds at scale, built on the Operator framework.
 
 This operator comes batteries-included, provisioning MariaDB, RabbitMQ, and other stateful services required
