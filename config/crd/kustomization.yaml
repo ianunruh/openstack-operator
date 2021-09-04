@@ -71,7 +71,7 @@ patchesStrategicMerge:
 - patches/cainjection_in_novacells.yaml
 - patches/cainjection_in_neutrons.yaml
 - patches/cainjection_in_horizons.yaml
-#- patches/cainjection_in_memcacheds.yaml
+- patches/cainjection_in_memcacheds.yaml
 - patches/cainjection_in_cinders.yaml
 - patches/cainjection_in_heats.yaml
 - patches/cainjection_in_magnums.yaml

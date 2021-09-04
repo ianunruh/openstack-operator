@@ -330,6 +330,10 @@ func main() {
 		setupLog.Error(err, "unable to create webhook", "webhook", "NovaCell")
 		os.Exit(1)
 	}
+	if err = (&openstackv1beta1.Memcached{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Memcached")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {
