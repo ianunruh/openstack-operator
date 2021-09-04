@@ -51,6 +51,26 @@ rules:
   - update
   - watch
 - apiGroups:
+  - ceph.rook.io
+  resources:
+  - cephblockpools
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+- apiGroups:
+  - ceph.rook.io
+  resources:
+  - cephclients
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update
+- apiGroups:
   - cert-manager.io
   resources:
   - certificates
@@ -142,7 +162,6 @@ rules:
   resources:
   - ingresses
   verbs:
-  - ;create
   - create
   - delete
   - get
