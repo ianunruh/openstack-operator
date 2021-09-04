@@ -26,7 +26,7 @@ ovs-vsctl set open . external_ids:ovn-remote=${OVN_SB_CONNECTION}
 ovs-vsctl set open . external_ids:ovn-encap-type=geneve
 ovs-vsctl set open . external_ids:ovn-encap-ip=${OVN_NODE_IP}
 
-if ${GATEWAY}; then
+if [ "${GATEWAY}" == "true" ]; then
     # mark it as gateway
     ovs-vsctl set open . external_ids:ovn-cms-options=enable-chassis-as-gw
     ovs-vsctl set open . external_ids:ovn-bridge-mappings=${BRIDGE_MAPPINGS}
