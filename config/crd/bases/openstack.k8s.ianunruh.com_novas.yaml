@@ -6,13 +6,13 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: nova.openstack.k8s.ianunruh.com
+  name: novas.openstack.k8s.ianunruh.com
 spec:
   group: openstack.k8s.ianunruh.com
   names:
     kind: Nova
     listKind: NovaList
-    plural: nova
+    plural: novas
     singular: nova
   scope: Namespaced
   versions:

@@ -12,7 +12,7 @@ resources:
 - bases/openstack.k8s.ianunruh.com_placements.yaml
 - bases/openstack.k8s.ianunruh.com_rabbitmqs.yaml
 - bases/openstack.k8s.ianunruh.com_rabbitmqusers.yaml
-- bases/openstack.k8s.ianunruh.com_nova.yaml
+- bases/openstack.k8s.ianunruh.com_novas.yaml
 - bases/openstack.k8s.ianunruh.com_novacells.yaml
 - bases/openstack.k8s.ianunruh.com_neutrons.yaml
 - bases/openstack.k8s.ianunruh.com_horizons.yaml
@@ -22,7 +22,7 @@ resources:
 - bases/openstack.k8s.ianunruh.com_magnums.yaml
 - bases/openstack.k8s.ianunruh.com_barbicans.yaml
 - bases/openstack.k8s.ianunruh.com_ovncontrolplanes.yaml
-- bases/openstack.k8s.ianunruh.com_octavia.yaml
+- bases/openstack.k8s.ianunruh.com_octavias.yaml
 - bases/openstack.k8s.ianunruh.com_rallies.yaml
 - bases/openstack.k8s.ianunruh.com_manilas.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
@@ -40,7 +40,7 @@ patchesStrategicMerge:
 #- patches/webhook_in_placements.yaml
 #- patches/webhook_in_rabbitmqs.yaml
 #- patches/webhook_in_rabbitmqusers.yaml
-#- patches/webhook_in_nova.yaml
+#- patches/webhook_in_novas.yaml
 #- patches/webhook_in_novacells.yaml
 #- patches/webhook_in_neutrons.yaml
 #- patches/webhook_in_horizons.yaml
@@ -50,7 +50,7 @@ patchesStrategicMerge:
 #- patches/webhook_in_magnums.yaml
 #- patches/webhook_in_barbicans.yaml
 #- patches/webhook_in_ovncontrolplanes.yaml
-#- patches/webhook_in_octavia.yaml
+#- patches/webhook_in_octavias.yaml
 #- patches/webhook_in_rallies.yaml
 #- patches/webhook_in_manilas.yaml
 # +kubebuilder:scaffold:crdkustomizewebhookpatch
@@ -67,7 +67,7 @@ patchesStrategicMerge:
 #- patches/cainjection_in_placements.yaml
 #- patches/cainjection_in_rabbitmqs.yaml
 #- patches/cainjection_in_rabbitmqusers.yaml
-#- patches/cainjection_in_nova.yaml
+#- patches/cainjection_in_novas.yaml
 #- patches/cainjection_in_novacells.yaml
 #- patches/cainjection_in_neutrons.yaml
 #- patches/cainjection_in_horizons.yaml
@@ -77,7 +77,7 @@ patchesStrategicMerge:
 #- patches/cainjection_in_magnums.yaml
 #- patches/cainjection_in_barbicans.yaml
 #- patches/cainjection_in_ovncontrolplanes.yaml
-#- patches/cainjection_in_octavia.yaml
+#- patches/cainjection_in_octavias.yaml
 #- patches/cainjection_in_rallies.yaml
 #- patches/cainjection_in_manilas.yaml
 # +kubebuilder:scaffold:crdkustomizecainjectionpatch

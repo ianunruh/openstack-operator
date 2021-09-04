@@ -91,6 +91,7 @@ type NovaStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
+// +kubebuilder:resource:path=novas
 
 // Nova is the Schema for the nova API
 type Nova struct {

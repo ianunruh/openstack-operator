@@ -108,6 +108,7 @@ type OctaviaAmphoraHealthPort struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:path=octavias
 
 // Octavia is the Schema for the octavia API
 type Octavia struct {
