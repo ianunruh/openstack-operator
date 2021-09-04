@@ -33,7 +33,7 @@ patchesStrategicMerge:
 #- patches/webhook_in_controlplanes.yaml
 #- patches/webhook_in_mariadbs.yaml
 #- patches/webhook_in_mariadbdatabases.yaml
-- patches/webhook_in_keystones.yaml
+#- patches/webhook_in_keystones.yaml
 #- patches/webhook_in_keystoneservices.yaml
 #- patches/webhook_in_keystoneusers.yaml
 #- patches/webhook_in_glances.yaml
