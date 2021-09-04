@@ -128,8 +128,6 @@ spec:
                 type: object
             required:
             - amphora
-            - broker
-            - database
             - healthManager
             - image
             type: object

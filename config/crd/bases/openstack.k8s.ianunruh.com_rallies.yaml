@@ -67,7 +67,6 @@ spec:
                 type: string
             required:
             - data
-            - database
             - image
             type: object
           status:

@@ -13,6 +13,111 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-barbican
+  failurePolicy: Fail
+  name: mbarbican.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - barbicans
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-cinder
+  failurePolicy: Fail
+  name: mcinder.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - cinders
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-glance
+  failurePolicy: Fail
+  name: mglance.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - glances
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-heat
+  failurePolicy: Fail
+  name: mheat.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - heats
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-horizon
+  failurePolicy: Fail
+  name: mhorizon.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - horizons
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-openstack-k8s-ianunruh-com-v1beta1-keystone
   failurePolicy: Fail
   name: mkeystone.kb.io
@@ -27,6 +132,258 @@ webhooks:
     resources:
     - keystones
   sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-magnum
+  failurePolicy: Fail
+  name: mmagnum.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - magnums
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-manila
+  failurePolicy: Fail
+  name: mmanila.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - manilas
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-mariadb
+  failurePolicy: Fail
+  name: mmariadb.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - mariadbs
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-memcached
+  failurePolicy: Fail
+  name: mmemcached.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - memcacheds
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-neutron
+  failurePolicy: Fail
+  name: mneutron.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - neutrons
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-nova
+  failurePolicy: Fail
+  name: mnova.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - novas
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-novacell
+  failurePolicy: Fail
+  name: mnovacell.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - novacells
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-octavia
+  failurePolicy: Fail
+  name: moctavia.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - octavias
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-ovncontrolplane
+  failurePolicy: Fail
+  name: movncontrolplane.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - ovncontrolplanes
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-placement
+  failurePolicy: Fail
+  name: mplacement.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - placements
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-rabbitmq
+  failurePolicy: Fail
+  name: mrabbitmq.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - rabbitmqs
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-rally
+  failurePolicy: Fail
+  name: mrally.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - rallies
+  sideEffects: None
 
 ---
 apiVersion: admissionregistration.k8s.io/v1
@@ -35,6 +392,111 @@ metadata:
   creationTimestamp: null
   name: validating-webhook-configuration
 webhooks:
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-barbican
+  failurePolicy: Fail
+  name: vbarbican.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - barbicans
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-cinder
+  failurePolicy: Fail
+  name: vcinder.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - cinders
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-glance
+  failurePolicy: Fail
+  name: vglance.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - glances
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-heat
+  failurePolicy: Fail
+  name: vheat.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - heats
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-horizon
+  failurePolicy: Fail
+  name: vhorizon.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - horizons
+  sideEffects: None
 - admissionReviewVersions:
   - v1
   - v1beta1
@@ -55,4 +517,256 @@ webhooks:
     - UPDATE
     resources:
     - keystones
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-magnum
+  failurePolicy: Fail
+  name: vmagnum.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - magnums
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-manila
+  failurePolicy: Fail
+  name: vmanila.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - manilas
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-mariadb
+  failurePolicy: Fail
+  name: vmariadb.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - mariadbs
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-memcached
+  failurePolicy: Fail
+  name: vmemcached.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - memcacheds
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-neutron
+  failurePolicy: Fail
+  name: vneutron.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - neutrons
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-nova
+  failurePolicy: Fail
+  name: vnova.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - novas
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-novacell
+  failurePolicy: Fail
+  name: vnovacell.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - novacells
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-octavia
+  failurePolicy: Fail
+  name: voctavia.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - octavias
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-ovncontrolplane
+  failurePolicy: Fail
+  name: vovncontrolplane.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - ovncontrolplanes
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-placement
+  failurePolicy: Fail
+  name: vplacement.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - placements
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-rabbitmq
+  failurePolicy: Fail
+  name: vrabbitmq.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - rabbitmqs
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-rally
+  failurePolicy: Fail
+  name: vrally.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - rallies
   sideEffects: None

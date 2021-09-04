@@ -120,7 +120,6 @@ spec:
               image:
                 type: string
             required:
-            - database
             - image
             type: object
           status:

@@ -97,8 +97,6 @@ spec:
                         type: integer
                     type: object
                 required:
-                - broker
-                - database
                 - image
                 type: object
               broker:
@@ -264,8 +262,6 @@ spec:
                         type: integer
                     type: object
                 required:
-                - broker
-                - database
                 - image
                 type: object
               database:
@@ -380,7 +376,6 @@ spec:
                   image:
                     type: string
                 required:
-                - database
                 - image
                 type: object
               heat:
@@ -461,8 +456,6 @@ spec:
                   image:
                     type: string
                 required:
-                - broker
-                - database
                 - image
                 type: object
               horizon:
@@ -617,8 +610,6 @@ spec:
                   image:
                     type: string
                 required:
-                - broker
-                - database
                 - image
                 type: object
               manila:
@@ -720,8 +711,6 @@ spec:
                     type: object
                 required:
                 - backends
-                - broker
-                - database
                 - image
                 type: object
               neutron:
@@ -788,8 +777,6 @@ spec:
                         type: integer
                     type: object
                 required:
-                - broker
-                - database
                 - image
                 - metadataAgent
                 type: object
@@ -929,8 +916,6 @@ spec:
                               type: integer
                           type: object
                       required:
-                      - broker
-                      - database
                       - name
                       type: object
                     type: array
@@ -965,9 +950,6 @@ spec:
                         type: integer
                     type: object
                 required:
-                - apiDatabase
-                - broker
-                - cellDatabase
                 - cells
                 - compute
                 - image
@@ -1069,8 +1051,6 @@ spec:
                     type: object
                 required:
                 - amphora
-                - broker
-                - database
                 - healthManager
                 - image
                 type: object
@@ -1186,7 +1166,6 @@ spec:
                   image:
                     type: string
                 required:
-                - database
                 - image
                 type: object
             required:

@@ -96,8 +96,6 @@ spec:
                     type: integer
                 type: object
             required:
-            - broker
-            - database
             - image
             - metadataAgent
             type: object

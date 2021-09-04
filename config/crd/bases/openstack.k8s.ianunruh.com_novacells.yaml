@@ -106,8 +106,6 @@ spec:
                     type: integer
                 type: object
             required:
-            - broker
-            - database
             - name
             type: object
           status:

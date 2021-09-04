@@ -166,8 +166,6 @@ spec:
                           type: integer
                       type: object
                   required:
-                  - broker
-                  - database
                   - name
                   type: object
                 type: array
@@ -202,9 +200,6 @@ spec:
                     type: integer
                 type: object
             required:
-            - apiDatabase
-            - broker
-            - cellDatabase
             - cells
             - compute
             - image

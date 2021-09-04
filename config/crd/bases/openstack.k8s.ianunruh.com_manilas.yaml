@@ -131,8 +131,6 @@ spec:
                 type: object
             required:
             - backends
-            - broker
-            - database
             - image
             type: object
           status:
