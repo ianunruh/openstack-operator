@@ -24,6 +24,10 @@ import (
 type NovaCellSpec struct {
 	Name string `json:"name"`
 
+	Libvirtd NovaLibvirtdSpec `json:"libvirtd"`
+
+	Compute NovaComputeSpec `json:"compute"`
+
 	// +optional
 	Database MariaDBDatabaseSpec `json:"database"`
 
@@ -38,6 +42,14 @@ type NovaCellSpec struct {
 
 	// +optional
 	NoVNCProxy NovaNoVNCProxySpec `json:"novncproxy"`
+}
+
+type NovaLibvirtdSpec struct {
+	Image string `json:"image"`
+}
+
+type NovaComputeSpec struct {
+	NodeSelector map[string]string `json:"nodeSelector"`
 }
 
 // NovaCellStatus defines the observed state of NovaCell

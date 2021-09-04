@@ -119,6 +119,15 @@ spec:
                       - secret
                       - virtualHost
                       type: object
+                    compute:
+                      properties:
+                        nodeSelector:
+                          additionalProperties:
+                            type: string
+                          type: object
+                      required:
+                      - nodeSelector
+                      type: object
                     conductor:
                       properties:
                         replicas:
@@ -139,6 +148,13 @@ spec:
                       - cluster
                       - name
                       - secret
+                      type: object
+                    libvirtd:
+                      properties:
+                        image:
+                          type: string
+                      required:
+                      - image
                       type: object
                     metadata:
                       properties:
@@ -166,18 +182,11 @@ spec:
                           type: integer
                       type: object
                   required:
+                  - compute
+                  - libvirtd
                   - name
                   type: object
                 type: array
-              compute:
-                properties:
-                  nodeSelector:
-                    additionalProperties:
-                      type: string
-                    type: object
-                required:
-                - nodeSelector
-                type: object
               conductor:
                 properties:
                   replicas:
@@ -186,13 +195,6 @@ spec:
                 type: object
               image:
                 type: string
-              libvirtd:
-                properties:
-                  image:
-                    type: string
-                required:
-                - image
-                type: object
               scheduler:
                 properties:
                   replicas:
@@ -201,9 +203,7 @@ spec:
                 type: object
             required:
             - cells
-            - compute
             - image
-            - libvirtd
             type: object
           status:
             description: NovaStatus defines the observed state of Nova

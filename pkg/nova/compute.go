@@ -14,7 +14,7 @@ const (
 	ComputeComponentLabel = "compute"
 )
 
-func ComputeDaemonSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume) *appsv1.DaemonSet {
+func ComputeDaemonSet(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume, containerImage string) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, ComputeComponentLabel)
 
 	runAsRootUser := int64(0)
@@ -61,7 +61,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volu
 		InitContainers: []corev1.Container{
 			{
 				Name:  "compute-init",
-				Image: instance.Spec.Image,
+				Image: containerImage,
 				Command: []string{
 					"bash",
 					"-c",
@@ -80,7 +80,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volu
 		Containers: []corev1.Container{
 			{
 				Name:  "compute",
-				Image: instance.Spec.Image,
+				Image: containerImage,
 				Command: []string{
 					"nova-compute",
 					"--config-file=/etc/nova/nova.conf",

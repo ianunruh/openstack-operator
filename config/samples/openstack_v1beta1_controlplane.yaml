@@ -58,6 +58,12 @@ spec:
     image: ghcr.io/ianunruh/openstack-operator-images/nova:master
     cells:
     - name: cell1
+      compute:
+        nodeSelector:
+          openstack/cloud: openstack
+          openstack/compute-node: enabled
+      libvirtd:
+        image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
       database:
         name: nova_cell1
         secret: nova-cell1-db
@@ -67,12 +73,6 @@ spec:
         secret: nova-cell1-rabbitmq
         cluster: rabbitmq
         virtualHost: nova-cell1
-    libvirtd:
-      image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
-    compute:
-      nodeSelector:
-        openstack/cloud: openstack
-        openstack/compute-node: enabled
     apiDatabase:
       name: nova_api
       secret: nova-api-db

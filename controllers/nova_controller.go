@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -38,7 +37,6 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 	"github.com/ianunruh/openstack-operator/pkg/nova"
 	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
-	"github.com/ianunruh/openstack-operator/pkg/rookceph"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -190,14 +188,6 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileLibvirtd(ctx, instance, cinder, log); err != nil {
-		return ctrl.Result{}, err
-	}
-
-	if err := r.reconcileCompute(ctx, instance, cinder, env, volumes, log); err != nil {
-		return ctrl.Result{}, err
-	}
-
 	// TODO wait for deploys to be ready then mark status
 
 	return ctrl.Result{}, nil
@@ -255,82 +245,6 @@ func (r *NovaReconciler) reconcileScheduler(ctx context.Context, instance *opens
 	sts := nova.SchedulerStatefulSet(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *NovaReconciler) reconcileLibvirtd(ctx context.Context, instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder, log logr.Logger) error {
-	cm := nova.LibvirtdConfigMap(instance)
-	controllerutil.SetControllerReference(instance, cm, r.Scheme)
-	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
-		return err
-	}
-	configHash := template.AppliedHash(cm)
-
-	env := []corev1.EnvVar{
-		template.EnvVar("CONFIG_HASH", configHash),
-	}
-
-	var (
-		volumeMounts []corev1.VolumeMount
-		volumes      []corev1.Volume
-	)
-
-	if cinder != nil {
-		cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
-		for _, backend := range cinder.Spec.Backends {
-			if cephSpec := backend.Ceph; cephSpec != nil {
-				cephSecrets.Append(cephSpec.Secret)
-
-				// TODO support multiple ceph backends
-				env = append(env, template.EnvVar("LIBVIRT_CEPH_CINDER_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
-				env = append(env, template.EnvVar("CEPH_CINDER_USER", cephSpec.ClientName))
-				env = append(env, template.EnvVar("CEPH_CINDER_SECRET", cephSpec.Secret))
-			}
-		}
-	}
-
-	ds := nova.LibvirtdDaemonSet(instance, env, volumeMounts, volumes)
-	controllerutil.SetControllerReference(instance, ds, r.Scheme)
-	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *NovaReconciler) reconcileCompute(ctx context.Context, instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
-	// TODO make this configurable
-	cell := instance.Spec.Cells[0]
-
-	extraEnvVars := []corev1.EnvVar{
-		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", cell.Broker.Secret, "connection"),
-		// TODO make ingress optional
-		template.EnvVar("OS_VNC__NOVNCPROXY_BASE_URL", fmt.Sprintf("https://%s/vnc_auto.html", cell.NoVNCProxy.Ingress.Host)),
-	}
-
-	var volumeMounts []corev1.VolumeMount
-
-	if cinder != nil {
-		cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
-		for _, backend := range cinder.Spec.Backends {
-			if cephSpec := backend.Ceph; cephSpec != nil {
-				cephSecrets.Append(cephSpec.Secret)
-
-				// TODO support multiple ceph backends
-				env = append(env, template.EnvVar("OS_LIBVIRT__RBD_SECRET_UUID", "74a0b63e-041d-4040-9398-3704e4cf8260"))
-				env = append(env, template.EnvVar("OS_LIBVIRT__RBD_USER", cephSpec.ClientName))
-			}
-		}
-	}
-
-	env = append(env, extraEnvVars...)
-
-	ds := nova.ComputeDaemonSet(instance, env, volumeMounts, volumes)
-	controllerutil.SetControllerReference(instance, ds, r.Scheme)
-	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err
 	}
 

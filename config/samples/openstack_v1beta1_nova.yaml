@@ -13,11 +13,6 @@ spec:
         cert-manager.io/cluster-issuer: letsencrypt-prod
   scheduler:
     replicas: 2
-  libvirtd:
-    image: ghcr.io/ianunruh/openstack-operator-images/libvirtd:master
-  compute:
-    nodeSelector:
-      openstack/compute-node: enabled
   apiDatabase:
     name: nova_api
     secret: nova-api-db
@@ -33,6 +28,11 @@ spec:
     virtualHost: openstack
   cells:
   - name: cell1
+    compute:
+      nodeSelector:
+        openstack/compute-node: enabled
+    libvirtd:
+      image: ghcr.io/ianunruh/openstack-operator-images/libvirtd:master
     database:
       name: nova_cell1
       secret: nova-cell1-db

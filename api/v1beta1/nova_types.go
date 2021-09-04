@@ -24,6 +24,8 @@ import (
 type NovaSpec struct {
 	Image string `json:"image"`
 
+	Cells []NovaCellSpec `json:"cells"`
+
 	// +optional
 	API NovaAPISpec `json:"api"`
 
@@ -33,10 +35,6 @@ type NovaSpec struct {
 	// +optional
 	Scheduler NovaSchedulerSpec `json:"scheduler"`
 
-	Libvirtd NovaLibvirtdSpec `json:"libvirtd"`
-
-	Compute NovaComputeSpec `json:"compute"`
-
 	// +optional
 	APIDatabase MariaDBDatabaseSpec `json:"apiDatabase"`
 
@@ -45,8 +43,6 @@ type NovaSpec struct {
 
 	// +optional
 	Broker RabbitMQUserSpec `json:"broker"`
-
-	Cells []NovaCellSpec `json:"cells"`
 }
 
 type NovaAPISpec struct {
@@ -76,14 +72,6 @@ type NovaNoVNCProxySpec struct {
 type NovaSchedulerSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas"`
-}
-
-type NovaLibvirtdSpec struct {
-	Image string `json:"image"`
-}
-
-type NovaComputeSpec struct {
-	NodeSelector map[string]string `json:"nodeSelector"`
 }
 
 // NovaStatus defines the observed state of Nova

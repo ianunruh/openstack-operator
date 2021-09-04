@@ -12,7 +12,7 @@ const (
 	LibvirtdComponentLabel = "libvirtd"
 )
 
-func LibvirtdConfigMap(instance *openstackv1beta1.Nova) *corev1.ConfigMap {
+func LibvirtdConfigMap(instance *openstackv1beta1.NovaCell) *corev1.ConfigMap {
 	labels := template.Labels(instance.Name, AppLabel, LibvirtdComponentLabel)
 	name := template.Combine(instance.Name, "libvirtd")
 	cm := template.GenericConfigMap(name, instance.Namespace, labels)
@@ -23,7 +23,7 @@ func LibvirtdConfigMap(instance *openstackv1beta1.Nova) *corev1.ConfigMap {
 	return cm
 }
 
-func LibvirtdDaemonSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume) *appsv1.DaemonSet {
+func LibvirtdDaemonSet(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, LibvirtdComponentLabel)
 
 	configMapName := template.Combine(instance.Name, "libvirtd")
