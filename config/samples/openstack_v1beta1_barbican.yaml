@@ -3,7 +3,7 @@ kind: Barbican
 metadata:
   name: barbican
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/barbican:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/barbican:master
   api:
     replicas: 2
     ingress:

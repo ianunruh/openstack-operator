@@ -24,7 +24,7 @@ spec:
       capacity: 50Gi
       storageClass: ceph-block-ssd
   keystone:
-    image: ghcr.io/ianunruh/openstack-operator-images/keystone:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/keystone:master
     database:
       name: keystone
       secret: keystone-db
@@ -35,7 +35,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   glance:
-    image: ghcr.io/ianunruh/openstack-operator-images/glance:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/glance:master
     database:
       name: glance
       secret: glance-db
@@ -51,7 +51,7 @@ spec:
           deviceClass: ssd
           replicatedSize: 2
   cinder:
-    image: ghcr.io/ianunruh/openstack-operator-images/cinder:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/cinder:master
     backends:
     - name: ceph
       volumeBackendName: ceph
@@ -73,18 +73,18 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   placement:
-    image: ghcr.io/ianunruh/openstack-operator-images/placement:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/placement:master
     database:
       name: placement
       secret: placement-db
       cluster: mariadb
   nova:
-    image: ghcr.io/ianunruh/openstack-operator-images/nova:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/nova:master
     cells:
     - name: cell1
       database:
         name: nova_cell1
-        secret: nova-db-cell1
+        secret: nova-cell1-db
         cluster: mariadb
       broker:
         name: nova-cell1
@@ -92,18 +92,18 @@ spec:
         cluster: rabbitmq
         virtualHost: nova-cell1
     libvirtd:
-      image: ghcr.io/ianunruh/openstack-operator-images/libvirtd:latest
+      image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
     compute:
       nodeSelector:
         openstack/cloud: openstack
         openstack/compute-node: enabled
     apiDatabase:
       name: nova_api
-      secret: nova-db-api
+      secret: nova-api-db
       cluster: mariadb
     cellDatabase:
       name: nova_cell0
-      secret: nova-db-cell0
+      secret: nova-cell0-db
       cluster: mariadb
     broker:
       name: nova
@@ -111,7 +111,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   neutron:
-    image: ghcr.io/ianunruh/openstack-operator-images/neutron:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
     metadataAgent:
       nodeSelector:
         openstack/cloud: openstack
@@ -126,7 +126,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   ovn:
-    image: ghcr.io/ianunruh/openstack-operator-images/neutron:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
     node:
       nodeSelector:
         openstack/cloud: openstack
@@ -140,9 +140,9 @@ spec:
         capacity: 20Gi
         storageClass: ceph-block-ssd
   horizon:
-    image: ghcr.io/ianunruh/openstack-operator-images/horizon:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/horizon:master
   heat:
-    image: ghcr.io/ianunruh/openstack-operator-images/heat:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/heat:master
     database:
       name: heat
       secret: heat-db
@@ -153,7 +153,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   magnum:
-    image: ghcr.io/ianunruh/openstack-operator-images/magnum:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/magnum:master
     database:
       name: magnum
       secret: magnum-db
@@ -164,7 +164,7 @@ spec:
       cluster: rabbitmq
       virtualHost: openstack
   barbican:
-    image: ghcr.io/ianunruh/openstack-operator-images/barbican:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/barbican:master
     database:
       name: barbican
       secret: barbican-db

@@ -3,7 +3,7 @@ kind: Nova
 metadata:
   name: nova
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/nova:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/nova:master
   api:
     replicas: 2
     ingress:
@@ -14,17 +14,17 @@ spec:
   scheduler:
     replicas: 2
   libvirtd:
-    image: ghcr.io/ianunruh/openstack-operator-images/libvirtd:latest
+    image: ghcr.io/ianunruh/openstack-operator-images/libvirtd:master
   compute:
     nodeSelector:
       openstack/compute-node: enabled
   apiDatabase:
     name: nova_api
-    secret: nova-db-api
+    secret: nova-api-db
     cluster: mariadb
   cellDatabase:
     name: nova_cell0
-    secret: nova-db-cell0
+    secret: nova-cell0-db
     cluster: mariadb
   broker:
     name: nova
@@ -33,6 +33,10 @@ spec:
     virtualHost: openstack
   cells:
   - name: cell1
+    database:
+      name: nova_cell1
+      secret: nova-cell1-db
+      cluster: mariadb
     broker:
       name: nova-cell1
       secret: nova-cell1-rabbitmq

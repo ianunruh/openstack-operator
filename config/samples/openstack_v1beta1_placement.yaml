@@ -3,7 +3,7 @@ kind: Placement
 metadata:
   name: placement
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/placement:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/placement:master
   api:
     replicas: 2
     ingress:

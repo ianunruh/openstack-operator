@@ -3,7 +3,7 @@ kind: Manila
 metadata:
   name: manila
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/manila:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/manila:master
   api:
     replicas: 2
     ingress:

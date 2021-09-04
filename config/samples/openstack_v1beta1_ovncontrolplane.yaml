@@ -3,7 +3,7 @@ kind: OVNControlPlane
 metadata:
   name: ovn
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/neutron:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
   node:
     nodeSelector:
       openstack/network-agent: ovn

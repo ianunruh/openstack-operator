@@ -3,7 +3,7 @@ kind: Heat
 metadata:
   name: heat
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/heat:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/heat:master
   api:
     replicas: 2
     ingress:

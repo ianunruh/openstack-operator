@@ -3,7 +3,7 @@ kind: Magnum
 metadata:
   name: magnum
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/magnum:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/magnum:master
   api:
     replicas: 2
     ingress:

@@ -3,7 +3,7 @@ kind: Cinder
 metadata:
   name: cinder
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/cinder:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/cinder:master
   api:
     replicas: 2
     ingress:

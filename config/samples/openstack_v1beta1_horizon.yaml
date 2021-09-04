@@ -3,7 +3,7 @@ kind: Horizon
 metadata:
   name: horizon
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/horizon:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/horizon:master
   server:
     replicas: 2
     ingress:

@@ -3,7 +3,7 @@ kind: Neutron
 metadata:
   name: neutron
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/neutron:latest
+  image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
   server:
     replicas: 2
     ingress:
