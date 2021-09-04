@@ -38,13 +38,13 @@ type GlanceBackendSpec struct {
 	Name string `json:"name"`
 
 	// +optional
-	Default bool `json:"default"`
+	Default bool `json:"default,omitempty"`
 
 	// +optional
-	Ceph *CephSpec `json:"ceph"`
+	Ceph *CephSpec `json:"ceph,omitempty"`
 
 	// +optional
-	PVC *VolumeSpec `json:"pvc"`
+	PVC *VolumeSpec `json:"pvc,omitempty"`
 }
 
 type GlanceAPISpec struct {
