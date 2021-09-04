@@ -17,6 +17,9 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+	"strings"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -25,6 +28,22 @@ type MariaDBDatabaseSpec struct {
 	Cluster string `json:"cluster"`
 	Name    string `json:"name"`
 	Secret  string `json:"secret"`
+}
+
+func databaseDefault(spec MariaDBDatabaseSpec, instance string) MariaDBDatabaseSpec {
+	if spec.Cluster == "" {
+		spec.Cluster = "mariadb"
+	}
+
+	if spec.Name == "" {
+		spec.Name = strings.ReplaceAll(instance, "-", "_")
+	}
+
+	if spec.Secret == "" {
+		spec.Secret = fmt.Sprintf("%s-db", instance)
+	}
+
+	return spec
 }
 
 // MariaDBDatabaseStatus defines the observed state of MariaDBDatabase

@@ -262,6 +262,10 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "Manila")
 		os.Exit(1)
 	}
+	if err = (&openstackv1beta1.Keystone{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Keystone")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {

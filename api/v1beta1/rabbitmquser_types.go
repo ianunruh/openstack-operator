@@ -17,7 +17,13 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+const (
+	defaultVirtualHost = "openstack"
 )
 
 // RabbitMQUserSpec defines the desired state of RabbitMQUser
@@ -26,6 +32,26 @@ type RabbitMQUserSpec struct {
 	Name        string `json:"name"`
 	Secret      string `json:"secret"`
 	VirtualHost string `json:"virtualHost"`
+}
+
+func brokerDefault(spec RabbitMQUserSpec, instance, virtualHost string) RabbitMQUserSpec {
+	if spec.Cluster == "" {
+		spec.Cluster = "rabbitmq"
+	}
+
+	if spec.Name == "" {
+		spec.Name = instance
+	}
+
+	if spec.Secret == "" {
+		spec.Secret = fmt.Sprintf("%s-rabbitmq", instance)
+	}
+
+	if spec.VirtualHost == "" {
+		spec.VirtualHost = virtualHost
+	}
+
+	return spec
 }
 
 // RabbitMQUserStatus defines the observed state of RabbitMQUser

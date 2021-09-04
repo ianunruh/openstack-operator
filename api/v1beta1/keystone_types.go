@@ -27,8 +27,10 @@ type KeystoneSpec struct {
 	// +optional
 	API KeystoneAPISpec `json:"api"`
 
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database"`
 
+	// +optional
 	Broker RabbitMQUserSpec `json:"broker"`
 }
 

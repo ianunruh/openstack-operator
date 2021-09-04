@@ -94,8 +94,6 @@ spec:
               image:
                 type: string
             required:
-            - broker
-            - database
             - image
             type: object
           status:
