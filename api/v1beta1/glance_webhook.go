@@ -42,7 +42,7 @@ var _ webhook.Defaulter = &Glance{}
 func (r *Glance) Default() {
 	glancelog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

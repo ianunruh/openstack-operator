@@ -27,6 +27,7 @@ type PlacementSpec struct {
 	// +optional
 	API PlacementAPISpec `json:"api"`
 
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database"`
 }
 

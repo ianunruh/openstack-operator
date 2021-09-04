@@ -42,7 +42,8 @@ var _ webhook.Defaulter = &NovaCell{}
 func (r *NovaCell) Default() {
 	novacelllog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, r.Name)
+	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

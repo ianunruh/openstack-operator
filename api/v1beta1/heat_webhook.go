@@ -42,7 +42,8 @@ var _ webhook.Defaulter = &Heat{}
 func (r *Heat) Default() {
 	heatlog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
+	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

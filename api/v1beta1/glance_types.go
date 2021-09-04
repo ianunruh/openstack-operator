@@ -27,6 +27,7 @@ type GlanceSpec struct {
 	// +optional
 	API GlanceAPISpec `json:"api"`
 
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database"`
 
 	// +optional

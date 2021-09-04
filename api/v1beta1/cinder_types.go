@@ -36,8 +36,10 @@ type CinderSpec struct {
 	// +optional
 	Backends []CinderBackendSpec `json:"backends"`
 
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database"`
 
+	// +optional
 	Broker RabbitMQUserSpec `json:"broker"`
 }
 

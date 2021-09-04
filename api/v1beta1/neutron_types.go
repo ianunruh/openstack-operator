@@ -29,8 +29,10 @@ type NeutronSpec struct {
 
 	MetadataAgent NeutronMetadataAgentSpec `json:"metadataAgent"`
 
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database"`
 
+	// +optional
 	Broker RabbitMQUserSpec `json:"broker"`
 }
 

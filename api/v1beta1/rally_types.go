@@ -24,9 +24,10 @@ import (
 type RallySpec struct {
 	Image string `json:"image"`
 
-	Database MariaDBDatabaseSpec `json:"database"`
-
 	Data *VolumeSpec `json:"data"`
+
+	// +optional
+	Database MariaDBDatabaseSpec `json:"database"`
 }
 
 // RallyStatus defines the observed state of Rally

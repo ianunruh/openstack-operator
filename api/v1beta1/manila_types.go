@@ -35,8 +35,10 @@ type ManilaSpec struct {
 
 	Backends []ManilaBackendSpec `json:"backends"`
 
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database"`
 
+	// +optional
 	Broker RabbitMQUserSpec `json:"broker"`
 }
 

@@ -37,10 +37,13 @@ type NovaSpec struct {
 
 	Compute NovaComputeSpec `json:"compute"`
 
+	// +optional
 	APIDatabase MariaDBDatabaseSpec `json:"apiDatabase"`
 
+	// +optional
 	CellDatabase MariaDBDatabaseSpec `json:"cellDatabase"`
 
+	// +optional
 	Broker RabbitMQUserSpec `json:"broker"`
 
 	Cells []NovaCellSpec `json:"cells"`

@@ -17,6 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -42,7 +44,9 @@ var _ webhook.Defaulter = &Nova{}
 func (r *Nova) Default() {
 	novalog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
+	r.Spec.APIDatabase = databaseDefault(r.Spec.APIDatabase, fmt.Sprintf("%s-api", r.Name))
+	r.Spec.CellDatabase = databaseDefault(r.Spec.CellDatabase, fmt.Sprintf("%s-cell0", r.Name))
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

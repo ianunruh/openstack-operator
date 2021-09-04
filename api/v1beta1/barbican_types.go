@@ -30,8 +30,10 @@ type BarbicanSpec struct {
 	// +optional
 	Worker BarbicanWorkerSpec `json:"scheduler"`
 
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database"`
 
+	// +optional
 	Broker RabbitMQUserSpec `json:"broker"`
 }
 

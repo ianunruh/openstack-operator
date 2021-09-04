@@ -24,8 +24,10 @@ import (
 type NovaCellSpec struct {
 	Name string `json:"name"`
 
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database"`
 
+	// +optional
 	Broker RabbitMQUserSpec `json:"broker"`
 
 	// +optional
