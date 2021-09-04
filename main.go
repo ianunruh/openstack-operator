@@ -266,6 +266,70 @@ func main() {
 		setupLog.Error(err, "unable to create webhook", "webhook", "Keystone")
 		os.Exit(1)
 	}
+	if err = (&openstackv1beta1.Nova{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Nova")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.Octavia{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Octavia")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.Barbican{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Barbican")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.Cinder{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Cinder")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.Glance{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Glance")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.Heat{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Heat")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.Horizon{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Horizon")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.Magnum{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Magnum")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.Manila{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Manila")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.MariaDB{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "MariaDB")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.RabbitMQ{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "RabbitMQ")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.Neutron{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Neutron")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.OVNControlPlane{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "OVNControlPlane")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.Placement{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Placement")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.Rally{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Rally")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.NovaCell{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "NovaCell")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {

@@ -25,6 +25,10 @@ resources:
   kind: MariaDB
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -74,6 +78,10 @@ resources:
   kind: Glance
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -83,6 +91,10 @@ resources:
   kind: Placement
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -92,6 +104,10 @@ resources:
   kind: RabbitMQ
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -111,6 +127,10 @@ resources:
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   plural: novas
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -120,6 +140,10 @@ resources:
   kind: NovaCell
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -129,6 +153,10 @@ resources:
   kind: Neutron
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -147,6 +175,10 @@ resources:
   kind: Cinder
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -156,6 +188,10 @@ resources:
   kind: Magnum
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -165,6 +201,10 @@ resources:
   kind: Barbican
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -174,6 +214,10 @@ resources:
   kind: OVNControlPlane
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -184,6 +228,10 @@ resources:
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   plural: octavias
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -193,6 +241,10 @@ resources:
   kind: Rally
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -202,6 +254,10 @@ resources:
   kind: Manila
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -211,6 +267,10 @@ resources:
   kind: Heat
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 - api:
     crdVersion: v1
     namespaced: true
@@ -220,4 +280,8 @@ resources:
   kind: Horizon
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 version: "3"
