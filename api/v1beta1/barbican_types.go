@@ -25,34 +25,34 @@ type BarbicanSpec struct {
 	Image string `json:"image"`
 
 	// +optional
-	API BarbicanAPISpec `json:"api"`
+	API BarbicanAPISpec `json:"api,omitempty"`
 
 	// +optional
-	Worker BarbicanWorkerSpec `json:"scheduler"`
+	Worker BarbicanWorkerSpec `json:"scheduler,omitempty"`
 
 	// +optional
-	Database MariaDBDatabaseSpec `json:"database"`
+	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional
-	Broker RabbitMQUserSpec `json:"broker"`
+	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 }
 
 type BarbicanAPISpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 	// +optional
-	Ingress *IngressSpec `json:"ingress"`
+	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
 type BarbicanWorkerSpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 }
 
 // BarbicanStatus defines the observed state of Barbican
 type BarbicanStatus struct {
 	// +optional
-	DBSyncJobHash string `json:"dbSyncJobHash"`
+	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true

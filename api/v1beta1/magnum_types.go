@@ -25,34 +25,34 @@ type MagnumSpec struct {
 	Image string `json:"image"`
 
 	// +optional
-	API MagnumAPISpec `json:"api"`
+	API MagnumAPISpec `json:"api,omitempty"`
 
 	// +optional
-	Conductor MagnumConductorSpec `json:"conductor"`
+	Conductor MagnumConductorSpec `json:"conductor,omitempty"`
 
 	// +optional
-	Database MariaDBDatabaseSpec `json:"database"`
+	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional
-	Broker RabbitMQUserSpec `json:"broker"`
+	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 }
 
 type MagnumAPISpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 	// +optional
-	Ingress *IngressSpec `json:"ingress"`
+	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
 type MagnumConductorSpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 }
 
 // MagnumStatus defines the observed state of Magnum
 type MagnumStatus struct {
 	// +optional
-	DBSyncJobHash string `json:"dbSyncJobHash"`
+	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true

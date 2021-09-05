@@ -27,21 +27,21 @@ type OctaviaSpec struct {
 	Amphora OctaviaAmphoraSpec `json:"amphora"`
 
 	// +optional
-	API OctaviaAPISpec `json:"api"`
+	API OctaviaAPISpec `json:"api,omitempty"`
 
 	HealthManager OctaviaHealthManagerSpec `json:"healthManager"`
 
 	// +optional
-	Housekeeping OctaviaHousekeepingSpec `json:"housekeeping"`
+	Housekeeping OctaviaHousekeepingSpec `json:"housekeeping,omitempty"`
 
 	// +optional
-	Worker OctaviaWorkerSpec `json:"worker"`
+	Worker OctaviaWorkerSpec `json:"worker,omitempty"`
 
 	// +optional
-	Database MariaDBDatabaseSpec `json:"database"`
+	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional
-	Broker RabbitMQUserSpec `json:"broker"`
+	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 }
 
 type OctaviaAmphoraSpec struct {
@@ -50,9 +50,9 @@ type OctaviaAmphoraSpec struct {
 
 type OctaviaAPISpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 	// +optional
-	Ingress *IngressSpec `json:"ingress"`
+	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
 type OctaviaHealthManagerSpec struct {
@@ -63,20 +63,20 @@ type OctaviaHousekeepingSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector"`
 
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 }
 
 type OctaviaWorkerSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector"`
 
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 }
 
 // OctaviaStatus defines the observed state of Octavia
 type OctaviaStatus struct {
 	// +optional
-	DBSyncJobHash string `json:"dbSyncJobHash"`
+	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 
 	// +optional
 	Amphora OctaviaAmphoraStatus `json:"amphora,omitempty"`

@@ -25,38 +25,38 @@ type ManilaSpec struct {
 	Image string `json:"image"`
 
 	// +optional
-	API ManilaAPISpec `json:"api"`
+	API ManilaAPISpec `json:"api,omitempty"`
 
 	// +optional
-	Scheduler ManilaSchedulerSpec `json:"scheduler"`
+	Scheduler ManilaSchedulerSpec `json:"scheduler,omitempty"`
 
 	// +optional
-	Share ManilaShareSpec `json:"share"`
+	Share ManilaShareSpec `json:"share,omitempty"`
 
 	Backends []ManilaBackendSpec `json:"backends"`
 
 	// +optional
-	Database MariaDBDatabaseSpec `json:"database"`
+	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional
-	Broker RabbitMQUserSpec `json:"broker"`
+	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 }
 
 type ManilaAPISpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 	// +optional
-	Ingress *IngressSpec `json:"ingress"`
+	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
 type ManilaSchedulerSpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 }
 
 type ManilaShareSpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 }
 
 type ManilaBackendSpec struct {
@@ -82,7 +82,7 @@ type ManilaRookCephSpec struct {
 // ManilaStatus defines the observed state of Manila
 type ManilaStatus struct {
 	// +optional
-	DBSyncJobHash string `json:"dbSyncJobHash"`
+	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 //+kubebuilder:object:root=true

@@ -25,13 +25,12 @@ type GlanceSpec struct {
 	Image string `json:"image"`
 
 	// +optional
-	API GlanceAPISpec `json:"api"`
+	API GlanceAPISpec `json:"api,omitempty"`
 
 	// +optional
-	Database MariaDBDatabaseSpec `json:"database"`
+	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
-	// +optional
-	Backends []GlanceBackendSpec `json:"backends"`
+	Backends []GlanceBackendSpec `json:"backends,omitempty"`
 }
 
 type GlanceBackendSpec struct {
@@ -49,15 +48,15 @@ type GlanceBackendSpec struct {
 
 type GlanceAPISpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 	// +optional
-	Ingress *IngressSpec `json:"ingress"`
+	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
 // GlanceStatus defines the observed state of Glance
 type GlanceStatus struct {
 	// +optional
-	DBSyncJobHash string `json:"dbSyncJobHash"`
+	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true

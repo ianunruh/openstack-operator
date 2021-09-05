@@ -27,57 +27,57 @@ type NovaSpec struct {
 	Cells []NovaCellSpec `json:"cells"`
 
 	// +optional
-	API NovaAPISpec `json:"api"`
+	API NovaAPISpec `json:"api,omitempty"`
 
 	// +optional
-	Conductor NovaConductorSpec `json:"conductor"`
+	Conductor NovaConductorSpec `json:"conductor,omitempty"`
 
 	// +optional
-	Scheduler NovaSchedulerSpec `json:"scheduler"`
+	Scheduler NovaSchedulerSpec `json:"scheduler,omitempty"`
 
 	// +optional
-	APIDatabase MariaDBDatabaseSpec `json:"apiDatabase"`
+	APIDatabase MariaDBDatabaseSpec `json:"apiDatabase,omitempty"`
 
 	// +optional
-	CellDatabase MariaDBDatabaseSpec `json:"cellDatabase"`
+	CellDatabase MariaDBDatabaseSpec `json:"cellDatabase,omitempty"`
 
 	// +optional
-	Broker RabbitMQUserSpec `json:"broker"`
+	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 }
 
 type NovaAPISpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 	// +optional
-	Ingress *IngressSpec `json:"ingress"`
+	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
 type NovaConductorSpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 }
 
 type NovaMetadataSpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 }
 
 type NovaNoVNCProxySpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 	// +optional
-	Ingress *IngressSpec `json:"ingress"`
+	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
 type NovaSchedulerSpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 }
 
 // NovaStatus defines the observed state of Nova
 type NovaStatus struct {
 	// +optional
-	DBSyncJobHash string `json:"dbSyncJobHash"`
+	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true

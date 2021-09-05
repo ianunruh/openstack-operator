@@ -25,16 +25,16 @@ type KeystoneUserSpec struct {
 	Secret string `json:"secret"`
 
 	// +optional
-	Roles []string `json:"roles"`
+	Roles []string `json:"roles,omitempty"`
 
 	// +optional
-	Domain string `json:"domain"`
+	Domain string `json:"domain,omitempty"`
 
 	// +optional
-	Project string `json:"project"`
+	Project string `json:"project,omitempty"`
 
 	// +optional
-	ProjectDomain string `json:"projectDomain"`
+	ProjectDomain string `json:"projectDomain,omitempty"`
 }
 
 // KeystoneUserStatus defines the observed state of KeystoneUser
@@ -42,7 +42,7 @@ type KeystoneUserStatus struct {
 	Ready bool `json:"ready"`
 
 	// +optional
-	SetupJobHash string `json:"setupJobHash"`
+	SetupJobHash string `json:"setupJobHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true

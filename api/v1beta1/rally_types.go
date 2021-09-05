@@ -27,13 +27,13 @@ type RallySpec struct {
 	Data *VolumeSpec `json:"data"`
 
 	// +optional
-	Database MariaDBDatabaseSpec `json:"database"`
+	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 }
 
 // RallyStatus defines the observed state of Rally
 type RallyStatus struct {
 	// +optional
-	DBSyncJobHash string `json:"dbSyncJobHash"`
+	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 //+kubebuilder:object:root=true

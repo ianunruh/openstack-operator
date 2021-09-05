@@ -25,14 +25,14 @@ type HorizonSpec struct {
 	Image string `json:"image"`
 
 	// +optional
-	Server HorizonServerSpec `json:"server"`
+	Server HorizonServerSpec `json:"server,omitempty"`
 }
 
 type HorizonServerSpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 	// +optional
-	Ingress *IngressSpec `json:"ingress"`
+	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
 // HorizonStatus defines the observed state of Horizon

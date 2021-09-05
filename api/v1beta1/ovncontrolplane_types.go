@@ -41,10 +41,10 @@ type OVNNodeSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector"`
 
 	// +optional
-	BridgeMappings []string `json:"bridgeMappings"`
+	BridgeMappings []string `json:"bridgeMappings,omitempty"`
 
 	// +optional
-	BridgePorts []string `json:"bridgePorts"`
+	BridgePorts []string `json:"bridgePorts,omitempty"`
 }
 
 type OVNNorthdSpec struct {

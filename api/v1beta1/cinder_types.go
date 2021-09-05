@@ -25,22 +25,22 @@ type CinderSpec struct {
 	Image string `json:"image"`
 
 	// +optional
-	API CinderAPISpec `json:"api"`
+	API CinderAPISpec `json:"api,omitempty"`
 
 	// +optional
-	Scheduler CinderSchedulerSpec `json:"scheduler"`
+	Scheduler CinderSchedulerSpec `json:"scheduler,omitempty"`
 
 	// +optional
-	Volume CinderVolumeSpec `json:"volume"`
+	Volume CinderVolumeSpec `json:"volume,omitempty"`
 
 	// +optional
-	Backends []CinderBackendSpec `json:"backends"`
+	Backends []CinderBackendSpec `json:"backends,omitempty"`
 
 	// +optional
-	Database MariaDBDatabaseSpec `json:"database"`
+	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional
-	Broker RabbitMQUserSpec `json:"broker"`
+	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 }
 
 type CinderBackendSpec struct {
@@ -49,30 +49,30 @@ type CinderBackendSpec struct {
 	VolumeBackendName string `json:"volumeBackendName"`
 
 	// +optional
-	Ceph *CephSpec `json:"ceph"`
+	Ceph *CephSpec `json:"ceph,omitempty"`
 }
 
 type CinderAPISpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 	// +optional
-	Ingress *IngressSpec `json:"ingress"`
+	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
 type CinderSchedulerSpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 }
 
 type CinderVolumeSpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 }
 
 // CinderStatus defines the observed state of Cinder
 type CinderStatus struct {
 	// +optional
-	DBSyncJobHash string `json:"dbSyncJobHash"`
+	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true

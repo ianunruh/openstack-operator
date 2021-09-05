@@ -25,20 +25,20 @@ type KeystoneSpec struct {
 	Image string `json:"image"`
 
 	// +optional
-	API KeystoneAPISpec `json:"api"`
+	API KeystoneAPISpec `json:"api,omitempty"`
 
 	// +optional
-	Database MariaDBDatabaseSpec `json:"database"`
+	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional
-	Broker RabbitMQUserSpec `json:"broker"`
+	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 }
 
 type KeystoneAPISpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 	// +optional
-	Ingress *IngressSpec `json:"ingress"`
+	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
 // KeystoneStatus defines the observed state of Keystone
@@ -46,10 +46,10 @@ type KeystoneStatus struct {
 	Ready bool `json:"ready"`
 
 	// +optional
-	BootstrapJobHash string `json:"bootstrapJobHash"`
+	BootstrapJobHash string `json:"bootstrapJobHash,omitempty"`
 
 	// +optional
-	DBSyncJobHash string `json:"dbSyncJobHash"`
+	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true

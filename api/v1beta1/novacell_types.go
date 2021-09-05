@@ -29,19 +29,19 @@ type NovaCellSpec struct {
 	Compute NovaComputeSpec `json:"compute"`
 
 	// +optional
-	Database MariaDBDatabaseSpec `json:"database"`
+	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional
-	Broker RabbitMQUserSpec `json:"broker"`
+	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 
 	// +optional
-	Conductor NovaConductorSpec `json:"conductor"`
+	Conductor NovaConductorSpec `json:"conductor,omitempty"`
 
 	// +optional
-	Metadata NovaMetadataSpec `json:"metadata"`
+	Metadata NovaMetadataSpec `json:"metadata,omitempty"`
 
 	// +optional
-	NoVNCProxy NovaNoVNCProxySpec `json:"novncproxy"`
+	NoVNCProxy NovaNoVNCProxySpec `json:"novncproxy,omitempty"`
 }
 
 type NovaLibvirtdSpec struct {
@@ -57,7 +57,7 @@ type NovaCellStatus struct {
 	Ready bool `json:"ready"`
 
 	// +optional
-	DBSyncJobHash string `json:"dbSyncJobHash"`
+	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true

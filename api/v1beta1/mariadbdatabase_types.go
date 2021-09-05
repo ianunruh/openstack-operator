@@ -51,7 +51,7 @@ type MariaDBDatabaseStatus struct {
 	Ready bool `json:"ready"`
 
 	// +optional
-	SetupJobHash string `json:"setupJobHash"`
+	SetupJobHash string `json:"setupJobHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -25,22 +25,22 @@ type NeutronSpec struct {
 	Image string `json:"image"`
 
 	// +optional
-	Server NeutronServerSpec `json:"server"`
+	Server NeutronServerSpec `json:"server,omitempty"`
 
 	MetadataAgent NeutronMetadataAgentSpec `json:"metadataAgent"`
 
 	// +optional
-	Database MariaDBDatabaseSpec `json:"database"`
+	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional
-	Broker RabbitMQUserSpec `json:"broker"`
+	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 }
 
 type NeutronServerSpec struct {
 	// +optional
-	Replicas int32 `json:"replicas"`
+	Replicas int32 `json:"replicas,omitempty"`
 	// +optional
-	Ingress *IngressSpec `json:"ingress"`
+	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
 type NeutronMetadataAgentSpec struct {
@@ -50,7 +50,7 @@ type NeutronMetadataAgentSpec struct {
 // NeutronStatus defines the observed state of Neutron
 type NeutronStatus struct {
 	// +optional
-	DBSyncJobHash string `json:"dbSyncJobHash"`
+	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true

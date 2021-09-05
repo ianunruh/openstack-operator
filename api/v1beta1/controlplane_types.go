@@ -25,7 +25,7 @@ type ControlPlaneSpec struct {
 	Domain string `json:"domain"`
 
 	// +optional
-	Ingress ControlPlaneIngressSpec `json:"ingress"`
+	Ingress ControlPlaneIngressSpec `json:"ingress,omitempty"`
 
 	Broker   RabbitMQSpec  `json:"broker"`
 	Cache    MemcachedSpec `json:"cache"`
@@ -35,32 +35,32 @@ type ControlPlaneSpec struct {
 	Glance    GlanceSpec    `json:"glance"`
 	Placement PlacementSpec `json:"placement"`
 	// +optional
-	Cinder  CinderSpec  `json:"cinder"`
+	Cinder  CinderSpec  `json:"cinder,omitempty"`
 	Nova    NovaSpec    `json:"nova"`
 	Neutron NeutronSpec `json:"neutron"`
 	Horizon HorizonSpec `json:"horizon"`
 	// +optional
-	Heat HeatSpec `json:"heat"`
+	Heat HeatSpec `json:"heat,omitempty"`
 	// +optional
-	Magnum MagnumSpec `json:"magnum"`
+	Magnum MagnumSpec `json:"magnum,omitempty"`
 	// +optional
-	Barbican BarbicanSpec `json:"barbican"`
+	Barbican BarbicanSpec `json:"barbican,omitempty"`
 
 	OVN OVNControlPlaneSpec `json:"ovn"`
 
 	// +optional
-	Octavia OctaviaSpec `json:"octavia"`
+	Octavia OctaviaSpec `json:"octavia,omitempty"`
 
 	// +optional
-	Manila ManilaSpec `json:"manila"`
+	Manila ManilaSpec `json:"manila,omitempty"`
 }
 
 type ControlPlaneIngressSpec struct {
 	// +optional
-	Annotations map[string]string `json:"annotations"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 
 	// +optional
-	TLSSecretName string `json:"tlsSecretName"`
+	TLSSecretName string `json:"tlsSecretName,omitempty"`
 }
 
 // ControlPlaneStatus defines the observed state of ControlPlane
