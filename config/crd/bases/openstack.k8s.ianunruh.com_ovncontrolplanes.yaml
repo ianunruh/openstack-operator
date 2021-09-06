@@ -67,6 +67,10 @@ spec:
                 type: object
               ovsdbNorth:
                 properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   volume:
                     properties:
                       accessModes:
@@ -85,6 +89,10 @@ spec:
                 type: object
               ovsdbSouth:
                 properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   volume:
                     properties:
                       accessModes:

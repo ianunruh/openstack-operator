@@ -20,9 +20,10 @@ func WorkerDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, 
 	}
 
 	deploy := template.GenericDeployment(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Replicas:  instance.Spec.Worker.Replicas,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		Replicas:     instance.Spec.Worker.Replicas,
+		NodeSelector: instance.Spec.Worker.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:  "worker",

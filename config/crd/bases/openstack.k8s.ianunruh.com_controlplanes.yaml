@@ -52,6 +52,10 @@ spec:
                           tlsSecretName:
                             type: string
                         type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
@@ -92,6 +96,10 @@ spec:
                     type: string
                   scheduler:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
@@ -118,6 +126,10 @@ spec:
                             type: string
                         type: object
                     type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   volume:
                     properties:
                       accessModes:
@@ -140,6 +152,10 @@ spec:
                 properties:
                   image:
                     type: string
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   volume:
                     properties:
                       accessModes:
@@ -172,6 +188,10 @@ spec:
                             type: string
                           tlsSecretName:
                             type: string
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
                         type: object
                       replicas:
                         format: int32
@@ -251,12 +271,20 @@ spec:
                     type: string
                   scheduler:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
                     type: object
                   volume:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
@@ -269,6 +297,10 @@ spec:
                 properties:
                   image:
                     type: string
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   volume:
                     properties:
                       accessModes:
@@ -303,6 +335,10 @@ spec:
                             type: string
                           tlsSecretName:
                             type: string
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
                         type: object
                       replicas:
                         format: int32
@@ -394,6 +430,10 @@ spec:
                           tlsSecretName:
                             type: string
                         type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
@@ -428,6 +468,10 @@ spec:
                           tlsSecretName:
                             type: string
                         type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
@@ -449,6 +493,10 @@ spec:
                     type: object
                   engine:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
@@ -475,6 +523,10 @@ spec:
                             type: string
                           tlsSecretName:
                             type: string
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
                         type: object
                       replicas:
                         format: int32
@@ -507,6 +559,10 @@ spec:
                             type: string
                           tlsSecretName:
                             type: string
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
                         type: object
                       replicas:
                         format: int32
@@ -565,6 +621,10 @@ spec:
                           tlsSecretName:
                             type: string
                         type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
@@ -588,6 +648,10 @@ spec:
                     type: object
                   conductor:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
@@ -627,6 +691,10 @@ spec:
                             type: string
                           tlsSecretName:
                             type: string
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
                         type: object
                       replicas:
                         format: int32
@@ -699,12 +767,20 @@ spec:
                     type: string
                   scheduler:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
                     type: object
                   share:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
@@ -772,6 +848,10 @@ spec:
                           tlsSecretName:
                             type: string
                         type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
@@ -795,6 +875,10 @@ spec:
                             type: string
                           tlsSecretName:
                             type: string
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
                         type: object
                       replicas:
                         format: int32
@@ -880,6 +964,10 @@ spec:
                           type: object
                         conductor:
                           properties:
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              type: object
                             replicas:
                               format: int32
                               type: integer
@@ -908,6 +996,10 @@ spec:
                           type: object
                         metadata:
                           properties:
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              type: object
                             replicas:
                               format: int32
                               type: integer
@@ -927,6 +1019,10 @@ spec:
                                 tlsSecretName:
                                   type: string
                               type: object
+                            nodeSelector:
+                              additionalProperties:
+                                type: string
+                              type: object
                             replicas:
                               format: int32
                               type: integer
@@ -939,6 +1035,10 @@ spec:
                     type: array
                   conductor:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
@@ -947,6 +1047,10 @@ spec:
                     type: string
                   scheduler:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       replicas:
                         format: int32
                         type: integer
@@ -977,6 +1081,10 @@ spec:
                             type: string
                           tlsSecretName:
                             type: string
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
                         type: object
                       replicas:
                         format: int32
@@ -1088,6 +1196,10 @@ spec:
                     type: object
                   ovsdbNorth:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       volume:
                         properties:
                           accessModes:
@@ -1106,6 +1218,10 @@ spec:
                     type: object
                   ovsdbSouth:
                     properties:
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
                       volume:
                         properties:
                           accessModes:
@@ -1143,6 +1259,10 @@ spec:
                             type: string
                           tlsSecretName:
                             type: string
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
                         type: object
                       replicas:
                         format: int32

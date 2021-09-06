@@ -20,9 +20,10 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar
 	}
 
 	sts := template.GenericStatefulSet(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Replicas:  instance.Spec.Scheduler.Replicas,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		Replicas:     instance.Spec.Scheduler.Replicas,
+		NodeSelector: instance.Spec.Scheduler.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:  "scheduler",

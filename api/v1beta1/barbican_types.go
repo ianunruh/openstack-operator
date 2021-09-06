@@ -40,6 +40,10 @@ type BarbicanSpec struct {
 type BarbicanAPISpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
@@ -47,6 +51,9 @@ type BarbicanAPISpec struct {
 type BarbicanWorkerSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 // BarbicanStatus defines the observed state of Barbican

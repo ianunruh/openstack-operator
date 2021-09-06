@@ -26,8 +26,9 @@ func ClusterStatefulSet(instance *openstackv1beta1.RabbitMQ, configHash string) 
 
 	// TODO pod anti-affinity
 	sts := template.GenericStatefulSet(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		NodeSelector: instance.Spec.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
 			FSGroup:   &runAsUser,
 			RunAsUser: &runAsUser,

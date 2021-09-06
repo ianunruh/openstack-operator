@@ -25,6 +25,9 @@ type MemcachedSpec struct {
 	Image string `json:"image"`
 
 	Volume *VolumeSpec `json:"volume"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 // MemcachedStatus defines the observed state of Memcached

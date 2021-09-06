@@ -28,9 +28,10 @@ func VolumeStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, v
 	}
 
 	sts := template.GenericStatefulSet(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Replicas:  instance.Spec.Volume.Replicas,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		Replicas:     instance.Spec.Volume.Replicas,
+		NodeSelector: instance.Spec.Volume.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:  "volume",

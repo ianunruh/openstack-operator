@@ -21,9 +21,10 @@ func NoVNCProxyDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvV
 	}
 
 	deploy := template.GenericDeployment(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Replicas:  instance.Spec.NoVNCProxy.Replicas,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		Replicas:     instance.Spec.NoVNCProxy.Replicas,
+		NodeSelector: instance.Spec.NoVNCProxy.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:  "novncproxy",

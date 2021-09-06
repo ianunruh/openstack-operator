@@ -24,8 +24,9 @@ func ClusterStatefulSet(instance *openstackv1beta1.Memcached) *appsv1.StatefulSe
 	runAsUser := int64(1001)
 
 	sts := template.GenericStatefulSet(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		NodeSelector: instance.Spec.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
 			FSGroup:   &runAsUser,
 			RunAsUser: &runAsUser,

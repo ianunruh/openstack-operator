@@ -28,9 +28,10 @@ func ShareStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar, vo
 	}
 
 	sts := template.GenericStatefulSet(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Replicas:  instance.Spec.Share.Replicas,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		Replicas:     instance.Spec.Share.Replicas,
+		NodeSelector: instance.Spec.Share.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:  "share",

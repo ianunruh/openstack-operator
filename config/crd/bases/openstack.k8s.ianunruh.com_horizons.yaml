@@ -51,6 +51,10 @@ spec:
                       tlsSecretName:
                         type: string
                     type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   replicas:
                     format: int32
                     type: integer

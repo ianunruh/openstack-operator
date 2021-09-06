@@ -38,6 +38,10 @@ spec:
             properties:
               image:
                 type: string
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                type: object
               volume:
                 properties:
                   accessModes:

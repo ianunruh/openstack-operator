@@ -59,6 +59,10 @@ spec:
                         type: string
                     type: object
                 type: object
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                type: object
               volume:
                 properties:
                   accessModes:

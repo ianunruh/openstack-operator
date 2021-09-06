@@ -45,6 +45,10 @@ type ManilaSpec struct {
 type ManilaAPISpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
@@ -52,11 +56,17 @@ type ManilaAPISpec struct {
 type ManilaSchedulerSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type ManilaShareSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type ManilaBackendSpec struct {

@@ -35,6 +35,9 @@ type OVNControlPlaneSpec struct {
 
 type OVSDBSpec struct {
 	Volume *VolumeSpec `json:"volume"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type OVNNodeSpec struct {

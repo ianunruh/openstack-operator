@@ -48,6 +48,10 @@ type NovaSpec struct {
 type NovaAPISpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
@@ -55,16 +59,26 @@ type NovaAPISpec struct {
 type NovaConductorSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type NovaMetadataSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type NovaNoVNCProxySpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
@@ -72,6 +86,9 @@ type NovaNoVNCProxySpec struct {
 type NovaSchedulerSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 // NovaStatus defines the observed state of Nova

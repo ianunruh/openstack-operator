@@ -31,6 +31,10 @@ type HorizonSpec struct {
 type HorizonServerSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
 }

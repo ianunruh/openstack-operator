@@ -40,6 +40,10 @@ type MagnumSpec struct {
 type MagnumAPISpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
@@ -47,6 +51,9 @@ type MagnumAPISpec struct {
 type MagnumConductorSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 // MagnumStatus defines the observed state of Magnum

@@ -20,9 +20,10 @@ func ConductorStatefulSet(instance *openstackv1beta1.Magnum, env []corev1.EnvVar
 	}
 
 	sts := template.GenericStatefulSet(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Replicas:  instance.Spec.Conductor.Replicas,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		Replicas:     instance.Spec.Conductor.Replicas,
+		NodeSelector: instance.Spec.Conductor.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:  "conductor",

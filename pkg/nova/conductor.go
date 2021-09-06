@@ -20,9 +20,10 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 	}
 
 	sts := template.GenericStatefulSet(template.Component{
-		Namespace: namespace,
-		Labels:    labels,
-		Replicas:  spec.Replicas,
+		Namespace:    namespace,
+		Labels:       labels,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:  "conductor",

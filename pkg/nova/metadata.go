@@ -34,9 +34,10 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 	}
 
 	deploy := template.GenericDeployment(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Replicas:  instance.Spec.Metadata.Replicas,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		Replicas:     instance.Spec.Metadata.Replicas,
+		NodeSelector: instance.Spec.Metadata.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:  "metadata",

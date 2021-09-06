@@ -28,6 +28,9 @@ type RabbitMQSpec struct {
 
 	// +optional
 	Management RabbitMQManagementSpec `json:"management,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type RabbitMQManagementSpec struct {

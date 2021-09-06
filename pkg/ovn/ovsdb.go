@@ -38,8 +38,9 @@ func OVSDBStatefulSet(instance *openstackv1beta1.OVNControlPlane, component stri
 	}
 
 	ds := template.GenericStatefulSet(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:  "ovsdb",

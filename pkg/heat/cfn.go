@@ -34,9 +34,10 @@ func CFNDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 	}
 
 	deploy := template.GenericDeployment(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Replicas:  instance.Spec.API.Replicas,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		Replicas:     instance.Spec.CFN.Replicas,
+		NodeSelector: instance.Spec.CFN.NodeSelector,
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: template.NodePodAntiAffinity(labels),
 		},

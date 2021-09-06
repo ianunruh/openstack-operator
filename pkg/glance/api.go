@@ -49,9 +49,10 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 	}
 
 	deploy := template.GenericDeployment(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Replicas:  instance.Spec.API.Replicas,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		Replicas:     instance.Spec.API.Replicas,
+		NodeSelector: instance.Spec.API.NodeSelector,
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: template.NodePodAntiAffinity(labels),
 		},
