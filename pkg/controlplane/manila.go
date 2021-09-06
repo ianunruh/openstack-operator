@@ -11,6 +11,11 @@ func Manila(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Manila {
 	spec := instance.Spec.Manila
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "manila")
+	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
+
+	spec.Scheduler.NodeSelector = controllerNodeSelector(spec.Scheduler.NodeSelector, instance)
+
+	spec.Share.NodeSelector = controllerNodeSelector(spec.Share.NodeSelector, instance)
 
 	return &openstackv1beta1.Manila{
 		ObjectMeta: metav1.ObjectMeta{

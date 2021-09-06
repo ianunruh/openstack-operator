@@ -7,12 +7,16 @@ import (
 )
 
 func Cache(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Memcached {
+	spec := instance.Spec.Cache
+
+	spec.NodeSelector = controllerNodeSelector(spec.NodeSelector, instance)
+
 	// TODO labels
 	return &openstackv1beta1.Memcached{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "memcached",
 			Namespace: instance.Namespace,
 		},
-		Spec: instance.Spec.Cache,
+		Spec: spec,
 	}
 }

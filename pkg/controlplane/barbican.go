@@ -11,6 +11,9 @@ func Barbican(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Barbica
 	spec := instance.Spec.Barbican
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "barbican")
+	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
+
+	spec.Worker.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 
 	return &openstackv1beta1.Barbican{
 		ObjectMeta: metav1.ObjectMeta{

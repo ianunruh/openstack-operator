@@ -27,7 +27,8 @@ type NeutronSpec struct {
 	// +optional
 	Server NeutronServerSpec `json:"server,omitempty"`
 
-	MetadataAgent NeutronMetadataAgentSpec `json:"metadataAgent"`
+	// +optional
+	MetadataAgent NeutronMetadataAgentSpec `json:"metadataAgent,omitempty"`
 
 	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
@@ -48,7 +49,8 @@ type NeutronServerSpec struct {
 }
 
 type NeutronMetadataAgentSpec struct {
-	NodeSelector map[string]string `json:"nodeSelector"`
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 // NeutronStatus defines the observed state of Neutron

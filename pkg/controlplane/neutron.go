@@ -11,6 +11,9 @@ func Neutron(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Neutron 
 	spec := instance.Spec.Neutron
 
 	spec.Server.Ingress = ingressDefaults(spec.Server.Ingress, instance, "neutron")
+	spec.Server.NodeSelector = controllerNodeSelector(spec.Server.NodeSelector, instance)
+
+	spec.MetadataAgent.NodeSelector = computeNodeSelector(spec.MetadataAgent.NodeSelector, instance)
 
 	return &openstackv1beta1.Neutron{
 		ObjectMeta: metav1.ObjectMeta{

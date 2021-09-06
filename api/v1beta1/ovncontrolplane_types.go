@@ -27,7 +27,8 @@ type OVNControlPlaneSpec struct {
 	OVSDBNorth *OVSDBSpec `json:"ovsdbNorth"`
 	OVSDBSouth *OVSDBSpec `json:"ovsdbSouth"`
 
-	Node *OVNNodeSpec `json:"node"`
+	// +optional
+	Node *OVNNodeSpec `json:"node,omitempty"`
 
 	// +optional
 	Northd OVNNorthdSpec `json:"northd,omitempty"`
@@ -41,7 +42,8 @@ type OVSDBSpec struct {
 }
 
 type OVNNodeSpec struct {
-	NodeSelector map[string]string `json:"nodeSelector"`
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional
 	BridgeMappings []string `json:"bridgeMappings,omitempty"`

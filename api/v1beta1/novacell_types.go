@@ -26,7 +26,8 @@ type NovaCellSpec struct {
 
 	Libvirtd NovaLibvirtdSpec `json:"libvirtd"`
 
-	Compute NovaComputeSpec `json:"compute"`
+	// +optional
+	Compute NovaComputeSpec `json:"compute,omitempty"`
 
 	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
@@ -49,7 +50,8 @@ type NovaLibvirtdSpec struct {
 }
 
 type NovaComputeSpec struct {
-	NodeSelector map[string]string `json:"nodeSelector"`
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 // NovaCellStatus defines the observed state of NovaCell

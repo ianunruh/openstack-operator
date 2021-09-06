@@ -11,6 +11,11 @@ func Cinder(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Cinder {
 	spec := instance.Spec.Cinder
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "cinder")
+	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
+
+	spec.Scheduler.NodeSelector = controllerNodeSelector(spec.Scheduler.NodeSelector, instance)
+
+	spec.Volume.NodeSelector = controllerNodeSelector(spec.Volume.NodeSelector, instance)
 
 	return &openstackv1beta1.Cinder{
 		ObjectMeta: metav1.ObjectMeta{

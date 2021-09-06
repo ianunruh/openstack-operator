@@ -53,6 +53,17 @@ type ControlPlaneSpec struct {
 
 	// +optional
 	Manila ManilaSpec `json:"manila,omitempty"`
+
+	// +optional
+	NodeSelector ControlPlaneNodeSelector `json:"nodeSelector,omitempty"`
+}
+
+type ControlPlaneNodeSelector struct {
+	// +optional
+	Controller map[string]string `json:"controller,omitempty"`
+
+	// +optional
+	Compute map[string]string `json:"compute,omitempty"`
 }
 
 type ControlPlaneIngressSpec struct {

@@ -832,8 +832,6 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                    required:
-                    - nodeSelector
                     type: object
                   server:
                     properties:
@@ -858,7 +856,17 @@ spec:
                     type: object
                 required:
                 - image
-                - metadataAgent
+                type: object
+              nodeSelector:
+                properties:
+                  compute:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  controller:
+                    additionalProperties:
+                      type: string
+                    type: object
                 type: object
               nova:
                 description: NovaSpec defines the desired state of Nova
@@ -959,8 +967,6 @@ spec:
                               additionalProperties:
                                 type: string
                               type: object
-                          required:
-                          - nodeSelector
                           type: object
                         conductor:
                           properties:
@@ -1028,7 +1034,6 @@ spec:
                               type: integer
                           type: object
                       required:
-                      - compute
                       - libvirtd
                       - name
                       type: object
@@ -1181,8 +1186,6 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
-                    required:
-                    - nodeSelector
                     type: object
                   northd:
                     properties:
@@ -1240,7 +1243,6 @@ spec:
                     type: object
                 required:
                 - image
-                - node
                 - ovsdbNorth
                 - ovsdbSouth
                 type: object

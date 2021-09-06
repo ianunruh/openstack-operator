@@ -7,12 +7,16 @@ import (
 )
 
 func Database(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.MariaDB {
+	spec := instance.Spec.Database
+
+	spec.NodeSelector = controllerNodeSelector(spec.NodeSelector, instance)
+
 	// TODO labels
 	return &openstackv1beta1.MariaDB{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "mariadb",
 			Namespace: instance.Namespace,
 		},
-		Spec: instance.Spec.Database,
+		Spec: spec,
 	}
 }

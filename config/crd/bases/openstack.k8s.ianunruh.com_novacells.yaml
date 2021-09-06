@@ -66,8 +66,6 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
-                required:
-                - nodeSelector
                 type: object
               conductor:
                 properties:
@@ -134,7 +132,6 @@ spec:
                     type: integer
                 type: object
             required:
-            - compute
             - libvirtd
             - name
             type: object

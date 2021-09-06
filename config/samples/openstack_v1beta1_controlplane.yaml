@@ -8,6 +8,10 @@ spec:
     annotations:
       external-dns/enabled: "true"
       cert-manager.io/cluster-issuer: letsencrypt-prod
+  nodeSelector:
+    compute:
+      openstack/cloud: openstack
+      openstack/compute-node: enabled
   broker:
     image: docker.io/bitnami/rabbitmq:3.8.9-debian-10-r58
     volume:
@@ -41,24 +45,12 @@ spec:
     image: ghcr.io/ianunruh/openstack-operator-images/nova:master
     cells:
     - name: cell1
-      compute:
-        nodeSelector:
-          openstack/cloud: openstack
-          openstack/compute-node: enabled
       libvirtd:
         image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
   neutron:
     image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
-    metadataAgent:
-      nodeSelector:
-        openstack/cloud: openstack
-        openstack/compute-node: enabled
   ovn:
     image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
-    node:
-      nodeSelector:
-        openstack/cloud: openstack
-        openstack/network-agent: ovn
     ovsdbNorth:
       volume:
         capacity: 20Gi

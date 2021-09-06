@@ -11,7 +11,13 @@ func Nova(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Nova {
 	spec := instance.Spec.Nova
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "nova")
+	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
+
 	spec.Cells = novaCellDefaults(spec.Cells, instance)
+
+	spec.Conductor.NodeSelector = controllerNodeSelector(spec.Conductor.NodeSelector, instance)
+
+	spec.Scheduler.NodeSelector = controllerNodeSelector(spec.Scheduler.NodeSelector, instance)
 
 	return &openstackv1beta1.Nova{
 		ObjectMeta: metav1.ObjectMeta{
@@ -25,11 +31,18 @@ func Nova(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Nova {
 func novaCellDefaults(cells []openstackv1beta1.NovaCellSpec, instance *openstackv1beta1.ControlPlane) []openstackv1beta1.NovaCellSpec {
 	out := make([]openstackv1beta1.NovaCellSpec, 0, len(cells))
 
-	for _, cell := range cells {
-		// TODO handle naming for multiple cells
-		cell.NoVNCProxy.Ingress = ingressDefaults(cell.NoVNCProxy.Ingress, instance, "novnc")
+	for _, spec := range cells {
+		spec.Conductor.NodeSelector = controllerNodeSelector(spec.Conductor.NodeSelector, instance)
 
-		out = append(out, cell)
+		spec.Compute.NodeSelector = computeNodeSelector(spec.Compute.NodeSelector, instance)
+
+		spec.Metadata.NodeSelector = controllerNodeSelector(spec.Metadata.NodeSelector, instance)
+
+		// TODO handle naming for multiple cells
+		spec.NoVNCProxy.Ingress = ingressDefaults(spec.NoVNCProxy.Ingress, instance, "novnc")
+		spec.NoVNCProxy.NodeSelector = controllerNodeSelector(spec.NoVNCProxy.NodeSelector, instance)
+
+		out = append(out, spec)
 	}
 
 	return out

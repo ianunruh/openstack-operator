@@ -52,8 +52,6 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
-                required:
-                - nodeSelector
                 type: object
               northd:
                 properties:
@@ -111,7 +109,6 @@ spec:
                 type: object
             required:
             - image
-            - node
             - ovsdbNorth
             - ovsdbSouth
             type: object

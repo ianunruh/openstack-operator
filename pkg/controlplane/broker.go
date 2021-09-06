@@ -11,6 +11,8 @@ func Broker(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.RabbitMQ 
 
 	spec.Management.Ingress = ingressDefaults(spec.Management.Ingress, instance, "rabbitmq")
 
+	spec.NodeSelector = controllerNodeSelector(spec.NodeSelector, instance)
+
 	// TODO labels
 	return &openstackv1beta1.RabbitMQ{
 		ObjectMeta: metav1.ObjectMeta{

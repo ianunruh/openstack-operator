@@ -75,8 +75,6 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
-                required:
-                - nodeSelector
                 type: object
               server:
                 properties:
@@ -101,7 +99,6 @@ spec:
                 type: object
             required:
             - image
-            - metadataAgent
             type: object
           status:
             description: NeutronStatus defines the observed state of Neutron

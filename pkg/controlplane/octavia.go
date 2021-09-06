@@ -11,6 +11,13 @@ func Octavia(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Octavia 
 	spec := instance.Spec.Octavia
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "octavia")
+	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
+
+	spec.HealthManager.NodeSelector = controllerNodeSelector(spec.HealthManager.NodeSelector, instance)
+
+	spec.Housekeeping.NodeSelector = controllerNodeSelector(spec.Housekeeping.NodeSelector, instance)
+
+	spec.Worker.NodeSelector = controllerNodeSelector(spec.Worker.NodeSelector, instance)
 
 	return &openstackv1beta1.Octavia{
 		ObjectMeta: metav1.ObjectMeta{

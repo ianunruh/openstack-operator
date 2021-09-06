@@ -11,7 +11,10 @@ func Heat(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Heat {
 	spec := instance.Spec.Heat
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "heat")
+	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
+
 	spec.CFN.Ingress = ingressDefaults(spec.CFN.Ingress, instance, "heat-cfn")
+	spec.CFN.NodeSelector = controllerNodeSelector(spec.CFN.NodeSelector, instance)
 
 	return &openstackv1beta1.Heat{
 		ObjectMeta: metav1.ObjectMeta{
