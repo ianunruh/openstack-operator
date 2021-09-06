@@ -27,21 +27,8 @@ spec:
     image: ghcr.io/ianunruh/openstack-operator-images/keystone:master
     api:
       replicas: 2
-    database:
-      name: keystone
-      secret: keystone-db
-      cluster: mariadb
-    broker:
-      name: keystone
-      secret: keystone-rabbitmq
-      cluster: rabbitmq
-      virtualHost: openstack
   glance:
     image: ghcr.io/ianunruh/openstack-operator-images/glance:master
-    database:
-      name: glance
-      secret: glance-db
-      cluster: mariadb
     backends:
     - name: ssd
       pvc:
@@ -50,10 +37,6 @@ spec:
         accessModes: [ReadWriteMany]
   placement:
     image: ghcr.io/ianunruh/openstack-operator-images/placement:master
-    database:
-      name: placement
-      secret: placement-db
-      cluster: mariadb
   nova:
     image: ghcr.io/ianunruh/openstack-operator-images/nova:master
     cells:
@@ -64,43 +47,12 @@ spec:
           openstack/compute-node: enabled
       libvirtd:
         image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
-      database:
-        name: nova_cell1
-        secret: nova-cell1-db
-        cluster: mariadb
-      broker:
-        name: nova-cell1
-        secret: nova-cell1-rabbitmq
-        cluster: rabbitmq
-        virtualHost: nova-cell1
-    apiDatabase:
-      name: nova_api
-      secret: nova-api-db
-      cluster: mariadb
-    cellDatabase:
-      name: nova_cell0
-      secret: nova-cell0-db
-      cluster: mariadb
-    broker:
-      name: nova
-      secret: nova-rabbitmq
-      cluster: rabbitmq
-      virtualHost: openstack
   neutron:
     image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
     metadataAgent:
       nodeSelector:
         openstack/cloud: openstack
         openstack/compute-node: enabled
-    database:
-      name: neutron
-      secret: neutron-db
-      cluster: mariadb
-    broker:
-      name: neutron
-      secret: neutron-rabbitmq
-      cluster: rabbitmq
-      virtualHost: openstack
   ovn:
     image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
     node:
