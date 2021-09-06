@@ -64,25 +64,6 @@ type NovaConductorSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
-type NovaMetadataSpec struct {
-	// +optional
-	Replicas int32 `json:"replicas,omitempty"`
-
-	// +optional
-	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
-}
-
-type NovaNoVNCProxySpec struct {
-	// +optional
-	Replicas int32 `json:"replicas,omitempty"`
-
-	// +optional
-	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
-
-	// +optional
-	Ingress *IngressSpec `json:"ingress,omitempty"`
-}
-
 type NovaSchedulerSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`

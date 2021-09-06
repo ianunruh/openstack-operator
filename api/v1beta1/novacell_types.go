@@ -45,13 +45,32 @@ type NovaCellSpec struct {
 	NoVNCProxy NovaNoVNCProxySpec `json:"novncproxy,omitempty"`
 }
 
+type NovaComputeSpec struct {
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+}
+
 type NovaLibvirtdSpec struct {
 	Image string `json:"image"`
 }
 
-type NovaComputeSpec struct {
+type NovaMetadataSpec struct {
+	// +optional
+	Replicas int32 `json:"replicas,omitempty"`
+
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+}
+
+type NovaNoVNCProxySpec struct {
+	// +optional
+	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// +optional
+	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
 // NovaCellStatus defines the observed state of NovaCell
