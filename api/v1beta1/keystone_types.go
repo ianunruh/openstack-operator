@@ -32,6 +32,9 @@ type KeystoneSpec struct {
 
 	// +optional
 	Broker RabbitMQUserSpec `json:"broker,omitempty"`
+
+	// +optional
+	Notifications KeystoneNotificationsSpec `json:"notifications,omitempty"`
 }
 
 type KeystoneAPISpec struct {
@@ -43,6 +46,11 @@ type KeystoneAPISpec struct {
 
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
+}
+
+type KeystoneNotificationsSpec struct {
+	// +optional
+	Enabled bool `json:"enabled,omitempty"`
 }
 
 // KeystoneStatus defines the observed state of Keystone

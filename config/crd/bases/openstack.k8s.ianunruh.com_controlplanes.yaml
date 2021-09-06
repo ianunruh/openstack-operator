@@ -602,6 +602,11 @@ spec:
                     type: object
                   image:
                     type: string
+                  notifications:
+                    properties:
+                      enabled:
+                        type: boolean
+                    type: object
                 required:
                 - image
                 type: object

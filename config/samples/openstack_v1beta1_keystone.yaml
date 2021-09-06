@@ -20,3 +20,5 @@ spec:
     secret: keystone-rabbitmq
     cluster: rabbitmq
     virtualHost: openstack
+  notifications:
+    enabled: true

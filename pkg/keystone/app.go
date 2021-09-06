@@ -25,7 +25,13 @@ func ConfigMap(instance *openstackv1beta1.Keystone) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["keystone.conf"] = template.MustReadFile(AppLabel, "keystone.conf")
+	cfg := template.MustLoadINI(AppLabel, "keystone.conf")
+
+	if instance.Spec.Notifications.Enabled {
+		cfg.Section("oslo_messaging_notifications").NewKey("driver", "messagingv2")
+	}
+
+	cm.Data["keystone.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm
 }
