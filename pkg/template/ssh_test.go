@@ -1,4 +1,4 @@
-package amphora
+package template
 
 import (
 	"testing"
