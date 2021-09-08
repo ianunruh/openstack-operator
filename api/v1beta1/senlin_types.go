@@ -28,7 +28,13 @@ type SenlinSpec struct {
 	API SenlinAPISpec `json:"api,omitempty"`
 
 	// +optional
+	Conductor SenlinConductorSpec `json:"conductor,omitempty"`
+
+	// +optional
 	Engine SenlinEngineSpec `json:"engine,omitempty"`
+
+	// +optional
+	HealthManager SenlinHealthManagerSpec `json:"healthManager,omitempty"`
 
 	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
@@ -48,7 +54,23 @@ type SenlinAPISpec struct {
 	Ingress *IngressSpec `json:"ingress,omitempty"`
 }
 
+type SenlinConductorSpec struct {
+	// +optional
+	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+}
+
 type SenlinEngineSpec struct {
+	// +optional
+	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+}
+
+type SenlinHealthManagerSpec struct {
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 

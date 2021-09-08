@@ -74,6 +74,16 @@ spec:
                 - secret
                 - virtualHost
                 type: object
+              conductor:
+                properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                type: object
               database:
                 description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
                 properties:
@@ -89,6 +99,16 @@ spec:
                 - secret
                 type: object
               engine:
+                properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                type: object
+              healthManager:
                 properties:
                   nodeSelector:
                     additionalProperties:

@@ -11,7 +11,11 @@ spec:
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
+  conductor:
+    replicas: 2
   engine:
+    replicas: 2
+  healthManager:
     replicas: 2
   database:
     name: senlin

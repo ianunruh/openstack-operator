@@ -9,11 +9,11 @@ import (
 )
 
 const (
-	EngineComponentLabel = "engine"
+	ConductorComponentLabel = "conductor"
 )
 
-func EngineDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
-	labels := template.Labels(instance.Name, AppLabel, EngineComponentLabel)
+func ConductorDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
+	labels := template.Labels(instance.Name, AppLabel, ConductorComponentLabel)
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-senlin", "/etc/senlin/senlin.conf", "senlin.conf"),
@@ -22,14 +22,14 @@ func EngineDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar, vo
 	sts := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.Engine.Replicas,
-		NodeSelector: instance.Spec.Engine.NodeSelector,
+		Replicas:     instance.Spec.Conductor.Replicas,
+		NodeSelector: instance.Spec.Conductor.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "engine",
+				Name:  "conductor",
 				Image: instance.Spec.Image,
 				Command: []string{
-					"senlin-engine",
+					"senlin-conductor",
 					"--config-file=/etc/senlin/senlin.conf",
 				},
 				Env:          env,
@@ -43,7 +43,7 @@ func EngineDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar, vo
 		Volumes: volumes,
 	})
 
-	sts.Name = template.Combine(instance.Name, "engine")
+	sts.Name = template.Combine(instance.Name, "conductor")
 
 	return sts
 }

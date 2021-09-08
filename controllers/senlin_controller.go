@@ -56,7 +56,6 @@ type SenlinReconciler struct {
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;delete
-// +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;watch;create;update;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -151,7 +150,15 @@ func (r *SenlinReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
+	if err := r.reconcileConductor(ctx, instance, env, volumes, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	if err := r.reconcileEngine(ctx, instance, env, volumes, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := r.reconcileHealthManager(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -186,16 +193,30 @@ func (r *SenlinReconciler) reconcileAPI(ctx context.Context, instance *openstack
 	return nil
 }
 
-func (r *SenlinReconciler) reconcileEngine(ctx context.Context, instance *openstackv1beta1.Senlin, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
-	svc := senlin.EngineService(instance)
-	controllerutil.SetControllerReference(instance, svc, r.Scheme)
-	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
+func (r *SenlinReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.Senlin, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	deploy := senlin.ConductorDeployment(instance, env, volumes)
+	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
+	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
 
-	sts := senlin.EngineStatefulSet(instance, env, volumes)
-	controllerutil.SetControllerReference(instance, sts, r.Scheme)
-	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
+	return nil
+}
+
+func (r *SenlinReconciler) reconcileEngine(ctx context.Context, instance *openstackv1beta1.Senlin, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	deploy := senlin.EngineDeployment(instance, env, volumes)
+	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
+	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *SenlinReconciler) reconcileHealthManager(ctx context.Context, instance *openstackv1beta1.Senlin, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	deploy := senlin.HealthManagerDeployment(instance, env, volumes)
+	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
+	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
 
@@ -212,7 +233,6 @@ func (r *SenlinReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&batchv1.Job{}).
 		Owns(&corev1.Secret{}).
 		Owns(&corev1.Service{}).
-		Owns(&appsv1.StatefulSet{}).
 		Owns(&openstackv1beta1.KeystoneService{}).
 		Owns(&openstackv1beta1.KeystoneUser{}).
 		Owns(&openstackv1beta1.MariaDBDatabase{}).
