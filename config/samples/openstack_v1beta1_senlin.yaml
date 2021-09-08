@@ -1,0 +1,7 @@
+apiVersion: openstack.k8s.ianunruh.com/v1beta1
+kind: Senlin
+metadata:
+  name: senlin-sample
+spec:
+  # Add fields here
+  foo: bar

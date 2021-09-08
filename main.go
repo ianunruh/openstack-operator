@@ -334,6 +334,13 @@ func main() {
 		setupLog.Error(err, "unable to create webhook", "webhook", "Memcached")
 		os.Exit(1)
 	}
+	if err = (&controllers.SenlinReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Senlin")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {
