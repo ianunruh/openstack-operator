@@ -138,6 +138,15 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
+	computeSSHSecret, err := nova.ComputeSSHKeypairSecret(instance)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	controllerutil.SetControllerReference(instance, computeSSHSecret, r.Scheme)
+	if err := template.CreateSecret(ctx, r.Client, computeSSHSecret, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),

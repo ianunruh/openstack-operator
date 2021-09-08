@@ -169,6 +169,10 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
+	if err := r.reconcileComputeSSH(ctx, instance, cluster.Spec.Image, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	if !instance.Status.Ready {
 		instance.Status.Ready = true
 		if err := r.Client.Status().Update(ctx, instance); err != nil {
@@ -309,6 +313,16 @@ func (r *NovaCellReconciler) reconcileCompute(ctx context.Context, instance *ope
 	env = append(env, extraEnvVars...)
 
 	ds := nova.ComputeDaemonSet(instance, env, volumeMounts, volumes, containerImage)
+	controllerutil.SetControllerReference(instance, ds, r.Scheme)
+	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *NovaCellReconciler) reconcileComputeSSH(ctx context.Context, instance *openstackv1beta1.NovaCell, containerImage string, log logr.Logger) error {
+	ds := nova.ComputeSSHDaemonSet(instance, containerImage)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err
