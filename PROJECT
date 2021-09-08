@@ -297,4 +297,8 @@ resources:
   kind: Senlin
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 version: "3"
