@@ -384,6 +384,27 @@ webhooks:
     resources:
     - rallies
   sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-senlin
+  failurePolicy: Fail
+  name: msenlin.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - senlins
+  sideEffects: None
 
 ---
 apiVersion: admissionregistration.k8s.io/v1
@@ -769,4 +790,25 @@ webhooks:
     - UPDATE
     resources:
     - rallies
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-senlin
+  failurePolicy: Fail
+  name: vsenlin.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - senlins
   sideEffects: None
