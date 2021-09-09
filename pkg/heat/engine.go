@@ -20,9 +20,10 @@ func EngineStatefulSet(instance *openstackv1beta1.Heat, env []corev1.EnvVar, vol
 	}
 
 	sts := template.GenericStatefulSet(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Replicas:  instance.Spec.Engine.Replicas,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		Replicas:     instance.Spec.Engine.Replicas,
+		NodeSelector: instance.Spec.Engine.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:  "engine",
