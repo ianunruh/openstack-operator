@@ -838,6 +838,16 @@ spec:
                           type: string
                         type: object
                     type: object
+                  nova:
+                    properties:
+                      secret:
+                        type: string
+                    type: object
+                  placement:
+                    properties:
+                      secret:
+                        type: string
+                    type: object
                   server:
                     properties:
                       ingress:
