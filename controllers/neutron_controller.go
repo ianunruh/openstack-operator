@@ -125,8 +125,8 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
-	env = append(env, keystone.ClientEnv("OS_NOVA__", "nova-keystone")...)
-	env = append(env, keystone.ClientEnv("OS_PLACEMENT__", "placement-keystone")...)
+	env = append(env, keystone.ClientEnv("OS_NOVA__", instance.Spec.Nova.Secret)...)
+	env = append(env, keystone.ClientEnv("OS_PLACEMENT__", instance.Spec.Placement.Secret)...)
 
 	serverEnvVars := append(env, fullEnvVars...)
 

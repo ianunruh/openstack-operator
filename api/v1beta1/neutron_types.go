@@ -35,6 +35,12 @@ type NeutronSpec struct {
 
 	// +optional
 	Broker RabbitMQUserSpec `json:"broker,omitempty"`
+
+	// +optional
+	Nova NeutronNovaSpec `json:"nova,omitempty"`
+
+	// +optional
+	Placement NeutronPlacementSpec `json:"placement,omitempty"`
 }
 
 type NeutronServerSpec struct {
@@ -51,6 +57,16 @@ type NeutronServerSpec struct {
 type NeutronMetadataAgentSpec struct {
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+}
+
+type NeutronNovaSpec struct {
+	// +optional
+	Secret string `json:"secret,omitempty"`
+}
+
+type NeutronPlacementSpec struct {
+	// +optional
+	Secret string `json:"secret,omitempty"`
 }
 
 // NeutronStatus defines the observed state of Neutron

@@ -44,6 +44,14 @@ func (r *Neutron) Default() {
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
+
+	if r.Spec.Nova.Secret == "" {
+		r.Spec.Nova.Secret = "nova-keystone"
+	}
+
+	if r.Spec.Placement.Secret == "" {
+		r.Spec.Placement.Secret = "placement-keystone"
+	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
