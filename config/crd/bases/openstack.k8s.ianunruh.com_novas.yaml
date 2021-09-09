@@ -212,6 +212,16 @@ spec:
                 type: object
               image:
                 type: string
+              neutron:
+                properties:
+                  secret:
+                    type: string
+                type: object
+              placement:
+                properties:
+                  secret:
+                    type: string
+                type: object
               scheduler:
                 properties:
                   nodeSelector:

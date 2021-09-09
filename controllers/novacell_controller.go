@@ -135,8 +135,8 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneSecret)...)
-	env = append(env, keystone.ClientEnv("OS_NEUTRON__", "neutron-keystone")...)
-	env = append(env, keystone.ClientEnv("OS_PLACEMENT__", "placement-keystone")...)
+	env = append(env, keystone.ClientEnv("OS_NEUTRON__", cluster.Spec.Neutron.Secret)...)
+	env = append(env, keystone.ClientEnv("OS_PLACEMENT__", cluster.Spec.Placement.Secret)...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-nova", cm.Name, nil),

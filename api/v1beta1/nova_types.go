@@ -43,6 +43,12 @@ type NovaSpec struct {
 
 	// +optional
 	Broker RabbitMQUserSpec `json:"broker,omitempty"`
+
+	// +optional
+	Neutron NovaNeutronSpec `json:"neutron,omitempty"`
+
+	// +optional
+	Placement NovaPlacementSpec `json:"placement,omitempty"`
 }
 
 type NovaAPISpec struct {
@@ -70,6 +76,16 @@ type NovaSchedulerSpec struct {
 
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+}
+
+type NovaNeutronSpec struct {
+	// +optional
+	Secret string `json:"secret,omitempty"`
+}
+
+type NovaPlacementSpec struct {
+	// +optional
+	Secret string `json:"secret,omitempty"`
 }
 
 // NovaStatus defines the observed state of Nova
