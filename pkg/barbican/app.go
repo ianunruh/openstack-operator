@@ -25,7 +25,10 @@ func ConfigMap(instance *openstackv1beta1.Barbican) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["barbican.conf"] = template.MustReadFile(AppLabel, "barbican.conf")
+	cfg := template.MustLoadINI(AppLabel, "barbican.conf")
+	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
+	cm.Data["barbican.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm
 }
