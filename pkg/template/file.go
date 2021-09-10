@@ -16,6 +16,8 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 )
 
 var decUnstructured = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
@@ -156,4 +158,14 @@ func MustOutputINI(file *ini.File) *bytes.Buffer {
 		panic(err)
 	}
 	return cfgOut
+}
+
+func MergeINI(cfg *ini.File, extraCfg openstackv1beta1.ExtraConfig) {
+	for sectionName, elements := range extraCfg {
+		section, _ := cfg.NewSection(sectionName)
+
+		for name, value := range elements {
+			section.NewKey(name, value)
+		}
+	}
 }
