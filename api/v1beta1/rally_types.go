@@ -28,6 +28,9 @@ type RallySpec struct {
 
 	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
+
+	// +optional
+	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 
 // RallyStatus defines the observed state of Rally

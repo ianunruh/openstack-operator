@@ -21,7 +21,10 @@ func ConfigMap(instance *openstackv1beta1.Rally) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["rally.conf"] = template.MustReadFile(AppLabel, "rally.conf")
+	cfg := template.MustLoadINI(AppLabel, "rally.conf")
+	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
+	cm.Data["rally.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm
 }

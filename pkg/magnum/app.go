@@ -25,7 +25,10 @@ func ConfigMap(instance *openstackv1beta1.Magnum) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["magnum.conf"] = template.MustReadFile(AppLabel, "magnum.conf")
+	cfg := template.MustLoadINI(AppLabel, "magnum.conf")
+	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
+	cm.Data["magnum.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm
 }

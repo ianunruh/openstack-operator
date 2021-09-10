@@ -50,6 +50,8 @@ func ConfigMap(instance *openstackv1beta1.Cinder) *corev1.ConfigMap {
 
 	cfg.Section("").NewKey("enabled_backends", strings.Join(backendNames, ","))
 
+	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
 	cm.Data["cinder.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm

@@ -31,6 +31,9 @@ type GlanceSpec struct {
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	Backends []GlanceBackendSpec `json:"backends,omitempty"`
+
+	// +optional
+	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 
 type GlanceBackendSpec struct {

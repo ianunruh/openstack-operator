@@ -42,6 +42,8 @@ func ConfigMap(instance *openstackv1beta1.Octavia) *corev1.ConfigMap {
 
 	cfg.Section("health_manager").NewKey("controller_ip_port_list", strings.Join(healthManagerAddrs, ","))
 
+	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
 	cm.Data["octavia.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm

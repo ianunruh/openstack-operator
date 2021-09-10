@@ -37,6 +37,8 @@ func ConfigMap(instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder)
 		}
 	}
 
+	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
 	cm.Data["nova.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm

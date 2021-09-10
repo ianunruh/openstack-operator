@@ -25,7 +25,10 @@ func ConfigMap(instance *openstackv1beta1.Senlin) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["senlin.conf"] = template.MustReadFile(AppLabel, "senlin.conf")
+	cfg := template.MustLoadINI(AppLabel, "senlin.conf")
+	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
+	cm.Data["senlin.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm
 }

@@ -31,6 +31,8 @@ func ConfigMap(instance *openstackv1beta1.Keystone) *corev1.ConfigMap {
 		cfg.Section("oslo_messaging_notifications").NewKey("driver", "messagingv2")
 	}
 
+	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
 	cm.Data["keystone.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm

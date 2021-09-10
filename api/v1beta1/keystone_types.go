@@ -35,6 +35,9 @@ type KeystoneSpec struct {
 
 	// +optional
 	Notifications KeystoneNotificationsSpec `json:"notifications,omitempty"`
+
+	// +optional
+	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 
 type KeystoneAPISpec struct {

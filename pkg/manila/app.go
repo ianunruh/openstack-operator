@@ -48,6 +48,8 @@ func ConfigMap(instance *openstackv1beta1.Manila) *corev1.ConfigMap {
 
 	cfg.Section("").NewKey("enabled_share_backends", strings.Join(backendNames, ","))
 
+	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
 	cm.Data["manila.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm

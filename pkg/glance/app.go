@@ -64,6 +64,8 @@ func ConfigMap(instance *openstackv1beta1.Glance) *corev1.ConfigMap {
 	cfg.Section("").NewKey("enabled_backends", strings.Join(backendNames, ","))
 	cfg.Section("glance_store").NewKey("default_backend", defaultBackend)
 
+	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
 	cm.Data["glance-api.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm
