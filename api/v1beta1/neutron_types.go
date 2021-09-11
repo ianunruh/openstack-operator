@@ -41,6 +41,9 @@ type NeutronSpec struct {
 
 	// +optional
 	Placement NeutronPlacementSpec `json:"placement,omitempty"`
+
+	// +optional
+	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 
 type NeutronServerSpec struct {

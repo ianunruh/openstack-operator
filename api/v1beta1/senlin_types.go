@@ -41,6 +41,9 @@ type SenlinSpec struct {
 
 	// +optional
 	Broker RabbitMQUserSpec `json:"broker,omitempty"`
+
+	// +optional
+	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 
 type SenlinAPISpec struct {

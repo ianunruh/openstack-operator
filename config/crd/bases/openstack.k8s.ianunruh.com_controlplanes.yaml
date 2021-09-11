@@ -273,6 +273,12 @@ spec:
                     - name
                     - secret
                     type: object
+                  extraConfig:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    type: object
                   image:
                     type: string
                   scheduler:
@@ -415,6 +421,12 @@ spec:
                     - name
                     - secret
                     type: object
+                  extraConfig:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    type: object
                   image:
                     type: string
                 required:
@@ -506,6 +518,12 @@ spec:
                       replicas:
                         format: int32
                         type: integer
+                    type: object
+                  extraConfig:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
                     type: object
                   image:
                     type: string
@@ -606,6 +624,12 @@ spec:
                     - name
                     - secret
                     type: object
+                  extraConfig:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    type: object
                   image:
                     type: string
                   notifications:
@@ -681,6 +705,12 @@ spec:
                     - cluster
                     - name
                     - secret
+                    type: object
+                  extraConfig:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
                     type: object
                   image:
                     type: string
@@ -774,6 +804,12 @@ spec:
                     - name
                     - secret
                     type: object
+                  extraConfig:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    type: object
                   image:
                     type: string
                   scheduler:
@@ -834,6 +870,12 @@ spec:
                     - cluster
                     - name
                     - secret
+                    type: object
+                  extraConfig:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
                     type: object
                   image:
                     type: string
@@ -1069,6 +1111,12 @@ spec:
                         format: int32
                         type: integer
                     type: object
+                  extraConfig:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    type: object
                   image:
                     type: string
                   neutron:
@@ -1157,6 +1205,12 @@ spec:
                     - cluster
                     - name
                     - secret
+                    type: object
+                  extraConfig:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
                     type: object
                   healthManager:
                     properties:
@@ -1315,6 +1369,12 @@ spec:
                     - cluster
                     - name
                     - secret
+                    type: object
+                  extraConfig:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
                     type: object
                   image:
                     type: string

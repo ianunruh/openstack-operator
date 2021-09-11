@@ -49,6 +49,9 @@ type NovaSpec struct {
 
 	// +optional
 	Placement NovaPlacementSpec `json:"placement,omitempty"`
+
+	// +optional
+	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 
 type NovaAPISpec struct {

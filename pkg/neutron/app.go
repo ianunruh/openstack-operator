@@ -25,8 +25,11 @@ func ConfigMap(instance *openstackv1beta1.Neutron) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
+	cfg := template.MustLoadINI(AppLabel, "neutron.conf")
+	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
+	cm.Data["neutron.conf"] = template.MustOutputINI(cfg).String()
 	cm.Data["neutron_ovn_metadata_agent.ini"] = template.MustReadFile(AppLabel, "neutron_ovn_metadata_agent.ini")
-	cm.Data["neutron.conf"] = template.MustReadFile(AppLabel, "neutron.conf")
 
 	return cm
 }

@@ -63,6 +63,12 @@ spec:
                 - name
                 - secret
                 type: object
+              extraConfig:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: object
               image:
                 type: string
             required:

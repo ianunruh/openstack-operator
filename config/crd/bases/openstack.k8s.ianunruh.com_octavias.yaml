@@ -95,6 +95,12 @@ spec:
                 - name
                 - secret
                 type: object
+              extraConfig:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: object
               healthManager:
                 properties:
                   nodeSelector:

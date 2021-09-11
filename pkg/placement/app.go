@@ -25,7 +25,10 @@ func ConfigMap(instance *openstackv1beta1.Placement) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["placement.conf"] = template.MustReadFile(AppLabel, "placement.conf")
+	cfg := template.MustLoadINI(AppLabel, "placement.conf")
+	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
+	cm.Data["placement.conf"] = template.MustOutputINI(cfg).String()
 
 	return cm
 }

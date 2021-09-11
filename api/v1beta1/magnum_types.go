@@ -35,6 +35,9 @@ type MagnumSpec struct {
 
 	// +optional
 	Broker RabbitMQUserSpec `json:"broker,omitempty"`
+
+	// +optional
+	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 
 type MagnumAPISpec struct {
