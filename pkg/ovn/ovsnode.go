@@ -14,20 +14,26 @@ const (
 	OVSNodeComponentLabel = "ovs-node"
 )
 
-func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane) *appsv1.DaemonSet {
+func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, configHash string) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, OVSNodeComponentLabel)
 
+	cfg := instance.Spec.Node
+
 	env := []corev1.EnvVar{
+		template.EnvVar("CONFIG_HASH", configHash),
 		template.FieldEnvVar("HOSTNAME", "spec.nodeName"),
+		template.EnvVar("OVERLAY_CIDRS", strings.Join(cfg.OverlayCIDRs, ",")),
 	}
 
-	cfg := instance.Spec.Node
 	if len(cfg.BridgeMappings) > 0 {
 		env = append(env,
 			template.EnvVar("BRIDGE_MAPPINGS", strings.Join(cfg.BridgeMappings, ",")),
 			template.EnvVar("BRIDGE_PORTS", strings.Join(cfg.BridgePorts, ",")),
 			template.EnvVar("GATEWAY", "true"))
 	}
+
+	scriptsConfigMap := template.Combine(instance.Name, "scripts")
+	scriptsDefaultMode := int32(0555)
 
 	privileged := true
 
@@ -41,8 +47,7 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane) *appsv1.Daemon
 				Image: instance.Spec.Image,
 				Command: []string{
 					"bash",
-					"-c",
-					template.MustReadFile(AppLabel, "start-node.sh"),
+					"/scripts/start-node.sh",
 				},
 				Env: env,
 				EnvFrom: []corev1.EnvFromSource{
@@ -57,6 +62,7 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane) *appsv1.Daemon
 					template.VolumeMount("host-etc-openvswitch", "/etc/openvswitch"),
 					template.VolumeMount("host-run-openvswitch", "/run/openvswitch"),
 					template.VolumeMount("host-var-lib-openvswitch", "/var/lib/openvswitch"),
+					template.ReadOnlyVolumeMount("scripts", "/scripts"),
 				},
 			},
 		},
@@ -66,6 +72,7 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane) *appsv1.Daemon
 			template.HostPathVolume("host-etc-openvswitch", "/etc/openvswitch"),
 			template.HostPathVolume("host-run-openvswitch", "/run/openvswitch"),
 			template.HostPathVolume("host-var-lib-openvswitch", "/var/lib/openvswitch"),
+			template.ConfigMapVolume("scripts", scriptsConfigMap, &scriptsDefaultMode),
 		},
 	})
 

@@ -43,6 +43,9 @@ type OVSDBSpec struct {
 
 type OVNNodeSpec struct {
 	// +optional
+	OverlayCIDRs []string `json:"overlayCIDRs,omitempty"`
+
+	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional

@@ -1271,6 +1271,10 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      overlayCIDRs:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   northd:
                     properties:
