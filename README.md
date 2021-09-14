@@ -35,6 +35,7 @@ Also supports the following optional components.
 * Manila (filesystem storage)
 * Octavia (load balancing)
 * Rally (benchmarking)
+* Senlin (clustering)
 
 ## Images
 
@@ -78,20 +79,40 @@ kubectl label node compute7 \
 Use the supplied `openrc` file with the Python CLI client.
 
 ```
-pip install osc-placement python-heatclient python-magnumclient python-manilaclient python-openstackclient
-
+# this runs in the current context's namespace
 source openrc
 
-openstack token issue
-openstack catalog list
-openstack image list
-openstack resource provider list
-openstack compute service list
-openstack hypervisor list
-openstack network agent list
-openstack volume service list
-openstack orchestration service list
-openstack coe service list
+# starts an interactive shell
+pipenv run openstack
+
+# the following commands run in the interactive shell
+
+token issue
+catalog list
+image list
+resource provider list
+compute service list
+hypervisor list
+network agent list
+volume service list
+orchestration service list
+coe service list
+```
+
+Some APIs require using the system scope for administrative tasks.
+
+```
+# Should be done in a new session
+source openrc-system
+
+# starts an interactive shell
+pipenv run openstack
+
+# the following commands run in the interactive shell
+
+loadbalancer list
+loadbalancer amphora list
+share service list
 ```
 
 Launch an instance
@@ -131,9 +152,10 @@ kubectl delete controlplane default
 
 kubectl delete pvc --all
 # alternatively target specific PVCs
-kubectl delete pvc -l app=mariadb
-kubectl delete pvc -l app=memcached
-kubectl delete pvc -l app=rabbitmq
+kubectl delete pvc -l app.kubernetes.io/name=mariadb
+kubectl delete pvc -l app.kubernetes.io/name=memcached
+kubectl delete pvc -l app.kubernetes.io/name=rabbitmq
+kubectl delete pvc -l app.kubernetes.io/name=ovn
 ```
 
 Ingress secrets will also remain until manually cleaned up.

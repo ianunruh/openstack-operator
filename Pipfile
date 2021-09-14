@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+osc-placement = "*"
+python-heatclient = "*"
+python-magnumclient = "*"
+python-manilaclient = "*"
+python-octaviaclient = "*"
+python-openstackclient = "*"
+python-senlinclient = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
