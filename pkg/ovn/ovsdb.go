@@ -98,7 +98,7 @@ func ovsdbStartScript(component string) string {
 	return template.MustReadFile(AppLabel, "start-ovsdb-sb.sh")
 }
 
-func ovsdbSpec(instance *openstackv1beta1.OVNControlPlane, component string) *openstackv1beta1.OVSDBSpec {
+func ovsdbSpec(instance *openstackv1beta1.OVNControlPlane, component string) openstackv1beta1.OVSDBSpec {
 	if component == OVSDBNorth {
 		return instance.Spec.OVSDBNorth
 	}

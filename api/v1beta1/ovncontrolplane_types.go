@@ -24,11 +24,11 @@ import (
 type OVNControlPlaneSpec struct {
 	Image string `json:"image"`
 
-	OVSDBNorth *OVSDBSpec `json:"ovsdbNorth"`
-	OVSDBSouth *OVSDBSpec `json:"ovsdbSouth"`
+	OVSDBNorth OVSDBSpec `json:"ovsdbNorth"`
+	OVSDBSouth OVSDBSpec `json:"ovsdbSouth"`
 
 	// +optional
-	Node *OVNNodeSpec `json:"node,omitempty"`
+	Node OVNNodeSpec `json:"node,omitempty"`
 
 	// +optional
 	Northd OVNNorthdSpec `json:"northd,omitempty"`
