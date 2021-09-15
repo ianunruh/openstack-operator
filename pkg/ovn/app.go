@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -15,6 +16,17 @@ import (
 const (
 	AppLabel = "ovn"
 )
+
+func ScriptsConfigMap(instance *openstackv1beta1.OVNControlPlane) *corev1.ConfigMap {
+	labels := template.AppLabels(instance.Name, AppLabel)
+	name := template.Combine(instance.Name, "scripts")
+	cm := template.GenericConfigMap(name, instance.Namespace, labels)
+
+	cm.Data["get-encap-ip.py"] = template.MustReadFile(AppLabel, "get-encap-ip.py")
+	cm.Data["start-node.sh"] = template.MustReadFile(AppLabel, "start-node.sh")
+
+	return cm
+}
 
 func EnsureControlPlane(ctx context.Context, c client.Client, intended *openstackv1beta1.OVNControlPlane, log logr.Logger) error {
 	hash, err := template.ObjectHash(intended)

@@ -73,6 +73,13 @@ func (r *OVNControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		}
 	}
 
+	cm := ovn.ScriptsConfigMap(instance)
+	controllerutil.SetControllerReference(instance, cm, r.Scheme)
+	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
+		return ctrl.Result{}, err
+	}
+	configHash := template.AppliedHash(cm)
+
 	ovsdbNorthSvc, err := r.reconcileOVSDB(ctx, instance, ovn.OVSDBNorth, log)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -93,7 +100,7 @@ func (r *OVNControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileOVSNode(ctx, instance, log); err != nil {
+	if err := r.reconcileOVSNode(ctx, instance, configHash, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -140,8 +147,8 @@ func (r *OVNControlPlaneReconciler) reconcileController(ctx context.Context, ins
 	return nil
 }
 
-func (r *OVNControlPlaneReconciler) reconcileOVSNode(ctx context.Context, instance *openstackv1beta1.OVNControlPlane, log logr.Logger) error {
-	ds := ovn.OVSNodeDaemonSet(instance)
+func (r *OVNControlPlaneReconciler) reconcileOVSNode(ctx context.Context, instance *openstackv1beta1.OVNControlPlane, configHash string, log logr.Logger) error {
+	ds := ovn.OVSNodeDaemonSet(instance, configHash)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err
