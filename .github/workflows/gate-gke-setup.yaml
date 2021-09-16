@@ -1,0 +1,48 @@
+name: Setup GKE gate
+
+on:
+  pull_request:
+    types: [labeled, synchronize, opened, reopened]
+
+env:
+  CLUSTER_NAME: gate-pr-${{ github.event.pull_request.number }}
+  CLOUDSDK_COMPUTE_ZONE: us-central1-a
+  DNS_ZONE: ospk8s
+
+jobs:
+  setup:
+    if: contains(github.event.pull_request.labels.*.name, 'gate')
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Mask service account key
+        run: |
+          echo "::add-mask::${{ secrets.GCLOUD_SVC_ACCOUNT_KEY_JSON }}"
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ospk8s
+          service_account_key: ${{ secrets.GCLOUD_SVC_ACCOUNT_KEY_JSON }}
+          export_default_credentials: true
+
+      - name: Install kustomize
+        run: |
+          curl -OL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.3.0/kustomize_v4.3.0_linux_amd64.tar.gz
+          tar xfv kustomize_v4.3.0_linux_amd64.tar.gz
+          mv kustomize /usr/local/bin/kustomize
+
+      - name: Update operator image
+        working-directory: config/manager
+        run: |
+          kustomize edit set image ghcr.io/ianunruh/openstack-operator:sha-$GITHUB_SHA
+
+      - name: Setup GKE cluster
+        working-directory: gate/gke
+        run: ./setup.sh
+        env:
+          GCLOUD_SVC_ACCOUNT_KEY_JSON: ${{ secrets.GCLOUD_SVC_ACCOUNT_KEY_JSON }}
