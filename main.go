@@ -346,6 +346,18 @@ func main() {
 		setupLog.Error(err, "unable to create webhook", "webhook", "Senlin")
 		os.Exit(1)
 	}
+	if err = (&controllers.RallyTaskReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("RallyTask"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "RallyTask")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.RallyTask{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "RallyTask")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {

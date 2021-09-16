@@ -67,6 +67,9 @@ type ControlPlaneSpec struct {
 
 	// +optional
 	Octavia OctaviaSpec `json:"octavia,omitempty"`
+
+	// +optional
+	Rally RallySpec `json:"rally,omitempty"`
 }
 
 type ControlPlaneNodeSelector struct {

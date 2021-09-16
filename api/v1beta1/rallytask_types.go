@@ -20,50 +20,42 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// RallySpec defines the desired state of Rally
-type RallySpec struct {
+// RallyTaskSpec defines the desired state of RallyTask
+type RallyTaskSpec struct {
 	Image string `json:"image"`
 
-	Data *VolumeSpec `json:"data"`
-
-	// +optional
-	Database MariaDBDatabaseSpec `json:"database,omitempty"`
-
-	// +optional
-	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
+	Path string `json:"path"`
 }
 
-// RallyStatus defines the observed state of Rally
-type RallyStatus struct {
-	Ready bool `json:"ready"`
-
+// RallyTaskStatus defines the observed state of RallyTask
+type RallyTaskStatus struct {
 	// +optional
-	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
+	CompletionTime *metav1.Time `json:"completionTime,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="Ready",type=boolean,JSONPath=`.status.ready`
+//+kubebuilder:printcolumn:name="Completion",type=date,JSONPath=`.status.completionTime`
 //+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
-// Rally is the Schema for the rallies API
-type Rally struct {
+// RallyTask is the Schema for the rallytasks API
+type RallyTask struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   RallySpec   `json:"spec,omitempty"`
-	Status RallyStatus `json:"status,omitempty"`
+	Spec   RallyTaskSpec   `json:"spec,omitempty"`
+	Status RallyTaskStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// RallyList contains a list of Rally
-type RallyList struct {
+// RallyTaskList contains a list of RallyTask
+type RallyTaskList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Rally `json:"items"`
+	Items           []RallyTask `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&Rally{}, &RallyList{})
+	SchemeBuilder.Register(&RallyTask{}, &RallyTaskList{})
 }
