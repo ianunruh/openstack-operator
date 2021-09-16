@@ -6,27 +6,27 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: rallies.openstack.k8s.ianunruh.com
+  name: rallytasks.openstack.k8s.ianunruh.com
 spec:
   group: openstack.k8s.ianunruh.com
   names:
-    kind: Rally
-    listKind: RallyList
-    plural: rallies
-    singular: rally
+    kind: RallyTask
+    listKind: RallyTaskList
+    plural: rallytasks
+    singular: rallytask
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .status.ready
-      name: Ready
-      type: boolean
+    - jsonPath: .status.completionTime
+      name: Completion
+      type: date
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Rally is the Schema for the rallies API
+        description: RallyTask is the Schema for the rallytasks API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -41,56 +41,22 @@ spec:
           metadata:
             type: object
           spec:
-            description: RallySpec defines the desired state of Rally
+            description: RallyTaskSpec defines the desired state of RallyTask
             properties:
-              data:
-                properties:
-                  accessModes:
-                    items:
-                      type: string
-                    type: array
-                  capacity:
-                    type: string
-                  storageClass:
-                    type: string
-                required:
-                - capacity
-                type: object
-              database:
-                description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
-                properties:
-                  cluster:
-                    type: string
-                  name:
-                    type: string
-                  secret:
-                    type: string
-                required:
-                - cluster
-                - name
-                - secret
-                type: object
-              extraConfig:
-                additionalProperties:
-                  additionalProperties:
-                    type: string
-                  type: object
-                type: object
               image:
                 type: string
+              path:
+                type: string
             required:
-            - data
             - image
+            - path
             type: object
           status:
-            description: RallyStatus defines the observed state of Rally
+            description: RallyTaskStatus defines the observed state of RallyTask
             properties:
-              dbSyncJobHash:
+              completionTime:
+                format: date-time
                 type: string
-              ready:
-                type: boolean
-            required:
-            - ready
             type: object
         type: object
     served: true

@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -48,19 +49,11 @@ type RallyReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Rally object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.8.3/pkg/reconcile
 func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
 
 	instance := &openstackv1beta1.Rally{}
-	err := r.Client.Get(ctx, req.NamespacedName, instance)
-	if err != nil {
+	if err := r.Client.Get(ctx, req.NamespacedName, instance); err != nil {
 		if errors.IsNotFound(err) {
 			return ctrl.Result{}, nil
 		}
@@ -103,13 +96,10 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
-		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__PASSWORD", keystoneUser.Spec.Secret, "OS_PASSWORD"),
-		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 	}
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-rally", cm.Name, nil),
-		template.PersistentVolume("data", pvc.Name),
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
@@ -118,10 +108,11 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return result, err
 	}
 
-	runnerJob := rally.TaskRunnerJob(instance, keystoneUser, env, volumes)
-	controllerutil.SetControllerReference(instance, runnerJob, r.Scheme)
-	if err := template.CreateJob(ctx, r.Client, runnerJob, log); err != nil {
-		return ctrl.Result{}, err
+	if !instance.Status.Ready {
+		instance.Status.Ready = true
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	return ctrl.Result{}, nil
@@ -131,5 +122,9 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 func (r *RallyReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&openstackv1beta1.Rally{}).
+		Owns(&corev1.ConfigMap{}).
+		Owns(&batchv1.Job{}).
+		Owns(&openstackv1beta1.KeystoneUser{}).
+		Owns(&openstackv1beta1.MariaDBDatabase{}).
 		Complete(r)
 }

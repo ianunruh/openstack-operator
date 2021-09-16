@@ -44,6 +44,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/ovn"
 	"github.com/ianunruh/openstack-operator/pkg/placement"
 	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
+	"github.com/ianunruh/openstack-operator/pkg/rally"
 )
 
 // ControlPlaneReconciler reconciles a ControlPlane object
@@ -175,6 +176,14 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		sfs := controlplane.Manila(instance)
 		controllerutil.SetControllerReference(instance, sfs, r.Scheme)
 		if err := manila.EnsureManila(ctx, r.Client, sfs, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	if instance.Spec.Rally.Image != "" {
+		benchmark := controlplane.Rally(instance)
+		controllerutil.SetControllerReference(instance, benchmark, r.Scheme)
+		if err := rally.EnsureRally(ctx, r.Client, benchmark, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}

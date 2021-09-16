@@ -1385,6 +1385,49 @@ spec:
                 required:
                 - image
                 type: object
+              rally:
+                description: RallySpec defines the desired state of Rally
+                properties:
+                  data:
+                    properties:
+                      accessModes:
+                        items:
+                          type: string
+                        type: array
+                      capacity:
+                        type: string
+                      storageClass:
+                        type: string
+                    required:
+                    - capacity
+                    type: object
+                  database:
+                    description: MariaDBDatabaseSpec defines the desired state of
+                      MariaDBDatabase
+                    properties:
+                      cluster:
+                        type: string
+                      name:
+                        type: string
+                      secret:
+                        type: string
+                    required:
+                    - cluster
+                    - name
+                    - secret
+                    type: object
+                  extraConfig:
+                    additionalProperties:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    type: object
+                  image:
+                    type: string
+                required:
+                - data
+                - image
+                type: object
             required:
             - broker
             - cache
