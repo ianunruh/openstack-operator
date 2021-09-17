@@ -23,4 +23,5 @@ resources:
 - openstack_v1beta1_manila.yaml
 - openstack_v1beta1_senlin.yaml
 - openstack_v1beta1_rallytask.yaml
+- openstack_v1beta1_novacompute.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

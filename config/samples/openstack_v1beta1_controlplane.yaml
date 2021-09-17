@@ -45,8 +45,10 @@ spec:
     image: ghcr.io/ianunruh/openstack-operator-images/nova:master
     cells:
     - name: cell1
-      libvirtd:
-        image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
+      compute:
+        default:
+          libvirtd:
+            image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
   neutron:
     image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
   ovn:

@@ -34,7 +34,9 @@ func novaCellDefaults(cells []openstackv1beta1.NovaCellSpec, instance *openstack
 	for _, spec := range cells {
 		spec.Conductor.NodeSelector = controllerNodeSelector(spec.Conductor.NodeSelector, instance)
 
-		spec.Compute.NodeSelector = computeNodeSelector(spec.Compute.NodeSelector, instance)
+		for name, compute := range spec.Compute {
+			spec.Compute[name] = novaComputeDefaults(compute, spec, instance)
+		}
 
 		spec.Metadata.NodeSelector = controllerNodeSelector(spec.Metadata.NodeSelector, instance)
 
@@ -46,4 +48,10 @@ func novaCellDefaults(cells []openstackv1beta1.NovaCellSpec, instance *openstack
 	}
 
 	return out
+}
+
+func novaComputeDefaults(spec openstackv1beta1.NovaComputeSpec, cell openstackv1beta1.NovaCellSpec, instance *openstackv1beta1.ControlPlane) openstackv1beta1.NovaComputeSpec {
+	spec.NodeSelector = computeNodeSelector(spec.NodeSelector, instance)
+
+	return spec
 }

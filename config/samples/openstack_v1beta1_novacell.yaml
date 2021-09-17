@@ -5,10 +5,11 @@ metadata:
 spec:
   name: cell1
   compute:
-    nodeSelector:
-      openstack/compute-node: enabled
-  libvirtd:
-    image: ghcr.io/ianunruh/openstack-operator-images/libvirtd:master
+    default:
+      libvirtd:
+        image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
+      nodeSelector:
+        openstack/compute-node: enabled
   broker:
     name: nova-cell1
     secret: nova-cell1-rabbitmq

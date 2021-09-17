@@ -358,6 +358,18 @@ func main() {
 		setupLog.Error(err, "unable to create webhook", "webhook", "RallyTask")
 		os.Exit(1)
 	}
+	if err = (&controllers.NovaComputeReconciler{
+		Client: mgr.GetClient(),
+		Log:    ctrl.Log.WithName("controllers").WithName("NovaCompute"),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "NovaCompute")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.NovaCompute{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "NovaCompute")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {

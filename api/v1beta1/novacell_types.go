@@ -24,10 +24,8 @@ import (
 type NovaCellSpec struct {
 	Name string `json:"name"`
 
-	Libvirtd NovaLibvirtdSpec `json:"libvirtd"`
-
 	// +optional
-	Compute NovaComputeSpec `json:"compute,omitempty"`
+	Compute map[string]NovaComputeSpec `json:"compute,omitempty"`
 
 	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
@@ -43,15 +41,6 @@ type NovaCellSpec struct {
 
 	// +optional
 	NoVNCProxy NovaNoVNCProxySpec `json:"novncproxy,omitempty"`
-}
-
-type NovaComputeSpec struct {
-	// +optional
-	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
-}
-
-type NovaLibvirtdSpec struct {
-	Image string `json:"image"`
 }
 
 type NovaMetadataSpec struct {
