@@ -286,6 +286,27 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-novacompute
+  failurePolicy: Fail
+  name: mnovacompute.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - novacomputes
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-openstack-k8s-ianunruh-com-v1beta1-octavia
   failurePolicy: Fail
   name: moctavia.kb.io
@@ -706,6 +727,27 @@ webhooks:
     - UPDATE
     resources:
     - novacells
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-k8s-ianunruh-com-v1beta1-novacompute
+  failurePolicy: Fail
+  name: vnovacompute.kb.io
+  rules:
+  - apiGroups:
+    - openstack.k8s.ianunruh.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - novacomputes
   sideEffects: None
 - admissionReviewVersions:
   - v1

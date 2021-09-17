@@ -27,7 +27,7 @@ type NovaCellSpec struct {
 	Libvirtd NovaLibvirtdSpec `json:"libvirtd"`
 
 	// +optional
-	Compute NovaComputeSpec `json:"compute,omitempty"`
+	Compute NovaCellComputeSpec `json:"compute,omitempty"`
 
 	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
@@ -45,7 +45,7 @@ type NovaCellSpec struct {
 	NoVNCProxy NovaNoVNCProxySpec `json:"novncproxy,omitempty"`
 }
 
-type NovaComputeSpec struct {
+type NovaCellComputeSpec struct {
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
