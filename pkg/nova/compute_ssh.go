@@ -14,7 +14,7 @@ const (
 	ComputeSSHComponentLabel = "compute-ssh"
 )
 
-func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaCell, containerImage string) *appsv1.DaemonSet {
+func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaCompute, containerImage string) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, ComputeSSHComponentLabel)
 
 	defaultMode := int32(0400)
@@ -35,7 +35,7 @@ func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaCell, containerImage str
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		NodeSelector: instance.Spec.Compute.NodeSelector,
+		NodeSelector: instance.Spec.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
 			RunAsUser: &appUID,
 		},

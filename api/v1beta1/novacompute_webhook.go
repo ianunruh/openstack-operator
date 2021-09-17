@@ -42,7 +42,9 @@ var _ webhook.Defaulter = &NovaCompute{}
 func (r *NovaCompute) Default() {
 	novacomputelog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	if r.Spec.Cell == "" {
+		r.Spec.Cell = "cell1"
+	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

@@ -25,11 +25,17 @@ import (
 
 // NovaComputeSpec defines the desired state of NovaCompute
 type NovaComputeSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Libvirtd NovaLibvirtdSpec `json:"libvirtd"`
 
-	// Foo is an example field of NovaCompute. Edit novacompute_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// +optional
+	Cell string `json:"cell,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+}
+
+type NovaLibvirtdSpec struct {
+	Image string `json:"image"`
 }
 
 // NovaComputeStatus defines the observed state of NovaCompute

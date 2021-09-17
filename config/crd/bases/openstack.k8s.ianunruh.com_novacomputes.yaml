@@ -36,10 +36,21 @@ spec:
           spec:
             description: NovaComputeSpec defines the desired state of NovaCompute
             properties:
-              foo:
-                description: Foo is an example field of NovaCompute. Edit novacompute_types.go
-                  to remove/update
+              cell:
                 type: string
+              libvirtd:
+                properties:
+                  image:
+                    type: string
+                required:
+                - image
+                type: object
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                type: object
+            required:
+            - libvirtd
             type: object
           status:
             description: NovaComputeStatus defines the observed state of NovaCompute

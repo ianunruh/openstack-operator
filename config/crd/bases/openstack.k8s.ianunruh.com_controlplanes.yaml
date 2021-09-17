@@ -1025,11 +1025,26 @@ spec:
                           - virtualHost
                           type: object
                         compute:
-                          properties:
-                            nodeSelector:
-                              additionalProperties:
+                          additionalProperties:
+                            description: NovaComputeSpec defines the desired state
+                              of NovaCompute
+                            properties:
+                              cell:
                                 type: string
-                              type: object
+                              libvirtd:
+                                properties:
+                                  image:
+                                    type: string
+                                required:
+                                - image
+                                type: object
+                              nodeSelector:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            required:
+                            - libvirtd
+                            type: object
                           type: object
                         conductor:
                           properties:
@@ -1055,13 +1070,6 @@ spec:
                           - cluster
                           - name
                           - secret
-                          type: object
-                        libvirtd:
-                          properties:
-                            image:
-                              type: string
-                          required:
-                          - image
                           type: object
                         metadata:
                           properties:
@@ -1097,7 +1105,6 @@ spec:
                               type: integer
                           type: object
                       required:
-                      - libvirtd
                       - name
                       type: object
                     type: array
