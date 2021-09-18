@@ -177,7 +177,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - barbicans
   verbs:
@@ -189,13 +189,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - barbicans/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - barbicans/status
   verbs:
@@ -203,7 +203,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - cinders
   verbs:
@@ -215,13 +215,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - cinders/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - cinders/status
   verbs:
@@ -229,7 +229,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - controlplanes
   verbs:
@@ -241,13 +241,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - controlplanes/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - controlplanes/status
   verbs:
@@ -255,7 +255,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - glances
   verbs:
@@ -267,13 +267,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - glances/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - glances/status
   verbs:
@@ -281,7 +281,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - heats
   verbs:
@@ -293,13 +293,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - heats/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - heats/status
   verbs:
@@ -307,7 +307,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - horizons
   verbs:
@@ -319,13 +319,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - horizons/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - horizons/status
   verbs:
@@ -333,7 +333,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - keystones
   verbs:
@@ -345,13 +345,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - keystones/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - keystones/status
   verbs:
@@ -359,7 +359,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - keystoneservices
   verbs:
@@ -371,13 +371,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - keystoneservices/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - keystoneservices/status
   verbs:
@@ -385,7 +385,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - keystoneusers
   verbs:
@@ -397,13 +397,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - keystoneusers/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - keystoneusers/status
   verbs:
@@ -411,7 +411,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - magnums
   verbs:
@@ -423,13 +423,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - magnums/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - magnums/status
   verbs:
@@ -437,7 +437,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - manilas
   verbs:
@@ -449,13 +449,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - manilas/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - manilas/status
   verbs:
@@ -463,7 +463,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - mariadbdatabases
   verbs:
@@ -475,13 +475,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - mariadbdatabases/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - mariadbdatabases/status
   verbs:
@@ -489,7 +489,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - mariadbs
   verbs:
@@ -501,13 +501,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - mariadbs/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - mariadbs/status
   verbs:
@@ -515,7 +515,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - memcacheds
   verbs:
@@ -527,13 +527,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - memcacheds/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - memcacheds/status
   verbs:
@@ -541,7 +541,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - neutrons
   verbs:
@@ -553,13 +553,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - neutrons/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - neutrons/status
   verbs:
@@ -567,7 +567,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - novacells
   verbs:
@@ -579,13 +579,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - novacells/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - novacells/status
   verbs:
@@ -593,7 +593,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - novacomputes
   verbs:
@@ -605,13 +605,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - novacomputes/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - novacomputes/status
   verbs:
@@ -619,7 +619,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - novas
   verbs:
@@ -631,13 +631,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - novas/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - novas/status
   verbs:
@@ -645,7 +645,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - octavias
   verbs:
@@ -657,13 +657,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - octavias/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - octavias/status
   verbs:
@@ -671,7 +671,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - ovncontrolplanes
   verbs:
@@ -683,13 +683,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - ovncontrolplanes/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - ovncontrolplanes/status
   verbs:
@@ -697,7 +697,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - placements
   verbs:
@@ -709,13 +709,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - placements/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - placements/status
   verbs:
@@ -723,7 +723,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rabbitmqs
   verbs:
@@ -735,13 +735,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rabbitmqs/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rabbitmqs/status
   verbs:
@@ -749,7 +749,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rabbitmqusers
   verbs:
@@ -761,13 +761,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rabbitmqusers/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rabbitmqusers/status
   verbs:
@@ -775,7 +775,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rallies
   verbs:
@@ -787,13 +787,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rallies/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rallies/status
   verbs:
@@ -801,7 +801,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rallytasks
   verbs:
@@ -813,13 +813,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rallytasks/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rallytasks/status
   verbs:
@@ -827,7 +827,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - senlins
   verbs:
@@ -839,13 +839,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - senlins/finalizers
   verbs:
   - update
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - senlins/status
   verbs:

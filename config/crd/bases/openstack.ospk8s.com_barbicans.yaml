@@ -6,20 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: manilas.openstack.k8s.ianunruh.com
+  name: barbicans.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: Manila
-    listKind: ManilaList
-    plural: manilas
-    singular: manila
+    kind: Barbican
+    listKind: BarbicanList
+    plural: barbicans
+    singular: barbican
   scope: Namespaced
   versions:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Manila is the Schema for the manilas API
+        description: Barbican is the Schema for the barbicans API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,7 +34,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: ManilaSpec defines the desired state of Manila
+            description: BarbicanSpec defines the desired state of Barbican
             properties:
               api:
                 properties:
@@ -84,37 +84,6 @@ spec:
                         type: object
                     type: object
                 type: object
-              backends:
-                items:
-                  properties:
-                    ceph:
-                      properties:
-                        clientName:
-                          type: string
-                        rook:
-                          properties:
-                            namespace:
-                              type: string
-                          required:
-                          - namespace
-                          type: object
-                        secret:
-                          type: string
-                      required:
-                      - clientName
-                      - rook
-                      - secret
-                      type: object
-                    name:
-                      type: string
-                    shareBackendName:
-                      type: string
-                  required:
-                  - ceph
-                  - name
-                  - shareBackendName
-                  type: object
-                type: array
               broker:
                 description: RabbitMQUserSpec defines the desired state of RabbitMQUser
                 properties:
@@ -191,49 +160,11 @@ spec:
                         type: object
                     type: object
                 type: object
-              share:
-                properties:
-                  nodeSelector:
-                    additionalProperties:
-                      type: string
-                    type: object
-                  replicas:
-                    format: int32
-                    type: integer
-                  resources:
-                    description: ResourceRequirements describes the compute resource
-                      requirements.
-                    properties:
-                      limits:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Limits describes the maximum amount of compute
-                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                        type: object
-                      requests:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Requests describes the minimum amount of compute
-                          resources required. If Requests is omitted for a container,
-                          it defaults to Limits if that is explicitly specified, otherwise
-                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                        type: object
-                    type: object
-                type: object
             required:
-            - backends
             - image
             type: object
           status:
-            description: ManilaStatus defines the observed state of Manila
+            description: BarbicanStatus defines the observed state of Barbican
             properties:
               dbSyncJobHash:
                 type: string

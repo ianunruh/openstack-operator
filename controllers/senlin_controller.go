@@ -47,9 +47,9 @@ type SenlinReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=senlins,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=senlins/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=senlins/finalizers,verbs=update
+//+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=senlins,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=senlins/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=senlins/finalizers,verbs=update
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;create;update;delete
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;delete

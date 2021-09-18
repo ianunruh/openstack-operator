@@ -1,4 +1,4 @@
-domain: k8s.ianunruh.com
+domain: ospk8s.com
 layout:
 - go.kubebuilder.io/v3
 plugins:
@@ -11,7 +11,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: ControlPlane
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -20,7 +20,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: MariaDB
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -33,7 +33,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: MariaDBDatabase
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -42,7 +42,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Keystone
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -55,7 +55,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: KeystoneService
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -64,7 +64,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: KeystoneUser
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -73,7 +73,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Glance
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -86,7 +86,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Placement
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -99,7 +99,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: RabbitMQ
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -112,7 +112,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: RabbitMQUser
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -121,7 +121,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Nova
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -135,7 +135,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: NovaCell
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -148,7 +148,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Neutron
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -161,7 +161,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Memcached
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -174,7 +174,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Cinder
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -187,7 +187,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Magnum
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -200,7 +200,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Barbican
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -213,7 +213,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: OVNControlPlane
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -226,7 +226,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Octavia
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -240,7 +240,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Rally
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -253,7 +253,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Manila
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -266,7 +266,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Heat
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -279,7 +279,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Horizon
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -292,7 +292,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: Senlin
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -305,7 +305,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: RallyTask
   path: github.com/ianunruh/openstack-operator/api/v1beta1
@@ -318,7 +318,7 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: k8s.ianunruh.com
+  domain: ospk8s.com
   group: openstack
   kind: NovaCompute
   path: github.com/ianunruh/openstack-operator/api/v1beta1

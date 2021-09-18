@@ -2,32 +2,32 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/openstack.k8s.ianunruh.com_controlplanes.yaml
-- bases/openstack.k8s.ianunruh.com_mariadbs.yaml
-- bases/openstack.k8s.ianunruh.com_mariadbdatabases.yaml
-- bases/openstack.k8s.ianunruh.com_keystones.yaml
-- bases/openstack.k8s.ianunruh.com_keystoneservices.yaml
-- bases/openstack.k8s.ianunruh.com_keystoneusers.yaml
-- bases/openstack.k8s.ianunruh.com_glances.yaml
-- bases/openstack.k8s.ianunruh.com_placements.yaml
-- bases/openstack.k8s.ianunruh.com_rabbitmqs.yaml
-- bases/openstack.k8s.ianunruh.com_rabbitmqusers.yaml
-- bases/openstack.k8s.ianunruh.com_novas.yaml
-- bases/openstack.k8s.ianunruh.com_novacells.yaml
-- bases/openstack.k8s.ianunruh.com_neutrons.yaml
-- bases/openstack.k8s.ianunruh.com_horizons.yaml
-- bases/openstack.k8s.ianunruh.com_memcacheds.yaml
-- bases/openstack.k8s.ianunruh.com_cinders.yaml
-- bases/openstack.k8s.ianunruh.com_heats.yaml
-- bases/openstack.k8s.ianunruh.com_magnums.yaml
-- bases/openstack.k8s.ianunruh.com_barbicans.yaml
-- bases/openstack.k8s.ianunruh.com_ovncontrolplanes.yaml
-- bases/openstack.k8s.ianunruh.com_octavias.yaml
-- bases/openstack.k8s.ianunruh.com_rallies.yaml
-- bases/openstack.k8s.ianunruh.com_manilas.yaml
-- bases/openstack.k8s.ianunruh.com_senlins.yaml
-- bases/openstack.k8s.ianunruh.com_rallytasks.yaml
-- bases/openstack.k8s.ianunruh.com_novacomputes.yaml
+- bases/openstack.ospk8s.com_controlplanes.yaml
+- bases/openstack.ospk8s.com_mariadbs.yaml
+- bases/openstack.ospk8s.com_mariadbdatabases.yaml
+- bases/openstack.ospk8s.com_keystones.yaml
+- bases/openstack.ospk8s.com_keystoneservices.yaml
+- bases/openstack.ospk8s.com_keystoneusers.yaml
+- bases/openstack.ospk8s.com_glances.yaml
+- bases/openstack.ospk8s.com_placements.yaml
+- bases/openstack.ospk8s.com_rabbitmqs.yaml
+- bases/openstack.ospk8s.com_rabbitmqusers.yaml
+- bases/openstack.ospk8s.com_novas.yaml
+- bases/openstack.ospk8s.com_novacells.yaml
+- bases/openstack.ospk8s.com_neutrons.yaml
+- bases/openstack.ospk8s.com_horizons.yaml
+- bases/openstack.ospk8s.com_memcacheds.yaml
+- bases/openstack.ospk8s.com_cinders.yaml
+- bases/openstack.ospk8s.com_heats.yaml
+- bases/openstack.ospk8s.com_magnums.yaml
+- bases/openstack.ospk8s.com_barbicans.yaml
+- bases/openstack.ospk8s.com_ovncontrolplanes.yaml
+- bases/openstack.ospk8s.com_octavias.yaml
+- bases/openstack.ospk8s.com_rallies.yaml
+- bases/openstack.ospk8s.com_manilas.yaml
+- bases/openstack.ospk8s.com_senlins.yaml
+- bases/openstack.ospk8s.com_rallytasks.yaml
+- bases/openstack.ospk8s.com_novacomputes.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

@@ -13,12 +13,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-barbican
+      path: /mutate-openstack-ospk8s-com-v1beta1-barbican
   failurePolicy: Fail
   name: mbarbican.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -34,12 +34,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-cinder
+      path: /mutate-openstack-ospk8s-com-v1beta1-cinder
   failurePolicy: Fail
   name: mcinder.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -55,12 +55,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-glance
+      path: /mutate-openstack-ospk8s-com-v1beta1-glance
   failurePolicy: Fail
   name: mglance.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -76,12 +76,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-heat
+      path: /mutate-openstack-ospk8s-com-v1beta1-heat
   failurePolicy: Fail
   name: mheat.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -97,12 +97,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-horizon
+      path: /mutate-openstack-ospk8s-com-v1beta1-horizon
   failurePolicy: Fail
   name: mhorizon.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -118,12 +118,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-keystone
+      path: /mutate-openstack-ospk8s-com-v1beta1-keystone
   failurePolicy: Fail
   name: mkeystone.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -139,12 +139,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-magnum
+      path: /mutate-openstack-ospk8s-com-v1beta1-magnum
   failurePolicy: Fail
   name: mmagnum.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -160,12 +160,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-manila
+      path: /mutate-openstack-ospk8s-com-v1beta1-manila
   failurePolicy: Fail
   name: mmanila.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -181,12 +181,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-mariadb
+      path: /mutate-openstack-ospk8s-com-v1beta1-mariadb
   failurePolicy: Fail
   name: mmariadb.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -202,12 +202,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-memcached
+      path: /mutate-openstack-ospk8s-com-v1beta1-memcached
   failurePolicy: Fail
   name: mmemcached.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -223,12 +223,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-neutron
+      path: /mutate-openstack-ospk8s-com-v1beta1-neutron
   failurePolicy: Fail
   name: mneutron.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -244,12 +244,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-nova
+      path: /mutate-openstack-ospk8s-com-v1beta1-nova
   failurePolicy: Fail
   name: mnova.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -265,12 +265,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-novacell
+      path: /mutate-openstack-ospk8s-com-v1beta1-novacell
   failurePolicy: Fail
   name: mnovacell.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -286,12 +286,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-novacompute
+      path: /mutate-openstack-ospk8s-com-v1beta1-novacompute
   failurePolicy: Fail
   name: mnovacompute.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -307,12 +307,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-octavia
+      path: /mutate-openstack-ospk8s-com-v1beta1-octavia
   failurePolicy: Fail
   name: moctavia.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -328,12 +328,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-ovncontrolplane
+      path: /mutate-openstack-ospk8s-com-v1beta1-ovncontrolplane
   failurePolicy: Fail
   name: movncontrolplane.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -349,12 +349,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-placement
+      path: /mutate-openstack-ospk8s-com-v1beta1-placement
   failurePolicy: Fail
   name: mplacement.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -370,12 +370,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-rabbitmq
+      path: /mutate-openstack-ospk8s-com-v1beta1-rabbitmq
   failurePolicy: Fail
   name: mrabbitmq.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -391,12 +391,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-rally
+      path: /mutate-openstack-ospk8s-com-v1beta1-rally
   failurePolicy: Fail
   name: mrally.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -412,12 +412,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-rallytask
+      path: /mutate-openstack-ospk8s-com-v1beta1-rallytask
   failurePolicy: Fail
   name: mrallytask.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -433,12 +433,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-openstack-k8s-ianunruh-com-v1beta1-senlin
+      path: /mutate-openstack-ospk8s-com-v1beta1-senlin
   failurePolicy: Fail
   name: msenlin.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -462,12 +462,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-barbican
+      path: /validate-openstack-ospk8s-com-v1beta1-barbican
   failurePolicy: Fail
   name: vbarbican.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -483,12 +483,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-cinder
+      path: /validate-openstack-ospk8s-com-v1beta1-cinder
   failurePolicy: Fail
   name: vcinder.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -504,12 +504,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-glance
+      path: /validate-openstack-ospk8s-com-v1beta1-glance
   failurePolicy: Fail
   name: vglance.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -525,12 +525,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-heat
+      path: /validate-openstack-ospk8s-com-v1beta1-heat
   failurePolicy: Fail
   name: vheat.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -546,12 +546,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-horizon
+      path: /validate-openstack-ospk8s-com-v1beta1-horizon
   failurePolicy: Fail
   name: vhorizon.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -567,12 +567,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-keystone
+      path: /validate-openstack-ospk8s-com-v1beta1-keystone
   failurePolicy: Fail
   name: vkeystone.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -588,12 +588,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-magnum
+      path: /validate-openstack-ospk8s-com-v1beta1-magnum
   failurePolicy: Fail
   name: vmagnum.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -609,12 +609,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-manila
+      path: /validate-openstack-ospk8s-com-v1beta1-manila
   failurePolicy: Fail
   name: vmanila.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -630,12 +630,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-mariadb
+      path: /validate-openstack-ospk8s-com-v1beta1-mariadb
   failurePolicy: Fail
   name: vmariadb.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -651,12 +651,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-memcached
+      path: /validate-openstack-ospk8s-com-v1beta1-memcached
   failurePolicy: Fail
   name: vmemcached.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -672,12 +672,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-neutron
+      path: /validate-openstack-ospk8s-com-v1beta1-neutron
   failurePolicy: Fail
   name: vneutron.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -693,12 +693,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-nova
+      path: /validate-openstack-ospk8s-com-v1beta1-nova
   failurePolicy: Fail
   name: vnova.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -714,12 +714,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-novacell
+      path: /validate-openstack-ospk8s-com-v1beta1-novacell
   failurePolicy: Fail
   name: vnovacell.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -735,12 +735,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-novacompute
+      path: /validate-openstack-ospk8s-com-v1beta1-novacompute
   failurePolicy: Fail
   name: vnovacompute.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -756,12 +756,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-octavia
+      path: /validate-openstack-ospk8s-com-v1beta1-octavia
   failurePolicy: Fail
   name: voctavia.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -777,12 +777,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-ovncontrolplane
+      path: /validate-openstack-ospk8s-com-v1beta1-ovncontrolplane
   failurePolicy: Fail
   name: vovncontrolplane.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -798,12 +798,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-placement
+      path: /validate-openstack-ospk8s-com-v1beta1-placement
   failurePolicy: Fail
   name: vplacement.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -819,12 +819,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-rabbitmq
+      path: /validate-openstack-ospk8s-com-v1beta1-rabbitmq
   failurePolicy: Fail
   name: vrabbitmq.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -840,12 +840,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-rally
+      path: /validate-openstack-ospk8s-com-v1beta1-rally
   failurePolicy: Fail
   name: vrally.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -861,12 +861,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-rallytask
+      path: /validate-openstack-ospk8s-com-v1beta1-rallytask
   failurePolicy: Fail
   name: vrallytask.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:
@@ -882,12 +882,12 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-openstack-k8s-ianunruh-com-v1beta1-senlin
+      path: /validate-openstack-ospk8s-com-v1beta1-senlin
   failurePolicy: Fail
   name: vsenlin.kb.io
   rules:
   - apiGroups:
-    - openstack.k8s.ianunruh.com
+    - openstack.ospk8s.com
     apiVersions:
     - v1beta1
     operations:

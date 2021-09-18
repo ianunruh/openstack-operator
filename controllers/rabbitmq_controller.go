@@ -43,9 +43,9 @@ type RabbitMQReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=rabbitmqs,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=rabbitmqs/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=rabbitmqs/finalizers,verbs=update
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=rabbitmqs,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=rabbitmqs/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=rabbitmqs/finalizers,verbs=update
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=roles,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=get;list;watch;create;update;delete

@@ -4,4 +4,4 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     cert-manager.io/inject-ca-from: $(CERTIFICATE_NAMESPACE)/$(CERTIFICATE_NAME)
-  name: memcacheds.openstack.k8s.ianunruh.com
+  name: memcacheds.openstack.ospk8s.com

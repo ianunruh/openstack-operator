@@ -6,20 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: barbicans.openstack.k8s.ianunruh.com
+  name: cinders.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: Barbican
-    listKind: BarbicanList
-    plural: barbicans
-    singular: barbican
+    kind: Cinder
+    listKind: CinderList
+    plural: cinders
+    singular: cinder
   scope: Namespaced
   versions:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Barbican is the Schema for the barbicans API
+        description: Cinder is the Schema for the cinders API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,7 +34,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: BarbicanSpec defines the desired state of Barbican
+            description: CinderSpec defines the desired state of Cinder
             properties:
               api:
                 properties:
@@ -84,6 +84,44 @@ spec:
                         type: object
                     type: object
                 type: object
+              backends:
+                items:
+                  properties:
+                    ceph:
+                      properties:
+                        clientName:
+                          type: string
+                        poolName:
+                          type: string
+                        rook:
+                          properties:
+                            deviceClass:
+                              type: string
+                            namespace:
+                              type: string
+                            replicatedSize:
+                              type: integer
+                          required:
+                          - namespace
+                          - replicatedSize
+                          type: object
+                        secret:
+                          type: string
+                      required:
+                      - clientName
+                      - poolName
+                      - rook
+                      - secret
+                      type: object
+                    name:
+                      type: string
+                    volumeBackendName:
+                      type: string
+                  required:
+                  - name
+                  - volumeBackendName
+                  type: object
+                type: array
               broker:
                 description: RabbitMQUserSpec defines the desired state of RabbitMQUser
                 properties:
@@ -160,11 +198,48 @@ spec:
                         type: object
                     type: object
                 type: object
+              volume:
+                properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                  resources:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                    type: object
+                type: object
             required:
             - image
             type: object
           status:
-            description: BarbicanStatus defines the observed state of Barbican
+            description: CinderStatus defines the observed state of Cinder
             properties:
               dbSyncJobHash:
                 type: string

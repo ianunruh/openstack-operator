@@ -6,23 +6,17 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: keystoneusers.openstack.k8s.ianunruh.com
+  name: rallies.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: KeystoneUser
-    listKind: KeystoneUserList
-    plural: keystoneusers
-    singular: keystoneuser
+    kind: Rally
+    listKind: RallyList
+    plural: rallies
+    singular: rally
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.project
-      name: Project
-      type: string
-    - jsonPath: .spec.domain
-      name: Domain
-      type: string
     - jsonPath: .status.ready
       name: Ready
       type: boolean
@@ -32,7 +26,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: KeystoneUser is the Schema for the keystoneusers API
+        description: Rally is the Schema for the rallies API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -47,30 +41,54 @@ spec:
           metadata:
             type: object
           spec:
-            description: KeystoneUserSpec defines the desired state of KeystoneUser
+            description: RallySpec defines the desired state of Rally
             properties:
-              domain:
-                type: string
-              project:
-                type: string
-              projectDomain:
-                type: string
-              roles:
-                items:
-                  type: string
-                type: array
-              secret:
+              data:
+                properties:
+                  accessModes:
+                    items:
+                      type: string
+                    type: array
+                  capacity:
+                    type: string
+                  storageClass:
+                    type: string
+                required:
+                - capacity
+                type: object
+              database:
+                description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
+                properties:
+                  cluster:
+                    type: string
+                  name:
+                    type: string
+                  secret:
+                    type: string
+                required:
+                - cluster
+                - name
+                - secret
+                type: object
+              extraConfig:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: object
+              image:
                 type: string
             required:
-            - secret
+            - data
+            - image
             type: object
           status:
-            description: KeystoneUserStatus defines the observed state of KeystoneUser
+            description: RallyStatus defines the observed state of Rally
             properties:
+              dbSyncJobHash:
+                type: string
               ready:
                 type: boolean
-              setupJobHash:
-                type: string
             required:
             - ready
             type: object

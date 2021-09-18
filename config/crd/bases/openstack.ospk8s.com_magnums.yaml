@@ -6,27 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: keystones.openstack.k8s.ianunruh.com
+  name: magnums.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: Keystone
-    listKind: KeystoneList
-    plural: keystones
-    singular: keystone
+    kind: Magnum
+    listKind: MagnumList
+    plural: magnums
+    singular: magnum
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .status.ready
-      name: Ready
-      type: boolean
-    - jsonPath: .metadata.creationTimestamp
-      name: Age
-      type: date
-    name: v1beta1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Keystone is the Schema for the keystones API
+        description: Magnum is the Schema for the magnums API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -41,7 +34,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: KeystoneSpec defines the desired state of Keystone
+            description: MagnumSpec defines the desired state of Magnum
             properties:
               api:
                 properties:
@@ -108,6 +101,43 @@ spec:
                 - secret
                 - virtualHost
                 type: object
+              conductor:
+                properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                  resources:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                    type: object
+                type: object
               database:
                 description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
                 properties:
@@ -130,25 +160,14 @@ spec:
                 type: object
               image:
                 type: string
-              notifications:
-                properties:
-                  enabled:
-                    type: boolean
-                type: object
             required:
             - image
             type: object
           status:
-            description: KeystoneStatus defines the observed state of Keystone
+            description: MagnumStatus defines the observed state of Magnum
             properties:
-              bootstrapJobHash:
-                type: string
               dbSyncJobHash:
                 type: string
-              ready:
-                type: boolean
-            required:
-            - ready
             type: object
         type: object
     served: true

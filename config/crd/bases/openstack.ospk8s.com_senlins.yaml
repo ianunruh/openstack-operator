@@ -6,20 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: octavias.openstack.k8s.ianunruh.com
+  name: senlins.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: Octavia
-    listKind: OctaviaList
-    plural: octavias
-    singular: octavia
+    kind: Senlin
+    listKind: SenlinList
+    plural: senlins
+    singular: senlin
   scope: Namespaced
   versions:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Octavia is the Schema for the octavia API
+        description: Senlin is the Schema for the senlins API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,15 +34,8 @@ spec:
           metadata:
             type: object
           spec:
-            description: OctaviaSpec defines the desired state of Octavia
+            description: SenlinSpec defines the desired state of Senlin
             properties:
-              amphora:
-                properties:
-                  imageURL:
-                    type: string
-                required:
-                - imageURL
-                type: object
               api:
                 properties:
                   ingress:
@@ -108,6 +101,43 @@ spec:
                 - secret
                 - virtualHost
                 type: object
+              conductor:
+                properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                  resources:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                    type: object
+                type: object
               database:
                 description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
                 properties:
@@ -122,6 +152,43 @@ spec:
                 - name
                 - secret
                 type: object
+              engine:
+                properties:
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                  resources:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                    type: object
+                type: object
               extraConfig:
                 additionalProperties:
                   additionalProperties:
@@ -134,42 +201,6 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
-                  resources:
-                    description: ResourceRequirements describes the compute resource
-                      requirements.
-                    properties:
-                      limits:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Limits describes the maximum amount of compute
-                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                        type: object
-                      requests:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Requests describes the minimum amount of compute
-                          resources required. If Requests is omitted for a container,
-                          it defaults to Limits if that is explicitly specified, otherwise
-                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                        type: object
-                    type: object
-                required:
-                - nodeSelector
-                type: object
-              housekeeping:
-                properties:
-                  nodeSelector:
-                    additionalProperties:
-                      type: string
-                    type: object
                   replicas:
                     format: int32
                     type: integer
@@ -200,92 +231,15 @@ spec:
                           to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                     type: object
-                required:
-                - nodeSelector
                 type: object
               image:
                 type: string
-              worker:
-                properties:
-                  nodeSelector:
-                    additionalProperties:
-                      type: string
-                    type: object
-                  replicas:
-                    format: int32
-                    type: integer
-                  resources:
-                    description: ResourceRequirements describes the compute resource
-                      requirements.
-                    properties:
-                      limits:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Limits describes the maximum amount of compute
-                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                        type: object
-                      requests:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Requests describes the minimum amount of compute
-                          resources required. If Requests is omitted for a container,
-                          it defaults to Limits if that is explicitly specified, otherwise
-                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                        type: object
-                    type: object
-                required:
-                - nodeSelector
-                type: object
             required:
-            - amphora
-            - healthManager
             - image
             type: object
           status:
-            description: OctaviaStatus defines the observed state of Octavia
+            description: SenlinStatus defines the observed state of Senlin
             properties:
-              amphora:
-                properties:
-                  flavorID:
-                    type: string
-                  healthPorts:
-                    items:
-                      properties:
-                        id:
-                          type: string
-                        ipAddress:
-                          type: string
-                        macAddress:
-                          type: string
-                      required:
-                      - id
-                      - ipAddress
-                      - macAddress
-                      type: object
-                    type: array
-                  healthSecurityGroupIDs:
-                    items:
-                      type: string
-                    type: array
-                  imageProjectID:
-                    type: string
-                  networkIDs:
-                    items:
-                      type: string
-                    type: array
-                  securityGroupIDs:
-                    items:
-                      type: string
-                    type: array
-                type: object
               dbSyncJobHash:
                 type: string
             type: object

@@ -1,0 +1,178 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.4.1
+  creationTimestamp: null
+  name: glances.openstack.ospk8s.com
+spec:
+  group: openstack.ospk8s.com
+  names:
+    kind: Glance
+    listKind: GlanceList
+    plural: glances
+    singular: glance
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    schema:
+      openAPIV3Schema:
+        description: Glance is the Schema for the glances API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: GlanceSpec defines the desired state of Glance
+            properties:
+              api:
+                properties:
+                  ingress:
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      host:
+                        type: string
+                      tlsSecretName:
+                        type: string
+                    type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                  resources:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                    type: object
+                type: object
+              backends:
+                items:
+                  properties:
+                    ceph:
+                      properties:
+                        clientName:
+                          type: string
+                        poolName:
+                          type: string
+                        rook:
+                          properties:
+                            deviceClass:
+                              type: string
+                            namespace:
+                              type: string
+                            replicatedSize:
+                              type: integer
+                          required:
+                          - namespace
+                          - replicatedSize
+                          type: object
+                        secret:
+                          type: string
+                      required:
+                      - clientName
+                      - poolName
+                      - rook
+                      - secret
+                      type: object
+                    default:
+                      type: boolean
+                    name:
+                      type: string
+                    pvc:
+                      properties:
+                        accessModes:
+                          items:
+                            type: string
+                          type: array
+                        capacity:
+                          type: string
+                        storageClass:
+                          type: string
+                      required:
+                      - capacity
+                      type: object
+                  required:
+                  - name
+                  type: object
+                type: array
+              database:
+                description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
+                properties:
+                  cluster:
+                    type: string
+                  name:
+                    type: string
+                  secret:
+                    type: string
+                required:
+                - cluster
+                - name
+                - secret
+                type: object
+              extraConfig:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: object
+              image:
+                type: string
+            required:
+            - image
+            type: object
+          status:
+            description: GlanceStatus defines the observed state of Glance
+            properties:
+              dbSyncJobHash:
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []

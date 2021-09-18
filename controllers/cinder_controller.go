@@ -47,9 +47,9 @@ type CinderReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=cinders,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=cinders/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=cinders/finalizers,verbs=update
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=cinders,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=cinders/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=cinders/finalizers,verbs=update
 // +kubebuilder:rbac:groups=ceph.rook.io,resources=cephblockpools,verbs=get;list;create;update;delete
 // +kubebuilder:rbac:groups=ceph.rook.io,resources=cephclients,verbs=get;list;create;update;delete
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;create;update;delete

@@ -6,20 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: magnums.openstack.k8s.ianunruh.com
+  name: horizons.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: Magnum
-    listKind: MagnumList
-    plural: magnums
-    singular: magnum
+    kind: Horizon
+    listKind: HorizonList
+    plural: horizons
+    singular: horizon
   scope: Namespaced
   versions:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Magnum is the Schema for the magnums API
+        description: Horizon is the Schema for the horizons API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,9 +34,11 @@ spec:
           metadata:
             type: object
           spec:
-            description: MagnumSpec defines the desired state of Magnum
+            description: HorizonSpec defines the desired state of Horizon
             properties:
-              api:
+              image:
+                type: string
+              server:
                 properties:
                   ingress:
                     properties:
@@ -84,90 +86,11 @@ spec:
                         type: object
                     type: object
                 type: object
-              broker:
-                description: RabbitMQUserSpec defines the desired state of RabbitMQUser
-                properties:
-                  cluster:
-                    type: string
-                  name:
-                    type: string
-                  secret:
-                    type: string
-                  virtualHost:
-                    type: string
-                required:
-                - cluster
-                - name
-                - secret
-                - virtualHost
-                type: object
-              conductor:
-                properties:
-                  nodeSelector:
-                    additionalProperties:
-                      type: string
-                    type: object
-                  replicas:
-                    format: int32
-                    type: integer
-                  resources:
-                    description: ResourceRequirements describes the compute resource
-                      requirements.
-                    properties:
-                      limits:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Limits describes the maximum amount of compute
-                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                        type: object
-                      requests:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Requests describes the minimum amount of compute
-                          resources required. If Requests is omitted for a container,
-                          it defaults to Limits if that is explicitly specified, otherwise
-                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                        type: object
-                    type: object
-                type: object
-              database:
-                description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
-                properties:
-                  cluster:
-                    type: string
-                  name:
-                    type: string
-                  secret:
-                    type: string
-                required:
-                - cluster
-                - name
-                - secret
-                type: object
-              extraConfig:
-                additionalProperties:
-                  additionalProperties:
-                    type: string
-                  type: object
-                type: object
-              image:
-                type: string
             required:
             - image
             type: object
           status:
-            description: MagnumStatus defines the observed state of Magnum
-            properties:
-              dbSyncJobHash:
-                type: string
+            description: HorizonStatus defines the observed state of Horizon
             type: object
         type: object
     served: true

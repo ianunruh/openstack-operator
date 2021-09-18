@@ -6,20 +6,27 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: ovncontrolplanes.openstack.k8s.ianunruh.com
+  name: novacells.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: OVNControlPlane
-    listKind: OVNControlPlaneList
-    plural: ovncontrolplanes
-    singular: ovncontrolplane
+    kind: NovaCell
+    listKind: NovaCellList
+    plural: novacells
+    singular: novacell
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - additionalPrinterColumns:
+    - jsonPath: .status.ready
+      name: Ready
+      type: boolean
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
     schema:
       openAPIV3Schema:
-        description: OVNControlPlane is the Schema for the ovncontrolplanes API
+        description: NovaCell is the Schema for the novacells API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,57 +41,103 @@ spec:
           metadata:
             type: object
           spec:
-            description: OVNControlPlaneSpec defines the desired state of OVNControlPlane
+            description: NovaCellSpec defines the desired state of NovaCell
             properties:
-              image:
-                type: string
-              node:
+              broker:
+                description: RabbitMQUserSpec defines the desired state of RabbitMQUser
                 properties:
-                  bridgeMappings:
-                    items:
-                      type: string
-                    type: array
-                  bridgePorts:
-                    items:
-                      type: string
-                    type: array
-                  nodeSelector:
-                    additionalProperties:
-                      type: string
-                    type: object
-                  overlayCIDRs:
-                    items:
-                      type: string
-                    type: array
-                  resources:
-                    description: ResourceRequirements describes the compute resource
-                      requirements.
-                    properties:
-                      limits:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Limits describes the maximum amount of compute
-                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                        type: object
-                      requests:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Requests describes the minimum amount of compute
-                          resources required. If Requests is omitted for a container,
-                          it defaults to Limits if that is explicitly specified, otherwise
-                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                        type: object
-                    type: object
+                  cluster:
+                    type: string
+                  name:
+                    type: string
+                  secret:
+                    type: string
+                  virtualHost:
+                    type: string
+                required:
+                - cluster
+                - name
+                - secret
+                - virtualHost
                 type: object
-              northd:
+              compute:
+                additionalProperties:
+                  description: NovaComputeSpec defines the desired state of NovaCompute
+                  properties:
+                    cell:
+                      type: string
+                    libvirtd:
+                      properties:
+                        image:
+                          type: string
+                        resources:
+                          description: ResourceRequirements describes the compute
+                            resource requirements.
+                          properties:
+                            limits:
+                              additionalProperties:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
+                              description: 'Limits describes the maximum amount of
+                                compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                              type: object
+                            requests:
+                              additionalProperties:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
+                              description: 'Requests describes the minimum amount
+                                of compute resources required. If Requests is omitted
+                                for a container, it defaults to Limits if that is
+                                explicitly specified, otherwise to an implementation-defined
+                                value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                              type: object
+                          type: object
+                      required:
+                      - image
+                      type: object
+                    nodeSelector:
+                      additionalProperties:
+                        type: string
+                      type: object
+                    resources:
+                      description: ResourceRequirements describes the compute resource
+                        requirements.
+                      properties:
+                        limits:
+                          additionalProperties:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                          description: 'Limits describes the maximum amount of compute
+                            resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                          type: object
+                        requests:
+                          additionalProperties:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                          description: 'Requests describes the minimum amount of compute
+                            resources required. If Requests is omitted for a container,
+                            it defaults to Limits if that is explicitly specified,
+                            otherwise to an implementation-defined value. More info:
+                            https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                          type: object
+                      type: object
+                  required:
+                  - libvirtd
+                  type: object
+                type: object
+              conductor:
                 properties:
                   nodeSelector:
                     additionalProperties:
@@ -121,61 +174,29 @@ spec:
                         type: object
                     type: object
                 type: object
-              ovsdbNorth:
+              database:
+                description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
                 properties:
-                  nodeSelector:
-                    additionalProperties:
-                      type: string
-                    type: object
-                  resources:
-                    description: ResourceRequirements describes the compute resource
-                      requirements.
-                    properties:
-                      limits:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Limits describes the maximum amount of compute
-                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                        type: object
-                      requests:
-                        additionalProperties:
-                          anyOf:
-                          - type: integer
-                          - type: string
-                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-                          x-kubernetes-int-or-string: true
-                        description: 'Requests describes the minimum amount of compute
-                          resources required. If Requests is omitted for a container,
-                          it defaults to Limits if that is explicitly specified, otherwise
-                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
-                        type: object
-                    type: object
-                  volume:
-                    properties:
-                      accessModes:
-                        items:
-                          type: string
-                        type: array
-                      capacity:
-                        type: string
-                      storageClass:
-                        type: string
-                    required:
-                    - capacity
-                    type: object
+                  cluster:
+                    type: string
+                  name:
+                    type: string
+                  secret:
+                    type: string
                 required:
-                - volume
+                - cluster
+                - name
+                - secret
                 type: object
-              ovsdbSouth:
+              metadata:
                 properties:
                   nodeSelector:
                     additionalProperties:
                       type: string
                     type: object
+                  replicas:
+                    format: int32
+                    type: integer
                   resources:
                     description: ResourceRequirements describes the compute resource
                       requirements.
@@ -203,29 +224,69 @@ spec:
                           to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                     type: object
-                  volume:
+                type: object
+              name:
+                type: string
+              novncproxy:
+                properties:
+                  ingress:
                     properties:
-                      accessModes:
-                        items:
+                      annotations:
+                        additionalProperties:
                           type: string
-                        type: array
-                      capacity:
+                        type: object
+                      host:
                         type: string
-                      storageClass:
+                      tlsSecretName:
                         type: string
-                    required:
-                    - capacity
                     type: object
-                required:
-                - volume
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  replicas:
+                    format: int32
+                    type: integer
+                  resources:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
+                    properties:
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                        type: object
+                    type: object
                 type: object
             required:
-            - image
-            - ovsdbNorth
-            - ovsdbSouth
+            - name
             type: object
           status:
-            description: OVNControlPlaneStatus defines the observed state of OVNControlPlane
+            description: NovaCellStatus defines the observed state of NovaCell
+            properties:
+              dbSyncJobHash:
+                type: string
+              ready:
+                type: boolean
+            required:
+            - ready
             type: object
         type: object
     served: true

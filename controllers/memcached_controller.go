@@ -40,9 +40,9 @@ type MemcachedReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=memcacheds,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=memcacheds/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=memcacheds/finalizers,verbs=update
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=memcacheds,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=memcacheds/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=memcacheds/finalizers,verbs=update
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=core,resources=services,verbs=get;list;watch;create;update;delete

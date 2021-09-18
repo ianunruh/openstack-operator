@@ -6,20 +6,27 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: glances.openstack.k8s.ianunruh.com
+  name: keystones.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: Glance
-    listKind: GlanceList
-    plural: glances
-    singular: glance
+    kind: Keystone
+    listKind: KeystoneList
+    plural: keystones
+    singular: keystone
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - additionalPrinterColumns:
+    - jsonPath: .status.ready
+      name: Ready
+      type: boolean
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Glance is the Schema for the glances API
+        description: Keystone is the Schema for the keystones API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,7 +41,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: GlanceSpec defines the desired state of Glance
+            description: KeystoneSpec defines the desired state of Keystone
             properties:
               api:
                 properties:
@@ -84,56 +91,23 @@ spec:
                         type: object
                     type: object
                 type: object
-              backends:
-                items:
-                  properties:
-                    ceph:
-                      properties:
-                        clientName:
-                          type: string
-                        poolName:
-                          type: string
-                        rook:
-                          properties:
-                            deviceClass:
-                              type: string
-                            namespace:
-                              type: string
-                            replicatedSize:
-                              type: integer
-                          required:
-                          - namespace
-                          - replicatedSize
-                          type: object
-                        secret:
-                          type: string
-                      required:
-                      - clientName
-                      - poolName
-                      - rook
-                      - secret
-                      type: object
-                    default:
-                      type: boolean
-                    name:
-                      type: string
-                    pvc:
-                      properties:
-                        accessModes:
-                          items:
-                            type: string
-                          type: array
-                        capacity:
-                          type: string
-                        storageClass:
-                          type: string
-                      required:
-                      - capacity
-                      type: object
-                  required:
-                  - name
-                  type: object
-                type: array
+              broker:
+                description: RabbitMQUserSpec defines the desired state of RabbitMQUser
+                properties:
+                  cluster:
+                    type: string
+                  name:
+                    type: string
+                  secret:
+                    type: string
+                  virtualHost:
+                    type: string
+                required:
+                - cluster
+                - name
+                - secret
+                - virtualHost
+                type: object
               database:
                 description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
                 properties:
@@ -156,14 +130,25 @@ spec:
                 type: object
               image:
                 type: string
+              notifications:
+                properties:
+                  enabled:
+                    type: boolean
+                type: object
             required:
             - image
             type: object
           status:
-            description: GlanceStatus defines the observed state of Glance
+            description: KeystoneStatus defines the observed state of Keystone
             properties:
+              bootstrapJobHash:
+                type: string
               dbSyncJobHash:
                 type: string
+              ready:
+                type: boolean
+            required:
+            - ready
             type: object
         type: object
     served: true

@@ -40,9 +40,9 @@ type OVNControlPlaneReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=ovncontrolplanes,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=ovncontrolplanes/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=ovncontrolplanes/finalizers,verbs=update
+//+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=ovncontrolplanes,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=ovncontrolplanes/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=ovncontrolplanes/finalizers,verbs=update
 // +kubebuilder:rbac:groups=cert-manager.io,resources=certificates,verbs=get;list;create;update;delete
 // +kubebuilder:rbac:groups=cert-manager.io,resources=issuers,verbs=get;list;create;update;delete
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;delete
