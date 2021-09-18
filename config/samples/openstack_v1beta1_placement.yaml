@@ -1,4 +1,4 @@
-apiVersion: openstack.k8s.ianunruh.com/v1beta1
+apiVersion: openstack.ospk8s.com/v1beta1
 kind: Placement
 metadata:
   name: placement

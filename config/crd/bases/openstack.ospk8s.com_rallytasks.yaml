@@ -6,33 +6,27 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: rabbitmqusers.openstack.k8s.ianunruh.com
+  name: rallytasks.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: RabbitMQUser
-    listKind: RabbitMQUserList
-    plural: rabbitmqusers
-    singular: rabbitmquser
+    kind: RallyTask
+    listKind: RallyTaskList
+    plural: rallytasks
+    singular: rallytask
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.cluster
-      name: Cluster
-      type: string
-    - jsonPath: .spec.virtualHost
-      name: Vhost
-      type: string
-    - jsonPath: .status.ready
-      name: Ready
-      type: boolean
+    - jsonPath: .status.completionTime
+      name: Completion
+      type: date
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: RabbitMQUser is the Schema for the rabbitmqusers API
+        description: RallyTask is the Schema for the rallytasks API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -47,31 +41,22 @@ spec:
           metadata:
             type: object
           spec:
-            description: RabbitMQUserSpec defines the desired state of RabbitMQUser
+            description: RallyTaskSpec defines the desired state of RallyTask
             properties:
-              cluster:
+              image:
                 type: string
-              name:
-                type: string
-              secret:
-                type: string
-              virtualHost:
+              path:
                 type: string
             required:
-            - cluster
-            - name
-            - secret
-            - virtualHost
+            - image
+            - path
             type: object
           status:
-            description: RabbitMQUserStatus defines the observed state of RabbitMQUser
+            description: RallyTaskStatus defines the observed state of RallyTask
             properties:
-              ready:
-                type: boolean
-              setupJobHash:
+              completionTime:
+                format: date-time
                 type: string
-            required:
-            - ready
             type: object
         type: object
     served: true

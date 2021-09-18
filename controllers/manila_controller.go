@@ -46,9 +46,9 @@ type ManilaReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=manilas,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=manilas/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=manilas/finalizers,verbs=update
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=manilas,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=manilas/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=manilas/finalizers,verbs=update
 // +kubebuilder:rbac:groups=ceph.rook.io,resources=cephclients,verbs=get;list;create;update;delete
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;create;update;delete
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;delete

@@ -48,9 +48,9 @@ type HeatReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=heats,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=heats/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=openstack.k8s.ianunruh.com,resources=heats/finalizers,verbs=update
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=heats,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=heats/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=heats/finalizers,verbs=update
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;create;update;delete
 // +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;delete

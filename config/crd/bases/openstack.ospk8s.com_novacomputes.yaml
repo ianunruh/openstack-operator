@@ -6,20 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: horizons.openstack.k8s.ianunruh.com
+  name: novacomputes.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: Horizon
-    listKind: HorizonList
-    plural: horizons
-    singular: horizon
+    kind: NovaCompute
+    listKind: NovaComputeList
+    plural: novacomputes
+    singular: novacompute
   scope: Namespaced
   versions:
   - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: Horizon is the Schema for the horizons API
+        description: NovaCompute is the Schema for the novacomputes API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -34,30 +34,14 @@ spec:
           metadata:
             type: object
           spec:
-            description: HorizonSpec defines the desired state of Horizon
+            description: NovaComputeSpec defines the desired state of NovaCompute
             properties:
-              image:
+              cell:
                 type: string
-              server:
+              libvirtd:
                 properties:
-                  ingress:
-                    properties:
-                      annotations:
-                        additionalProperties:
-                          type: string
-                        type: object
-                      host:
-                        type: string
-                      tlsSecretName:
-                        type: string
-                    type: object
-                  nodeSelector:
-                    additionalProperties:
-                      type: string
-                    type: object
-                  replicas:
-                    format: int32
-                    type: integer
+                  image:
+                    type: string
                   resources:
                     description: ResourceRequirements describes the compute resource
                       requirements.
@@ -85,12 +69,44 @@ spec:
                           to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                     type: object
+                required:
+                - image
+                type: object
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                type: object
+              resources:
+                description: ResourceRequirements describes the compute resource requirements.
+                properties:
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Limits describes the maximum amount of compute resources
+                      allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Requests describes the minimum amount of compute
+                      resources required. If Requests is omitted for a container,
+                      it defaults to Limits if that is explicitly specified, otherwise
+                      to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
+                    type: object
                 type: object
             required:
-            - image
+            - libvirtd
             type: object
           status:
-            description: HorizonStatus defines the observed state of Horizon
+            description: NovaComputeStatus defines the observed state of NovaCompute
             type: object
         type: object
     served: true

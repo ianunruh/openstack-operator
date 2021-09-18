@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	AppliedHashAnnotation = "openstack.k8s.ianunruh.com/applied-hash"
+	AppliedHashAnnotation = "openstack.ospk8s.com/applied-hash"
 )
 
 func MatchesAppliedHash(obj metav1.Object, expected string) bool {

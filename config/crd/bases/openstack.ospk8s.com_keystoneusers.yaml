@@ -6,19 +6,22 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: mariadbdatabases.openstack.k8s.ianunruh.com
+  name: keystoneusers.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: MariaDBDatabase
-    listKind: MariaDBDatabaseList
-    plural: mariadbdatabases
-    singular: mariadbdatabase
+    kind: KeystoneUser
+    listKind: KeystoneUserList
+    plural: keystoneusers
+    singular: keystoneuser
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .spec.cluster
-      name: Cluster
+    - jsonPath: .spec.project
+      name: Project
+      type: string
+    - jsonPath: .spec.domain
+      name: Domain
       type: string
     - jsonPath: .status.ready
       name: Ready
@@ -29,7 +32,7 @@ spec:
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: MariaDBDatabase is the Schema for the mariadbdatabases API
+        description: KeystoneUser is the Schema for the keystoneusers API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -44,21 +47,25 @@ spec:
           metadata:
             type: object
           spec:
-            description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
+            description: KeystoneUserSpec defines the desired state of KeystoneUser
             properties:
-              cluster:
+              domain:
                 type: string
-              name:
+              project:
                 type: string
+              projectDomain:
+                type: string
+              roles:
+                items:
+                  type: string
+                type: array
               secret:
                 type: string
             required:
-            - cluster
-            - name
             - secret
             type: object
           status:
-            description: MariaDBDatabaseStatus defines the observed state of MariaDBDatabase
+            description: KeystoneUserStatus defines the observed state of KeystoneUser
             properties:
               ready:
                 type: boolean

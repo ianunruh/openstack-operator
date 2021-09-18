@@ -5,7 +5,7 @@ metadata:
   name: rabbitmquser-editor-role
 rules:
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rabbitmqusers
   verbs:
@@ -17,7 +17,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rabbitmqusers/status
   verbs:

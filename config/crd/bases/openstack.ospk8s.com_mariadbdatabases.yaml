@@ -6,27 +6,30 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: rallytasks.openstack.k8s.ianunruh.com
+  name: mariadbdatabases.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: RallyTask
-    listKind: RallyTaskList
-    plural: rallytasks
-    singular: rallytask
+    kind: MariaDBDatabase
+    listKind: MariaDBDatabaseList
+    plural: mariadbdatabases
+    singular: mariadbdatabase
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - jsonPath: .status.completionTime
-      name: Completion
-      type: date
+    - jsonPath: .spec.cluster
+      name: Cluster
+      type: string
+    - jsonPath: .status.ready
+      name: Ready
+      type: boolean
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
     name: v1beta1
     schema:
       openAPIV3Schema:
-        description: RallyTask is the Schema for the rallytasks API
+        description: MariaDBDatabase is the Schema for the mariadbdatabases API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -41,22 +44,28 @@ spec:
           metadata:
             type: object
           spec:
-            description: RallyTaskSpec defines the desired state of RallyTask
+            description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
             properties:
-              image:
+              cluster:
                 type: string
-              path:
+              name:
+                type: string
+              secret:
                 type: string
             required:
-            - image
-            - path
+            - cluster
+            - name
+            - secret
             type: object
           status:
-            description: RallyTaskStatus defines the observed state of RallyTask
+            description: MariaDBDatabaseStatus defines the observed state of MariaDBDatabase
             properties:
-              completionTime:
-                format: date-time
+              ready:
+                type: boolean
+              setupJobHash:
                 type: string
+            required:
+            - ready
             type: object
         type: object
     served: true

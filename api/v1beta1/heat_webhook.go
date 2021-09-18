@@ -34,7 +34,7 @@ func (r *Heat) SetupWebhookWithManager(mgr ctrl.Manager) error {
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
-//+kubebuilder:webhook:path=/mutate-openstack-k8s-ianunruh-com-v1beta1-heat,mutating=true,failurePolicy=fail,sideEffects=None,groups=openstack.k8s.ianunruh.com,resources=heats,verbs=create;update,versions=v1beta1,name=mheat.kb.io,admissionReviewVersions={v1,v1beta1}
+//+kubebuilder:webhook:path=/mutate-openstack-ospk8s-com-v1beta1-heat,mutating=true,failurePolicy=fail,sideEffects=None,groups=openstack.ospk8s.com,resources=heats,verbs=create;update,versions=v1beta1,name=mheat.kb.io,admissionReviewVersions={v1,v1beta1}
 
 var _ webhook.Defaulter = &Heat{}
 
@@ -47,7 +47,7 @@ func (r *Heat) Default() {
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
-//+kubebuilder:webhook:path=/validate-openstack-k8s-ianunruh-com-v1beta1-heat,mutating=false,failurePolicy=fail,sideEffects=None,groups=openstack.k8s.ianunruh.com,resources=heats,verbs=create;update,versions=v1beta1,name=vheat.kb.io,admissionReviewVersions={v1,v1beta1}
+//+kubebuilder:webhook:path=/validate-openstack-ospk8s-com-v1beta1-heat,mutating=false,failurePolicy=fail,sideEffects=None,groups=openstack.ospk8s.com,resources=heats,verbs=create;update,versions=v1beta1,name=vheat.kb.io,admissionReviewVersions={v1,v1beta1}
 
 var _ webhook.Validator = &Heat{}
 

@@ -6,27 +6,20 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.4.1
   creationTimestamp: null
-  name: rabbitmqs.openstack.k8s.ianunruh.com
+  name: memcacheds.openstack.ospk8s.com
 spec:
-  group: openstack.k8s.ianunruh.com
+  group: openstack.ospk8s.com
   names:
-    kind: RabbitMQ
-    listKind: RabbitMQList
-    plural: rabbitmqs
-    singular: rabbitmq
+    kind: Memcached
+    listKind: MemcachedList
+    plural: memcacheds
+    singular: memcached
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - jsonPath: .status.ready
-      name: Ready
-      type: boolean
-    - jsonPath: .metadata.creationTimestamp
-      name: Age
-      type: date
-    name: v1beta1
+  - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: RabbitMQ is the Schema for the rabbitmqs API
+        description: Memcached is the Schema for the memcacheds API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -41,24 +34,10 @@ spec:
           metadata:
             type: object
           spec:
-            description: RabbitMQSpec defines the desired state of RabbitMQ
+            description: MemcachedSpec defines the desired state of Memcached
             properties:
               image:
                 type: string
-              management:
-                properties:
-                  ingress:
-                    properties:
-                      annotations:
-                        additionalProperties:
-                          type: string
-                        type: object
-                      host:
-                        type: string
-                      tlsSecretName:
-                        type: string
-                    type: object
-                type: object
               nodeSelector:
                 additionalProperties:
                   type: string
@@ -107,12 +86,7 @@ spec:
             - volume
             type: object
           status:
-            description: RabbitMQStatus defines the observed state of RabbitMQ
-            properties:
-              ready:
-                type: boolean
-            required:
-            - ready
+            description: MemcachedStatus defines the observed state of Memcached
             type: object
         type: object
     served: true

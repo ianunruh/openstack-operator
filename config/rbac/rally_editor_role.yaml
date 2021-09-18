@@ -5,7 +5,7 @@ metadata:
   name: rally-editor-role
 rules:
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rallies
   verbs:
@@ -17,7 +17,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - openstack.k8s.ianunruh.com
+  - openstack.ospk8s.com
   resources:
   - rallies/status
   verbs:
