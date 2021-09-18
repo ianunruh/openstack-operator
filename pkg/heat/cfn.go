@@ -55,6 +55,7 @@ func CFNDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
+				Resources:     instance.Spec.CFN.Resources,
 				VolumeMounts:  volumeMounts,
 			},
 		},

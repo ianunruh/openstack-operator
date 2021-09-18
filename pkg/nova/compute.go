@@ -118,6 +118,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaCompute, env []corev1.EnvVa
 				Env: []corev1.EnvVar{
 					template.EnvVar("NOVA_USER_UID", strconv.Itoa(int(appUID))),
 				},
+				Resources: instance.Spec.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					RunAsUser:  &runAsRootUser,
 					Privileged: &privileged,
@@ -134,7 +135,8 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaCompute, env []corev1.EnvVa
 					"--config-file=/etc/nova/nova.conf",
 					"--config-file=/tmp/pod-shared/nova-hypervisor.conf",
 				},
-				Env: env,
+				Env:       env,
+				Resources: instance.Spec.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged:             &privileged,
 					ReadOnlyRootFilesystem: &rootOnlyRootFilesystem,

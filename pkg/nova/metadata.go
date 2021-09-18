@@ -52,6 +52,7 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 				},
 				// LivenessProbe: probe,
 				// StartupProbe:  probe,
+				Resources:    instance.Spec.Metadata.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

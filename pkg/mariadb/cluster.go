@@ -60,6 +60,7 @@ func ClusterStatefulSet(instance *openstackv1beta1.MariaDB, configHash string) *
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
+				Resources:     instance.Spec.Resources,
 				VolumeMounts: []corev1.VolumeMount{
 					{
 						Name:      "config",

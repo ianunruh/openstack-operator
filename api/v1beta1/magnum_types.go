@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -49,6 +50,9 @@ type MagnumAPISpec struct {
 
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type MagnumConductorSpec struct {
@@ -57,6 +61,9 @@ type MagnumConductorSpec struct {
 
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 // MagnumStatus defines the observed state of Magnum

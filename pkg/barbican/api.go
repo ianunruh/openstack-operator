@@ -52,6 +52,7 @@ func APIDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, vol
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 9311},
 				},
+				Resources:     instance.Spec.API.Resources,
 				LivenessProbe: probe,
 				StartupProbe:  probe,
 				VolumeMounts:  volumeMounts,

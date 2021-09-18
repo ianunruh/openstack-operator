@@ -55,6 +55,7 @@ func APIDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar, volum
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
+				Resources:     instance.Spec.API.Resources,
 				VolumeMounts:  volumeMounts,
 			},
 		},

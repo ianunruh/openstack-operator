@@ -46,7 +46,7 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 		Labels:       labels,
 		NodeSelector: instance.Spec.HealthManager.NodeSelector,
 		InitContainers: []corev1.Container{
-			amphora.InitContainer(instance.Spec.Image, volumeMounts),
+			amphora.InitContainer(instance.Spec.Image, instance.Spec.HealthManager.Resources, volumeMounts),
 			{
 				Name:  "init-port",
 				Image: instance.Spec.Image,
@@ -59,6 +59,7 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 					template.EnvVar("HM_PORT_ID", port.ID),
 					template.EnvVar("HM_PORT_MAC", port.MACAddress),
 				},
+				Resources: instance.Spec.HealthManager.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 					RunAsUser:  &runAsRootUser,
@@ -75,6 +76,7 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 					"--config-file=/etc/octavia/octavia.conf",
 				},
 				Env:          env,
+				Resources:    instance.Spec.HealthManager.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

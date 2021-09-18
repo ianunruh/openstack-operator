@@ -33,6 +33,7 @@ func EngineDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar, vo
 					"--config-file=/etc/senlin/senlin.conf",
 				},
 				Env:          env,
+				Resources:    instance.Spec.Engine.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

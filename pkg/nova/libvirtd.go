@@ -101,6 +101,7 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaCompute, env []corev1.EnvV
 				Env:           env,
 				LivenessProbe: probe,
 				StartupProbe:  probe,
+				Resources:     instance.Spec.Libvirtd.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 				},

@@ -60,6 +60,7 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
+				Resources:     instance.Spec.Server.Resources,
 				VolumeMounts:  volumeMounts,
 			},
 		},

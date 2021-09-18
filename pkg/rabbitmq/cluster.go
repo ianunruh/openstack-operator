@@ -95,6 +95,7 @@ func ClusterStatefulSet(instance *openstackv1beta1.RabbitMQ, configHash string) 
 					{Name: "metrics", ContainerPort: 9419},
 					{Name: "stats", ContainerPort: 15672},
 				},
+				Resources: instance.Spec.Resources,
 				VolumeMounts: []corev1.VolumeMount{
 					{
 						Name:      "config",

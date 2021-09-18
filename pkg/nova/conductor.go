@@ -34,6 +34,7 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 					"--debug",
 				},
 				Env:          env,
+				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

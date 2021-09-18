@@ -30,6 +30,7 @@ func ControllerDaemonSet(instance *openstackv1beta1.OVNControlPlane) *appsv1.Dae
 					"-c",
 					template.MustReadFile(AppLabel, "start-controller.sh"),
 				},
+				Resources: instance.Spec.Node.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 				},

@@ -41,6 +41,7 @@ func ShareStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar, vo
 					"--config-file=/etc/manila/manila.conf",
 				},
 				Env:          env,
+				Resources:    instance.Spec.Share.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

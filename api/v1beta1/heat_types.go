@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -52,6 +53,9 @@ type HeatAPISpec struct {
 
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type HeatEngineSpec struct {
@@ -60,6 +64,9 @@ type HeatEngineSpec struct {
 
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 // HeatStatus defines the observed state of Heat

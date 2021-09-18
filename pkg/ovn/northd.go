@@ -35,6 +35,7 @@ func NorthdDeployment(instance *openstackv1beta1.OVNControlPlane) *appsv1.Deploy
 				EnvFrom: []corev1.EnvFromSource{
 					template.EnvFromConfigMap(template.Combine(instance.Name, "ovsdb")),
 				},
+				Resources: instance.Spec.Northd.Resources,
 			},
 		},
 	})

@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -60,10 +61,16 @@ type OctaviaAPISpec struct {
 
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type OctaviaHealthManagerSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type OctaviaHousekeepingSpec struct {
@@ -71,6 +78,9 @@ type OctaviaHousekeepingSpec struct {
 
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type OctaviaWorkerSpec struct {
@@ -78,6 +88,9 @@ type OctaviaWorkerSpec struct {
 
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 // OctaviaStatus defines the observed state of Octavia

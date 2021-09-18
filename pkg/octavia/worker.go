@@ -29,7 +29,7 @@ func WorkerDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, v
 		Replicas:     instance.Spec.Worker.Replicas,
 		NodeSelector: instance.Spec.Worker.NodeSelector,
 		InitContainers: []corev1.Container{
-			amphora.InitContainer(instance.Spec.Image, volumeMounts),
+			amphora.InitContainer(instance.Spec.Image, instance.Spec.Worker.Resources, volumeMounts),
 		},
 		Containers: []corev1.Container{
 			{
@@ -40,6 +40,7 @@ func WorkerDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, v
 					"--config-file=/etc/octavia/octavia.conf",
 				},
 				Env:          env,
+				Resources:    instance.Spec.Worker.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},
