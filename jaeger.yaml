@@ -1,0 +1,14 @@
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: jaeger
+spec:
+  ingress:
+    hosts:
+    - jaeger.openstack.k8s.kcloud.zone
+    tls:
+    - secretName: wildcard-tls
+      hosts:
+      - jaeger.openstack.k8s.kcloud.zone
+    annotations:
+      external-dns/enabled: "true"

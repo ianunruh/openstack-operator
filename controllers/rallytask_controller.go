@@ -81,6 +81,10 @@ func (r *RallyTaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		template.EnvVar("RALLY_TASK_PATH", instance.Spec.Path),
 	}
 
+	if len(instance.Spec.ProfilerSecret) > 0 {
+		env = append(env, template.SecretEnvVar("OSPROFILER_HMAC_KEY", instance.Spec.ProfilerSecret, "hmac-key"))
+	}
+
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-rally", cluster.Name, nil),
 		// template.PersistentVolume("data", template.Combine(cluster.Name, "data")),

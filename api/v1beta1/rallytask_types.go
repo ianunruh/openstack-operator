@@ -25,6 +25,9 @@ type RallyTaskSpec struct {
 	Image string `json:"image"`
 
 	Path string `json:"path"`
+
+	// +optional
+	ProfilerSecret string `json:"profilerSecret,omitempty"`
 }
 
 // RallyTaskStatus defines the observed state of RallyTask
