@@ -53,6 +53,7 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, configHash str
 				EnvFrom: []corev1.EnvFromSource{
 					template.EnvFromConfigMap(template.Combine(instance.Name, "ovsdb")),
 				},
+				Resources: instance.Spec.Node.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 				},

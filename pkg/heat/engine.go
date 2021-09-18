@@ -33,6 +33,7 @@ func EngineStatefulSet(instance *openstackv1beta1.Heat, env []corev1.EnvVar, vol
 					"--config-file=/etc/heat/heat.conf",
 				},
 				Env:          env,
+				Resources:    instance.Spec.Engine.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

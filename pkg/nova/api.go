@@ -57,6 +57,7 @@ func APIDeployment(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
+				Resources:     instance.Spec.API.Resources,
 				VolumeMounts:  volumeMounts,
 			},
 		},

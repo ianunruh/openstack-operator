@@ -55,6 +55,7 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
+				Resources:     instance.Spec.API.Resources,
 				VolumeMounts:  volumeMounts,
 			},
 		},

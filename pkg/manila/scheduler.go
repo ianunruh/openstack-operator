@@ -33,6 +33,7 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar
 					"--config-file=/etc/manila/manila.conf",
 				},
 				Env:          env,
+				Resources:    instance.Spec.Scheduler.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

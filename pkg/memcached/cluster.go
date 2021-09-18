@@ -42,6 +42,7 @@ func ClusterStatefulSet(instance *openstackv1beta1.Memcached) *appsv1.StatefulSe
 				Ports: []corev1.ContainerPort{
 					{Name: "memcached", ContainerPort: 11211},
 				},
+				Resources: instance.Spec.Resources,
 				VolumeMounts: []corev1.VolumeMount{
 					{
 						Name:      "data",

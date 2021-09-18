@@ -17,6 +17,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -39,6 +40,9 @@ type OVSDBSpec struct {
 
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type OVNNodeSpec struct {
@@ -53,6 +57,9 @@ type OVNNodeSpec struct {
 
 	// +optional
 	BridgePorts []string `json:"bridgePorts,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type OVNNorthdSpec struct {
@@ -61,6 +68,9 @@ type OVNNorthdSpec struct {
 
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 // OVNControlPlaneStatus defines the observed state of OVNControlPlane

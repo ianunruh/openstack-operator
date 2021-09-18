@@ -29,7 +29,7 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 		Replicas:     instance.Spec.Housekeeping.Replicas,
 		NodeSelector: instance.Spec.Housekeeping.NodeSelector,
 		InitContainers: []corev1.Container{
-			amphora.InitContainer(instance.Spec.Image, volumeMounts),
+			amphora.InitContainer(instance.Spec.Image, instance.Spec.Housekeeping.Resources, volumeMounts),
 		},
 		Containers: []corev1.Container{
 			{
@@ -39,7 +39,8 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 					"octavia-housekeeping",
 					"--config-file=/etc/octavia/octavia.conf",
 				},
-				Env: env,
+				Env:       env,
+				Resources: instance.Spec.Housekeeping.Resources,
 				Ports: []corev1.ContainerPort{
 					{Name: "heartbeat", ContainerPort: 5555, Protocol: corev1.ProtocolUDP},
 				},

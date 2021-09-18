@@ -37,6 +37,7 @@ func NoVNCProxyDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvV
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 6080},
 				},
+				Resources:    instance.Spec.NoVNCProxy.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

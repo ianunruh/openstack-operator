@@ -26,7 +26,7 @@ func VolumeMounts(instance *openstackv1beta1.Octavia) []corev1.VolumeMount {
 	}
 }
 
-func InitContainer(image string, volumeMounts []corev1.VolumeMount) corev1.Container {
+func InitContainer(image string, resources corev1.ResourceRequirements, volumeMounts []corev1.VolumeMount) corev1.Container {
 	return corev1.Container{
 		Name:  "init-pki",
 		Image: image,
@@ -35,6 +35,7 @@ func InitContainer(image string, volumeMounts []corev1.VolumeMount) corev1.Conta
 			"-c",
 			template.MustReadFile("octavia", "init-pki.sh"),
 		},
+		Resources:    resources,
 		VolumeMounts: volumeMounts,
 	}
 }

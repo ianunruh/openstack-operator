@@ -40,7 +40,8 @@ func MetadataAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.Env
 					"--config-file=/etc/neutron/neutron.conf",
 					"--config-file=/etc/neutron/neutron_ovn_metadata_agent.ini",
 				},
-				Env: env,
+				Env:       env,
+				Resources: instance.Spec.MetadataAgent.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 				},

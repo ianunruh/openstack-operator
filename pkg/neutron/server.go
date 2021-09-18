@@ -55,6 +55,7 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
+				Resources:     instance.Spec.Server.Resources,
 				VolumeMounts:  volumeMounts,
 			},
 		},

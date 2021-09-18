@@ -41,6 +41,7 @@ func VolumeStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, v
 					"--config-file=/etc/cinder/cinder.conf",
 				},
 				Env:          env,
+				Resources:    instance.Spec.Volume.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

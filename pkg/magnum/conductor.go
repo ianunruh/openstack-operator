@@ -33,6 +33,7 @@ func ConductorStatefulSet(instance *openstackv1beta1.Magnum, env []corev1.EnvVar
 					"--config-file=/etc/magnum/magnum.conf",
 				},
 				Env:          env,
+				Resources:    instance.Spec.Conductor.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

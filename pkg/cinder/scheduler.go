@@ -33,6 +33,7 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar
 					"--config-file=/etc/cinder/cinder.conf",
 				},
 				Env:          env,
+				Resources:    instance.Spec.Scheduler.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

@@ -33,6 +33,7 @@ func HealthManagerDeployment(instance *openstackv1beta1.Senlin, env []corev1.Env
 					"--config-file=/etc/senlin/senlin.conf",
 				},
 				Env:          env,
+				Resources:    instance.Spec.HealthManager.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},
