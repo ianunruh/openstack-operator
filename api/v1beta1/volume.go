@@ -5,7 +5,8 @@ import (
 )
 
 type VolumeSpec struct {
-	Capacity string `json:"capacity"`
+	// +optional
+	Capacity string `json:"capacity,omitempty"`
 
 	// +optional
 	StorageClass *string `json:"storageClass,omitempty"`

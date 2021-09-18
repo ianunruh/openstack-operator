@@ -19,6 +19,11 @@ func PersistentVolumeClaim(name string, labels map[string]string, spec *openstac
 		accessModes = []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce}
 	}
 
+	capacity := spec.Capacity
+	if capacity == "" {
+		capacity = "10Gi"
+	}
+
 	return corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,

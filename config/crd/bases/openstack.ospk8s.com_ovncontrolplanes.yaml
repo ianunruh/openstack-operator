@@ -164,8 +164,6 @@ spec:
                         type: string
                       storageClass:
                         type: string
-                    required:
-                    - capacity
                     type: object
                 required:
                 - volume
@@ -213,8 +211,6 @@ spec:
                         type: string
                       storageClass:
                         type: string
-                    required:
-                    - capacity
                     type: object
                 required:
                 - volume

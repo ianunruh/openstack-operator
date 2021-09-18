@@ -53,8 +53,6 @@ spec:
                     type: string
                   storageClass:
                     type: string
-                required:
-                - capacity
                 type: object
               database:
                 description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase

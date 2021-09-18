@@ -229,8 +229,6 @@ spec:
                         type: string
                       storageClass:
                         type: string
-                    required:
-                    - capacity
                     type: object
                 required:
                 - image
@@ -282,8 +280,6 @@ spec:
                         type: string
                       storageClass:
                         type: string
-                    required:
-                    - capacity
                     type: object
                 required:
                 - image
@@ -544,8 +540,6 @@ spec:
                         type: string
                       storageClass:
                         type: string
-                    required:
-                    - capacity
                     type: object
                 required:
                 - image
@@ -648,8 +642,6 @@ spec:
                               type: string
                             storageClass:
                               type: string
-                          required:
-                          - capacity
                           type: object
                       required:
                       - name
@@ -2317,8 +2309,6 @@ spec:
                             type: string
                           storageClass:
                             type: string
-                        required:
-                        - capacity
                         type: object
                     required:
                     - volume
@@ -2367,8 +2357,6 @@ spec:
                             type: string
                           storageClass:
                             type: string
-                        required:
-                        - capacity
                         type: object
                     required:
                     - volume
@@ -2469,8 +2457,6 @@ spec:
                         type: string
                       storageClass:
                         type: string
-                    required:
-                    - capacity
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
