@@ -8,6 +8,10 @@ spec:
     annotations:
       external-dns/enabled: "true"
       cert-manager.io/cluster-issuer: letsencrypt-prod
+  nodeSelector:
+    compute:
+      openstack/cloud: openstack
+      openstack/compute-node: enabled
   broker:
     image: docker.io/bitnami/rabbitmq:3.8.9-debian-10-r58
     volume:
@@ -25,21 +29,8 @@ spec:
       storageClass: ceph-block-ssd
   keystone:
     image: ghcr.io/ianunruh/openstack-operator-images/keystone:master
-    database:
-      name: keystone
-      secret: keystone-db
-      cluster: mariadb
-    broker:
-      name: keystone
-      secret: keystone-rabbitmq
-      cluster: rabbitmq
-      virtualHost: openstack
   glance:
     image: ghcr.io/ianunruh/openstack-operator-images/glance:master
-    database:
-      name: glance
-      secret: glance-db
-      cluster: mariadb
     backends:
     - name: ceph-ssd
       ceph:
@@ -63,74 +54,20 @@ spec:
           namespace: rook-ceph
           deviceClass: ssd
           replicatedSize: 2
-    database:
-      name: cinder
-      secret: cinder-db
-      cluster: mariadb
-    broker:
-      name: cinder
-      secret: cinder-rabbitmq
-      cluster: rabbitmq
-      virtualHost: openstack
   placement:
     image: ghcr.io/ianunruh/openstack-operator-images/placement:master
-    database:
-      name: placement
-      secret: placement-db
-      cluster: mariadb
   nova:
     image: ghcr.io/ianunruh/openstack-operator-images/nova:master
     cells:
     - name: cell1
-      database:
-        name: nova_cell1
-        secret: nova-cell1-db
-        cluster: mariadb
-      broker:
-        name: nova-cell1
-        secret: nova-cell1-rabbitmq
-        cluster: rabbitmq
-        virtualHost: nova-cell1
-    libvirtd:
-      image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
-    compute:
-      nodeSelector:
-        openstack/cloud: openstack
-        openstack/compute-node: enabled
-    apiDatabase:
-      name: nova_api
-      secret: nova-api-db
-      cluster: mariadb
-    cellDatabase:
-      name: nova_cell0
-      secret: nova-cell0-db
-      cluster: mariadb
-    broker:
-      name: nova
-      secret: nova-rabbitmq
-      cluster: rabbitmq
-      virtualHost: openstack
+      compute:
+        default:
+          libvirtd:
+            image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
   neutron:
     image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
-    metadataAgent:
-      nodeSelector:
-        openstack/cloud: openstack
-        openstack/network-node: enabled
-    database:
-      name: neutron
-      secret: neutron-db
-      cluster: mariadb
-    broker:
-      name: neutron
-      secret: neutron-rabbitmq
-      cluster: rabbitmq
-      virtualHost: openstack
   ovn:
     image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
-    node:
-      nodeSelector:
-        openstack/cloud: openstack
-        openstack/network-agent: ovn
     ovsdbNorth:
       volume:
         capacity: 20Gi
@@ -143,34 +80,7 @@ spec:
     image: ghcr.io/ianunruh/openstack-operator-images/horizon:master
   heat:
     image: ghcr.io/ianunruh/openstack-operator-images/heat:master
-    database:
-      name: heat
-      secret: heat-db
-      cluster: mariadb
-    broker:
-      name: heat
-      secret: heat-rabbitmq
-      cluster: rabbitmq
-      virtualHost: openstack
   magnum:
     image: ghcr.io/ianunruh/openstack-operator-images/magnum:master
-    database:
-      name: magnum
-      secret: magnum-db
-      cluster: mariadb
-    broker:
-      name: magnum
-      secret: magnum-rabbitmq
-      cluster: rabbitmq
-      virtualHost: openstack
   barbican:
     image: ghcr.io/ianunruh/openstack-operator-images/barbican:master
-    database:
-      name: barbican
-      secret: barbican-db
-      cluster: mariadb
-    broker:
-      name: barbican
-      secret: barbican-rabbitmq
-      cluster: rabbitmq
-      virtualHost: openstack

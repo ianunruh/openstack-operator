@@ -4,6 +4,9 @@ metadata:
   name: default
 spec:
   domain: openstack2.k8s.example.com
+  nodeSelector:
+    compute:
+      openstack/cloud: openstack2
   cinder:
     backends:
     - name: ceph
@@ -27,11 +30,3 @@ spec:
           namespace: rook-ceph
           deviceClass: ssd
           replicatedSize: 2
-  nova:
-    compute:
-      nodeSelector:
-        openstack/cloud: openstack2
-  neutron:
-    metadataAgent:
-      nodeSelector:
-        openstack/cloud: openstack2
