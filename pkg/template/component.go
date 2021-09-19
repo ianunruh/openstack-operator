@@ -39,8 +39,8 @@ func GenericDaemonSet(component Component) *appsv1.DaemonSet {
 				},
 				Spec: corev1.PodSpec{
 					Affinity:        component.Affinity,
-					Containers:      component.Containers,
-					InitContainers:  component.InitContainers,
+					Containers:      containerDefaults(component.Containers),
+					InitContainers:  containerDefaults(component.InitContainers),
 					NodeSelector:    component.NodeSelector,
 					SecurityContext: component.SecurityContext,
 					Volumes:         component.Volumes,
@@ -75,8 +75,8 @@ func GenericDeployment(component Component) *appsv1.Deployment {
 				},
 				Spec: corev1.PodSpec{
 					Affinity:        component.Affinity,
-					Containers:      component.Containers,
-					InitContainers:  component.InitContainers,
+					Containers:      containerDefaults(component.Containers),
+					InitContainers:  containerDefaults(component.InitContainers),
 					NodeSelector:    component.NodeSelector,
 					SecurityContext: component.SecurityContext,
 					Volumes:         component.Volumes,
@@ -102,8 +102,8 @@ func GenericJob(component Component) *batchv1.Job {
 				},
 				Spec: corev1.PodSpec{
 					Affinity:        component.Affinity,
-					Containers:      component.Containers,
-					InitContainers:  component.InitContainers,
+					Containers:      containerDefaults(component.Containers),
+					InitContainers:  containerDefaults(component.InitContainers),
 					NodeSelector:    component.NodeSelector,
 					SecurityContext: component.SecurityContext,
 					Volumes:         component.Volumes,
@@ -140,8 +140,8 @@ func GenericStatefulSet(component Component) *appsv1.StatefulSet {
 				},
 				Spec: corev1.PodSpec{
 					Affinity:        component.Affinity,
-					Containers:      component.Containers,
-					InitContainers:  component.InitContainers,
+					Containers:      containerDefaults(component.Containers),
+					InitContainers:  containerDefaults(component.InitContainers),
 					NodeSelector:    component.NodeSelector,
 					SecurityContext: component.SecurityContext,
 					Volumes:         component.Volumes,
@@ -150,4 +150,13 @@ func GenericStatefulSet(component Component) *appsv1.StatefulSet {
 			VolumeClaimTemplates: component.VolumeClaimTemplates,
 		},
 	}
+}
+
+func containerDefaults(containers []corev1.Container) []corev1.Container {
+	out := make([]corev1.Container, 0, len(containers))
+	for _, container := range containers {
+		container.ImagePullPolicy = corev1.PullAlways
+		out = append(out, container)
+	}
+	return out
 }
