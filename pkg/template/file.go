@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -161,11 +162,24 @@ func MustOutputINI(file *ini.File) *bytes.Buffer {
 }
 
 func MergeINI(cfg *ini.File, extraCfg openstackv1beta1.ExtraConfig) {
-	for sectionName, elements := range extraCfg {
+	sectionNames := make([]string, 0, len(extraCfg))
+	for name := range extraCfg {
+		sectionNames = append(sectionNames, name)
+	}
+	sort.Strings(sectionNames)
+
+	for _, sectionName := range sectionNames {
 		section, _ := cfg.NewSection(sectionName)
 
-		for name, value := range elements {
-			section.NewKey(name, value)
+		elements := extraCfg[sectionName]
+		keyNames := make([]string, 0, len(elements))
+		for name := range elements {
+			keyNames = append(keyNames, name)
+		}
+		sort.Strings(keyNames)
+
+		for _, name := range keyNames {
+			section.NewKey(name, elements[name])
 		}
 	}
 }
