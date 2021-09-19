@@ -371,8 +371,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.NovaHostAggregateReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("NovaHostAggregate"),
+		Recorder: mgr.GetEventRecorderFor("NovaHostAggregate"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "NovaHostAggregate")
 		os.Exit(1)
