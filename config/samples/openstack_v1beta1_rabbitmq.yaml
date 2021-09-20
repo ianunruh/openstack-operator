@@ -7,3 +7,5 @@ spec:
   volume:
     capacity: 50Gi
     storageClass: ceph-block-ssd
+  prometheus:
+    serviceMonitor: true

@@ -9,6 +9,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
@@ -153,6 +154,23 @@ func ClusterManagementIngress(instance *openstackv1beta1.RabbitMQ) *netv1.Ingres
 	ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Port.Name = "stats"
 
 	return ingress
+}
+
+type serviceMonitorOptions struct {
+	Name      string
+	Namespace string
+}
+
+func ClusterServiceMonitor(instance *openstackv1beta1.RabbitMQ) *unstructured.Unstructured {
+	manifest := template.MustRenderFile(AppLabel, "servicemonitor.yaml", serviceMonitorOptions{
+		Name:      instance.Name,
+		Namespace: instance.Namespace,
+	})
+
+	res := template.MustDecodeManifest(manifest)
+	res.SetNamespace(instance.Namespace)
+
+	return res
 }
 
 func EnsureCluster(ctx context.Context, c client.Client, intended *openstackv1beta1.RabbitMQ, log logr.Logger) error {

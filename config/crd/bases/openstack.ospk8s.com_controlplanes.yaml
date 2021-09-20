@@ -192,6 +192,11 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  prometheus:
+                    properties:
+                      serviceMonitor:
+                        type: boolean
+                    type: object
                   resources:
                     description: ResourceRequirements describes the compute resource
                       requirements.
