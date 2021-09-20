@@ -27,7 +27,12 @@ if [ -z "${hypervisor_address}" ] ; then
   exit 1
 fi
 
-tee > /tmp/pod-shared/nova-hypervisor.conf << EOF
+tee > /tmp/pod-shared/nova-host.conf <<EOF
 [DEFAULT]
-my_ip  = $hypervisor_address
+host = $(hostname -s)
+EOF
+
+tee > /tmp/pod-shared/nova-hypervisor.conf <<EOF
+[DEFAULT]
+my_ip = $hypervisor_address
 EOF

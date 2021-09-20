@@ -133,6 +133,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaCompute, env []corev1.EnvVa
 				Command: []string{
 					"nova-compute",
 					"--config-file=/etc/nova/nova.conf",
+					"--config-file=/tmp/pod-shared/nova-host.conf",
 					"--config-file=/tmp/pod-shared/nova-hypervisor.conf",
 				},
 				Env:       env,
