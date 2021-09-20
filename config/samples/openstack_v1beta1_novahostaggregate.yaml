@@ -1,0 +1,11 @@
+apiVersion: openstack.ospk8s.com/v1beta1
+kind: NovaHostAggregate
+metadata:
+  name: az1-ssd
+spec:
+  zone: az1
+  metadata:
+    ephemeral_disk: ssd
+  nodeSelector:
+    openstack/cloud: openstack
+    openstack/az: az1
