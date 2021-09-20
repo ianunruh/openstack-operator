@@ -34,12 +34,20 @@ type RabbitMQSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional
+	Prometheus RabbitMQPrometheusSpec `json:"prometheus,omitempty"`
+
+	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type RabbitMQManagementSpec struct {
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
+}
+
+type RabbitMQPrometheusSpec struct {
+	// +optional
+	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
 
 // RabbitMQStatus defines the observed state of RabbitMQ

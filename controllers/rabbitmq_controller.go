@@ -46,6 +46,7 @@ type RabbitMQReconciler struct {
 // +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=rabbitmqs,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=rabbitmqs/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=rabbitmqs/finalizers,verbs=update
+// +kubebuilder:rbac:groups=monitoring.coreos.com,resources=servicemonitors,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=networking.k8s.io,resources=ingresses,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=roles,verbs=get;list;watch;create;update;delete
 // +kubebuilder:rbac:groups=rbac.authorization.k8s.io,resources=rolebindings,verbs=get;list;watch;create;update;delete
@@ -91,6 +92,10 @@ func (r *RabbitMQReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
+	if err := r.reconcileIngress(ctx, instance, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	sts := rabbitmq.ClusterStatefulSet(instance, configHash)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
@@ -105,17 +110,26 @@ func (r *RabbitMQReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		}
 	}
 
-	if instance.Spec.Management.Ingress == nil {
-		// TODO ensure ingress does not exist
-	} else {
-		ingress := rabbitmq.ClusterManagementIngress(instance)
-		controllerutil.SetControllerReference(instance, ingress, r.Scheme)
-		if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
-			return ctrl.Result{}, err
-		}
+	if err := r.reconcileServiceMonitor(ctx, instance, log); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *RabbitMQReconciler) reconcileIngress(ctx context.Context, instance *openstackv1beta1.RabbitMQ, log logr.Logger) error {
+	if instance.Spec.Management.Ingress == nil {
+		// TODO ensure ingress does not exist
+		return nil
+	}
+
+	ingress := rabbitmq.ClusterManagementIngress(instance)
+	controllerutil.SetControllerReference(instance, ingress, r.Scheme)
+	if err := template.EnsureIngress(ctx, r.Client, ingress, log); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *RabbitMQReconciler) reconcileRBAC(ctx context.Context, instance *openstackv1beta1.RabbitMQ, log logr.Logger) error {
@@ -188,6 +202,20 @@ func (r *RabbitMQReconciler) reconcileServices(ctx context.Context, instance *op
 		}
 	}
 
+	return nil
+}
+
+func (r *RabbitMQReconciler) reconcileServiceMonitor(ctx context.Context, instance *openstackv1beta1.RabbitMQ, log logr.Logger) error {
+	if !instance.Spec.Prometheus.ServiceMonitor {
+		// TODO ensure service monitor does not exist
+		return nil
+	}
+
+	svcMonitor := rabbitmq.ClusterServiceMonitor(instance)
+	controllerutil.SetControllerReference(instance, svcMonitor, r.Scheme)
+	if err := template.EnsureResource(ctx, r.Client, svcMonitor, log); err != nil {
+		return err
+	}
 	return nil
 }
 
