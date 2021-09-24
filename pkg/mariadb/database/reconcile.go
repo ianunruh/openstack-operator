@@ -1,4 +1,4 @@
-package mariadb
+package database
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -20,8 +21,8 @@ type databaseOptions struct {
 	DatabaseAdminUsername string
 }
 
-func DatabaseJob(instance *openstackv1beta1.MariaDBDatabase, containerImage, databaseHostName, adminSecret string) *batchv1.Job {
-	labels := template.AppLabels(instance.Name, AppLabel)
+func SetupJob(instance *openstackv1beta1.MariaDBDatabase, containerImage, databaseHostName, adminSecret string) *batchv1.Job {
+	labels := template.AppLabels(instance.Name, mariadb.AppLabel)
 
 	opts := databaseOptions{
 		DatabaseName:          instance.Spec.Name,
@@ -39,7 +40,7 @@ func DatabaseJob(instance *openstackv1beta1.MariaDBDatabase, containerImage, dat
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustRenderFile(AppLabel, "database.sh", opts),
+					template.MustRenderFile(mariadb.AppLabel, "database.sh", opts),
 				},
 				Env: []corev1.EnvVar{
 					template.SecretEnvVar("MYSQL_PWD", adminSecret, "password"),
@@ -54,8 +55,8 @@ func DatabaseJob(instance *openstackv1beta1.MariaDBDatabase, containerImage, dat
 	return job
 }
 
-func DatabaseSecret(instance *openstackv1beta1.MariaDBDatabase) *corev1.Secret {
-	labels := template.AppLabels(instance.Name, AppLabel)
+func Secret(instance *openstackv1beta1.MariaDBDatabase) *corev1.Secret {
+	labels := template.AppLabels(instance.Name, mariadb.AppLabel)
 	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
 
 	hostname := instance.Spec.Cluster
@@ -69,7 +70,7 @@ func DatabaseSecret(instance *openstackv1beta1.MariaDBDatabase) *corev1.Secret {
 	return secret
 }
 
-func EnsureDatabase(ctx context.Context, c client.Client, instance *openstackv1beta1.MariaDBDatabase, log logr.Logger) error {
+func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.MariaDBDatabase, log logr.Logger) error {
 	intended := instance.DeepCopy()
 	hash, err := template.ObjectHash(intended)
 	if err != nil {

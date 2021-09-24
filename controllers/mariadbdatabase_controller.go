@@ -31,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
-	"github.com/ianunruh/openstack-operator/pkg/mariadb"
+	mariadbdatabase "github.com/ianunruh/openstack-operator/pkg/mariadb/database"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -75,7 +75,7 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
-	secret := mariadb.DatabaseSecret(instance)
+	secret := mariadbdatabase.Secret(instance)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
 	if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
 		return ctrl.Result{}, err
@@ -83,7 +83,7 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.SetupJobHash,
-		mariadb.DatabaseJob(instance, cluster.Spec.Image, cluster.Name, cluster.Name))
+		mariadbdatabase.SetupJob(instance, cluster.Spec.Image, cluster.Name, cluster.Name))
 	jobs.SetReady(&instance.Status.Ready)
 	return jobs.Run(instance)
 }
