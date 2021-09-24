@@ -34,7 +34,7 @@ import (
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/magnum"
-	"github.com/ianunruh/openstack-operator/pkg/mariadb"
+	mariadbdatabase "github.com/ianunruh/openstack-operator/pkg/mariadb/database"
 	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -72,7 +72,7 @@ func (r *MagnumReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	db := magnum.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
-	if err := mariadb.EnsureDatabase(ctx, r.Client, db, log); err != nil {
+	if err := mariadbdatabase.Ensure(ctx, r.Client, db, log); err != nil {
 		return ctrl.Result{}, err
 	} else if !db.Status.Ready {
 		log.Info("Waiting on database to be available", "name", db.Name)
