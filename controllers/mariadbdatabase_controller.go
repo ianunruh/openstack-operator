@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -38,8 +39,9 @@ import (
 // MariaDBDatabaseReconciler reconciles a MariaDBDatabase object
 type MariaDBDatabaseReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 // +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=mariadbdatabases,verbs=get;list;watch;create;update;patch;delete
@@ -52,6 +54,7 @@ type MariaDBDatabaseReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
+	reporter := mariadbdatabase.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.MariaDBDatabase{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -60,6 +63,13 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
+	}
+
+	if mariadbdatabase.ReadyCondition(instance) == nil {
+		reporter.Pending(instance, nil, "MariaDBDatabasePending", "Waiting for database to be reconciled")
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	cluster := &openstackv1beta1.MariaDB{
@@ -71,7 +81,11 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
 		return ctrl.Result{}, err
 	} else if !cluster.Status.Ready {
-		log.Info("Waiting on MariaDB to be available", "name", cluster.Name)
+		log.Info("Waiting on MariaDB to be ready", "name", cluster.Name)
+		reporter.Pending(instance, nil, "MariaDBDatabasePending", "Waiting for cluster to be ready")
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
@@ -84,8 +98,25 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.SetupJobHash,
 		mariadbdatabase.SetupJob(instance, cluster.Spec.Image, cluster.Name, cluster.Name))
-	jobs.SetReady(&instance.Status.Ready)
-	return jobs.Run(instance)
+	if result, err := jobs.Run(instance); err != nil {
+		// TODO update pending w/error
+		return ctrl.Result{}, err
+	} else if !result.IsZero() {
+		reporter.Pending(instance, nil, "MariaDBDatabasePending", "Waiting for setup job to complete")
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	condition := mariadbdatabase.ReadyCondition(instance)
+	if condition.Status == metav1.ConditionFalse {
+		reporter.Succeeded(instance)
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	return ctrl.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
