@@ -82,14 +82,14 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
+	deps := template.NewConditionWaiter(log)
+
 	db := heat.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
 	if err := mariadbdatabase.Ensure(ctx, r.Client, db, log); err != nil {
 		return ctrl.Result{}, err
-	} else if !db.Status.Ready {
-		log.Info("Waiting on database to be available", "name", db.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
+	deps.AddReadyCheck(db, db.Status.Conditions)
 
 	brokerUser := heat.BrokerUser(instance)
 	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
@@ -128,6 +128,10 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	} else if !keystoneStackUser.Status.Ready {
 		log.Info("Waiting on Keystone user to be available", "name", keystoneStackUser.Name)
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+	}
+
+	if result := deps.Wait(); !result.IsZero() {
+		return result, nil
 	}
 
 	cm := heat.ConfigMap(instance)

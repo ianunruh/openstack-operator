@@ -79,14 +79,14 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
+	deps := template.NewConditionWaiter(log)
+
 	db := nova.CellDatabase(cluster.Name, instance.Spec.Name, instance.Namespace, instance.Spec.Database)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
 	if err := mariadbdatabase.Ensure(ctx, r.Client, db, log); err != nil {
 		return ctrl.Result{}, err
-	} else if !db.Status.Ready {
-		log.Info("Waiting on database to be available", "name", db.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
+	deps.AddReadyCheck(db, db.Status.Conditions)
 
 	brokerUser := nova.BrokerUser(instance.Name, instance.Namespace, instance.Spec.Broker)
 	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
@@ -95,6 +95,10 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	} else if !brokerUser.Status.Ready {
 		log.Info("Waiting on broker to be available", "name", brokerUser.Name)
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+	}
+
+	if result := deps.Wait(); !result.IsZero() {
+		return result, nil
 	}
 
 	cm := &corev1.ConfigMap{

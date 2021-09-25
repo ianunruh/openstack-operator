@@ -48,7 +48,7 @@ func databaseDefault(spec MariaDBDatabaseSpec, instance string) MariaDBDatabaseS
 
 // MariaDBDatabaseStatus defines the observed state of MariaDBDatabase
 type MariaDBDatabaseStatus struct {
-	Ready bool `json:"ready"`
+	Conditions []metav1.Condition `json:"conditions"`
 
 	// +optional
 	SetupJobHash string `json:"setupJobHash,omitempty"`
