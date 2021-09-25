@@ -34,6 +34,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/heat"
 	"github.com/ianunruh/openstack-operator/pkg/horizon"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
+	keystoneuser "github.com/ianunruh/openstack-operator/pkg/keystone/user"
 	"github.com/ianunruh/openstack-operator/pkg/magnum"
 	"github.com/ianunruh/openstack-operator/pkg/manila"
 	"github.com/ianunruh/openstack-operator/pkg/mariadb"
@@ -190,7 +191,7 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	demoUser := controlplane.DemoKeystoneUser(instance)
 	controllerutil.SetControllerReference(instance, demoUser, r.Scheme)
-	if err := keystone.EnsureUser(ctx, r.Client, demoUser, log); err != nil {
+	if err := keystoneuser.Ensure(ctx, r.Client, demoUser, log); err != nil {
 		return ctrl.Result{}, err
 	}
 

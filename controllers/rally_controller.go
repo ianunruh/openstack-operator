@@ -30,7 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
-	"github.com/ianunruh/openstack-operator/pkg/keystone"
+	keystoneuser "github.com/ianunruh/openstack-operator/pkg/keystone/user"
 	mariadbdatabase "github.com/ianunruh/openstack-operator/pkg/mariadb/database"
 	"github.com/ianunruh/openstack-operator/pkg/rally"
 	"github.com/ianunruh/openstack-operator/pkg/template"
@@ -71,7 +71,7 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 	keystoneUser := rally.KeystoneUser(instance)
 	controllerutil.SetControllerReference(instance, keystoneUser, r.Scheme)
-	if err := keystone.EnsureUser(ctx, r.Client, keystoneUser, log); err != nil {
+	if err := keystoneuser.Ensure(ctx, r.Client, keystoneUser, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
