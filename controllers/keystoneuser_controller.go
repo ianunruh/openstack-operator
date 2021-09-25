@@ -31,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
-	"github.com/ianunruh/openstack-operator/pkg/keystone"
+	keystoneuser "github.com/ianunruh/openstack-operator/pkg/keystone/user"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -73,7 +73,7 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
-	secret := keystone.UserSecret(instance, cluster)
+	secret := keystoneuser.Secret(instance, cluster)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
 	if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
 		return ctrl.Result{}, err
@@ -81,7 +81,7 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.SetupJobHash,
-		keystone.UserJob(instance, cluster.Spec.Image, cluster.Name))
+		keystoneuser.SetupJob(instance, cluster.Spec.Image, cluster.Name))
 	jobs.SetReady(&instance.Status.Ready)
 	return jobs.Run(instance)
 }

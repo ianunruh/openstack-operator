@@ -30,7 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
-	"github.com/ianunruh/openstack-operator/pkg/keystone"
+	keystonesvc "github.com/ianunruh/openstack-operator/pkg/keystone/service"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -74,7 +74,7 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.SetupJobHash,
-		keystone.ServiceJob(instance, cluster.Spec.Image, cluster.Name))
+		keystonesvc.SetupJob(instance, cluster.Spec.Image, cluster.Name))
 	jobs.SetReady(&instance.Status.Ready)
 	return jobs.Run(instance)
 }

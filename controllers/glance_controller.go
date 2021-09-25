@@ -34,6 +34,8 @@ import (
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/glance"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
+	keystonesvc "github.com/ianunruh/openstack-operator/pkg/keystone/service"
+	keystoneuser "github.com/ianunruh/openstack-operator/pkg/keystone/user"
 	mariadbdatabase "github.com/ianunruh/openstack-operator/pkg/mariadb/database"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -84,13 +86,13 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	keystoneSvc := glance.KeystoneService(instance)
 	controllerutil.SetControllerReference(instance, keystoneSvc, r.Scheme)
-	if err := keystone.EnsureService(ctx, r.Client, keystoneSvc, log); err != nil {
+	if err := keystonesvc.Ensure(ctx, r.Client, keystoneSvc, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	keystoneUser := glance.KeystoneUser(instance)
 	controllerutil.SetControllerReference(instance, keystoneUser, r.Scheme)
-	if err := keystone.EnsureUser(ctx, r.Client, keystoneUser, log); err != nil {
+	if err := keystoneuser.Ensure(ctx, r.Client, keystoneUser, log); err != nil {
 		return ctrl.Result{}, err
 	} else if !keystoneUser.Status.Ready {
 		log.Info("Waiting on Keystone user to be available", "name", keystoneUser.Name)

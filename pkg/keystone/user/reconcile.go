@@ -1,4 +1,4 @@
-package keystone
+package user
 
 import (
 	"context"
@@ -12,11 +12,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func UserJob(instance *openstackv1beta1.KeystoneUser, containerImage, adminSecret string) *batchv1.Job {
-	labels := template.AppLabels(instance.Name, AppLabel)
+func SetupJob(instance *openstackv1beta1.KeystoneUser, containerImage, adminSecret string) *batchv1.Job {
+	labels := template.AppLabels(instance.Name, keystone.AppLabel)
 
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,
@@ -28,7 +29,7 @@ func UserJob(instance *openstackv1beta1.KeystoneUser, containerImage, adminSecre
 				Command: []string{
 					"python3",
 					"-c",
-					template.MustReadFile(AppLabel, "user-setup.py"),
+					template.MustReadFile(keystone.AppLabel, "user-setup.py"),
 				},
 				Env: []corev1.EnvVar{
 					template.EnvVar("SVC_ROLES", strings.Join(instance.Spec.Roles, ",")),
@@ -46,8 +47,8 @@ func UserJob(instance *openstackv1beta1.KeystoneUser, containerImage, adminSecre
 	return job
 }
 
-func UserSecret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.Keystone) *corev1.Secret {
-	labels := template.AppLabels(instance.Name, AppLabel)
+func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.Keystone) *corev1.Secret {
+	labels := template.AppLabels(instance.Name, keystone.AppLabel)
 	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
 
 	domainName := instance.Spec.Domain
@@ -82,7 +83,7 @@ func UserSecret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1bet
 	return secret
 }
 
-func EnsureUser(ctx context.Context, c client.Client, instance *openstackv1beta1.KeystoneUser, log logr.Logger) error {
+func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.KeystoneUser, log logr.Logger) error {
 	intended := instance.DeepCopy()
 	hash, err := template.ObjectHash(intended)
 	if err != nil {
