@@ -56,7 +56,7 @@ func brokerDefault(spec RabbitMQUserSpec, instance, virtualHost string) RabbitMQ
 
 // RabbitMQUserStatus defines the observed state of RabbitMQUser
 type RabbitMQUserStatus struct {
-	Ready bool `json:"ready"`
+	Conditions []metav1.Condition `json:"conditions"`
 
 	// +optional
 	SetupJobHash string `json:"setupJobHash,omitempty"`

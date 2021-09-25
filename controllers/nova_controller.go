@@ -93,10 +93,8 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
 	if err := rabbitmquser.Ensure(ctx, r.Client, brokerUser, log); err != nil {
 		return ctrl.Result{}, err
-	} else if !brokerUser.Status.Ready {
-		log.Info("Waiting on broker to be available", "name", brokerUser.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
+	rabbitmquser.AddReadyCheck(deps, brokerUser)
 
 	keystoneSvc := nova.KeystoneService(instance)
 	controllerutil.SetControllerReference(instance, keystoneSvc, r.Scheme)

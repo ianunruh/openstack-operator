@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -92,10 +91,8 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
 	if err := rabbitmquser.Ensure(ctx, r.Client, brokerUser, log); err != nil {
 		return ctrl.Result{}, err
-	} else if !brokerUser.Status.Ready {
-		log.Info("Waiting on broker to be available", "name", brokerUser.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
+	rabbitmquser.AddReadyCheck(deps, brokerUser)
 
 	if result := deps.Wait(); !result.IsZero() {
 		return result, nil
