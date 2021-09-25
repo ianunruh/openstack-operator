@@ -96,7 +96,3 @@ func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Mar
 
 	return nil
 }
-
-func AddReadyCheck(cw *template.ConditionWaiter, instance *openstackv1beta1.MariaDBDatabase) {
-	cw.AddReadyCheck(instance, instance.Status.Conditions)
-}
