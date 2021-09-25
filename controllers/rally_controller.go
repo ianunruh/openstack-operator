@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"time"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -67,18 +66,14 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	if err := mariadbdatabase.Ensure(ctx, r.Client, db, log); err != nil {
 		return ctrl.Result{}, err
 	}
-	deps.AddReadyCheck(db, db.Status.Conditions)
+	mariadbdatabase.AddReadyCheck(deps, db)
 
 	keystoneUser := rally.KeystoneUser(instance)
 	controllerutil.SetControllerReference(instance, keystoneUser, r.Scheme)
 	if err := keystoneuser.Ensure(ctx, r.Client, keystoneUser, log); err != nil {
 		return ctrl.Result{}, err
 	}
-
-	if !keystoneUser.Status.Ready {
-		log.Info("Waiting on Keystone user to be available", "name", keystoneUser.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	}
+	keystoneuser.AddReadyCheck(deps, keystoneUser)
 
 	if result := deps.Wait(); !result.IsZero() {
 		return result, nil

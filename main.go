@@ -112,17 +112,19 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.KeystoneServiceReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("KeystoneService"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("KeystoneService"),
+		Recorder: mgr.GetEventRecorderFor("KeystoneService"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "KeystoneService")
 		os.Exit(1)
 	}
 	if err = (&controllers.KeystoneUserReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("KeystoneUser"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("KeystoneUser"),
+		Recorder: mgr.GetEventRecorderFor("KeystoneUser"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "KeystoneUser")
 		os.Exit(1)

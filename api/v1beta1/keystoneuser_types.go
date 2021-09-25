@@ -39,7 +39,7 @@ type KeystoneUserSpec struct {
 
 // KeystoneUserStatus defines the observed state of KeystoneUser
 type KeystoneUserStatus struct {
-	Ready bool `json:"ready"`
+	Conditions []metav1.Condition `json:"conditions"`
 
 	// +optional
 	SetupJobHash string `json:"setupJobHash,omitempty"`

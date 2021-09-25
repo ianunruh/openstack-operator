@@ -102,7 +102,7 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err := mariadbdatabase.Ensure(ctx, r.Client, db, log); err != nil {
 		return ctrl.Result{}, err
 	}
-	deps.AddReadyCheck(db, db.Status.Conditions)
+	mariadbdatabase.AddReadyCheck(deps, db)
 
 	brokerUser := octavia.BrokerUser(instance)
 	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
@@ -118,20 +118,17 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err := keystonesvc.Ensure(ctx, r.Client, keystoneSvc, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	keystonesvc.AddReadyCheck(deps, keystoneSvc)
 
 	keystoneUser := octavia.KeystoneUser(instance)
 	controllerutil.SetControllerReference(instance, keystoneUser, r.Scheme)
 	if err := keystoneuser.Ensure(ctx, r.Client, keystoneUser, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	keystoneuser.AddReadyCheck(deps, keystoneUser)
 
 	if err := octavia.EnsureKeystoneRoles(ctx, instance, r.Client); err != nil {
 		return ctrl.Result{}, err
-	}
-
-	if !keystoneUser.Status.Ready {
-		log.Info("Waiting on Keystone user to be available", "name", keystoneUser.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
 	if result := deps.Wait(); !result.IsZero() {
