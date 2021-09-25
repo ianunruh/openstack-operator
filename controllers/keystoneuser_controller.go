@@ -107,6 +107,7 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		if err := r.Client.Status().Update(ctx, instance); err != nil {
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
 	condition := keystoneuser.ReadyCondition(instance)
