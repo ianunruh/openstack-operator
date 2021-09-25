@@ -20,9 +20,9 @@ spec:
     - jsonPath: .spec.type
       name: Type
       type: string
-    - jsonPath: .status.ready
+    - jsonPath: .status.conditions[?(@.type=="Ready")].status
       name: Ready
-      type: boolean
+      type: string
     - jsonPath: .spec.publicURL
       name: URL
       type: string
