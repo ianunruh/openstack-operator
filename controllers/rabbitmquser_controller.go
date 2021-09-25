@@ -31,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
-	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
+	rabbitmquser "github.com/ianunruh/openstack-operator/pkg/rabbitmq/user"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -75,7 +75,7 @@ func (r *RabbitMQUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
-	secret := rabbitmq.UserSecret(instance)
+	secret := rabbitmquser.Secret(instance)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
 	if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
 		return ctrl.Result{}, err
@@ -83,7 +83,7 @@ func (r *RabbitMQUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.SetupJobHash,
-		rabbitmq.UserJob(instance, cluster.Spec.Image, cluster.Name, cluster.Name))
+		rabbitmquser.SetupJob(instance, cluster.Spec.Image, cluster.Name, cluster.Name))
 	jobs.SetReady(&instance.Status.Ready)
 	return jobs.Run(instance)
 }
