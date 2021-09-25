@@ -109,7 +109,3 @@ func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Key
 
 	return nil
 }
-
-func AddReadyCheck(cw *template.ConditionWaiter, instance *openstackv1beta1.KeystoneUser) {
-	cw.AddReadyCheck(instance, instance.Status.Conditions)
-}

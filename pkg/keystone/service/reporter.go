@@ -9,6 +9,7 @@ import (
 	"k8s.io/client-go/tools/record"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
 const (
@@ -58,4 +59,8 @@ func SetCondition(instance *openstackv1beta1.KeystoneService, conditionType stri
 		Message:            message,
 		ObservedGeneration: instance.Generation,
 	})
+}
+
+func AddReadyCheck(cw *template.ConditionWaiter, instance *openstackv1beta1.KeystoneService) {
+	cw.AddReadyCheck(instance, instance.Status.Conditions)
 }
