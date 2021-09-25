@@ -39,7 +39,7 @@ import (
 	mariadbdatabase "github.com/ianunruh/openstack-operator/pkg/mariadb/database"
 	"github.com/ianunruh/openstack-operator/pkg/octavia"
 	"github.com/ianunruh/openstack-operator/pkg/octavia/amphora"
-	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
+	rabbitmquser "github.com/ianunruh/openstack-operator/pkg/rabbitmq/user"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -106,7 +106,7 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	brokerUser := octavia.BrokerUser(instance)
 	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
-	if err := rabbitmq.EnsureUser(ctx, r.Client, brokerUser, log); err != nil {
+	if err := rabbitmquser.Ensure(ctx, r.Client, brokerUser, log); err != nil {
 		return ctrl.Result{}, err
 	} else if !brokerUser.Status.Ready {
 		log.Info("Waiting on broker to be available", "name", brokerUser.Name)

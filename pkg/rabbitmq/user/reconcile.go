@@ -1,4 +1,4 @@
-package rabbitmq
+package user
 
 import (
 	"context"
@@ -11,11 +11,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func UserJob(instance *openstackv1beta1.RabbitMQUser, containerImage, databaseHostName, adminSecret string) *batchv1.Job {
-	labels := template.AppLabels(instance.Name, AppLabel)
+func SetupJob(instance *openstackv1beta1.RabbitMQUser, containerImage, databaseHostName, adminSecret string) *batchv1.Job {
+	labels := template.AppLabels(instance.Name, rabbitmq.AppLabel)
 
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,
@@ -28,7 +29,7 @@ func UserJob(instance *openstackv1beta1.RabbitMQUser, containerImage, databaseHo
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustReadFile(AppLabel, "user-setup.sh"),
+					template.MustReadFile(rabbitmq.AppLabel, "user-setup.sh"),
 				},
 				Env: []corev1.EnvVar{
 					template.SecretEnvVar("RABBITMQ_ADMIN_CONNECTION", adminSecret, "connection"),
@@ -43,8 +44,8 @@ func UserJob(instance *openstackv1beta1.RabbitMQUser, containerImage, databaseHo
 	return job
 }
 
-func UserSecret(instance *openstackv1beta1.RabbitMQUser) *corev1.Secret {
-	labels := template.AppLabels(instance.Name, AppLabel)
+func Secret(instance *openstackv1beta1.RabbitMQUser) *corev1.Secret {
+	labels := template.AppLabels(instance.Name, rabbitmq.AppLabel)
 	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
 
 	hostname := instance.Spec.Cluster
@@ -58,7 +59,7 @@ func UserSecret(instance *openstackv1beta1.RabbitMQUser) *corev1.Secret {
 	return secret
 }
 
-func EnsureUser(ctx context.Context, c client.Client, instance *openstackv1beta1.RabbitMQUser, log logr.Logger) error {
+func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.RabbitMQUser, log logr.Logger) error {
 	intended := instance.DeepCopy()
 	hash, err := template.ObjectHash(intended)
 	if err != nil {
