@@ -32,7 +32,7 @@ type KeystoneServiceSpec struct {
 
 // KeystoneServiceStatus defines the observed state of KeystoneService
 type KeystoneServiceStatus struct {
-	Ready bool `json:"ready"`
+	Conditions []metav1.Condition `json:"conditions"`
 
 	// +optional
 	SetupJobHash string `json:"setupJobHash,omitempty"`

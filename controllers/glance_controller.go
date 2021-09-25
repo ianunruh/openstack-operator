@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -82,22 +81,21 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	if err := mariadbdatabase.Ensure(ctx, r.Client, db, log); err != nil {
 		return ctrl.Result{}, err
 	}
-	deps.AddReadyCheck(db, db.Status.Conditions)
+	mariadbdatabase.AddReadyCheck(deps, db)
 
 	keystoneSvc := glance.KeystoneService(instance)
 	controllerutil.SetControllerReference(instance, keystoneSvc, r.Scheme)
 	if err := keystonesvc.Ensure(ctx, r.Client, keystoneSvc, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	keystonesvc.AddReadyCheck(deps, keystoneSvc)
 
 	keystoneUser := glance.KeystoneUser(instance)
 	controllerutil.SetControllerReference(instance, keystoneUser, r.Scheme)
 	if err := keystoneuser.Ensure(ctx, r.Client, keystoneUser, log); err != nil {
 		return ctrl.Result{}, err
-	} else if !keystoneUser.Status.Ready {
-		log.Info("Waiting on Keystone user to be available", "name", keystoneUser.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
+	keystoneuser.AddReadyCheck(deps, keystoneUser)
 
 	if result := deps.Wait(); !result.IsZero() {
 		return result, nil

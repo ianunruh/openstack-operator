@@ -76,7 +76,7 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	if err := mariadbdatabase.Ensure(ctx, r.Client, db, log); err != nil {
 		return ctrl.Result{}, err
 	}
-	deps.AddReadyCheck(db, db.Status.Conditions)
+	mariadbdatabase.AddReadyCheck(deps, db)
 
 	brokerUser := keystone.BrokerUser(instance)
 	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)

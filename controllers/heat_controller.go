@@ -91,7 +91,7 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	if err := mariadbdatabase.Ensure(ctx, r.Client, db, log); err != nil {
 		return ctrl.Result{}, err
 	}
-	deps.AddReadyCheck(db, db.Status.Conditions)
+	mariadbdatabase.AddReadyCheck(deps, db)
 
 	brokerUser := heat.BrokerUser(instance)
 	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
@@ -108,6 +108,7 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		if err := keystonesvc.Ensure(ctx, r.Client, keystoneSvc, log); err != nil {
 			return ctrl.Result{}, err
 		}
+		keystonesvc.AddReadyCheck(deps, keystoneSvc)
 	}
 
 	keystoneUser := heat.KeystoneUser(instance)
@@ -115,6 +116,7 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	if err := keystoneuser.Ensure(ctx, r.Client, keystoneUser, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	keystoneuser.AddReadyCheck(deps, keystoneUser)
 
 	// TODO need to create heat_stack_user role
 
@@ -123,14 +125,7 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	if err := keystoneuser.Ensure(ctx, r.Client, keystoneStackUser, log); err != nil {
 		return ctrl.Result{}, err
 	}
-
-	if !keystoneUser.Status.Ready {
-		log.Info("Waiting on Keystone user to be available", "name", keystoneUser.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	} else if !keystoneStackUser.Status.Ready {
-		log.Info("Waiting on Keystone user to be available", "name", keystoneStackUser.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	}
+	keystoneuser.AddReadyCheck(deps, keystoneStackUser)
 
 	if result := deps.Wait(); !result.IsZero() {
 		return result, nil

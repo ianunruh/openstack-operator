@@ -86,7 +86,7 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	if err := mariadbdatabase.Ensure(ctx, r.Client, db, log); err != nil {
 		return ctrl.Result{}, err
 	}
-	deps.AddReadyCheck(db, db.Status.Conditions)
+	mariadbdatabase.AddReadyCheck(deps, db)
 
 	brokerUser := nova.BrokerUser(instance.Name, instance.Namespace, instance.Spec.Broker)
 	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)

@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -37,18 +38,22 @@ import (
 // KeystoneServiceReconciler reconciles a KeystoneService object
 type KeystoneServiceReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 // +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=keystoneservices,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=keystoneservices/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=keystoneservices/finalizers,verbs=update
+// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;delete
+// +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
+	reporter := keystonesvc.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.KeystoneService{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -57,6 +62,13 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
+	}
+
+	if keystonesvc.ReadyCondition(instance) == nil {
+		reporter.Pending(instance, nil, "KeystoneServicePending", "Waiting for service to be reconciled")
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	cluster := &openstackv1beta1.Keystone{
@@ -69,14 +81,36 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	} else if !cluster.Status.Ready {
 		log.Info("Waiting on Keystone to be available", "name", cluster.Name)
+		reporter.Pending(instance, nil, "KeystoneServicePending", "Waiting for cluster to be ready")
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
+	// TODO update condition
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.SetupJobHash,
 		keystonesvc.SetupJob(instance, cluster.Spec.Image, cluster.Name))
-	jobs.SetReady(&instance.Status.Ready)
-	return jobs.Run(instance)
+	if result, err := jobs.Run(instance); err != nil {
+		// TODO update pending w/error
+		return ctrl.Result{}, err
+	} else if !result.IsZero() {
+		reporter.Pending(instance, nil, "KeystoneServicePending", "Waiting for setup job to complete")
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	condition := keystonesvc.ReadyCondition(instance)
+	if condition.Status == metav1.ConditionFalse {
+		reporter.Succeeded(instance)
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	return ctrl.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
