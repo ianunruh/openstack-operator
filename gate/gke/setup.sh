@@ -6,7 +6,7 @@ CLUSTER_DOMAIN=$CLUSTER_NAME.$CLOUDSDK_COMPUTE_ZONE.test.ospk8s.com
 if ! gcloud container clusters describe $CLUSTER_NAME >/dev/null; then
     gcloud container clusters create $CLUSTER_NAME \
         --num-nodes "3" \
-        --cluster-version "1.20.9-gke.701" \
+        --cluster-version "1.20.10-gke.301" \
         --release-channel "regular" \
         --machine-type "e2-standard-2" \
         --image-type "UBUNTU_CONTAINERD" \
