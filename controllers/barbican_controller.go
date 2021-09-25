@@ -19,7 +19,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -86,10 +85,8 @@ func (r *BarbicanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	controllerutil.SetControllerReference(instance, brokerUser, r.Scheme)
 	if err := rabbitmquser.Ensure(ctx, r.Client, brokerUser, log); err != nil {
 		return ctrl.Result{}, err
-	} else if !brokerUser.Status.Ready {
-		log.Info("Waiting on broker to be available", "name", brokerUser.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
+	rabbitmquser.AddReadyCheck(deps, brokerUser)
 
 	keystoneSvc := barbican.KeystoneService(instance)
 	controllerutil.SetControllerReference(instance, keystoneSvc, r.Scheme)
