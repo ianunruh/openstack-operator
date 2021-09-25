@@ -100,6 +100,7 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		if err := r.Client.Status().Update(ctx, instance); err != nil {
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
 	condition := keystonesvc.ReadyCondition(instance)
