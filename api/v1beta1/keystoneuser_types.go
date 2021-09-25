@@ -49,7 +49,7 @@ type KeystoneUserStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Project",type=string,JSONPath=`.spec.project`
 // +kubebuilder:printcolumn:name="Domain",type=string,JSONPath=`.spec.domain`
-// +kubebuilder:printcolumn:name="Ready",type=boolean,JSONPath=`.status.ready`
+// +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // KeystoneUser is the Schema for the keystoneusers API
