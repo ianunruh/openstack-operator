@@ -254,9 +254,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.RallyReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Rally"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Rally"),
+		Recorder: mgr.GetEventRecorderFor("Rally"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Rally")
 		os.Exit(1)

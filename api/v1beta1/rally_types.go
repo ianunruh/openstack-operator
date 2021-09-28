@@ -35,7 +35,7 @@ type RallySpec struct {
 
 // RallyStatus defines the observed state of Rally
 type RallyStatus struct {
-	Ready bool `json:"ready"`
+	Conditions []metav1.Condition `json:"conditions"`
 
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
@@ -43,7 +43,7 @@ type RallyStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="Ready",type=boolean,JSONPath=`.status.ready`
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
 //+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // Rally is the Schema for the rallies API

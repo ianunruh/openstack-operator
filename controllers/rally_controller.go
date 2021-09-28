@@ -23,7 +23,9 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -38,8 +40,9 @@ import (
 // RallyReconciler reconciles a Rally object
 type RallyReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=rallies,verbs=get;list;watch;create;update;patch;delete
@@ -50,6 +53,7 @@ type RallyReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
+	reporter := rally.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.Rally{}
 	if err := r.Client.Get(ctx, req.NamespacedName, instance); err != nil {
@@ -57,6 +61,13 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
+	}
+
+	if rally.ReadyCondition(instance) == nil {
+		reporter.Pending(instance, nil, "RallyPending", "Waiting for Rally to be reconciled")
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	deps := template.NewConditionWaiter(log)
@@ -107,8 +118,9 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return result, err
 	}
 
-	if !instance.Status.Ready {
-		instance.Status.Ready = true
+	condition := rally.ReadyCondition(instance)
+	if condition.Status == metav1.ConditionFalse {
+		reporter.Succeeded(instance)
 		if err := r.Client.Status().Update(ctx, instance); err != nil {
 			return ctrl.Result{}, err
 		}

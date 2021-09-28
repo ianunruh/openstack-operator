@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"time"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -63,6 +62,8 @@ func (r *RallyTaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, nil
 	}
 
+	deps := template.NewConditionWaiter(log)
+
 	cluster := &openstackv1beta1.Rally{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "rally",
@@ -71,9 +72,11 @@ func (r *RallyTaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
 		return ctrl.Result{}, err
-	} else if !cluster.Status.Ready {
-		log.Info("Waiting on Rally to be available", "name", cluster.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+	}
+	rally.AddReadyCheck(deps, cluster)
+
+	if result := deps.Wait(); !result.IsZero() {
+		return result, nil
 	}
 
 	env := []corev1.EnvVar{
