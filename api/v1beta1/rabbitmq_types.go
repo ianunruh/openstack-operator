@@ -52,7 +52,7 @@ type RabbitMQPrometheusSpec struct {
 
 // RabbitMQStatus defines the observed state of RabbitMQ
 type RabbitMQStatus struct {
-	Ready bool `json:"ready"`
+	Conditions []metav1.Condition `json:"conditions"`
 }
 
 // +kubebuilder:object:root=true

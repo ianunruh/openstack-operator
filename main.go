@@ -148,9 +148,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.RabbitMQReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("RabbitMQ"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("RabbitMQ"),
+		Recorder: mgr.GetEventRecorderFor("RabbitMQ"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "RabbitMQ")
 		os.Exit(1)
