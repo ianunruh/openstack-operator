@@ -62,7 +62,7 @@ type KeystoneNotificationsSpec struct {
 
 // KeystoneStatus defines the observed state of Keystone
 type KeystoneStatus struct {
-	Ready bool `json:"ready"`
+	Conditions []metav1.Condition `json:"conditions"`
 
 	// +optional
 	BootstrapJobHash string `json:"bootstrapJobHash,omitempty"`
@@ -73,7 +73,7 @@ type KeystoneStatus struct {
 
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Ready",type=boolean,JSONPath=`.status.ready`
+// +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
 // +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // Keystone is the Schema for the keystones API

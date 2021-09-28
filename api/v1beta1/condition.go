@@ -5,5 +5,6 @@ const (
 
 	ReasonDeleting  = "Deleting"
 	ReasonPending   = "Pending"
+	ReasonRunning   = "Running"
 	ReasonSucceeded = "Succeeded"
 )

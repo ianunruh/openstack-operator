@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	keystoneuser "github.com/ianunruh/openstack-operator/pkg/keystone/user"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -72,6 +73,8 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 	}
 
+	deps := template.NewConditionWaiter(log)
+
 	cluster := &openstackv1beta1.Keystone{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone",
@@ -80,13 +83,11 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
 		return ctrl.Result{}, err
-	} else if !cluster.Status.Ready {
-		log.Info("Waiting on Keystone to be available", "name", cluster.Name)
-		reporter.Pending(instance, nil, "KeystoneUserPending", "Waiting for cluster to be ready")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+	}
+	keystone.AddReadyCheck(deps, cluster)
+
+	if result := deps.Wait(); !result.IsZero() {
+		return result, nil
 	}
 
 	secret := keystoneuser.Secret(instance, cluster)
