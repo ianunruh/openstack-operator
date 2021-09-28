@@ -36,7 +36,7 @@ type MariaDBSpec struct {
 
 // MariaDBStatus defines the observed state of MariaDB
 type MariaDBStatus struct {
-	Ready bool `json:"ready"`
+	Conditions []metav1.Condition `json:"conditions"`
 }
 
 // +kubebuilder:object:root=true
