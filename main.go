@@ -87,9 +87,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.MariaDBReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("MariaDB"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("MariaDB"),
+		Recorder: mgr.GetEventRecorderFor("MariaDB"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "MariaDB")
 		os.Exit(1)

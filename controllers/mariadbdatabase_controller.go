@@ -32,6 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/mariadb"
 	mariadbdatabase "github.com/ianunruh/openstack-operator/pkg/mariadb/database"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -72,6 +73,8 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		}
 	}
 
+	deps := template.NewConditionWaiter(log)
+
 	cluster := &openstackv1beta1.MariaDB{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.Spec.Cluster,
@@ -80,13 +83,11 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
 		return ctrl.Result{}, err
-	} else if !cluster.Status.Ready {
-		log.Info("Waiting on MariaDB to be ready", "name", cluster.Name)
-		reporter.Pending(instance, nil, "MariaDBDatabasePending", "Waiting for cluster to be ready")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+	}
+	mariadb.AddReadyCheck(deps, cluster)
+
+	if result := deps.Wait(); !result.IsZero() {
+		return result, nil
 	}
 
 	secret := mariadbdatabase.Secret(instance)

@@ -25,7 +25,9 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -38,8 +40,9 @@ import (
 // MariaDBReconciler reconciles a MariaDB object
 type MariaDBReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 // +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=mariadbs,verbs=get;list;watch;create;update;patch;delete
@@ -55,6 +58,7 @@ type MariaDBReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *MariaDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
+	reporter := mariadb.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.MariaDB{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -63,6 +67,13 @@ func (r *MariaDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
+	}
+
+	if mariadb.ReadyCondition(instance) == nil {
+		reporter.Pending(instance, nil, "MariaDBPending", "Waiting for MariaDB to be running")
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	// Create admin secret if not found
@@ -87,8 +98,11 @@ func (r *MariaDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	} else if sts.Status.ReadyReplicas == 0 {
 		log.Info("Waiting for StatefulSet to be available", "name", sts.Name)
 		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	} else if !instance.Status.Ready {
-		instance.Status.Ready = true
+	}
+
+	condition := mariadb.ReadyCondition(instance)
+	if condition.Status == metav1.ConditionFalse {
+		reporter.Running(instance)
 		if err := r.Client.Status().Update(ctx, instance); err != nil {
 			return ctrl.Result{}, err
 		}
