@@ -104,9 +104,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.KeystoneReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Keystone"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Keystone"),
+		Recorder: mgr.GetEventRecorderFor("Keystone"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Keystone")
 		os.Exit(1)
