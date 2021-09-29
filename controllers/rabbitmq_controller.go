@@ -78,7 +78,7 @@ func (r *RabbitMQReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	if rabbitmq.ReadyCondition(instance) == nil {
-		reporter.Pending(instance, nil, "RabbitMQPending", "Waiting for MariaDB to be running")
+		reporter.Pending(instance, nil, "RabbitMQPending", "Waiting for RabbitMQ to be running")
 		if err := r.Client.Status().Update(ctx, instance); err != nil {
 			return ctrl.Result{}, err
 		}
