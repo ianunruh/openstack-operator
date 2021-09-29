@@ -13,15 +13,16 @@ import (
 
 	"github.com/go-logr/logr"
 	"gopkg.in/ini.v1"
+	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
+	runtimeyaml "k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 )
 
-var decUnstructured = yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+var decUnstructured = runtimeyaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 func init() {
 	// pretty much all OpenStack configs need the explicit default section
@@ -182,4 +183,12 @@ func MergeINI(cfg *ini.File, extraCfg openstackv1beta1.ExtraConfig) {
 			section.NewKey(name, elements[name])
 		}
 	}
+}
+
+func MustEncodeYAML(in interface{}) []byte {
+	out, err := yaml.Marshal(in)
+	if err != nil {
+		panic(err)
+	}
+	return out
 }

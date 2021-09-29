@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
+	"github.com/gophercloud/utils/openstack/clientconfig"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -68,6 +69,24 @@ func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.K
 		wwwAuthURL = fmt.Sprintf("https://%s/v3", cluster.Spec.API.Ingress.Host)
 	}
 
+	password := template.NewPassword()
+
+	cloudsYAML := clientconfig.Clouds{
+		Clouds: map[string]clientconfig.Cloud{
+			"default": {
+				AuthInfo: &clientconfig.AuthInfo{
+					AuthURL:           wwwAuthURL,
+					Username:          instance.Name,
+					Password:          password,
+					ProjectName:       instance.Spec.Project,
+					ProjectDomainName: projectDomainName,
+					UserDomainName:    domainName,
+				},
+				RegionName: "RegionOne",
+			},
+		},
+	}
+
 	secret.StringData = map[string]string{
 		"OS_IDENTITY_API_VERSION": "3",
 		"OS_AUTH_URL":             authURL,
@@ -77,7 +96,8 @@ func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.K
 		"OS_USER_DOMAIN_NAME":     domainName,
 		"OS_PROJECT_NAME":         instance.Spec.Project,
 		"OS_USERNAME":             instance.Name,
-		"OS_PASSWORD":             template.NewPassword(),
+		"OS_PASSWORD":             password,
+		"clouds.yaml":             string(template.MustEncodeYAML(cloudsYAML)),
 	}
 
 	return secret
