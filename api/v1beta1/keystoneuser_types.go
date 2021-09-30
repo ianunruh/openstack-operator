@@ -25,6 +25,9 @@ type KeystoneUserSpec struct {
 	Secret string `json:"secret"`
 
 	// +optional
+	Name string `json:"name,omitempty"`
+
+	// +optional
 	Roles []string `json:"roles,omitempty"`
 
 	// +optional

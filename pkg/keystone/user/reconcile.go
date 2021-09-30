@@ -52,6 +52,11 @@ func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.K
 	labels := template.AppLabels(instance.Name, keystone.AppLabel)
 	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
 
+	username := instance.Spec.Name
+	if username == "" {
+		username = instance.Name
+	}
+
 	domainName := instance.Spec.Domain
 	if domainName == "" {
 		domainName = "Default"
@@ -78,7 +83,7 @@ func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.K
 			"default": {
 				AuthInfo: &clientconfig.AuthInfo{
 					AuthURL:           wwwAuthURL,
-					Username:          instance.Name,
+					Username:          username,
 					Password:          password,
 					ProjectName:       instance.Spec.Project,
 					ProjectDomainName: projectDomainName,
@@ -97,7 +102,7 @@ func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.K
 		"OS_PROJECT_DOMAIN_NAME":  projectDomainName,
 		"OS_USER_DOMAIN_NAME":     domainName,
 		"OS_PROJECT_NAME":         instance.Spec.Project,
-		"OS_USERNAME":             instance.Name,
+		"OS_USERNAME":             username,
 		"OS_PASSWORD":             password,
 		"clouds.yaml":             string(template.MustEncodeYAML(cloudsYAML)),
 	}

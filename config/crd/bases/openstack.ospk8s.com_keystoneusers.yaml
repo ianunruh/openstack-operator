@@ -51,6 +51,8 @@ spec:
             properties:
               domain:
                 type: string
+              name:
+                type: string
               project:
                 type: string
               projectDomain:
