@@ -48,7 +48,7 @@ func SetupJob(instance *openstackv1beta1.KeystoneUser, containerImage, adminSecr
 	return job
 }
 
-func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.Keystone) *corev1.Secret {
+func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.Keystone, password string) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, keystone.AppLabel)
 	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
 
@@ -69,7 +69,9 @@ func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.K
 		wwwAuthURL = fmt.Sprintf("https://%s/v3", cluster.Spec.API.Ingress.Host)
 	}
 
-	password := template.NewPassword()
+	if password == "" {
+		password = template.NewPassword()
+	}
 
 	cloudsYAML := clientconfig.Clouds{
 		Clouds: map[string]clientconfig.Cloud{
@@ -101,6 +103,10 @@ func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.K
 	}
 
 	return secret
+}
+
+func PasswordFromSecret(secret *corev1.Secret) string {
+	return string(secret.Data["OS_PASSWORD"])
 }
 
 func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.KeystoneUser, log logr.Logger) error {

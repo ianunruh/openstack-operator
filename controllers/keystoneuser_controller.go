@@ -90,9 +90,24 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return result, nil
 	}
 
-	secret := keystoneuser.Secret(instance, cluster)
+	var currentPassword string
+	currentSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.Spec.Secret,
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(currentSecret), currentSecret); err != nil {
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+	} else {
+		currentPassword = keystoneuser.PasswordFromSecret(currentSecret)
+	}
+
+	secret := keystoneuser.Secret(instance, cluster, currentPassword)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
-	if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
+	if err := template.EnsureSecret(ctx, r.Client, secret, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
