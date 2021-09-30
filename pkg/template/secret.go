@@ -68,6 +68,7 @@ func EnsureSecret(ctx context.Context, c client.Client, intended *corev1.Secret,
 		return c.Create(ctx, intended)
 	} else if !MatchesAppliedHash(found, hash) {
 		found.Data = intended.Data
+		found.StringData = intended.StringData
 		SetAppliedHash(found, hash)
 
 		log.Info("Updating Secret", "Name", intended.Name)
