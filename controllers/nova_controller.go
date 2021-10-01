@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -187,10 +186,13 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		controllerutil.SetControllerReference(instance, cell, r.Scheme)
 		if err := novacell.Ensure(ctx, r.Client, cell, log); err != nil {
 			return ctrl.Result{}, err
-		} else if !cell.Status.Ready {
-			log.Info("Waiting on NovaCell to be ready", "name", cell.Name)
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 		}
+		novacell.AddReadyCheck(deps, cell)
+	}
+
+	// wait for cells to be ready
+	if result := deps.Wait(); !result.IsZero() {
+		return result, nil
 	}
 
 	if err := r.reconcileConductor(ctx, instance, fullEnvVars, volumes, log); err != nil {

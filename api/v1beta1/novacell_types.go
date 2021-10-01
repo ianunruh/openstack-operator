@@ -71,7 +71,7 @@ type NovaNoVNCProxySpec struct {
 
 // NovaCellStatus defines the observed state of NovaCell
 type NovaCellStatus struct {
-	Ready bool `json:"ready"`
+	Conditions []metav1.Condition `json:"conditions"`
 
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
