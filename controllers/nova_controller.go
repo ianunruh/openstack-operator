@@ -38,6 +38,7 @@ import (
 	keystoneuser "github.com/ianunruh/openstack-operator/pkg/keystone/user"
 	mariadbdatabase "github.com/ianunruh/openstack-operator/pkg/mariadb/database"
 	"github.com/ianunruh/openstack-operator/pkg/nova"
+	novacell "github.com/ianunruh/openstack-operator/pkg/nova/cell"
 	rabbitmquser "github.com/ianunruh/openstack-operator/pkg/rabbitmq/user"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -184,7 +185,7 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	for _, cellSpec := range instance.Spec.Cells {
 		cell := nova.Cell(instance, cellSpec)
 		controllerutil.SetControllerReference(instance, cell, r.Scheme)
-		if err := nova.EnsureCell(ctx, r.Client, cell, log); err != nil {
+		if err := novacell.Ensure(ctx, r.Client, cell, log); err != nil {
 			return ctrl.Result{}, err
 		} else if !cell.Status.Ready {
 			log.Info("Waiting on NovaCell to be ready", "name", cell.Name)

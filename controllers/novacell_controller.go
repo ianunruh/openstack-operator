@@ -35,6 +35,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	mariadbdatabase "github.com/ianunruh/openstack-operator/pkg/mariadb/database"
 	"github.com/ianunruh/openstack-operator/pkg/nova"
+	novacell "github.com/ianunruh/openstack-operator/pkg/nova/cell"
 	rabbitmquser "github.com/ianunruh/openstack-operator/pkg/rabbitmq/user"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -129,7 +130,7 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.DBSyncJobHash,
-		nova.CellDBSyncJob(instance, env, volumes, cluster.Spec.Image))
+		novacell.DBSyncJob(instance, env, volumes, cluster.Spec.Image))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
