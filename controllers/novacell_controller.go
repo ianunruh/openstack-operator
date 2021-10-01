@@ -27,6 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -43,8 +44,9 @@ import (
 // NovaCellReconciler reconciles a NovaCell object
 type NovaCellReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 // +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=novacells,verbs=get;list;watch;create;update;patch;delete
@@ -55,6 +57,7 @@ type NovaCellReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
+	reporter := novacell.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.NovaCell{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -63,6 +66,13 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
+	}
+
+	if novacell.ReadyCondition(instance) == nil {
+		reporter.Pending(instance, nil, "NovaCellPending", "Waiting for cell to be running")
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	cluster := &openstackv1beta1.Nova{
@@ -155,8 +165,9 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		}
 	}
 
-	if !instance.Status.Ready {
-		instance.Status.Ready = true
+	condition := novacell.ReadyCondition(instance)
+	if condition.Status == metav1.ConditionFalse {
+		reporter.Running(instance)
 		if err := r.Client.Status().Update(ctx, instance); err != nil {
 			return ctrl.Result{}, err
 		}

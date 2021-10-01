@@ -46,7 +46,13 @@ func (cw *ConditionWaiter) Wait() ctrl.Result {
 		return ctrl.Result{RequeueAfter: 10 * time.Second}
 	}
 
+	cw.Clear()
+
 	return ctrl.Result{}
+}
+
+func (cw *ConditionWaiter) Clear() {
+	cw.resources = nil
 }
 
 type conditionWaitResource struct {
