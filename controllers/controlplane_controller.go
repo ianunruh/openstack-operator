@@ -21,7 +21,9 @@ import (
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -51,8 +53,9 @@ import (
 // ControlPlaneReconciler reconciles a ControlPlane object
 type ControlPlaneReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 // +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=controlplanes,verbs=get;list;watch;create;update;patch;delete
@@ -63,6 +66,7 @@ type ControlPlaneReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
+	reporter := controlplane.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.ControlPlane{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -71,6 +75,13 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 			return ctrl.Result{}, nil
 		}
 		return ctrl.Result{}, err
+	}
+
+	if controlplane.ReadyCondition(instance) == nil {
+		reporter.Pending(instance, nil, "ControlPlanePending", "Waiting for ControlPlane to be running")
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	ovnControlPlane := controlplane.OVNControlPlane(instance)
@@ -195,6 +206,14 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
+	condition := controlplane.ReadyCondition(instance)
+	if condition.Status == metav1.ConditionFalse {
+		reporter.Running(instance)
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -202,15 +221,23 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 func (r *ControlPlaneReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&openstackv1beta1.ControlPlane{}).
+		Owns(&openstackv1beta1.Barbican{}).
 		Owns(&openstackv1beta1.Cinder{}).
 		Owns(&openstackv1beta1.Glance{}).
+		Owns(&openstackv1beta1.Heat{}).
 		Owns(&openstackv1beta1.Horizon{}).
 		Owns(&openstackv1beta1.Keystone{}).
+		Owns(&openstackv1beta1.KeystoneUser{}).
+		Owns(&openstackv1beta1.Magnum{}).
+		Owns(&openstackv1beta1.Manila{}).
 		Owns(&openstackv1beta1.MariaDB{}).
 		Owns(&openstackv1beta1.Memcached{}).
 		Owns(&openstackv1beta1.Neutron{}).
 		Owns(&openstackv1beta1.Nova{}).
+		Owns(&openstackv1beta1.Octavia{}).
+		Owns(&openstackv1beta1.OVNControlPlane{}).
 		Owns(&openstackv1beta1.Placement{}).
 		Owns(&openstackv1beta1.RabbitMQ{}).
+		Owns(&openstackv1beta1.Rally{}).
 		Complete(r)
 }
