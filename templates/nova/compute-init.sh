@@ -29,5 +29,6 @@ fi
 
 tee > /tmp/pod-shared/nova-hypervisor.conf << EOF
 [DEFAULT]
-my_ip  = $hypervisor_address
+host  = $(hostname -f)
+my_ip = $hypervisor_address
 EOF
