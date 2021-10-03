@@ -1,0 +1,6 @@
+apiVersion: openstack.ospk8s.com/v1beta1
+kind: NovaKeypair
+metadata:
+  name: ianunruh-ecdsa
+spec:
+  publicKey: ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBNdwR8ol7etCflUsgHJ7nKh9xCJIT+aL3KFKMLUmq/r2BXUjkLihd+PL4xrtVtjZ/g0euQ1v0Ikc2RQLJvaUwqY= ianunruh@gmail.com
