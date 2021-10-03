@@ -1,0 +1,20 @@
+# permissions for end users to view novakeypairs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: novakeypair-viewer-role
+rules:
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novakeypairs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novakeypairs/status
+  verbs:
+  - get

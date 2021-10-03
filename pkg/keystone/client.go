@@ -1,6 +1,8 @@
 package keystone
 
 import (
+	"context"
+
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
 	corev1 "k8s.io/api/core/v1"
@@ -34,4 +36,21 @@ func CloudClient(svcUser *corev1.Secret) (*gophercloud.ProviderClient, error) {
 	}
 
 	return openstack.AuthenticatedClient(clientOpts)
+}
+
+func NewIdentityServiceClient(ctx context.Context, svcUser *corev1.Secret) (*gophercloud.ServiceClient, error) {
+	client, err := CloudClient(svcUser)
+	if err != nil {
+		return nil, err
+	}
+
+	// pass through context from controller
+	client.Context = ctx
+
+	endpointOpts := gophercloud.EndpointOpts{
+		Region:       string(svcUser.Data["OS_REGION_NAME"]),
+		Availability: gophercloud.AvailabilityPublic,
+	}
+
+	return openstack.NewIdentityV3(client, endpointOpts)
 }

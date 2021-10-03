@@ -671,6 +671,32 @@ rules:
 - apiGroups:
   - openstack.ospk8s.com
   resources:
+  - novakeypairs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novakeypairs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novakeypairs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
   - novas
   verbs:
   - create
