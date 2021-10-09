@@ -9,7 +9,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
@@ -21,9 +20,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	novakeypair "github.com/ianunruh/openstack-operator/pkg/nova/keypair"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -36,7 +37,21 @@ const (
 	imageSourceProperty = "source"
 )
 
-func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client.Client, log logr.Logger) error {
+func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client.Client, log logr.Logger) (ctrl.Result, error) {
+	b, err := newBootstrap(ctx, instance, c, log)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := b.EnsureAll(ctx); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	result := b.Wait()
+	return result, nil
+}
+
+func newBootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client.Client, log logr.Logger) (*bootstrap, error) {
 	adminUser := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone",
@@ -44,7 +59,7 @@ func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client
 		},
 	}
 	if err := c.Get(ctx, client.ObjectKeyFromObject(adminUser), adminUser); err != nil {
-		return err
+		return nil, err
 	}
 
 	svcUser := &corev1.Secret{
@@ -54,7 +69,7 @@ func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client
 		},
 	}
 	if err := c.Get(ctx, client.ObjectKeyFromObject(svcUser), svcUser); err != nil {
-		return err
+		return nil, err
 	}
 
 	clientOpts := gophercloud.AuthOptions{
@@ -67,7 +82,7 @@ func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client
 
 	client, err := openstack.AuthenticatedClient(clientOpts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	endpointOpts := gophercloud.EndpointOpts{
@@ -77,21 +92,22 @@ func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client
 
 	compute, err := openstack.NewComputeV2(client, endpointOpts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	image, err := openstack.NewImageServiceV2(client, endpointOpts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	network, err := openstack.NewNetworkV2(client, endpointOpts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	b := &bootstrap{
 		client:   c,
+		deps:     template.NewConditionWaiter(log),
 		instance: instance,
 		log:      log,
 
@@ -100,11 +116,12 @@ func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client
 		network: network,
 	}
 
-	return b.EnsureAll(ctx)
+	return b, nil
 }
 
 type bootstrap struct {
 	client   client.Client
+	deps     *template.ConditionWaiter
 	instance *openstackv1beta1.Octavia
 	log      logr.Logger
 
@@ -143,6 +160,10 @@ func (b *bootstrap) EnsureAll(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (b *bootstrap) Wait() ctrl.Result {
+	return b.deps.Wait()
 }
 
 func (b *bootstrap) EnsureFlavor(ctx context.Context) error {
@@ -247,15 +268,6 @@ func (b *bootstrap) uploadImage(ctx context.Context, imageURL string) (*images.I
 }
 
 func (b *bootstrap) EnsureKeypair(ctx context.Context) error {
-	result := keypairs.Get(b.compute, amphoraKeypairName, keypairs.GetOpts{})
-	if err := result.Err; err != nil {
-		if _, ok := err.(gophercloud.ErrDefault404); !ok {
-			return err
-		}
-	} else {
-		return nil
-	}
-
 	secret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      template.Combine(b.instance.Name, "amphora-ssh"),
@@ -277,12 +289,24 @@ func (b *bootstrap) EnsureKeypair(ctx context.Context) error {
 		}
 	}
 
-	b.log.Info("Creating keypair", "name", amphoraKeypairName)
-	_, err := keypairs.Create(b.compute, keypairs.CreateOpts{
-		Name:      amphoraKeypairName,
-		PublicKey: string(secret.Data["id_rsa.pub"]),
-	}).Extract()
-	return err
+	keypair := &openstackv1beta1.NovaKeypair{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      template.Combine(b.instance.Name, "amphora"),
+			Namespace: b.instance.Name,
+		},
+		Spec: openstackv1beta1.NovaKeypairSpec{
+			Name:      amphoraKeypairName,
+			PublicKey: string(secret.Data["id_rsa.pub"]),
+			User:      b.instance.Name,
+		},
+	}
+	if err := novakeypair.Ensure(ctx, b.client, keypair, b.log); err != nil {
+		return err
+	}
+
+	novakeypair.AddReadyCheck(b.deps, keypair)
+
+	return nil
 }
 
 func (b *bootstrap) EnsureNetwork(ctx context.Context) error {
