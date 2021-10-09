@@ -137,8 +137,8 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	if err := amphora.Bootstrap(ctx, instance, r.Client, log); err != nil {
-		return ctrl.Result{}, err
+	if result, err := amphora.Bootstrap(ctx, instance, r.Client, log); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	cm := octavia.ConfigMap(instance)
