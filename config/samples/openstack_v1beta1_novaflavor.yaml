@@ -1,0 +1,9 @@
+apiVersion: openstack.ospk8s.com/v1beta1
+kind: NovaFlavor
+metadata:
+  name: c1-medium
+spec:
+  ram: 2048
+  vcpus: 2
+  disk: 40
+  isPublic: true

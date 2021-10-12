@@ -645,6 +645,32 @@ rules:
 - apiGroups:
   - openstack.ospk8s.com
   resources:
+  - novaflavors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novaflavors/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novaflavors/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
   - novahostaggregates
   verbs:
   - create

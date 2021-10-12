@@ -42,6 +42,27 @@ spec:
       libvirt:
         # KVM not supported on GKE, fallback to QEMU
         virt_type: qemu
+    flavors:
+      c1-mini:
+        ram: 256
+        vcpus: 1
+        disk: 10
+        isPublic: true
+      c1-small:
+        ram: 1024
+        vcpus: 1
+        disk: 20
+        isPublic: true
+      c1-medium:
+        ram: 2048
+        vcpus: 2
+        disk: 40
+        isPublic: true
+      c1-large:
+        ram: 4096
+        vcpus: 4
+        disk: 60
+        isPublic: true
   neutron:
     image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
   ovn:

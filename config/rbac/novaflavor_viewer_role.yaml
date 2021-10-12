@@ -1,0 +1,20 @@
+# permissions for end users to view novaflavors.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: novaflavor-viewer-role
+rules:
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novaflavors
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novaflavors/status
+  verbs:
+  - get
