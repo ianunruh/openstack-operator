@@ -46,6 +46,9 @@ type NovaSpec struct {
 	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 
 	// +optional
+	Flavors map[string]NovaFlavorSpec `json:"flavors,omitempty"`
+
+	// +optional
 	Neutron NovaNeutronSpec `json:"neutron,omitempty"`
 
 	// +optional

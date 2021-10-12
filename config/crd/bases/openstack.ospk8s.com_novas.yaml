@@ -418,6 +418,30 @@ spec:
                     type: string
                   type: object
                 type: object
+              flavors:
+                additionalProperties:
+                  description: NovaFlavorSpec defines the desired state of NovaFlavor
+                  properties:
+                    disk:
+                      type: integer
+                    ephemeral:
+                      type: integer
+                    isPublic:
+                      type: boolean
+                    name:
+                      type: string
+                    ram:
+                      type: integer
+                    swap:
+                      type: integer
+                    vcpus:
+                      type: integer
+                  required:
+                  - disk
+                  - ram
+                  - vcpus
+                  type: object
+                type: object
               image:
                 type: string
               neutron:

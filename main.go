@@ -398,6 +398,15 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "NovaKeypair")
 		os.Exit(1)
 	}
+	if err = (&controllers.NovaFlavorReconciler{
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("NovaFlavor"),
+		Recorder: mgr.GetEventRecorderFor("NovaFlavor"),
+		Scheme:   mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "NovaFlavor")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {

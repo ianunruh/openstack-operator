@@ -38,6 +38,7 @@ import (
 	mariadbdatabase "github.com/ianunruh/openstack-operator/pkg/mariadb/database"
 	"github.com/ianunruh/openstack-operator/pkg/nova"
 	novacell "github.com/ianunruh/openstack-operator/pkg/nova/cell"
+	novaflavor "github.com/ianunruh/openstack-operator/pkg/nova/flavor"
 	rabbitmquser "github.com/ianunruh/openstack-operator/pkg/rabbitmq/user"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -203,6 +204,10 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
+	if err := r.reconcileFlavors(ctx, instance, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	// TODO wait for deploys to be ready then mark status
 
 	return ctrl.Result{}, nil
@@ -262,6 +267,25 @@ func (r *NovaReconciler) reconcileScheduler(ctx context.Context, instance *opens
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func (r *NovaReconciler) reconcileFlavors(ctx context.Context, instance *openstackv1beta1.Nova, log logr.Logger) error {
+	for name, spec := range instance.Spec.Flavors {
+		flavor := &openstackv1beta1.NovaFlavor{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      name,
+				Namespace: instance.Namespace,
+			},
+			Spec: spec,
+		}
+		if err := novaflavor.Ensure(ctx, r.Client, flavor, log); err != nil {
+			return err
+		}
+	}
+
+	// TODO cleanup removed/renamed flavors
 
 	return nil
 }
