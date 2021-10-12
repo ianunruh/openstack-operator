@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	readyMessage = "Host aggregate reconciled in Nova successfully"
+	readyMessage = "Keypair reconciled in Nova successfully"
 )
 
 func NewReporter(recorder record.EventRecorder) *Reporter {
