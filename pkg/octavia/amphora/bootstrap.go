@@ -292,7 +292,7 @@ func (b *bootstrap) EnsureKeypair(ctx context.Context) error {
 	keypair := &openstackv1beta1.NovaKeypair{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      template.Combine(b.instance.Name, "amphora"),
-			Namespace: b.instance.Name,
+			Namespace: b.instance.Namespace,
 		},
 		Spec: openstackv1beta1.NovaKeypairSpec{
 			Name:      amphoraKeypairName,
