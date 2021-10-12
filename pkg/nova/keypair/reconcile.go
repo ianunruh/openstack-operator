@@ -20,13 +20,13 @@ import (
 func Reconcile(ctx context.Context, c client.Client, instance *openstackv1beta1.NovaKeypair, compute *gophercloud.ServiceClient, identity *gophercloud.ServiceClient, log logr.Logger) error {
 	userID, err := getUserID(instance, identity, log)
 	if err != nil {
-		return err
+		return fmt.Errorf("getting user ID: %w", err)
 	}
 
 	keypair, err := getKeypair(instance, userID, compute)
 	if err != nil {
 		if !errors.Is(err, gophercloud.ErrDefault404{}) {
-			return err
+			return fmt.Errorf("getting keypair: %w", err)
 		}
 	}
 
@@ -58,7 +58,7 @@ func reconcileKeypair(ctx context.Context, c client.Client, instance *openstackv
 			UserID:    userID,
 		}).Extract()
 		if err != nil {
-			return err
+			return fmt.Errorf("creating keypair: %w", err)
 		}
 	}
 
@@ -103,7 +103,7 @@ func getUserID(instance *openstackv1beta1.NovaKeypair, identity *gophercloud.Ser
 
 	domainID, err := getDomainID(instance, identity, log)
 	if err != nil {
-		return "", nil
+		return "", fmt.Errorf("getting domain ID: %w", err)
 	}
 
 	pages, err := users.List(identity, users.ListOpts{
