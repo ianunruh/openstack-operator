@@ -2,7 +2,6 @@ package keypair
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/go-logr/logr"
@@ -17,20 +16,20 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func Reconcile(ctx context.Context, c client.Client, instance *openstackv1beta1.NovaKeypair, compute *gophercloud.ServiceClient, identity *gophercloud.ServiceClient, log logr.Logger) error {
+func Reconcile(ctx context.Context, instance *openstackv1beta1.NovaKeypair, compute *gophercloud.ServiceClient, identity *gophercloud.ServiceClient, log logr.Logger) error {
 	userID, err := getUserID(instance, identity, log)
 	if err != nil {
-		return err
+		return fmt.Errorf("getting user ID: %w", err)
 	}
 
 	keypair, err := getKeypair(instance, userID, compute)
 	if err != nil {
-		if !errors.Is(err, gophercloud.ErrDefault404{}) {
-			return err
+		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+			return fmt.Errorf("getting keypair: %w", err)
 		}
 	}
 
-	if err := reconcileKeypair(ctx, c, instance, keypair, userID, compute, log); err != nil {
+	if err := reconcileKeypair(ctx, instance, keypair, userID, compute, log); err != nil {
 		return err
 	}
 
@@ -44,7 +43,7 @@ func getKeypair(instance *openstackv1beta1.NovaKeypair, userID string, compute *
 	}).Extract()
 }
 
-func reconcileKeypair(ctx context.Context, c client.Client, instance *openstackv1beta1.NovaKeypair, keypair *keypairs.KeyPair, userID string, compute *gophercloud.ServiceClient, log logr.Logger) error {
+func reconcileKeypair(ctx context.Context, instance *openstackv1beta1.NovaKeypair, keypair *keypairs.KeyPair, userID string, compute *gophercloud.ServiceClient, log logr.Logger) error {
 	name := keypairName(instance)
 
 	var err error
@@ -58,7 +57,7 @@ func reconcileKeypair(ctx context.Context, c client.Client, instance *openstackv
 			UserID:    userID,
 		}).Extract()
 		if err != nil {
-			return err
+			return fmt.Errorf("creating keypair: %w", err)
 		}
 	}
 
@@ -79,11 +78,10 @@ func Delete(instance *openstackv1beta1.NovaKeypair, compute *gophercloud.Service
 	if err := keypairs.Delete(compute, name, keypairs.DeleteOpts{
 		UserID: userID,
 	}).Err; err != nil {
-		if errors.Is(err, gophercloud.ErrDefault404{}) {
-			log.Info("Keypair not found on deletion", "name", name)
-		} else {
+		if _, ok := err.(gophercloud.ErrDefault404); !ok {
 			return err
 		}
+		log.Info("Keypair not found on deletion", "name", name)
 	}
 
 	return nil
@@ -103,7 +101,7 @@ func getUserID(instance *openstackv1beta1.NovaKeypair, identity *gophercloud.Ser
 
 	domainID, err := getDomainID(instance, identity, log)
 	if err != nil {
-		return "", nil
+		return "", fmt.Errorf("getting domain ID: %w", err)
 	}
 
 	pages, err := users.List(identity, users.ListOpts{

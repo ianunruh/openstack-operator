@@ -86,6 +86,8 @@ func (r *NovaKeypairReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	// compute API microversion 2.10 or later is required
+	compute.Microversion = "2.10"
 
 	identity, err := keystone.NewIdentityServiceClient(ctx, svcUser)
 	if err != nil {
@@ -128,7 +130,7 @@ func (r *NovaKeypairReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 	}
 
-	if err := keypair.Reconcile(ctx, r.Client, instance, compute, identity, log); err != nil {
+	if err := keypair.Reconcile(ctx, instance, compute, identity, log); err != nil {
 		reporter.Pending(instance, err, "KeypairReconcileError", "Error reconciling keypair")
 		if statusErr := r.Client.Status().Update(ctx, instance); statusErr != nil {
 			err = utilerrors.NewAggregate([]error{statusErr, err})
