@@ -25,7 +25,9 @@ func Reconcile(ctx context.Context, c client.Client, instance *openstackv1beta1.
 
 	keypair, err := getKeypair(instance, userID, compute)
 	if err != nil {
-		return err
+		if !errors.Is(err, gophercloud.ErrDefault404{}) {
+			return err
+		}
 	}
 
 	if err := reconcileKeypair(ctx, c, instance, keypair, userID, compute, log); err != nil {
