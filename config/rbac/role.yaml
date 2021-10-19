@@ -567,6 +567,32 @@ rules:
 - apiGroups:
   - openstack.ospk8s.com
   resources:
+  - neutronnetworks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - neutronnetworks/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - neutronnetworks/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
   - neutrons
   verbs:
   - create

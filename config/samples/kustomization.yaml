@@ -27,4 +27,5 @@ resources:
 - openstack_v1beta1_novahostaggregate.yaml
 - openstack_v1beta1_novakeypair.yaml
 - openstack_v1beta1_novaflavor.yaml
+- openstack_v1beta1_neutronnetwork.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

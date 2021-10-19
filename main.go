@@ -407,6 +407,19 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "NovaFlavor")
 		os.Exit(1)
 	}
+	if err = (&controllers.NeutronNetworkReconciler{
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("NeutronNetwork"),
+		Recorder: mgr.GetEventRecorderFor("NeutronNetwork"),
+		Scheme:   mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "NeutronNetwork")
+		os.Exit(1)
+	}
+	if err = (&openstackv1beta1.NeutronNetwork{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "NeutronNetwork")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("health", healthz.Ping); err != nil {

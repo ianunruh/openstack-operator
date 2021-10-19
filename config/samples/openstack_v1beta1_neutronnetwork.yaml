@@ -1,0 +1,9 @@
+apiVersion: openstack.ospk8s.com/v1beta1
+kind: NeutronNetwork
+metadata:
+  name: external
+spec:
+  external: true
+  segments:
+  - networkType: flat
+    physicalNetwork: external

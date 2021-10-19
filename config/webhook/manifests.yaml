@@ -244,6 +244,27 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-openstack-ospk8s-com-v1beta1-neutronnetwork
+  failurePolicy: Fail
+  name: mneutronnetwork.kb.io
+  rules:
+  - apiGroups:
+    - openstack.ospk8s.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - neutronnetworks
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-openstack-ospk8s-com-v1beta1-nova
   failurePolicy: Fail
   name: mnova.kb.io
@@ -685,6 +706,27 @@ webhooks:
     - UPDATE
     resources:
     - neutrons
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-ospk8s-com-v1beta1-neutronnetwork
+  failurePolicy: Fail
+  name: vneutronnetwork.kb.io
+  rules:
+  - apiGroups:
+    - openstack.ospk8s.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - neutronnetworks
   sideEffects: None
 - admissionReviewVersions:
   - v1

@@ -1,0 +1,24 @@
+# permissions for end users to edit neutronnetworks.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: neutronnetwork-editor-role
+rules:
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - neutronnetworks
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - neutronnetworks/status
+  verbs:
+  - get

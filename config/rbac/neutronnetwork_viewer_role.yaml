@@ -1,0 +1,20 @@
+# permissions for end users to view neutronnetworks.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: neutronnetwork-viewer-role
+rules:
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - neutronnetworks
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - neutronnetworks/status
+  verbs:
+  - get
