@@ -1,0 +1,66 @@
+name: Setup CAPI gate
+
+on:
+  pull_request:
+    types: [labeled, synchronize, opened, reopened]
+
+env:
+  CLUSTER_NAME: gate-pr-${{ github.event.pull_request.number }}
+  OPENSTACK_FAILURE_DOMAIN: az3
+  DNS_ZONE: ospk8s
+
+jobs:
+  setup:
+    if: contains(github.event.pull_request.labels.*.name, 'gate-capi')
+
+    runs-on: [self-hosted]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Mask secrets
+        run: |
+          echo "::add-mask::${{ secrets.GATE_KUBECONFIG }}"
+          echo "::add-mask::${{ secrets.GCLOUD_SVC_ACCOUNT_KEY_JSON }}"
+
+      - name: Setup Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          project_id: ospk8s
+          service_account_key: ${{ secrets.GCLOUD_SVC_ACCOUNT_KEY_JSON }}
+          export_default_credentials: true
+
+      - name: Install tools
+        working-directory: gate/capi
+        run: ./install-tools.sh
+
+      - name: Update operator image
+        working-directory: config/manager
+        run: |
+          kustomize edit set image ghcr.io/ianunruh/openstack-operator:sha-$GITHUB_SHA
+
+      - name: Setup CAPI cluster
+        working-directory: gate/capi
+        run: ./setup.sh
+        env:
+          GATE_KUBECONFIG: ${{ secrets.GATE_KUBECONFIG }}
+          GCLOUD_SVC_ACCOUNT_KEY_JSON: ${{ secrets.GCLOUD_SVC_ACCOUNT_KEY_JSON }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_READ }}
+
+      - name: Post comment to PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          message: |
+            CAPI K8s cluster in `${{ env.OPENSTACK_FAILURE_DOMAIN }}` ready for testing 🚀
+
+            Last deployed commit: `${{ github.sha }}`
+
+            Horizon: https://horizon.${{ env.CLUSTER_NAME }}.${{ env.OPENSTACK_FAILURE_DOMAIN }}.test.ospk8s.com
+
+            ```bash
+            clusterctl get kubeconfig -n ospk8s-ci ${{ env.CLUSTER_NAME }} > kubeconfig
+            export KUBECONFIG=$(pwd)/kubeconfig
+
+            kubectl get secret keystone -o 'jsonpath={.data.OS_PASSWORD}' | base64 -d
+            ```
