@@ -1,0 +1,29 @@
+name: Check codegen output
+
+on:
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  check-codegen:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.16'
+
+      - name: Run codegen
+        run: |
+          make generate
+          make manifests
+
+      # https://remarkablemark.org/blog/2017/10/12/check-git-dirty/
+      - name: Ensure working tree is clean
+        run: |
+          [[ -z $(git status -s) ]] || exit 1
