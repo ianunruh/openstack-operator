@@ -154,6 +154,7 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 		template.SecretEnvVar("OS_HEALTH_MANAGER__HEARTBEAT_KEY", amphoraSecret.Name, "heartbeat-key"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
+		template.ConfigMapEnvVar("OS_OVN__OVN_NB_CONNECTION", "ovn-ovsdb", "OVN_NB_CONNECTION"),
 	}
 
 	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
@@ -161,6 +162,7 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-octavia", cm.Name, nil),
+		template.HostPathVolume("host-var-run-octavia", "/var/run/octavia"),
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
@@ -170,6 +172,10 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := r.reconcileDriverAgent(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -208,6 +214,16 @@ func (r *OctaviaReconciler) reconcileAPI(ctx context.Context, instance *openstac
 	}
 
 	deploy := octavia.APIDeployment(instance, env, volumes)
+	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
+	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *OctaviaReconciler) reconcileDriverAgent(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	deploy := octavia.DriverAgentDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err

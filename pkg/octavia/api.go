@@ -19,6 +19,7 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
+		template.VolumeMount("host-var-run-octavia", "/var/run/octavia"),
 	}
 
 	probe := &corev1.Probe{
@@ -31,6 +32,7 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 		InitialDelaySeconds: 5,
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,
+		FailureThreshold:    15,
 	}
 
 	deploy := template.GenericDeployment(template.Component{
