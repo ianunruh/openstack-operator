@@ -30,6 +30,9 @@ type OctaviaSpec struct {
 	// +optional
 	API OctaviaAPISpec `json:"api,omitempty"`
 
+	// +optional
+	DriverAgent OctaviaDriverAgentSpec `json:"driverAgent,omitempty"`
+
 	HealthManager OctaviaHealthManagerSpec `json:"healthManager"`
 
 	// +optional
@@ -64,6 +67,17 @@ type OctaviaAPISpec struct {
 
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
+
+type OctaviaDriverAgentSpec struct {
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// +optional
+	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`

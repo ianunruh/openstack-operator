@@ -93,6 +93,12 @@ spec:
     image: ghcr.io/ianunruh/openstack-operator-images/octavia:master
     amphora:
       imageURL: https://tarballs.opendev.org/openstack/octavia/test-images/test-only-amphora-x64-haproxy-ubuntu-focal.qcow2
+    api:
+      nodeSelector:
+        openstack/octavia-controller: enabled
+    driverAgent:
+      nodeSelector:
+        openstack/octavia-controller: enabled
     healthManager:
       nodeSelector:
         openstack/octavia-controller: enabled
