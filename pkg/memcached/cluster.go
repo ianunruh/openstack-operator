@@ -91,9 +91,14 @@ func ClusterService(instance *openstackv1beta1.Memcached) *corev1.Service {
 }
 
 func ClusterHeadlessService(instance *openstackv1beta1.Memcached) *corev1.Service {
+	extraPorts := []corev1.ServicePort{
+		{Name: "metrics", Port: 9150},
+	}
+
 	svc := ClusterService(instance)
 	svc.Name = template.HeadlessServiceName(instance.Name)
 	svc.Spec.ClusterIP = corev1.ClusterIPNone
+	svc.Spec.Ports = append(svc.Spec.Ports, extraPorts...)
 
 	return svc
 }
