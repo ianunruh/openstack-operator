@@ -8,6 +8,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
@@ -23,6 +24,29 @@ func ClusterStatefulSet(instance *openstackv1beta1.Memcached) *appsv1.StatefulSe
 
 	runAsUser := int64(1001)
 
+	containers := []corev1.Container{
+		{
+			Name:  "memcached",
+			Image: instance.Spec.Image,
+			Args: []string{
+				"/run.sh",
+				"-e/cache-state/memory_file",
+			},
+			Ports: []corev1.ContainerPort{
+				{Name: "memcached", ContainerPort: 11211},
+			},
+			Resources: instance.Spec.Resources,
+			VolumeMounts: []corev1.VolumeMount{
+				template.VolumeMount("data", "/cache-state"),
+				template.VolumeMount("tmp", "/tmp"),
+			},
+		},
+	}
+
+	if promSpec := instance.Spec.Prometheus; promSpec != nil {
+		containers = append(containers, exporterContainer(promSpec.Exporter))
+	}
+
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
@@ -31,30 +55,7 @@ func ClusterStatefulSet(instance *openstackv1beta1.Memcached) *appsv1.StatefulSe
 			FSGroup:   &runAsUser,
 			RunAsUser: &runAsUser,
 		},
-		Containers: []corev1.Container{
-			{
-				Name:  "memcached",
-				Image: instance.Spec.Image,
-				Args: []string{
-					"/run.sh",
-					"-e/cache-state/memory_file",
-				},
-				Ports: []corev1.ContainerPort{
-					{Name: "memcached", ContainerPort: 11211},
-				},
-				Resources: instance.Spec.Resources,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "data",
-						MountPath: "/cache-state",
-					},
-					{
-						Name:      "tmp",
-						MountPath: "/tmp",
-					},
-				},
-			},
-		},
+		Containers: containers,
 		Volumes: []corev1.Volume{
 			template.EmptyDirVolume("tmp"),
 		},
@@ -64,6 +65,18 @@ func ClusterStatefulSet(instance *openstackv1beta1.Memcached) *appsv1.StatefulSe
 	})
 
 	return sts
+}
+
+func exporterContainer(spec openstackv1beta1.MemcachedExporterSpec) corev1.Container {
+	return corev1.Container{
+		Name:            "exporter",
+		Image:           spec.Image,
+		ImagePullPolicy: corev1.PullAlways,
+		Ports: []corev1.ContainerPort{
+			{Name: "metrics", ContainerPort: 9150},
+		},
+		Resources: spec.Resources,
+	}
 }
 
 func ClusterService(instance *openstackv1beta1.Memcached) *corev1.Service {
@@ -83,6 +96,23 @@ func ClusterHeadlessService(instance *openstackv1beta1.Memcached) *corev1.Servic
 	svc.Spec.ClusterIP = corev1.ClusterIPNone
 
 	return svc
+}
+
+type serviceMonitorOptions struct {
+	Name      string
+	Namespace string
+}
+
+func ClusterServiceMonitor(instance *openstackv1beta1.Memcached) *unstructured.Unstructured {
+	manifest := template.MustRenderFile(AppLabel, "servicemonitor.yaml", serviceMonitorOptions{
+		Name:      instance.Name,
+		Namespace: instance.Namespace,
+	})
+
+	res := template.MustDecodeManifest(manifest)
+	res.SetNamespace(instance.Namespace)
+
+	return res
 }
 
 func EnsureCluster(ctx context.Context, c client.Client, intended *openstackv1beta1.Memcached, log logr.Logger) error {

@@ -72,6 +72,10 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 	// TODO wait on sts to be ready and update status
 
+	if err := r.reconcileServiceMonitor(ctx, instance, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -95,6 +99,20 @@ func (r *MemcachedReconciler) reconcileServices(ctx context.Context, instance *o
 		}
 	}
 
+	return nil
+}
+func (r *MemcachedReconciler) reconcileServiceMonitor(ctx context.Context, instance *openstackv1beta1.Memcached, log logr.Logger) error {
+	promSpec := instance.Spec.Prometheus
+	if promSpec == nil || !promSpec.ServiceMonitor {
+		// TODO ensure service monitor does not exist
+		return nil
+	}
+
+	svcMonitor := memcached.ClusterServiceMonitor(instance)
+	controllerutil.SetControllerReference(instance, svcMonitor, r.Scheme)
+	if err := template.EnsureResource(ctx, r.Client, svcMonitor, log); err != nil {
+		return err
+	}
 	return nil
 }
 

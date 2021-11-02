@@ -4,6 +4,24 @@ metadata:
   name: memcached
 spec:
   image: docker.io/bitnami/memcached:1.6.9-debian-10-r0
+  resources:
+    requests:
+      cpu: 100m
+      memory: 64Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
   volume:
     capacity: 50Gi
     storageClass: ceph-block-ssd
+  prometheus:
+    exporter:
+      image: bitnami/memcached-exporter:0.9.0
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+    serviceMonitor: true
