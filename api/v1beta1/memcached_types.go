@@ -31,6 +31,23 @@ type MemcachedSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional
+	Prometheus *MemcachedPrometheusSpec `json:"prometheus,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
+
+type MemcachedPrometheusSpec struct {
+	Exporter MemcachedExporterSpec `json:"exporter"`
+
+	// +optional
+	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
+}
+
+type MemcachedExporterSpec struct {
+	Image string `json:"image"`
+
+	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 

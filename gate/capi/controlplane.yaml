@@ -16,6 +16,9 @@ spec:
     image: docker.io/bitnami/memcached:1.6.9-debian-10-r0
     volume:
       capacity: 20Gi
+    prometheus:
+      exporter:
+        image: bitnami/memcached-exporter:0.9.0
   database:
     image: docker.io/bitnami/mariadb:10.5.8-debian-10-r21
     volume:
