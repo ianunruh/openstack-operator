@@ -131,7 +131,6 @@ func ClusterService(instance *openstackv1beta1.RabbitMQ) *corev1.Service {
 		{Name: "amqp", Port: 5672},
 		{Name: "dist", Port: 25672},
 		{Name: "epmd", Port: 4369},
-		{Name: "metrics", Port: 9419},
 		{Name: "stats", Port: 15672},
 	}
 
@@ -139,9 +138,14 @@ func ClusterService(instance *openstackv1beta1.RabbitMQ) *corev1.Service {
 }
 
 func ClusterHeadlessService(instance *openstackv1beta1.RabbitMQ) *corev1.Service {
+	extraPorts := []corev1.ServicePort{
+		{Name: "metrics", Port: 9419},
+	}
+
 	svc := ClusterService(instance)
 	svc.Name = template.HeadlessServiceName(instance.Name)
 	svc.Spec.ClusterIP = corev1.ClusterIPNone
+	svc.Spec.Ports = append(svc.Spec.Ports, extraPorts...)
 
 	return svc
 }

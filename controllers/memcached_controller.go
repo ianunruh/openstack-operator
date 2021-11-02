@@ -18,12 +18,15 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -36,8 +39,9 @@ import (
 // MemcachedReconciler reconciles a Memcached object
 type MemcachedReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 // +kubebuilder:rbac:groups=openstack.ospk8s.com,resources=memcacheds,verbs=get;list;watch;create;update;patch;delete
@@ -53,6 +57,7 @@ type MemcachedReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
+	reporter := memcached.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.Memcached{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -63,26 +68,39 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
+	if memcached.ReadyCondition(instance) == nil {
+		reporter.Pending(instance, nil, "MemcachedPending", "Waiting for Memcached to be running")
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	if err := r.reconcileServices(ctx, instance, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileStatefulSet(ctx, instance, log); err != nil {
+	sts := memcached.ClusterStatefulSet(instance)
+	controllerutil.SetControllerReference(instance, sts, r.Scheme)
+	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return ctrl.Result{}, err
+	} else if sts.Status.ReadyReplicas == 0 {
+		log.Info("Waiting for StatefulSet to be available", "name", sts.Name)
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
-	// TODO wait on sts to be ready and update status
+
+	condition := memcached.ReadyCondition(instance)
+	if condition.Status == metav1.ConditionFalse {
+		reporter.Running(instance)
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
 
 	if err := r.reconcileServiceMonitor(ctx, instance, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
-}
-
-func (r *MemcachedReconciler) reconcileStatefulSet(ctx context.Context, instance *openstackv1beta1.Memcached, log logr.Logger) error {
-	sts := memcached.ClusterStatefulSet(instance)
-	controllerutil.SetControllerReference(instance, sts, r.Scheme)
-	return template.EnsureStatefulSet(ctx, r.Client, sts, log)
 }
 
 func (r *MemcachedReconciler) reconcileServices(ctx context.Context, instance *openstackv1beta1.Memcached, log logr.Logger) error {
