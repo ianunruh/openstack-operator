@@ -23,6 +23,9 @@ spec:
     image: docker.io/bitnami/mariadb:10.5.8-debian-10-r21
     volume:
       capacity: 20Gi
+    prometheus:
+      exporter:
+        image: bitnami/mysqld-exporter:0.13.0
   keystone:
     image: ghcr.io/ianunruh/openstack-operator-images/keystone:master
   glance:

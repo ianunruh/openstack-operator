@@ -108,6 +108,10 @@ func (r *MariaDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 	}
 
+	if err := r.reconcileServiceMonitor(ctx, instance, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -139,6 +143,21 @@ func (r *MariaDBReconciler) reconcileServices(ctx context.Context, instance *ope
 		}
 	}
 
+	return nil
+}
+
+func (r *MariaDBReconciler) reconcileServiceMonitor(ctx context.Context, instance *openstackv1beta1.MariaDB, log logr.Logger) error {
+	promSpec := instance.Spec.Prometheus
+	if promSpec == nil || !promSpec.ServiceMonitor {
+		// TODO ensure service monitor does not exist
+		return nil
+	}
+
+	svcMonitor := mariadb.ClusterServiceMonitor(instance)
+	controllerutil.SetControllerReference(instance, svcMonitor, r.Scheme)
+	if err := template.EnsureResource(ctx, r.Client, svcMonitor, log); err != nil {
+		return err
+	}
 	return nil
 }
 
