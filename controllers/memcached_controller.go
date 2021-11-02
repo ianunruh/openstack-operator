@@ -119,6 +119,7 @@ func (r *MemcachedReconciler) reconcileServices(ctx context.Context, instance *o
 
 	return nil
 }
+
 func (r *MemcachedReconciler) reconcileServiceMonitor(ctx context.Context, instance *openstackv1beta1.Memcached, log logr.Logger) error {
 	promSpec := instance.Spec.Prometheus
 	if promSpec == nil || !promSpec.ServiceMonitor {

@@ -8,6 +8,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
@@ -36,44 +37,42 @@ func ClusterStatefulSet(instance *openstackv1beta1.MariaDB, configHash string) *
 		TimeoutSeconds:      1,
 	}
 
+	containers := []corev1.Container{
+		{
+			Name:            "mariadb",
+			Image:           instance.Spec.Image,
+			ImagePullPolicy: corev1.PullAlways,
+			Env: []corev1.EnvVar{
+				template.EnvVar("CONFIG_HASH", configHash),
+				template.EnvVar("BITNAMI_DEBUG", "false"),
+				template.SecretEnvVar("MARIADB_ROOT_PASSWORD", instance.Name, "password"),
+			},
+			Ports: []corev1.ContainerPort{
+				{Name: "mysql", ContainerPort: 3306},
+			},
+			LivenessProbe: probe,
+			StartupProbe:  probe,
+			Resources:     instance.Spec.Resources,
+			VolumeMounts: []corev1.VolumeMount{
+				template.SubPathVolumeMount("config", "/opt/bitnami/mariadb/conf/my.cnf", "my.cnf"),
+				template.VolumeMount("data", "/bitnami/mariadb"),
+			},
+		},
+	}
+
+	if promSpec := instance.Spec.Prometheus; promSpec != nil {
+		containers = append(containers, exporterContainer(promSpec.Exporter, instance.Name))
+	}
+
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
 		NodeSelector: instance.Spec.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
-			FSGroup: &runAsUser,
+			FSGroup:   &runAsUser,
+			RunAsUser: &runAsUser,
 		},
-		Containers: []corev1.Container{
-			{
-				Name:  "mariadb",
-				Image: instance.Spec.Image,
-				SecurityContext: &corev1.SecurityContext{
-					RunAsUser: &runAsUser,
-				},
-				Env: []corev1.EnvVar{
-					template.EnvVar("CONFIG_HASH", configHash),
-					template.EnvVar("BITNAMI_DEBUG", "false"),
-					template.SecretEnvVar("MARIADB_ROOT_PASSWORD", instance.Name, "password"),
-				},
-				Ports: []corev1.ContainerPort{
-					{Name: "mysql", ContainerPort: 3306},
-				},
-				LivenessProbe: probe,
-				StartupProbe:  probe,
-				Resources:     instance.Spec.Resources,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "config",
-						MountPath: "/opt/bitnami/mariadb/conf/my.cnf",
-						SubPath:   "my.cnf",
-					},
-					{
-						Name:      "data",
-						MountPath: "/bitnami/mariadb",
-					},
-				},
-			},
-		},
+		Containers: containers,
 		Volumes: []corev1.Volume{
 			template.ConfigMapVolume("config", instance.Name, nil),
 		},
@@ -83,6 +82,26 @@ func ClusterStatefulSet(instance *openstackv1beta1.MariaDB, configHash string) *
 	})
 
 	return sts
+}
+
+func exporterContainer(spec openstackv1beta1.MariaDBExporterSpec, secret string) corev1.Container {
+	return corev1.Container{
+		Name:            "exporter",
+		Image:           spec.Image,
+		ImagePullPolicy: corev1.PullAlways,
+		Command: []string{
+			"bash",
+			"-c",
+			template.MustReadFile(AppLabel, "start-exporter.sh"),
+		},
+		Env: []corev1.EnvVar{
+			template.SecretEnvVar("MARIADB_ROOT_PASSWORD", secret, "password"),
+		},
+		Ports: []corev1.ContainerPort{
+			{Name: "metrics", ContainerPort: 9104},
+		},
+		Resources: spec.Resources,
+	}
 }
 
 func ClusterService(instance *openstackv1beta1.MariaDB) *corev1.Service {
@@ -97,11 +116,33 @@ func ClusterService(instance *openstackv1beta1.MariaDB) *corev1.Service {
 }
 
 func ClusterHeadlessService(instance *openstackv1beta1.MariaDB) *corev1.Service {
+	extraPorts := []corev1.ServicePort{
+		{Name: "metrics", Port: 9104},
+	}
+
 	svc := ClusterService(instance)
 	svc.Name = template.HeadlessServiceName(instance.Name)
 	svc.Spec.ClusterIP = corev1.ClusterIPNone
+	svc.Spec.Ports = append(svc.Spec.Ports, extraPorts...)
 
 	return svc
+}
+
+type serviceMonitorOptions struct {
+	Name      string
+	Namespace string
+}
+
+func ClusterServiceMonitor(instance *openstackv1beta1.MariaDB) *unstructured.Unstructured {
+	manifest := template.MustRenderFile(AppLabel, "servicemonitor.yaml", serviceMonitorOptions{
+		Name:      instance.Name,
+		Namespace: instance.Namespace,
+	})
+
+	res := template.MustDecodeManifest(manifest)
+	res.SetNamespace(instance.Namespace)
+
+	return res
 }
 
 func EnsureCluster(ctx context.Context, c client.Client, intended *openstackv1beta1.MariaDB, log logr.Logger) error {

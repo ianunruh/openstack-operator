@@ -31,6 +31,23 @@ type MariaDBSpec struct {
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional
+	Prometheus *MariaDBPrometheusSpec `json:"prometheus,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
+
+type MariaDBPrometheusSpec struct {
+	Exporter MariaDBExporterSpec `json:"exporter"`
+
+	// +optional
+	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
+}
+
+type MariaDBExporterSpec struct {
+	Image string `json:"image"`
+
+	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
