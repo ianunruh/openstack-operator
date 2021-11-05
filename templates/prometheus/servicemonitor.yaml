@@ -11,5 +11,5 @@ spec:
     - {{ .Namespace }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: mariadb
-      app.kubernetes.io/instance: {{ .Name }}
+      app.kubernetes.io/name: {{ .NameLabel }}
+      app.kubernetes.io/instance: {{ .InstanceLabel }}

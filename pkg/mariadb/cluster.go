@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/prometheus"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -128,21 +129,13 @@ func ClusterHeadlessService(instance *openstackv1beta1.MariaDB) *corev1.Service 
 	return svc
 }
 
-type serviceMonitorOptions struct {
-	Name      string
-	Namespace string
-}
-
 func ClusterServiceMonitor(instance *openstackv1beta1.MariaDB) *unstructured.Unstructured {
-	manifest := template.MustRenderFile(AppLabel, "servicemonitor.yaml", serviceMonitorOptions{
-		Name:      instance.Name,
-		Namespace: instance.Namespace,
+	return prometheus.ServiceMonitor(prometheus.ServiceMonitorParams{
+		Name:          instance.Name,
+		Namespace:     instance.Namespace,
+		NameLabel:     AppLabel,
+		InstanceLabel: instance.Name,
 	})
-
-	res := template.MustDecodeManifest(manifest)
-	res.SetNamespace(instance.Namespace)
-
-	return res
 }
 
 func EnsureCluster(ctx context.Context, c client.Client, intended *openstackv1beta1.MariaDB, log logr.Logger) error {
