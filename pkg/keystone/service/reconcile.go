@@ -5,49 +5,129 @@ import (
 	"fmt"
 
 	"github.com/go-logr/logr"
-	batchv1 "k8s.io/api/batch/v1"
-	corev1 "k8s.io/api/core/v1"
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/endpoints"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/services"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
-	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func SetupJob(instance *openstackv1beta1.KeystoneService, containerImage, adminSecret string) *batchv1.Job {
-	labels := template.AppLabels(instance.Name, keystone.AppLabel)
+const defaultRegion = "RegionOne"
 
-	job := template.GenericJob(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Containers: []corev1.Container{
-			{
-				Name:  "setup",
-				Image: containerImage,
-				Command: []string{
-					"python3",
-					"-c",
-					template.MustReadFile(keystone.AppLabel, "service-setup.py"),
-				},
-				EnvFrom: []corev1.EnvFromSource{
-					template.EnvFromSecret(adminSecret),
-				},
-				Env: []corev1.EnvVar{
-					template.EnvVar("SVC_NAME", instance.Spec.Name),
-					template.EnvVar("SVC_TYPE", instance.Spec.Type),
-					template.EnvVar("SVC_REGION", "RegionOne"),
-					template.EnvVar("SVC_ENDPOINT_ADMIN", instance.Spec.PublicURL),
-					template.EnvVar("SVC_ENDPOINT_INTERNAL", instance.Spec.InternalURL),
-					template.EnvVar("SVC_ENDPOINT_PUBLIC", instance.Spec.PublicURL),
-				},
+func Reconcile(ctx context.Context, instance *openstackv1beta1.KeystoneService, identity *gophercloud.ServiceClient, log logr.Logger) error {
+	svc, err := getService(instance, identity)
+	if err != nil {
+		return err
+	}
+
+	if err := reconcileService(ctx, instance, svc, identity, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func getService(instance *openstackv1beta1.KeystoneService, identity *gophercloud.ServiceClient) (*services.Service, error) {
+	pages, err := services.List(identity, services.ListOpts{
+		Name:        instance.Spec.Name,
+		ServiceType: instance.Spec.Type,
+	}).AllPages()
+	if err != nil {
+		return nil, err
+	}
+
+	current, err := services.ExtractServices(pages)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(current) == 0 {
+		return nil, nil
+	}
+
+	return &current[0], nil
+}
+
+func reconcileService(ctx context.Context, instance *openstackv1beta1.KeystoneService, svc *services.Service, identity *gophercloud.ServiceClient, log logr.Logger) error {
+	var err error
+
+	if svc == nil {
+		log.Info("Creating service", "name", instance.Spec.Name)
+		svc, err = services.Create(identity, services.CreateOpts{
+			Type: instance.Spec.Type,
+			Extra: map[string]interface{}{
+				"name": instance.Spec.Name,
 			},
-		},
-	})
+		}).Extract()
+		if err != nil {
+			return err
+		}
+	}
 
-	job.Name = template.Combine("keystone", "service", instance.Name)
+	if err := reconcileEndpoints(ctx, instance, svc, identity, log); err != nil {
+		return err
+	}
 
-	return job
+	return nil
+}
+
+func reconcileEndpoints(ctx context.Context, instance *openstackv1beta1.KeystoneService, svc *services.Service, identity *gophercloud.ServiceClient, log logr.Logger) error {
+	pages, err := endpoints.List(identity, endpoints.ListOpts{
+		ServiceID: svc.ID,
+	}).AllPages()
+	if err != nil {
+		return err
+	}
+
+	current, err := endpoints.ExtractEndpoints(pages)
+	if err != nil {
+		return err
+	}
+
+	expected := map[gophercloud.Availability]string{
+		gophercloud.AvailabilityAdmin:    instance.Spec.PublicURL,
+		gophercloud.AvailabilityInternal: instance.Spec.InternalURL,
+		gophercloud.AvailabilityPublic:   instance.Spec.PublicURL,
+	}
+	for endpointType, endpointURL := range expected {
+		if err := reconcileEndpoint(ctx, defaultRegion, endpointType, endpointURL, svc, current, identity); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func reconcileEndpoint(ctx context.Context, region string, endpointType gophercloud.Availability, endpointURL string, svc *services.Service, current []endpoints.Endpoint, identity *gophercloud.ServiceClient) error {
+	endpoint := filterEndpoints(current, region, endpointType)
+	if endpoint != nil {
+		_, err := endpoints.Update(identity, endpoint.ID, endpoints.UpdateOpts{
+			URL: endpointURL,
+		}).Extract()
+		return err
+	}
+
+	_, err := endpoints.Create(identity, endpoints.CreateOpts{
+		Availability: endpointType,
+		Name:         string(endpointType),
+		Region:       region,
+		ServiceID:    svc.ID,
+		URL:          endpointURL,
+	}).Extract()
+	return err
+}
+
+func filterEndpoints(current []endpoints.Endpoint, region string, availability gophercloud.Availability) *endpoints.Endpoint {
+	for _, endpoint := range current {
+		if endpoint.Region == region && endpoint.Availability == availability {
+			return &endpoint
+		}
+	}
+
+	return nil
 }
 
 func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.KeystoneService, log logr.Logger) error {
