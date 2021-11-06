@@ -33,9 +33,6 @@ type KeystoneServiceSpec struct {
 // KeystoneServiceStatus defines the observed state of KeystoneService
 type KeystoneServiceStatus struct {
 	Conditions []metav1.Condition `json:"conditions"`
-
-	// +optional
-	SetupJobHash string `json:"setupJobHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true

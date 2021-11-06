@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -89,19 +90,28 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return result, nil
 	}
 
-	// TODO update condition
-	jobs := template.NewJobRunner(ctx, r.Client, log)
-	jobs.Add(&instance.Status.SetupJobHash,
-		keystonesvc.SetupJob(instance, cluster.Spec.Image, cluster.Name))
-	if result, err := jobs.Run(instance); err != nil {
-		// TODO update pending w/error
+	// TODO handle this user not existing on deletion, and remove the finalizer anyway
+	svcUser := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "keystone",
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(svcUser), svcUser); err != nil {
 		return ctrl.Result{}, err
-	} else if !result.IsZero() {
-		reporter.Pending(instance, nil, "KeystoneServicePending", "Waiting for setup job to complete")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
+	}
+
+	identity, err := keystone.NewIdentityServiceClient(ctx, svcUser)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := keystonesvc.Reconcile(ctx, instance, identity, log); err != nil {
+		reporter.Pending(instance, err, "KeystoneServiceReconcileError", "Error reconciling Keystone service")
+		if statusErr := r.Client.Status().Update(ctx, instance); statusErr != nil {
+			err = utilerrors.NewAggregate([]error{statusErr, err})
 		}
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, err
 	}
 
 	condition := keystonesvc.ReadyCondition(instance)
