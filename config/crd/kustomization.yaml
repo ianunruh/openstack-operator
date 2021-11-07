@@ -74,7 +74,7 @@ patchesStrategicMerge:
 #- patches/cainjection_in_mariadbdatabases.yaml
 - patches/cainjection_in_keystones.yaml
 #- patches/cainjection_in_keystoneservices.yaml
-#- patches/cainjection_in_keystoneusers.yaml
+- patches/cainjection_in_keystoneusers.yaml
 - patches/cainjection_in_glances.yaml
 - patches/cainjection_in_placements.yaml
 - patches/cainjection_in_rabbitmqs.yaml

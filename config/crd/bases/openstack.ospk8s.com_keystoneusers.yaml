@@ -138,8 +138,6 @@ spec:
                   - type
                   type: object
                 type: array
-              setupJobHash:
-                type: string
             required:
             - conditions
             type: object

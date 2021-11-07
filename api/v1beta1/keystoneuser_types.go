@@ -43,9 +43,6 @@ type KeystoneUserSpec struct {
 // KeystoneUserStatus defines the observed state of KeystoneUser
 type KeystoneUserStatus struct {
 	Conditions []metav1.Condition `json:"conditions"`
-
-	// +optional
-	SetupJobHash string `json:"setupJobHash,omitempty"`
 }
 
 // +kubebuilder:object:root=true
