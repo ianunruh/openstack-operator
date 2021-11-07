@@ -3,11 +3,14 @@ package user
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/go-logr/logr"
+	"github.com/gophercloud/gophercloud"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/domains"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/projects"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/roles"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
 	"github.com/gophercloud/utils/openstack/clientconfig"
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -17,35 +20,248 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func SetupJob(instance *openstackv1beta1.KeystoneUser, containerImage, adminSecret string) *batchv1.Job {
-	labels := template.AppLabels(instance.Name, keystone.AppLabel)
+func Reconcile(instance *openstackv1beta1.KeystoneUser, secret *corev1.Secret, identity *gophercloud.ServiceClient, log logr.Logger) error {
+	project, err := reconcileProject(instance.Spec.Project, instance.Spec.ProjectDomain, identity, log)
+	if err != nil {
+		return err
+	}
 
-	job := template.GenericJob(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
-		Containers: []corev1.Container{
-			{
-				Name:  "setup",
-				Image: containerImage,
-				Command: []string{
-					"python3",
-					"-c",
-					template.MustReadFile(keystone.AppLabel, "user-setup.py"),
-				},
-				Env: []corev1.EnvVar{
-					template.EnvVar("SVC_ROLES", strings.Join(instance.Spec.Roles, ",")),
-				},
-				EnvFrom: []corev1.EnvFromSource{
-					template.EnvFromSecret(adminSecret),
-					template.EnvFromSecretPrefixed(instance.Spec.Secret, "SVC_"),
-				},
-			},
-		},
-	})
+	domain, err := reconcileDomain(instance.Spec.Domain, identity, log)
+	if err != nil {
+		return err
+	}
 
-	job.Name = template.Combine("keystone", "user", instance.Name)
+	name := instance.Spec.Name
+	if name == "" {
+		name = instance.Name
+	}
 
-	return job
+	password := string(secret.Data["OS_PASSWORD"])
+
+	user, err := findUserByName(name, domain.ID, identity)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		opts := users.CreateOpts{
+			DomainID: domain.ID,
+			Name:     name,
+			Password: password,
+		}
+		if project != nil {
+			opts.DefaultProjectID = project.ID
+		}
+
+		log.Info("Creating user", "name", name)
+		user, err = users.Create(identity, opts).Extract()
+		if err != nil {
+			return err
+		}
+	} else {
+		opts := users.UpdateOpts{
+			Password: password,
+		}
+		if project != nil {
+			opts.DefaultProjectID = project.ID
+		}
+
+		log.Info("Updating user", "name", name)
+		if err := users.Update(identity, user.ID, opts).Err; err != nil {
+			return err
+		}
+	}
+
+	rolesToAssign, err := reconcileRoles(instance.Spec.Roles, identity, log)
+	if err != nil {
+		return err
+	}
+
+	if err := reconcileUserRoles(user, project, rolesToAssign, identity, log); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func reconcileDomain(name string, identity *gophercloud.ServiceClient, log logr.Logger) (*domains.Domain, error) {
+	domain, err := findDomainByName(name, identity)
+	if err != nil {
+		return nil, err
+	}
+
+	if domain == nil {
+		log.Info("Creating domain", "name", name)
+		domain, err = domains.Create(identity, domains.CreateOpts{
+			Name: name,
+		}).Extract()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return domain, nil
+}
+
+func reconcileProject(name, domainName string, identity *gophercloud.ServiceClient, log logr.Logger) (*projects.Project, error) {
+	if name == "" {
+		return nil, nil
+	}
+
+	domain, err := reconcileDomain(domainName, identity, log)
+	if err != nil {
+		return nil, err
+	}
+
+	project, err := findProjectByName(name, domain.ID, identity)
+	if err != nil {
+		return nil, err
+	}
+
+	if project == nil {
+		log.Info("Creating project", "name", name)
+		project, err = projects.Create(identity, projects.CreateOpts{
+			DomainID: domain.ID,
+			Name:     name,
+		}).Extract()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return project, nil
+}
+
+func reconcileRoles(names []string, identity *gophercloud.ServiceClient, log logr.Logger) ([]*roles.Role, error) {
+	pages, err := roles.List(identity, roles.ListOpts{}).AllPages()
+	if err != nil {
+		return nil, fmt.Errorf("listing roles: %w", err)
+	}
+
+	current, err := roles.ExtractRoles(pages)
+	if err != nil {
+		return nil, fmt.Errorf("extracting roles: %w", err)
+	}
+
+	filtered := make([]*roles.Role, 0, len(names))
+	for _, name := range names {
+		role, err := reconcileRole(name, current, identity, log)
+		if err != nil {
+			return nil, err
+		}
+
+		filtered = append(filtered, role)
+	}
+
+	return filtered, nil
+}
+
+func reconcileRole(name string, current []roles.Role, identity *gophercloud.ServiceClient, log logr.Logger) (*roles.Role, error) {
+	role := filterRoleByName(name, current)
+
+	if role == nil {
+		log.Info("Creating role", "name", name)
+		var err error
+		role, err = roles.Create(identity, roles.CreateOpts{
+			Name: name,
+		}).Extract()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return role, nil
+}
+
+func reconcileUserRoles(user *users.User, project *projects.Project, rolesToAssign []*roles.Role, identity *gophercloud.ServiceClient, log logr.Logger) error {
+	opts := roles.AssignOpts{
+		UserID: user.ID,
+	}
+	if project == nil {
+		opts.DomainID = user.DomainID
+	} else {
+		opts.ProjectID = project.ID
+	}
+
+	for _, role := range rolesToAssign {
+		if err := roles.Assign(identity, role.ID, opts).Err; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func filterRoleByName(name string, current []roles.Role) *roles.Role {
+	for _, role := range current {
+		if role.Name == name {
+			return &role
+		}
+	}
+
+	return nil
+}
+
+func findDomainByName(name string, identity *gophercloud.ServiceClient) (*domains.Domain, error) {
+	pages, err := domains.List(identity, domains.ListOpts{
+		Name: name,
+	}).AllPages()
+	if err != nil {
+		return nil, fmt.Errorf("listing domains: %w", err)
+	}
+
+	current, err := domains.ExtractDomains(pages)
+	if err != nil {
+		return nil, fmt.Errorf("extracting domains: %w", err)
+	}
+
+	if len(current) == 0 {
+		return nil, nil
+	}
+
+	return &current[0], nil
+}
+
+func findProjectByName(name, domainID string, identity *gophercloud.ServiceClient) (*projects.Project, error) {
+	pages, err := projects.List(identity, projects.ListOpts{
+		DomainID: domainID,
+		Name:     name,
+	}).AllPages()
+	if err != nil {
+		return nil, fmt.Errorf("listing projects: %w", err)
+	}
+
+	current, err := projects.ExtractProjects(pages)
+	if err != nil {
+		return nil, fmt.Errorf("extracting projects: %w", err)
+	}
+
+	if len(current) == 0 {
+		return nil, nil
+	}
+
+	return &current[0], nil
+}
+
+func findUserByName(name, domainID string, identity *gophercloud.ServiceClient) (*users.User, error) {
+	pages, err := users.List(identity, users.ListOpts{
+		DomainID: domainID,
+		Name:     name,
+	}).AllPages()
+	if err != nil {
+		return nil, fmt.Errorf("listing users: %w", err)
+	}
+
+	current, err := users.ExtractUsers(pages)
+	if err != nil {
+		return nil, fmt.Errorf("extracting users: %w", err)
+	}
+
+	if len(current) == 0 {
+		return nil, nil
+	}
+
+	return &current[0], nil
 }
 
 func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.Keystone, password string) *corev1.Secret {

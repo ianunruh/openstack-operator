@@ -17,13 +17,13 @@ import (
 
 const defaultRegion = "RegionOne"
 
-func Reconcile(ctx context.Context, instance *openstackv1beta1.KeystoneService, identity *gophercloud.ServiceClient, log logr.Logger) error {
+func Reconcile(instance *openstackv1beta1.KeystoneService, identity *gophercloud.ServiceClient, log logr.Logger) error {
 	svc, err := getService(instance, identity)
 	if err != nil {
 		return err
 	}
 
-	if err := reconcileService(ctx, instance, svc, identity, log); err != nil {
+	if err := reconcileService(instance, svc, identity, log); err != nil {
 		return err
 	}
 
@@ -36,12 +36,12 @@ func getService(instance *openstackv1beta1.KeystoneService, identity *gopherclou
 		ServiceType: instance.Spec.Type,
 	}).AllPages()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("listing services: %w", err)
 	}
 
 	current, err := services.ExtractServices(pages)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("extracting services: %w", err)
 	}
 
 	if len(current) == 0 {
@@ -51,7 +51,7 @@ func getService(instance *openstackv1beta1.KeystoneService, identity *gopherclou
 	return &current[0], nil
 }
 
-func reconcileService(ctx context.Context, instance *openstackv1beta1.KeystoneService, svc *services.Service, identity *gophercloud.ServiceClient, log logr.Logger) error {
+func reconcileService(instance *openstackv1beta1.KeystoneService, svc *services.Service, identity *gophercloud.ServiceClient, log logr.Logger) error {
 	var err error
 
 	if svc == nil {
@@ -67,24 +67,24 @@ func reconcileService(ctx context.Context, instance *openstackv1beta1.KeystoneSe
 		}
 	}
 
-	if err := reconcileEndpoints(ctx, instance, svc, identity, log); err != nil {
+	if err := reconcileEndpoints(instance, svc, identity, log); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func reconcileEndpoints(ctx context.Context, instance *openstackv1beta1.KeystoneService, svc *services.Service, identity *gophercloud.ServiceClient, log logr.Logger) error {
+func reconcileEndpoints(instance *openstackv1beta1.KeystoneService, svc *services.Service, identity *gophercloud.ServiceClient, log logr.Logger) error {
 	pages, err := endpoints.List(identity, endpoints.ListOpts{
 		ServiceID: svc.ID,
 	}).AllPages()
 	if err != nil {
-		return err
+		return fmt.Errorf("listing endpoints: %w", err)
 	}
 
 	current, err := endpoints.ExtractEndpoints(pages)
 	if err != nil {
-		return err
+		return fmt.Errorf("extracting endpoints: %w", err)
 	}
 
 	expected := map[gophercloud.Availability]string{
@@ -93,7 +93,7 @@ func reconcileEndpoints(ctx context.Context, instance *openstackv1beta1.Keystone
 		gophercloud.AvailabilityPublic:   instance.Spec.PublicURL,
 	}
 	for endpointType, endpointURL := range expected {
-		if err := reconcileEndpoint(ctx, defaultRegion, endpointType, endpointURL, svc, current, identity); err != nil {
+		if err := reconcileEndpoint(defaultRegion, endpointType, endpointURL, svc, current, identity, log); err != nil {
 			return err
 		}
 	}
@@ -101,15 +101,28 @@ func reconcileEndpoints(ctx context.Context, instance *openstackv1beta1.Keystone
 	return nil
 }
 
-func reconcileEndpoint(ctx context.Context, region string, endpointType gophercloud.Availability, endpointURL string, svc *services.Service, current []endpoints.Endpoint, identity *gophercloud.ServiceClient) error {
+func reconcileEndpoint(region string, endpointType gophercloud.Availability, endpointURL string, svc *services.Service, current []endpoints.Endpoint, identity *gophercloud.ServiceClient, log logr.Logger) error {
+	log = log.WithValues(
+		"service", svc.Type,
+		"region", region,
+		"type", string(endpointType),
+		"url", endpointURL)
+
 	endpoint := filterEndpoints(current, region, endpointType)
 	if endpoint != nil {
+		if endpoint.URL == endpointURL {
+			// endpoint unchanged, skip update
+			return nil
+		}
+
+		log.Info("Updating endpoint", "id", endpoint.ID)
 		_, err := endpoints.Update(identity, endpoint.ID, endpoints.UpdateOpts{
 			URL: endpointURL,
 		}).Extract()
 		return err
 	}
 
+	log.Info("Creating endpoint")
 	_, err := endpoints.Create(identity, endpoints.CreateOpts{
 		Availability: endpointType,
 		Name:         string(endpointType),

@@ -106,7 +106,7 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	if err := keystonesvc.Reconcile(ctx, instance, identity, log); err != nil {
+	if err := keystonesvc.Reconcile(instance, identity, log); err != nil {
 		reporter.Pending(instance, err, "KeystoneServiceReconcileError", "Error reconciling Keystone service")
 		if statusErr := r.Client.Status().Update(ctx, instance); statusErr != nil {
 			err = utilerrors.NewAggregate([]error{statusErr, err})
