@@ -26,9 +26,6 @@ unset KUBECONFIG
 log "Tearing down $CLUSTER_NAME Kubernetes cluster"
 kubectl delete cluster $CLUSTER_NAME
 
-log "Cleaning up cluster secrets"
-kubectl delete secret $CLUSTER_NAME-cloud-config
-
 log "Cleaning up ingress wildcard DNS record"
 if gcloud dns record-sets describe "*.$CLUSTER_DOMAIN" --type=A --zone=$DNS_ZONE; then
     gcloud dns record-sets delete "*.$CLUSTER_DOMAIN" --type=A --zone=$DNS_ZONE

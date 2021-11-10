@@ -6,22 +6,12 @@ source common.sh
 setup_kubectl
 
 export OPENSTACK_CLOUD="default"
-export OPENSTACK_CLOUD_CACERT_B64=$(kubectl get secret cluster-admin-keystone -o 'jsonpath={.data.cacert}')
 export OPENSTACK_CLOUD_YAML_B64=$(kubectl get secret cluster-admin-keystone -o 'jsonpath={.data.clouds\.yaml}')
-export OPENSTACK_DNS_NAMESERVERS="1.1.1.1"
-export OPENSTACK_IMAGE_NAME="ubuntu-2004-kube-v1.20.9"
-export OPENSTACK_SSH_KEY_NAME="ianunruh-yubikey"
-
-export OPENSTACK_CONTROL_PLANE_MACHINE_FLAVOR="c1-medium"
-export OPENSTACK_NODE_MACHINE_FLAVOR="c1-large"
 
 log "Generating and applying Cluster API manifests to undercloud"
-clusterctl generate cluster $CLUSTER_NAME \
-    --kubernetes-version 1.20.9 \
-    --control-plane-machine-count 1 \
-    --worker-machine-count 3 \
-    --flavor external-cloud-provider \
-    | kubectl apply -f-
+sed "s/\$(CLUSTER_NAME)/$CLUSTER_NAME/" cluster.yaml | \
+    sed -e "s/\$(OPENSTACK_FAILURE_DOMAIN)/$OPENSTACK_FAILURE_DOMAIN/" | \
+    kubectl apply -f-
 
 log "Waiting for Kubernetes control plane to be available"
 kubectl wait kubeadmcontrolplane/$CLUSTER_NAME-control-plane \
@@ -85,10 +75,10 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/cloud-provider-ope
 kubectl apply -f cinder-storageclass.yaml
 
 log "Applying ingress-nginx manifests"
-curl -sL https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/cloud/deploy.yaml -o ingress.yaml
-# Octavia does not work with Local policy
-sed -i.bak "s/externalTrafficPolicy: Local/externalTrafficPolicy: Cluster/g" ingress.yaml
-kubectl apply -f ingress.yaml
+curl -sL https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/cloud/deploy.yaml | \
+    # Octavia does not work with Local policy
+    sed -e "s/externalTrafficPolicy: Local/externalTrafficPolicy: Cluster/g" | \
+    kubectl apply -f -
 
 log "Applying cert-manager manifests"
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
