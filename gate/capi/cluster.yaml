@@ -1,0 +1,144 @@
+apiVersion: cluster.x-k8s.io/v1alpha4
+kind: Cluster
+metadata:
+  name: $(CLUSTER_NAME)
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+    serviceDomain: cluster.local
+  controlPlaneRef:
+    apiVersion: controlplane.cluster.x-k8s.io/v1alpha4
+    kind: KubeadmControlPlane
+    name: $(CLUSTER_NAME)-control-plane
+  infrastructureRef:
+    apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+    kind: OpenStackCluster
+    name: $(CLUSTER_NAME)
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+kind: OpenStackCluster
+metadata:
+  name: $(CLUSTER_NAME)
+spec:
+  cloudName: default
+  dnsNameservers:
+  - 1.1.1.1
+  identityRef:
+    kind: Secret
+    name: cluster-admin-keystone
+  managedAPIServerLoadBalancer: true
+  managedSecurityGroups: true
+  nodeCidr: 10.12.0.0/24
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha4
+kind: KubeadmControlPlane
+metadata:
+  name: $(CLUSTER_NAME)-control-plane
+spec:
+  kubeadmConfigSpec:
+    clusterConfiguration:
+      apiServer:
+        extraArgs:
+          cloud-provider: external
+      controllerManager:
+        extraArgs:
+          cloud-provider: external
+      imageRepository: k8s.gcr.io
+    files:
+    - path: /etc/containerd/config.toml
+      contentFrom:
+        secret:
+          name: gate-containerd
+          key: config.toml
+    initConfiguration:
+      nodeRegistration:
+        kubeletExtraArgs:
+          cloud-provider: external
+        name: '{{ local_hostname }}'
+    joinConfiguration:
+      nodeRegistration:
+        kubeletExtraArgs:
+          cloud-provider: external
+        name: '{{ local_hostname }}'
+  machineTemplate:
+    infrastructureRef:
+      apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+      kind: OpenStackMachineTemplate
+      name: $(CLUSTER_NAME)-control-plane
+  replicas: 1
+  version: 1.20.9
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+kind: OpenStackMachineTemplate
+metadata:
+  name: $(CLUSTER_NAME)-control-plane
+spec:
+  template:
+    spec:
+      cloudName: default
+      flavor: c1-medium
+      identityRef:
+        kind: Secret
+        name: cluster-admin-keystone
+      image: ubuntu-2004-kube-v1.20.9
+      sshKeyName: ianunruh-yubikey
+---
+apiVersion: cluster.x-k8s.io/v1alpha4
+kind: MachineDeployment
+metadata:
+  name: $(CLUSTER_NAME)-md-0
+spec:
+  clusterName: $(CLUSTER_NAME)
+  replicas: 3
+  selector:
+    matchLabels: {}
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
+          kind: KubeadmConfigTemplate
+          name: $(CLUSTER_NAME)-md-0
+      clusterName: $(CLUSTER_NAME)
+      failureDomain: $(OPENSTACK_FAILURE_DOMAIN)
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+        kind: OpenStackMachineTemplate
+        name: $(CLUSTER_NAME)-md-0
+      version: 1.20.9
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+kind: OpenStackMachineTemplate
+metadata:
+  name: $(CLUSTER_NAME)-md-0
+spec:
+  template:
+    spec:
+      cloudName: default
+      flavor: c1-large
+      identityRef:
+        kind: Secret
+        name: cluster-admin-keystone
+      image: ubuntu-2004-kube-v1.20.9
+      sshKeyName: ianunruh-yubikey
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
+kind: KubeadmConfigTemplate
+metadata:
+  name: $(CLUSTER_NAME)-md-0
+spec:
+  template:
+    spec:
+      files:
+      - path: /etc/containerd/config.toml
+        contentFrom:
+          secret:
+            name: gate-containerd
+            key: config.toml
+      joinConfiguration:
+        nodeRegistration:
+          kubeletExtraArgs:
+            cloud-provider: external
+          name: '{{ local_hostname }}'
