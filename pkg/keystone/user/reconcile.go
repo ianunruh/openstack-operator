@@ -60,6 +60,7 @@ func Reconcile(instance *openstackv1beta1.KeystoneUser, secret *corev1.Secret, i
 		}
 	} else {
 		opts := users.UpdateOpts{
+			DomainID: domain.ID,
 			Password: password,
 		}
 		if project != nil {
