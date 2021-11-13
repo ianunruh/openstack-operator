@@ -81,6 +81,10 @@ spec:
         capacity: 10Gi
   horizon:
     image: ghcr.io/ianunruh/openstack-operator-images/horizon:master
+  heat:
+    image: ghcr.io/ianunruh/openstack-operator-images/heat:master
+  barbican:
+    image: ghcr.io/ianunruh/openstack-operator-images/barbican:master
   rally:
     image: xrally/xrally-openstack:2.1.0
     data:
