@@ -1,5 +1,4 @@
 cloud.conf
 clouds.yaml
-kubeconfig
 ingress.yaml
 *.bak
