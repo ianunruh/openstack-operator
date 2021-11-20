@@ -31,6 +31,12 @@ spec:
   managedAPIServerLoadBalancer: true
   managedSecurityGroups: true
   nodeCidr: 10.12.0.0/24
+  bastion:
+    enabled: true
+    instance:
+      flavor: c1-small
+      image: ubuntu-focal-20210913
+      sshKeyName: ianunruh-yubikey
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha4
 kind: KubeadmControlPlane
