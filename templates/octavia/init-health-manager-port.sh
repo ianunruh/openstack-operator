@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -eux
 
 HM_IFACE=o-hm0
 
@@ -14,13 +14,15 @@ ovs-vsctl --may-exist add-port br-int ${HM_IFACE} \
 
 ip link set dev ${HM_IFACE} address ${HM_PORT_MAC}
 
-cat > /tmp/dhclient.conf <<EOF
-request subnet-mask,broadcast-address,interface-mtu;
+cat > /etc/dhcp/dhclient.conf <<EOF
+request subnet-mask, broadcast-address, interface-mtu;
 do-forward-updates false;
 EOF
 
-dhclient -v ${HM_IFACE} -cf /tmp/dhclient.conf
+cat > /etc/dhcp/dhclient-enter-hooks.d/ignore-options <<EOF
+unset new_dhcp_lease_time
+unset new_domain_name new_domain_name_servers new_domain_search
+unset new_rfc3442_classless_static_routes new_routers new_static_routes
+EOF
 
-# prevent addr from expiring
-HM_PREFIX=$(ip -4 addr show ${HM_IFACE} | awk '/inet/{print $2}')
-ip addr change ${HM_PREFIX} dev ${HM_IFACE} valid_lft forever
+dhclient -1 -v ${HM_IFACE}

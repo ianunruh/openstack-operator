@@ -53,7 +53,7 @@ kubectl -n kube-system create secret generic cloud-config --from-file=cloud.conf
 
 # Install cluster networking
 log "Applying Calico networking manifests"
-kubectl apply -f https://docs.projectcalico.org/v3.18/manifests/calico.yaml
+kubectl apply -k calico
 
 log "Applying cloud provider manifests"
 kubectl kustomize cloud-provider | \
