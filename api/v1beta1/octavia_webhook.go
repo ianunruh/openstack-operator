@@ -23,7 +23,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 )
 
-// log is for logging in this package.
 var octavialog = logf.Log.WithName("octavia-resource")
 
 func (r *Octavia) SetupWebhookWithManager(mgr ctrl.Manager) error {
@@ -31,8 +30,6 @@ func (r *Octavia) SetupWebhookWithManager(mgr ctrl.Manager) error {
 		For(r).
 		Complete()
 }
-
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 
 //+kubebuilder:webhook:path=/mutate-openstack-ospk8s-com-v1beta1-octavia,mutating=true,failurePolicy=fail,sideEffects=None,groups=openstack.ospk8s.com,resources=octavias,verbs=create;update,versions=v1beta1,name=moctavia.kb.io,admissionReviewVersions={v1,v1beta1}
 
@@ -44,9 +41,12 @@ func (r *Octavia) Default() {
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
+
+	if r.Spec.Amphora.ManagementCIDR == "" {
+		r.Spec.Amphora.ManagementCIDR = "172.28.0.0/24"
+	}
 }
 
-// TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
 //+kubebuilder:webhook:path=/validate-openstack-ospk8s-com-v1beta1-octavia,mutating=false,failurePolicy=fail,sideEffects=None,groups=openstack.ospk8s.com,resources=octavias,verbs=create;update,versions=v1beta1,name=voctavia.kb.io,admissionReviewVersions={v1,v1beta1}
 
 var _ webhook.Validator = &Octavia{}
@@ -55,7 +55,6 @@ var _ webhook.Validator = &Octavia{}
 func (r *Octavia) ValidateCreate() error {
 	octavialog.Info("validate create", "name", r.Name)
 
-	// TODO(user): fill in your validation logic upon object creation.
 	return nil
 }
 
@@ -63,7 +62,8 @@ func (r *Octavia) ValidateCreate() error {
 func (r *Octavia) ValidateUpdate(old runtime.Object) error {
 	octavialog.Info("validate update", "name", r.Name)
 
-	// TODO(user): fill in your validation logic upon object update.
+	// TODO amphora managementCIDR should be immutable
+
 	return nil
 }
 
@@ -71,6 +71,5 @@ func (r *Octavia) ValidateUpdate(old runtime.Object) error {
 func (r *Octavia) ValidateDelete() error {
 	octavialog.Info("validate delete", "name", r.Name)
 
-	// TODO(user): fill in your validation logic upon object deletion.
 	return nil
 }

@@ -40,6 +40,8 @@ spec:
                 properties:
                   imageURL:
                     type: string
+                  managementCIDR:
+                    type: string
                 required:
                 - imageURL
                 type: object

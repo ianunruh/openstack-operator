@@ -89,3 +89,16 @@ spec:
     image: xrally/xrally-openstack:2.1.0
     data:
       capacity: 10Gi
+  octavia:
+    image: ghcr.io/ianunruh/openstack-operator-images/octavia:master
+    amphora:
+      imageURL: https://tarballs.opendev.org/openstack/octavia/test-images/test-only-amphora-x64-haproxy-ubuntu-focal.qcow2
+    healthManager:
+      nodeSelector:
+        openstack/octavia-controller: enabled
+    housekeeping:
+      nodeSelector:
+        openstack/octavia-controller: enabled
+    worker:
+      nodeSelector:
+        openstack/octavia-controller: enabled

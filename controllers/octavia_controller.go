@@ -251,6 +251,7 @@ func (r *OctaviaReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&openstackv1beta1.Octavia{}).
 		Owns(&corev1.ConfigMap{}).
+		Owns(&appsv1.DaemonSet{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&netv1.Ingress{}).
 		Owns(&batchv1.Job{}).

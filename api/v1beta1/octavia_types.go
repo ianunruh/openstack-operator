@@ -50,6 +50,9 @@ type OctaviaSpec struct {
 
 type OctaviaAmphoraSpec struct {
 	ImageURL string `json:"imageURL"`
+
+	// +optional
+	ManagementCIDR string `json:"managementCIDR"`
 }
 
 type OctaviaAPISpec struct {

@@ -327,7 +327,7 @@ func (b *bootstrap) EnsureNetwork(ctx context.Context) error {
 	_, err = subnets.Create(b.network, subnets.CreateOpts{
 		NetworkID: network.ID,
 		IPVersion: gophercloud.IPv4,
-		CIDR:      "192.168.250.0/24",
+		CIDR:      b.instance.Spec.Amphora.ManagementCIDR,
 	}).Extract()
 	if err != nil {
 		return err
