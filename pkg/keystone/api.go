@@ -32,8 +32,18 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-keystone", "/etc/keystone/keystone.conf", "keystone.conf"),
-		template.VolumeMount("credential-keys", "/etc/keystone/credential-keys"),
-		template.VolumeMount("fernet-keys", "/etc/keystone/fernet-keys"),
+		template.VolumeMount("pod-credential-keys", "/etc/keystone/credential-keys"),
+		template.VolumeMount("pod-fernet-keys", "/etc/keystone/fernet-keys"),
+	}
+
+	initVolumeMounts := []corev1.VolumeMount{
+		template.VolumeMount("credential-keys", "/var/run/secrets/credential-keys"),
+		template.VolumeMount("fernet-keys", "/var/run/secrets/fernet-keys"),
+	}
+
+	extraVolumes := []corev1.Volume{
+		template.EmptyDirVolume("pod-credential-keys"),
+		template.EmptyDirVolume("pod-fernet-keys"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -43,6 +53,19 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 		NodeSelector: instance.Spec.API.NodeSelector,
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: template.NodePodAntiAffinity(labels),
+		},
+		InitContainers: []corev1.Container{
+			{
+				Name:  "init-keys",
+				Image: instance.Spec.Image,
+				Command: []string{
+					"bash",
+					"-c",
+					template.MustReadFile(AppLabel, "init-keys.sh"),
+				},
+				Resources:    instance.Spec.API.Resources,
+				VolumeMounts: append(volumeMounts, initVolumeMounts...),
+			},
 		},
 		Containers: []corev1.Container{
 			{
@@ -60,7 +83,7 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 				VolumeMounts:  volumeMounts,
 			},
 		},
-		Volumes: volumes,
+		Volumes: append(volumes, extraVolumes...),
 	})
 
 	deploy.Name = template.Combine(instance.Name, "api")
