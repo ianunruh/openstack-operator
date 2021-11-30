@@ -3,7 +3,7 @@ set -eux
 
 mkdir -p $HOME/.local/bin
 
-curl -sL https://dl.k8s.io/release/v1.20.9/bin/linux/amd64/kubectl -o kubectl
+curl -sL https://dl.k8s.io/release/v1.21.7/bin/linux/amd64/kubectl -o kubectl
 chmod +x kubectl
 mv kubectl $HOME/.local/bin/kubectl
 
