@@ -62,11 +62,13 @@ spec:
       nodeRegistration:
         kubeletExtraArgs:
           cloud-provider: external
+          node-labels: node.kubernetes.io/exclude-from-external-load-balancers=
         name: '{{ local_hostname }}'
     joinConfiguration:
       nodeRegistration:
         kubeletExtraArgs:
           cloud-provider: external
+          node-labels: node.kubernetes.io/exclude-from-external-load-balancers=
         name: '{{ local_hostname }}'
   machineTemplate:
     infrastructureRef:

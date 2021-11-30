@@ -51,28 +51,14 @@ log "Ensuring kube-system/cloud-config secret"
 kubectl -n kube-system get secret cloud-config && kubectl -n kube-system delete secret cloud-config
 kubectl -n kube-system create secret generic cloud-config --from-file=cloud.conf
 
-log "Excluding control plane nodes from load balancer"
-kubectl label node node.kubernetes.io/exclude-from-external-load-balancers= \
-    -l node-role.kubernetes.io/control-plane= \
-    --overwrite
-
 # Install cluster networking
 log "Applying Calico networking manifests"
 kubectl apply -f https://docs.projectcalico.org/v3.18/manifests/calico.yaml
 
 log "Applying cloud provider manifests"
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/controller-manager/cloud-controller-manager-roles.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/controller-manager/cloud-controller-manager-role-bindings.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/controller-manager/openstack-cloud-controller-manager-ds.yaml
-
-log "Applying Cinder CSI driver manifests"
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/cinder-csi-plugin/cinder-csi-controllerplugin-rbac.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/cinder-csi-plugin/cinder-csi-controllerplugin.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/cinder-csi-plugin/cinder-csi-nodeplugin-rbac.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/cinder-csi-plugin/cinder-csi-nodeplugin.yaml
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/cinder-csi-plugin/csi-cinder-driver.yaml
-
-kubectl apply -f cinder-storageclass.yaml
+kubectl kustomize cloud-provider | \
+    sed "s/\$(CLUSTER_NAME)/$CLUSTER_NAME/" | \
+    kubectl apply -f-
 
 log "Applying ingress-nginx manifests"
 curl -sL https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/cloud/deploy.yaml | \
