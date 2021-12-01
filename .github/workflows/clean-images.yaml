@@ -1,0 +1,22 @@
+name: Clean old images
+
+on:
+  schedule:
+    - cron: 0 */12 * * *
+
+jobs:
+  clean-images:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.9.x
+
+      - run: pip install -U requests
+
+      - run: ci/clean-images.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_CLEAN_IMAGES }}
