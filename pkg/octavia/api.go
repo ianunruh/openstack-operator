@@ -17,7 +17,10 @@ const (
 func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
-	privileged := true
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
+		template.VolumeMount("host-var-run-octavia", "/var/run/octavia"),
+	}
 
 	probe := &corev1.Probe{
 		Handler: corev1.Handler{
@@ -30,11 +33,6 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,
 		FailureThreshold:    15,
-	}
-
-	volumeMounts := []corev1.VolumeMount{
-		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
-		template.BidirectionalVolumeMount("host-var-run-octavia", "/var/run/octavia"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -60,10 +58,7 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 				LivenessProbe: probe,
 				StartupProbe:  probe,
 				Resources:     instance.Spec.API.Resources,
-				SecurityContext: &corev1.SecurityContext{
-					Privileged: &privileged,
-				},
-				VolumeMounts: volumeMounts,
+				VolumeMounts:  volumeMounts,
 			},
 		},
 		SecurityContext: &corev1.PodSecurityContext{
