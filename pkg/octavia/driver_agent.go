@@ -19,7 +19,7 @@ func DriverAgentDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvV
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
-		template.VolumeMount("host-var-run-octavia", "/var/run/octavia"),
+		template.BidirectionalVolumeMount("host-var-run-octavia", "/var/run/octavia"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
