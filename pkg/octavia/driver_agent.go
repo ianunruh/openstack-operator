@@ -15,6 +15,7 @@ const (
 func DriverAgentDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, DriverAgentComponentLabel)
 
+	privileged := true
 	runAsRootUser := int64(0)
 
 	volumeMounts := []corev1.VolumeMount{
@@ -38,7 +39,8 @@ func DriverAgentDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvV
 				},
 				Resources: instance.Spec.DriverAgent.Resources,
 				SecurityContext: &corev1.SecurityContext{
-					RunAsUser: &runAsRootUser,
+					Privileged: &privileged,
+					RunAsUser:  &runAsRootUser,
 				},
 				VolumeMounts: volumeMounts,
 			},
@@ -51,8 +53,11 @@ func DriverAgentDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvV
 					"octavia-driver-agent",
 					"--config-file=/etc/octavia/octavia.conf",
 				},
-				Env:          env,
-				Resources:    instance.Spec.DriverAgent.Resources,
+				Env:       env,
+				Resources: instance.Spec.DriverAgent.Resources,
+				SecurityContext: &corev1.SecurityContext{
+					Privileged: &privileged,
+				},
 				VolumeMounts: volumeMounts,
 			},
 		},
