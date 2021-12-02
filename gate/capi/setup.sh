@@ -35,6 +35,8 @@ domain-name=$(yq eval .clouds.default.auth.user_domain_name clouds.yaml)
 [LoadBalancer]
 subnet-id=$LB_SUBNET_ID
 floating-network-id=$EXTERNAL_NET_ID
+lb-method=SOURCE_IP
+lb-provider=ovn
 
 [BlockStorage]
 bs-version=v2
