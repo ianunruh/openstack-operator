@@ -3,9 +3,6 @@ name: Clean old images
 on:
   pull_request:
     types: [closed]
-  push:
-    branches:
-    - master
 
 jobs:
   clean-images:
