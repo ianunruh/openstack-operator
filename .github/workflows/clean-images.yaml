@@ -1,8 +1,11 @@
 name: Clean old images
 
 on:
-  schedule:
-    - cron: 0 */12 * * *
+  pull_request:
+    types: [closed]
+  push:
+    branches:
+    - master
 
 jobs:
   clean-images:
