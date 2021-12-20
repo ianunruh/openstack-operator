@@ -2,11 +2,14 @@ package v1beta1
 
 type IngressSpec struct {
 	// +optional
-	Host string `json:"host"`
+	Annotations map[string]string `json:"annotations,omitempty"`
 
 	// +optional
-	Annotations map[string]string `json:"annotations"`
+	ClassName *string `json:"className,omitempty"`
 
 	// +optional
-	TLSSecretName string `json:"tlsSecretName"`
+	Host string `json:"host,omitempty"`
+
+	// +optional
+	TLSSecretName string `json:"tlsSecretName,omitempty"`
 }
