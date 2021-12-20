@@ -44,6 +44,8 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      className:
+                        type: string
                       host:
                         type: string
                       tlsSecretName:
@@ -330,6 +332,8 @@ spec:
                               additionalProperties:
                                 type: string
                               type: object
+                            className:
+                              type: string
                             host:
                               type: string
                             tlsSecretName:

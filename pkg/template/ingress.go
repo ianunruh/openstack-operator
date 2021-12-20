@@ -68,6 +68,7 @@ func GenericIngress(name, namespace string, spec *openstackv1beta1.IngressSpec, 
 			Annotations: spec.Annotations,
 		},
 		Spec: netv1.IngressSpec{
+			IngressClassName: spec.ClassName,
 			TLS: []netv1.IngressTLS{
 				{
 					SecretName: tlsSecretName,

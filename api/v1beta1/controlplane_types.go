@@ -85,6 +85,9 @@ type ControlPlaneIngressSpec struct {
 	Annotations map[string]string `json:"annotations,omitempty"`
 
 	// +optional
+	ClassName *string `json:"className,omitempty"`
+
+	// +optional
 	TLSSecretName string `json:"tlsSecretName,omitempty"`
 }
 
