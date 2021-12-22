@@ -11,7 +11,7 @@ curl -sL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomiz
 tar xfv kustomize.tar.gz
 mv kustomize $HOME/.local/bin/kustomize
 
-curl -sL https://github.com/kubernetes-sigs/cluster-api/releases/download/v0.4.2/clusterctl-linux-amd64 -o clusterctl
+curl -sL https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.0.2/clusterctl-linux-amd64 -o clusterctl
 chmod +x clusterctl
 mv clusterctl $HOME/.local/bin/clusterctl
 
