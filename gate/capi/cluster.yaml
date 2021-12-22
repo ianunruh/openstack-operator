@@ -1,4 +1,4 @@
-apiVersion: cluster.x-k8s.io/v1alpha4
+apiVersion: cluster.x-k8s.io/v1beta1
 kind: Cluster
 metadata:
   name: $(CLUSTER_NAME)
@@ -9,7 +9,7 @@ spec:
       - 192.168.0.0/16
     serviceDomain: cluster.local
   controlPlaneRef:
-    apiVersion: controlplane.cluster.x-k8s.io/v1alpha4
+    apiVersion: controlplane.cluster.x-k8s.io/v1beta1
     kind: KubeadmControlPlane
     name: $(CLUSTER_NAME)-control-plane
   infrastructureRef:
@@ -38,7 +38,7 @@ spec:
       image: ubuntu-focal-20210913
       sshKeyName: ianunruh-yubikey
 ---
-apiVersion: controlplane.cluster.x-k8s.io/v1alpha4
+apiVersion: controlplane.cluster.x-k8s.io/v1beta1
 kind: KubeadmControlPlane
 metadata:
   name: $(CLUSTER_NAME)-control-plane
@@ -93,7 +93,7 @@ spec:
       image: ubuntu-2004-kube-v1.20.9
       sshKeyName: ianunruh-yubikey
 ---
-apiVersion: cluster.x-k8s.io/v1alpha4
+apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
 metadata:
   name: $(CLUSTER_NAME)-md-0
@@ -106,7 +106,7 @@ spec:
     spec:
       bootstrap:
         configRef:
-          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
           kind: KubeadmConfigTemplate
           name: $(CLUSTER_NAME)-md-0
       clusterName: $(CLUSTER_NAME)
@@ -132,7 +132,7 @@ spec:
       image: ubuntu-2004-kube-v1.20.9
       sshKeyName: ianunruh-yubikey
 ---
-apiVersion: bootstrap.cluster.x-k8s.io/v1alpha4
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
 kind: KubeadmConfigTemplate
 metadata:
   name: $(CLUSTER_NAME)-md-0
