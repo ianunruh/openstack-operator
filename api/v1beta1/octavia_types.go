@@ -28,6 +28,9 @@ type OctaviaSpec struct {
 	Amphora OctaviaAmphoraSpec `json:"amphora"`
 
 	// +optional
+	OVN OctaviaOVNSpec `json:"ovn,omitempty"`
+
+	// +optional
 	API OctaviaAPISpec `json:"api,omitempty"`
 
 	// +optional
@@ -56,6 +59,11 @@ type OctaviaAmphoraSpec struct {
 
 	// +optional
 	ManagementCIDR string `json:"managementCIDR"`
+}
+
+type OctaviaOVNSpec struct {
+	// +optional
+	Enabled bool `json:"enabled,omitempty"`
 }
 
 type OctaviaAPISpec struct {

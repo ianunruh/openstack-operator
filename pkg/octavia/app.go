@@ -28,6 +28,13 @@ func ConfigMap(instance *openstackv1beta1.Octavia) *corev1.ConfigMap {
 
 	cfg := template.MustLoadINI(AppLabel, "octavia.conf")
 
+	providerDrivers := []string{"amphora:The Octavia Amphora driver"}
+	if instance.Spec.OVN.Enabled {
+		providerDrivers = append(providerDrivers, "ovn:Octavia OVN driver")
+	}
+
+	cfg.Section("api_settings").NewKey("enabled_provider_drivers", strings.Join(providerDrivers, ","))
+
 	amphora := instance.Status.Amphora
 
 	var healthManagerAddrs []string
