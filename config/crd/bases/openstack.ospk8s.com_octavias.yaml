@@ -246,6 +246,11 @@ spec:
                 type: object
               image:
                 type: string
+              ovn:
+                properties:
+                  enabled:
+                    type: boolean
+                type: object
               worker:
                 properties:
                   nodeSelector:
