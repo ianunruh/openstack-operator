@@ -35,6 +35,7 @@ import (
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
+	keystoneuser "github.com/ianunruh/openstack-operator/pkg/keystone/user"
 	mariadbdatabase "github.com/ianunruh/openstack-operator/pkg/mariadb/database"
 	rabbitmquser "github.com/ianunruh/openstack-operator/pkg/rabbitmq/user"
 	"github.com/ianunruh/openstack-operator/pkg/template"
@@ -108,6 +109,10 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		}
 	}
 
+	if err := r.reconcileAdminSecret(ctx, instance, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	cm := keystone.ConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
 	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
@@ -168,6 +173,31 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *KeystoneReconciler) reconcileAdminSecret(ctx context.Context, instance *openstackv1beta1.Keystone, log logr.Logger) error {
+	var currentPassword string
+	currentSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.Name,
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(currentSecret), currentSecret); err != nil {
+		if !errors.IsNotFound(err) {
+			return err
+		}
+	} else {
+		currentPassword = keystoneuser.PasswordFromSecret(currentSecret)
+	}
+
+	secret := keystone.AdminSecret(instance, currentPassword)
+	controllerutil.SetControllerReference(instance, secret, r.Scheme)
+	if err := template.EnsureSecret(ctx, r.Client, secret, log); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
