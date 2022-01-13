@@ -117,7 +117,7 @@ func (r *NovaComputeReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// TODO most of these are probably not needed
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
-		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", cluster.Spec.Broker.Secret, "connection"),
+		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", cell.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", cell.Spec.Database.Secret, "connection"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 	}
@@ -187,7 +187,6 @@ func (r *NovaComputeReconciler) reconcileLibvirtd(ctx context.Context, instance 
 
 func (r *NovaComputeReconciler) reconcileCompute(ctx context.Context, instance *openstackv1beta1.NovaCompute, cell *openstackv1beta1.NovaCell, cinder *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
 	extraEnvVars := []corev1.EnvVar{
-		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", cell.Spec.Broker.Secret, "connection"),
 		// TODO make ingress optional
 		template.EnvVar("OS_VNC__NOVNCPROXY_BASE_URL", fmt.Sprintf("https://%s/vnc_auto.html", cell.Spec.NoVNCProxy.Ingress.Host)),
 	}
