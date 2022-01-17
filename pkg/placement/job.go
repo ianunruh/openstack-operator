@@ -28,9 +28,11 @@ func DBSyncJob(instance *openstackv1beta1.Placement, env []corev1.EnvVar, volume
 					"sync",
 				},
 				Env:          env,
+				Resources:    instance.Spec.DBSyncJob.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},
+		NodeSelector: instance.Spec.DBSyncJob.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
 			RunAsUser: &appUID,
 			FSGroup:   &appUID,

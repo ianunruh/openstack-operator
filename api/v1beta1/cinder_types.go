@@ -29,6 +29,9 @@ type CinderSpec struct {
 	API CinderAPISpec `json:"api,omitempty"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	Scheduler CinderSchedulerSpec `json:"scheduler,omitempty"`
 
 	// +optional

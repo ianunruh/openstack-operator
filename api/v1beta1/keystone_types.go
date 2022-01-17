@@ -29,6 +29,12 @@ type KeystoneSpec struct {
 	API KeystoneAPISpec `json:"api,omitempty"`
 
 	// +optional
+	BootstrapJob JobSpec `json:"bootstrapJob,omitempty"`
+
+	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional

@@ -17,6 +17,8 @@ func Nova(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Nova {
 
 	spec.Conductor.NodeSelector = controllerNodeSelector(spec.Conductor.NodeSelector, instance)
 
+	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
+
 	spec.Scheduler.NodeSelector = controllerNodeSelector(spec.Scheduler.NodeSelector, instance)
 
 	return &openstackv1beta1.Nova{

@@ -34,6 +34,9 @@ type OctaviaSpec struct {
 	API OctaviaAPISpec `json:"api,omitempty"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	DriverAgent OctaviaDriverAgentSpec `json:"driverAgent,omitempty"`
 
 	HealthManager OctaviaHealthManagerSpec `json:"healthManager"`

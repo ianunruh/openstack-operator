@@ -32,6 +32,9 @@ type MagnumSpec struct {
 	Conductor MagnumConductorSpec `json:"conductor,omitempty"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional

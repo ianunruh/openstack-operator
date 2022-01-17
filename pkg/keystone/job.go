@@ -41,9 +41,11 @@ func BootstrapJob(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, volu
 					template.MustReadFile(AppLabel, "bootstrap.sh"),
 				},
 				Env:          append(env, extraEnv...),
+				Resources:    instance.Spec.BootstrapJob.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},
+		NodeSelector: instance.Spec.BootstrapJob.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
 			RunAsUser: &appUID,
 			FSGroup:   &appUID,
@@ -75,9 +77,11 @@ func DBSyncJob(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, volumes
 					"db_sync",
 				},
 				Env:          env,
+				Resources:    instance.Spec.DBSyncJob.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},
+		NodeSelector: instance.Spec.DBSyncJob.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
 			RunAsUser: &appUID,
 			FSGroup:   &appUID,

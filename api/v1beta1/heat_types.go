@@ -32,6 +32,9 @@ type HeatSpec struct {
 	CFN HeatAPISpec `json:"cfn,omitempty"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	Engine HeatEngineSpec `json:"engine,omitempty"`
 
 	// +optional

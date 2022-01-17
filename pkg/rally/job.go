@@ -28,10 +28,12 @@ func DBSyncJob(instance *openstackv1beta1.Rally, env []corev1.EnvVar, volumes []
 					template.MustReadFile(AppLabel, "db-sync.sh"),
 				},
 				Env:          env,
+				Resources:    instance.Spec.DBSyncJob.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},
-		Volumes: volumes,
+		NodeSelector: instance.Spec.DBSyncJob.NodeSelector,
+		Volumes:      volumes,
 	})
 
 	job.Name = template.Combine(instance.Name, "db-sync")
