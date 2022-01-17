@@ -29,6 +29,9 @@ type NeutronSpec struct {
 	Server NeutronServerSpec `json:"server,omitempty"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	MetadataAgent NeutronMetadataAgentSpec `json:"metadataAgent,omitempty"`
 
 	// +optional

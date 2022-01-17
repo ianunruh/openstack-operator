@@ -15,6 +15,8 @@ func Magnum(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Magnum {
 
 	spec.Conductor.NodeSelector = controllerNodeSelector(spec.Conductor.NodeSelector, instance)
 
+	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
+
 	return &openstackv1beta1.Magnum{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "magnum",

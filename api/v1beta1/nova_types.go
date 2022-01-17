@@ -34,6 +34,9 @@ type NovaSpec struct {
 	Conductor NovaConductorSpec `json:"conductor,omitempty"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	Scheduler NovaSchedulerSpec `json:"scheduler,omitempty"`
 
 	// +optional

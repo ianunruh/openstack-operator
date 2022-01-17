@@ -13,6 +13,10 @@ func Keystone(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Keyston
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "keystone")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 
+	spec.BootstrapJob.NodeSelector = controllerNodeSelector(spec.BootstrapJob.NodeSelector, instance)
+
+	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
+
 	return &openstackv1beta1.Keystone{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone",

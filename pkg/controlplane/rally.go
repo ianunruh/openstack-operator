@@ -10,6 +10,8 @@ func Rally(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Rally {
 	// TODO labels
 	spec := instance.Spec.Rally
 
+	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
+
 	return &openstackv1beta1.Rally{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "rally",

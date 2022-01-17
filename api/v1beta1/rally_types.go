@@ -27,6 +27,9 @@ type RallySpec struct {
 	Data *VolumeSpec `json:"data"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional

@@ -29,6 +29,9 @@ type PlacementSpec struct {
 	API PlacementAPISpec `json:"api,omitempty"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional

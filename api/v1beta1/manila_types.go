@@ -29,6 +29,9 @@ type ManilaSpec struct {
 	API ManilaAPISpec `json:"api,omitempty"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	Scheduler ManilaSchedulerSpec `json:"scheduler,omitempty"`
 
 	// +optional

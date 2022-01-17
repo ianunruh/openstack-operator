@@ -29,6 +29,9 @@ type BarbicanSpec struct {
 	API BarbicanAPISpec `json:"api,omitempty"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	Worker BarbicanWorkerSpec `json:"scheduler,omitempty"`
 
 	// +optional

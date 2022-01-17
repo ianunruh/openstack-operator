@@ -13,6 +13,8 @@ func Octavia(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Octavia 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "octavia")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 
+	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
+
 	spec.HealthManager.NodeSelector = controllerNodeSelector(spec.HealthManager.NodeSelector, instance)
 
 	spec.Housekeeping.NodeSelector = controllerNodeSelector(spec.Housekeeping.NodeSelector, instance)

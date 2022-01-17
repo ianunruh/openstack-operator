@@ -28,9 +28,11 @@ func DBSyncJob(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, volumes 
 					template.MustReadFile(AppLabel, "db-sync.sh"),
 				},
 				Env:          env,
+				Resources:    instance.Spec.DBSyncJob.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},
+		NodeSelector: instance.Spec.DBSyncJob.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
 			RunAsUser: &appUID,
 			FSGroup:   &appUID,

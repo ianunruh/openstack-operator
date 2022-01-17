@@ -12,6 +12,8 @@ func Glance(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Glance {
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "glance")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 
+	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
+
 	return &openstackv1beta1.Glance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "glance",

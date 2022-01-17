@@ -29,6 +29,9 @@ type NovaCellSpec struct {
 	Compute map[string]NovaComputeSpec `json:"compute,omitempty"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	// +optional

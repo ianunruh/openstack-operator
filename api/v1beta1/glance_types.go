@@ -29,6 +29,9 @@ type GlanceSpec struct {
 	API GlanceAPISpec `json:"api,omitempty"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
 	Backends []GlanceBackendSpec `json:"backends,omitempty"`

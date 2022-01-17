@@ -32,6 +32,9 @@ type SenlinSpec struct {
 	Conductor SenlinConductorSpec `json:"conductor,omitempty"`
 
 	// +optional
+	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
+
+	// +optional
 	Engine SenlinEngineSpec `json:"engine,omitempty"`
 
 	// +optional

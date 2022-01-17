@@ -13,6 +13,8 @@ func Manila(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Manila {
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "manila")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 
+	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
+
 	spec.Scheduler.NodeSelector = controllerNodeSelector(spec.Scheduler.NodeSelector, instance)
 
 	spec.Share.NodeSelector = controllerNodeSelector(spec.Share.NodeSelector, instance)
