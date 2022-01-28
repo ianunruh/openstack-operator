@@ -30,11 +30,14 @@ if [ "${GATEWAY}" == "true" ]; then
     ovs-vsctl set open . external_ids:ovn-cms-options=enable-chassis-as-gw
     ovs-vsctl set open . external_ids:ovn-bridge-mappings=${BRIDGE_MAPPINGS}
 
-    # setup bridge
-    GW_BRIDGE=`echo ${BRIDGE_PORTS} | cut -d":" -f1`
-    GW_PORT=`echo ${BRIDGE_PORTS} | cut -d":" -f2`
-    ovs-vsctl --may-exist add-br ${GW_BRIDGE}
-    ovs-vsctl --may-exist add-port ${GW_BRIDGE} ${GW_PORT}
+    # setup bridges
+    for bridge_port in ${BRIDGE_PORTS//,/ }
+    do
+        gw_bridge=$(echo ${bridge_port} | cut -d":" -f1)
+        gw_port=$(echo ${bridge_port} | cut -d":" -f2)
+        ovs-vsctl --may-exist add-br ${gw_bridge}
+        ovs-vsctl --may-exist add-port ${gw_bridge} ${gw_port}
+    done
 fi
 
 ovs-appctl -t ovsdb-server ovsdb-server/add-remote ptcp:6640:127.0.0.1
