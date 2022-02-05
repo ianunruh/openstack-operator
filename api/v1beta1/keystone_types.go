@@ -27,6 +27,9 @@ type KeystoneSpec struct {
 	Image string `json:"image,omitempty"`
 
 	// +optional
+	OIDC KeystoneOIDCSpec `json:"oidc,omitempty"`
+
+	// +optional
 	API KeystoneAPISpec `json:"api,omitempty"`
 
 	// +optional
@@ -46,6 +49,26 @@ type KeystoneSpec struct {
 
 	// +optional
 	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
+}
+
+type KeystoneOIDCSpec struct {
+	// +optional
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +optional
+	IdentityProvider string `json:"identityProvider,omitempty"`
+
+	// +optional
+	DashboardURL string `json:"dashboardURL,omitempty"`
+
+	// +optional
+	ProviderMetadataURL string `json:"providerMetadataURL,omitempty"`
+
+	// +optional
+	RedirectURI string `json:"redirectURI,omitempty"`
+
+	// +optional
+	Secret string `json:"secret,omitempty"`
 }
 
 type KeystoneAPISpec struct {

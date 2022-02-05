@@ -88,6 +88,27 @@ spec:
                         type: object
                     type: object
                 type: object
+              sso:
+                properties:
+                  enabled:
+                    type: boolean
+                  keystoneURL:
+                    type: string
+                  methods:
+                    items:
+                      properties:
+                        default:
+                          type: boolean
+                        kind:
+                          type: string
+                        title:
+                          type: string
+                      required:
+                      - kind
+                      - title
+                      type: object
+                    type: array
+                type: object
             type: object
           status:
             description: HorizonStatus defines the observed state of Horizon

@@ -27,7 +27,30 @@ type HorizonSpec struct {
 	Image string `json:"image,omitempty"`
 
 	// +optional
+	SSO HorizonSSOSpec `json:"sso,omitempty"`
+
+	// +optional
 	Server HorizonServerSpec `json:"server,omitempty"`
+}
+
+type HorizonSSOSpec struct {
+	// +optional
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +optional
+	KeystoneURL string `json:"keystoneURL,omitempty"`
+
+	// +optional
+	Methods []HorizonSSOMethod `json:"methods,omitempty"`
+}
+
+type HorizonSSOMethod struct {
+	Kind string `json:"kind"`
+
+	Title string `json:"title"`
+
+	// +optional
+	Default bool `json:"default,omitempty"`
 }
 
 type HorizonServerSpec struct {

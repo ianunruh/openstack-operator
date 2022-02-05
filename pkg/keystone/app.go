@@ -31,11 +31,42 @@ func ConfigMap(instance *openstackv1beta1.Keystone) *corev1.ConfigMap {
 		cfg.Section("oslo_messaging_notifications").NewKey("driver", "messagingv2")
 	}
 
+	if oidcSpec := instance.Spec.OIDC; oidcSpec.Enabled {
+		cfg.Section("auth").NewKey("methods", "password,token,oauth1,openid,mapped,application_credential")
+		cfg.Section("federation").NewKey("trusted_dashboard", oidcSpec.DashboardURL)
+	}
+
 	template.MergeINI(cfg, instance.Spec.ExtraConfig)
 
 	cm.Data["keystone.conf"] = template.MustOutputINI(cfg).String()
 
+	cm.Data["httpd.conf"] = template.MustRenderFile(AppLabel, "httpd.conf", httpdParamsFrom(instance))
+
 	return cm
+}
+
+type httpdParams struct {
+	OIDC httpdOIDCParams
+}
+
+type httpdOIDCParams struct {
+	Enabled             bool
+	ProviderMetadataURL string
+	RedirectURI         string
+}
+
+func httpdParamsFrom(instance *openstackv1beta1.Keystone) httpdParams {
+	params := httpdParams{}
+
+	if oidcSpec := instance.Spec.OIDC; oidcSpec.Enabled {
+		params.OIDC = httpdOIDCParams{
+			Enabled:             true,
+			ProviderMetadataURL: oidcSpec.ProviderMetadataURL,
+			RedirectURI:         oidcSpec.RedirectURI,
+		}
+	}
+
+	return params
 }
 
 func EnsureKeystone(ctx context.Context, c client.Client, intended *openstackv1beta1.Keystone, log logr.Logger) error {
