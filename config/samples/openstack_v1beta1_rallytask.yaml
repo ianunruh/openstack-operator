@@ -5,3 +5,4 @@ metadata:
 spec:
   image: xrally/xrally-openstack:2.1.0
   path: samples/tasks/scenarios/nova/list-hypervisors.yaml
+  profilerSecret: default-profiler
