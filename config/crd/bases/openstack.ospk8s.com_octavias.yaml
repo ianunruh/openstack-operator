@@ -236,8 +236,6 @@ spec:
                           to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                     type: object
-                required:
-                - nodeSelector
                 type: object
               housekeeping:
                 properties:
@@ -280,6 +278,10 @@ spec:
                 type: object
               image:
                 type: string
+              nodeSelector:
+                additionalProperties:
+                  type: string
+                type: object
               ovn:
                 properties:
                   enabled:
@@ -326,8 +328,6 @@ spec:
                 type: object
             required:
             - amphora
-            - healthManager
-            - image
             type: object
           status:
             description: OctaviaStatus defines the observed state of Octavia

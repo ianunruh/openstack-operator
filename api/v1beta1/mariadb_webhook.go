@@ -42,7 +42,12 @@ var _ webhook.Defaulter = &MariaDB{}
 func (r *MariaDB) Default() {
 	mariadblog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	r.Spec.Image = imageDefault(r.Spec.Image, MariaDBDefaultImage)
+	r.Spec.Volume = volumeDefault(r.Spec.Volume)
+
+	if promSpec := r.Spec.Prometheus; promSpec != nil {
+		promSpec.Exporter.Image = imageDefault(promSpec.Exporter.Image, MariaDBExporterDefaultImage)
+	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

@@ -7,8 +7,10 @@ import (
 )
 
 func Heat(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Heat {
-	// TODO labels
 	spec := instance.Spec.Heat
+	if spec == nil {
+		return nil
+	}
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "heat")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
@@ -18,11 +20,12 @@ func Heat(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Heat {
 
 	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
 
+	// TODO labels
 	return &openstackv1beta1.Heat{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "heat",
 			Namespace: instance.Namespace,
 		},
-		Spec: spec,
+		Spec: *spec,
 	}
 }

@@ -42,7 +42,7 @@ var _ webhook.Defaulter = &Horizon{}
 func (r *Horizon) Default() {
 	horizonlog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	r.Spec.Image = imageDefault(r.Spec.Image, HorizonDefaultImage)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

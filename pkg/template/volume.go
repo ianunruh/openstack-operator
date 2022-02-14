@@ -13,24 +13,14 @@ import (
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 )
 
-func PersistentVolumeClaim(name string, labels map[string]string, spec *openstackv1beta1.VolumeSpec) corev1.PersistentVolumeClaim {
-	accessModes := spec.AccessModes
-	if accessModes == nil {
-		accessModes = []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce}
-	}
-
-	capacity := spec.Capacity
-	if capacity == "" {
-		capacity = "10Gi"
-	}
-
+func PersistentVolumeClaim(name string, labels map[string]string, spec openstackv1beta1.VolumeSpec) corev1.PersistentVolumeClaim {
 	return corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   name,
 			Labels: labels,
 		},
 		Spec: corev1.PersistentVolumeClaimSpec{
-			AccessModes:      accessModes,
+			AccessModes:      spec.AccessModes,
 			StorageClassName: spec.StorageClass,
 			Resources:        StorageResources(spec.Capacity),
 		},

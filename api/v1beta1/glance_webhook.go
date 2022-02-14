@@ -43,6 +43,27 @@ func (r *Glance) Default() {
 	glancelog.Info("default", "name", r.Name)
 
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
+	r.Spec.Image = imageDefault(r.Spec.Image, GlanceDefaultImage)
+
+	if r.Spec.Backends == nil {
+		r.Spec.Backends = []GlanceBackendSpec{
+			{
+				Name: "ssd",
+				PVC: &VolumeSpec{
+					Capacity: "50Gi",
+				},
+			},
+		}
+	}
+
+	for i, backend := range r.Spec.Backends {
+		if backend.PVC != nil {
+			pvc := volumeDefault(*backend.PVC)
+			backend.PVC = &pvc
+		}
+
+		r.Spec.Backends[i] = backend
+	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

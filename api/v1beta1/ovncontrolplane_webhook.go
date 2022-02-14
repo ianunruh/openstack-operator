@@ -42,7 +42,9 @@ var _ webhook.Defaulter = &OVNControlPlane{}
 func (r *OVNControlPlane) Default() {
 	ovncontrolplanelog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	r.Spec.Image = imageDefault(r.Spec.Image, NeutronDefaultImage)
+	r.Spec.OVSDBNorth.Volume = volumeDefault(r.Spec.OVSDBNorth.Volume)
+	r.Spec.OVSDBSouth.Volume = volumeDefault(r.Spec.OVSDBSouth.Volume)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

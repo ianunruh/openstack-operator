@@ -7,8 +7,10 @@ import (
 )
 
 func Octavia(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Octavia {
-	// TODO labels
 	spec := instance.Spec.Octavia
+	if spec == nil {
+		return nil
+	}
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "octavia")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
@@ -21,11 +23,12 @@ func Octavia(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Octavia 
 
 	spec.Worker.NodeSelector = controllerNodeSelector(spec.Worker.NodeSelector, instance)
 
+	// TODO labels
 	return &openstackv1beta1.Octavia{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "octavia",
 			Namespace: instance.Namespace,
 		},
-		Spec: spec,
+		Spec: *spec,
 	}
 }

@@ -165,8 +165,6 @@ spec:
                       storageClass:
                         type: string
                     type: object
-                required:
-                - volume
                 type: object
               ovsdbSouth:
                 properties:
@@ -212,13 +210,7 @@ spec:
                       storageClass:
                         type: string
                     type: object
-                required:
-                - volume
                 type: object
-            required:
-            - image
-            - ovsdbNorth
-            - ovsdbSouth
             type: object
           status:
             description: OVNControlPlaneStatus defines the observed state of OVNControlPlane

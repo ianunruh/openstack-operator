@@ -192,8 +192,6 @@ spec:
                                       https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                                     type: object
                                 type: object
-                            required:
-                            - image
                             type: object
                           nodeSelector:
                             additionalProperties:
@@ -564,9 +562,6 @@ spec:
                         type: object
                     type: object
                 type: object
-            required:
-            - cells
-            - image
             type: object
           status:
             description: NovaStatus defines the observed state of Nova

@@ -19,7 +19,7 @@ func PersistentVolumeClaims(instance *openstackv1beta1.Glance) []*corev1.Persist
 		name := template.Combine(instance.Name, backend.Name)
 		labels := template.AppLabels(instance.Name, AppLabel)
 
-		pvc := template.PersistentVolumeClaim(name, labels, pvcSpec)
+		pvc := template.PersistentVolumeClaim(name, labels, *pvcSpec)
 		pvc.Namespace = instance.Namespace
 
 		claims = append(claims, &pvc)

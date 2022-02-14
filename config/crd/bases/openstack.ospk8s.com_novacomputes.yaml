@@ -69,8 +69,6 @@ spec:
                           to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                         type: object
                     type: object
-                required:
-                - image
                 type: object
               nodeSelector:
                 additionalProperties:

@@ -23,7 +23,8 @@ import (
 
 // HorizonSpec defines the desired state of Horizon
 type HorizonSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	Server HorizonServerSpec `json:"server,omitempty"`

@@ -7,8 +7,10 @@ import (
 )
 
 func Cinder(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Cinder {
-	// TODO labels
 	spec := instance.Spec.Cinder
+	if spec == nil {
+		return nil
+	}
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "cinder")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
@@ -19,11 +21,12 @@ func Cinder(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Cinder {
 
 	spec.Volume.NodeSelector = controllerNodeSelector(spec.Volume.NodeSelector, instance)
 
+	// TODO labels
 	return &openstackv1beta1.Cinder{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "cinder",
 			Namespace: instance.Namespace,
 		},
-		Spec: spec,
+		Spec: *spec,
 	}
 }

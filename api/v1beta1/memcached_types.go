@@ -23,9 +23,11 @@ import (
 
 // MemcachedSpec defines the desired state of Memcached
 type MemcachedSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
-	Volume *VolumeSpec `json:"volume"`
+	// +optional
+	Volume VolumeSpec `json:"volume,omitempty"`
 
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
@@ -38,14 +40,16 @@ type MemcachedSpec struct {
 }
 
 type MemcachedPrometheusSpec struct {
-	Exporter MemcachedExporterSpec `json:"exporter"`
+	// +optional
+	Exporter MemcachedExporterSpec `json:"exporter,omitempty"`
 
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
 
 type MemcachedExporterSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`

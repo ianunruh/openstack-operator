@@ -23,7 +23,8 @@ import (
 
 // NeutronSpec defines the desired state of Neutron
 type NeutronSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	Server NeutronServerSpec `json:"server,omitempty"`

@@ -266,7 +266,6 @@ spec:
                 type: object
             required:
             - backends
-            - image
             type: object
           status:
             description: ManilaStatus defines the observed state of Manila

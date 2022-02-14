@@ -42,7 +42,8 @@ var _ webhook.Defaulter = &RabbitMQ{}
 func (r *RabbitMQ) Default() {
 	rabbitmqlog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	r.Spec.Image = imageDefault(r.Spec.Image, RabbitMQDefaultImage)
+	r.Spec.Volume = volumeDefault(r.Spec.Volume)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

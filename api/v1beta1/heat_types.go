@@ -23,7 +23,8 @@ import (
 
 // HeatSpec defines the desired state of Heat
 type HeatSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	API HeatAPISpec `json:"api,omitempty"`

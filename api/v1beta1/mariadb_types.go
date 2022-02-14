@@ -23,9 +23,11 @@ import (
 
 // MariaDBSpec defines the desired state of MariaDB
 type MariaDBSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
-	Volume *VolumeSpec `json:"volume"`
+	// +optional
+	Volume VolumeSpec `json:"volume,omitempty"`
 
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
@@ -38,14 +40,16 @@ type MariaDBSpec struct {
 }
 
 type MariaDBPrometheusSpec struct {
-	Exporter MariaDBExporterSpec `json:"exporter"`
+	// +optional
+	Exporter MariaDBExporterSpec `json:"exporter,omitempty"`
 
 	// +optional
 	ServiceMonitor bool `json:"serviceMonitor,omitempty"`
 }
 
 type MariaDBExporterSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`

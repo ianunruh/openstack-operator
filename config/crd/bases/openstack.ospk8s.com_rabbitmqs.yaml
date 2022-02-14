@@ -107,9 +107,6 @@ spec:
                   storageClass:
                     type: string
                 type: object
-            required:
-            - image
-            - volume
             type: object
           status:
             description: RabbitMQStatus defines the observed state of RabbitMQ

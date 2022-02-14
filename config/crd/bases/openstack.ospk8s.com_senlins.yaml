@@ -270,8 +270,6 @@ spec:
                 type: object
               image:
                 type: string
-            required:
-            - image
             type: object
           status:
             description: SenlinStatus defines the observed state of Senlin

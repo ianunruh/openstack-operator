@@ -23,9 +23,11 @@ import (
 
 // NovaSpec defines the desired state of Nova
 type NovaSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
-	Cells []NovaCellSpec `json:"cells"`
+	// +optional
+	Cells []NovaCellSpec `json:"cells,omitempty"`
 
 	// +optional
 	API NovaAPISpec `json:"api,omitempty"`

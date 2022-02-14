@@ -83,13 +83,9 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                             type: object
                         type: object
-                    required:
-                    - image
                     type: object
                   serviceMonitor:
                     type: boolean
-                required:
-                - exporter
                 type: object
               resources:
                 description: ResourceRequirements describes the compute resource requirements.
@@ -128,9 +124,6 @@ spec:
                   storageClass:
                     type: string
                 type: object
-            required:
-            - image
-            - volume
             type: object
           status:
             description: MemcachedStatus defines the observed state of Memcached

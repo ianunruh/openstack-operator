@@ -23,7 +23,8 @@ import (
 
 // SenlinSpec defines the desired state of Senlin
 type SenlinSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	API SenlinAPISpec `json:"api,omitempty"`

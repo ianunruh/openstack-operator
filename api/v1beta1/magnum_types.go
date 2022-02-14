@@ -23,7 +23,8 @@ import (
 
 // MagnumSpec defines the desired state of Magnum
 type MagnumSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	API MagnumAPISpec `json:"api,omitempty"`

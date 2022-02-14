@@ -7,8 +7,10 @@ import (
 )
 
 func Barbican(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Barbican {
-	// TODO labels
 	spec := instance.Spec.Barbican
+	if spec == nil {
+		return nil
+	}
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "barbican")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
@@ -17,11 +19,12 @@ func Barbican(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Barbica
 
 	spec.Worker.NodeSelector = controllerNodeSelector(spec.Worker.NodeSelector, instance)
 
+	// TODO labels
 	return &openstackv1beta1.Barbican{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "barbican",
 			Namespace: instance.Namespace,
 		},
-		Spec: spec,
+		Spec: *spec,
 	}
 }

@@ -23,10 +23,14 @@ import (
 
 // OVNControlPlaneSpec defines the desired state of OVNControlPlane
 type OVNControlPlaneSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
-	OVSDBNorth OVSDBSpec `json:"ovsdbNorth"`
-	OVSDBSouth OVSDBSpec `json:"ovsdbSouth"`
+	// +optional
+	OVSDBNorth OVSDBSpec `json:"ovsdbNorth,omitempty"`
+
+	// +optional
+	OVSDBSouth OVSDBSpec `json:"ovsdbSouth,omitempty"`
 
 	// +optional
 	Node OVNNodeSpec `json:"node,omitempty"`
@@ -36,7 +40,8 @@ type OVNControlPlaneSpec struct {
 }
 
 type OVSDBSpec struct {
-	Volume *VolumeSpec `json:"volume"`
+	// +optional
+	Volume VolumeSpec `json:"volume"`
 
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
