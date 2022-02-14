@@ -196,8 +196,6 @@ spec:
                 type: object
               image:
                 type: string
-            required:
-            - image
             type: object
           status:
             description: MagnumStatus defines the observed state of Magnum

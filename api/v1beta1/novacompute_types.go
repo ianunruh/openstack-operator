@@ -39,7 +39,8 @@ type NovaComputeSpec struct {
 }
 
 type NovaLibvirtdSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`

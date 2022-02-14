@@ -8,42 +8,12 @@ spec:
     tlsSecretName: wildcard-tls
     annotations:
       kubernetes.io/ingress.class: nginx
-  broker:
-    image: docker.io/bitnami/rabbitmq:3.8.9-debian-10-r58
-    volume:
-      capacity: 20Gi
-  cache:
-    image: docker.io/bitnami/memcached:1.6.9-debian-10-r0
-    volume:
-      capacity: 20Gi
-    prometheus:
-      exporter:
-        image: bitnami/memcached-exporter:0.9.0
-  database:
-    image: docker.io/bitnami/mariadb:10.5.8-debian-10-r21
-    volume:
-      capacity: 20Gi
-    prometheus:
-      exporter:
-        image: bitnami/mysqld-exporter:0.13.0
-  keystone:
-    image: ghcr.io/ianunruh/openstack-operator-images/keystone:master
   glance:
-    image: ghcr.io/ianunruh/openstack-operator-images/glance:master
     backends:
     - name: ssd
       pvc:
         capacity: 30Gi
-  placement:
-    image: ghcr.io/ianunruh/openstack-operator-images/placement:master
   nova:
-    image: ghcr.io/ianunruh/openstack-operator-images/nova:master
-    cells:
-    - name: cell1
-      compute:
-        default:
-          libvirtd:
-            image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
     extraConfig:
       libvirt:
         # TODO since nested virt is available, might be able to remove this
@@ -69,42 +39,12 @@ spec:
         vcpus: 4
         disk: 60
         isPublic: true
-  neutron:
-    image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
-  ovn:
-    image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
-    ovsdbNorth:
-      volume:
-        capacity: 10Gi
-    ovsdbSouth:
-      volume:
-        capacity: 10Gi
-  horizon:
-    image: ghcr.io/ianunruh/openstack-operator-images/horizon:master
-  heat:
-    image: ghcr.io/ianunruh/openstack-operator-images/heat:master
-  barbican:
-    image: ghcr.io/ianunruh/openstack-operator-images/barbican:master
-  rally:
-    image: xrally/xrally-openstack:2.1.0
-    data:
-      capacity: 10Gi
+  horizon: {}
+  heat: {}
+  barbican: {}
+  rally: {}
   octavia:
-    image: ghcr.io/ianunruh/openstack-operator-images/octavia:master
     amphora:
       imageURL: https://tarballs.opendev.org/openstack/octavia/test-images/test-only-amphora-x64-haproxy-ubuntu-focal.qcow2
-    api:
-      nodeSelector:
-        openstack/octavia-controller: enabled
-    driverAgent:
-      nodeSelector:
-        openstack/octavia-controller: enabled
-    healthManager:
-      nodeSelector:
-        openstack/octavia-controller: enabled
-    housekeeping:
-      nodeSelector:
-        openstack/octavia-controller: enabled
-    worker:
-      nodeSelector:
-        openstack/octavia-controller: enabled
+    nodeSelector:
+      openstack/octavia-controller: enabled

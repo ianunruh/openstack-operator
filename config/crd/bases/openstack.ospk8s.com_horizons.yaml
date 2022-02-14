@@ -88,8 +88,6 @@ spec:
                         type: object
                     type: object
                 type: object
-            required:
-            - image
             type: object
           status:
             description: HorizonStatus defines the observed state of Horizon

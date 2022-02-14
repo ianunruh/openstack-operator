@@ -31,6 +31,14 @@ func Nova(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Nova {
 }
 
 func novaCellDefaults(cells []openstackv1beta1.NovaCellSpec, instance *openstackv1beta1.ControlPlane) []openstackv1beta1.NovaCellSpec {
+	if cells == nil {
+		cells = []openstackv1beta1.NovaCellSpec{
+			{
+				Name: "cell1",
+			},
+		}
+	}
+
 	out := make([]openstackv1beta1.NovaCellSpec, 0, len(cells))
 
 	for _, spec := range cells {

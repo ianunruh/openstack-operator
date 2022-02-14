@@ -23,7 +23,8 @@ import (
 
 // GlanceSpec defines the desired state of Glance
 type GlanceSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	API GlanceAPISpec `json:"api,omitempty"`
@@ -34,6 +35,7 @@ type GlanceSpec struct {
 	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`
 
+	// +optional
 	Backends []GlanceBackendSpec `json:"backends,omitempty"`
 
 	// +optional

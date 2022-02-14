@@ -30,46 +30,56 @@ type ControlPlaneSpec struct {
 	// +optional
 	NodeSelector ControlPlaneNodeSelector `json:"nodeSelector,omitempty"`
 
-	Broker RabbitMQSpec `json:"broker"`
-
-	Cache MemcachedSpec `json:"cache"`
-
-	Database MariaDBSpec `json:"database"`
-
-	Keystone KeystoneSpec `json:"keystone"`
-
-	Glance GlanceSpec `json:"glance"`
-
-	Placement PlacementSpec `json:"placement"`
-
-	Nova NovaSpec `json:"nova"`
-
-	Neutron NeutronSpec `json:"neutron"`
-
-	OVN OVNControlPlaneSpec `json:"ovn"`
-
-	Horizon HorizonSpec `json:"horizon"`
+	// +optional
+	Broker RabbitMQSpec `json:"broker,omitempty"`
 
 	// +optional
-	Barbican BarbicanSpec `json:"barbican,omitempty"`
+	Cache MemcachedSpec `json:"cache,omitempty"`
 
 	// +optional
-	Cinder CinderSpec `json:"cinder,omitempty"`
+	Database MariaDBSpec `json:"database,omitempty"`
 
 	// +optional
-	Heat HeatSpec `json:"heat,omitempty"`
+	Keystone KeystoneSpec `json:"keystone,omitempty"`
 
 	// +optional
-	Magnum MagnumSpec `json:"magnum,omitempty"`
+	Glance GlanceSpec `json:"glance,omitempty"`
 
 	// +optional
-	Manila ManilaSpec `json:"manila,omitempty"`
+	Placement PlacementSpec `json:"placement,omitempty"`
 
 	// +optional
-	Octavia OctaviaSpec `json:"octavia,omitempty"`
+	Nova NovaSpec `json:"nova,omitempty"`
 
 	// +optional
-	Rally RallySpec `json:"rally,omitempty"`
+	Neutron NeutronSpec `json:"neutron,omitempty"`
+
+	// +optional
+	OVN OVNControlPlaneSpec `json:"ovn,omitempty"`
+
+	// +optional
+	Horizon *HorizonSpec `json:"horizon,omitempty"`
+
+	// +optional
+	Barbican *BarbicanSpec `json:"barbican,omitempty"`
+
+	// +optional
+	Cinder *CinderSpec `json:"cinder,omitempty"`
+
+	// +optional
+	Heat *HeatSpec `json:"heat,omitempty"`
+
+	// +optional
+	Magnum *MagnumSpec `json:"magnum,omitempty"`
+
+	// +optional
+	Manila *ManilaSpec `json:"manila,omitempty"`
+
+	// +optional
+	Octavia *OctaviaSpec `json:"octavia,omitempty"`
+
+	// +optional
+	Rally *RallySpec `json:"rally,omitempty"`
 }
 
 type ControlPlaneNodeSelector struct {

@@ -48,7 +48,6 @@ spec:
               path:
                 type: string
             required:
-            - image
             - path
             type: object
           status:

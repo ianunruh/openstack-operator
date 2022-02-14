@@ -205,8 +205,6 @@ spec:
                   enabled:
                     type: boolean
                 type: object
-            required:
-            - image
             type: object
           status:
             description: KeystoneStatus defines the observed state of Keystone

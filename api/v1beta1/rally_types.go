@@ -22,9 +22,11 @@ import (
 
 // RallySpec defines the desired state of Rally
 type RallySpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
-	Data *VolumeSpec `json:"data"`
+	// +optional
+	Data VolumeSpec `json:"data,omitempty"`
 
 	// +optional
 	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`

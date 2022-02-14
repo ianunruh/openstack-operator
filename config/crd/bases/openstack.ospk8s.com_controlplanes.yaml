@@ -210,8 +210,6 @@ spec:
                             type: object
                         type: object
                     type: object
-                required:
-                - image
                 type: object
               broker:
                 description: RabbitMQSpec defines the desired state of RabbitMQ
@@ -281,9 +279,6 @@ spec:
                       storageClass:
                         type: string
                     type: object
-                required:
-                - image
-                - volume
                 type: object
               cache:
                 description: MemcachedSpec defines the desired state of Memcached
@@ -328,13 +323,9 @@ spec:
                                   value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                                 type: object
                             type: object
-                        required:
-                        - image
                         type: object
                       serviceMonitor:
                         type: boolean
-                    required:
-                    - exporter
                     type: object
                   resources:
                     description: ResourceRequirements describes the compute resource
@@ -374,9 +365,6 @@ spec:
                       storageClass:
                         type: string
                     type: object
-                required:
-                - image
-                - volume
                 type: object
               cinder:
                 description: CinderSpec defines the desired state of Cinder
@@ -622,7 +610,7 @@ spec:
                         type: object
                     type: object
                 required:
-                - image
+                - backends
                 type: object
               database:
                 description: MariaDBSpec defines the desired state of MariaDB
@@ -667,13 +655,9 @@ spec:
                                   value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                                 type: object
                             type: object
-                        required:
-                        - image
                         type: object
                       serviceMonitor:
                         type: boolean
-                    required:
-                    - exporter
                     type: object
                   resources:
                     description: ResourceRequirements describes the compute resource
@@ -713,9 +697,6 @@ spec:
                       storageClass:
                         type: string
                     type: object
-                required:
-                - image
-                - volume
                 type: object
               domain:
                 type: string
@@ -879,8 +860,6 @@ spec:
                     type: object
                   image:
                     type: string
-                required:
-                - image
                 type: object
               heat:
                 description: HeatSpec defines the desired state of Heat
@@ -1100,8 +1079,6 @@ spec:
                     type: object
                   image:
                     type: string
-                required:
-                - image
                 type: object
               horizon:
                 description: HorizonSpec defines the desired state of Horizon
@@ -1159,8 +1136,6 @@ spec:
                             type: object
                         type: object
                     type: object
-                required:
-                - image
                 type: object
               ingress:
                 properties:
@@ -1342,8 +1317,6 @@ spec:
                       enabled:
                         type: boolean
                     type: object
-                required:
-                - image
                 type: object
               magnum:
                 description: MagnumSpec defines the desired state of Magnum
@@ -1512,8 +1485,6 @@ spec:
                     type: object
                   image:
                     type: string
-                required:
-                - image
                 type: object
               manila:
                 description: ManilaSpec defines the desired state of Manila
@@ -1753,7 +1724,6 @@ spec:
                     type: object
                 required:
                 - backends
-                - image
                 type: object
               neutron:
                 description: NeutronSpec defines the desired state of Neutron
@@ -1929,8 +1899,6 @@ spec:
                             type: object
                         type: object
                     type: object
-                required:
-                - image
                 type: object
               nodeSelector:
                 properties:
@@ -2107,8 +2075,6 @@ spec:
                                           value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                                         type: object
                                     type: object
-                                required:
-                                - image
                                 type: object
                               nodeSelector:
                                 additionalProperties:
@@ -2483,9 +2449,6 @@ spec:
                             type: object
                         type: object
                     type: object
-                required:
-                - cells
-                - image
                 type: object
               octavia:
                 description: OctaviaSpec defines the desired state of Octavia
@@ -2695,8 +2658,6 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                             type: object
                         type: object
-                    required:
-                    - nodeSelector
                     type: object
                   housekeeping:
                     properties:
@@ -2740,6 +2701,10 @@ spec:
                     type: object
                   image:
                     type: string
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   ovn:
                     properties:
                       enabled:
@@ -2787,8 +2752,6 @@ spec:
                     type: object
                 required:
                 - amphora
-                - healthManager
-                - image
                 type: object
               ovn:
                 description: OVNControlPlaneSpec defines the desired state of OVNControlPlane
@@ -2925,8 +2888,6 @@ spec:
                           storageClass:
                             type: string
                         type: object
-                    required:
-                    - volume
                     type: object
                   ovsdbSouth:
                     properties:
@@ -2973,13 +2934,7 @@ spec:
                           storageClass:
                             type: string
                         type: object
-                    required:
-                    - volume
                     type: object
-                required:
-                - image
-                - ovsdbNorth
-                - ovsdbSouth
                 type: object
               placement:
                 description: PlacementSpec defines the desired state of Placement
@@ -3093,8 +3048,6 @@ spec:
                     type: object
                   image:
                     type: string
-                required:
-                - image
                 type: object
               rally:
                 description: RallySpec defines the desired state of Rally
@@ -3168,22 +3121,9 @@ spec:
                     type: object
                   image:
                     type: string
-                required:
-                - data
-                - image
                 type: object
             required:
-            - broker
-            - cache
-            - database
             - domain
-            - glance
-            - horizon
-            - keystone
-            - neutron
-            - nova
-            - ovn
-            - placement
             type: object
           status:
             description: ControlPlaneStatus defines the observed state of ControlPlane

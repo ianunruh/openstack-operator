@@ -126,8 +126,7 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
-	if len(instance.Spec.Cinder.Backends) > 0 {
-		volume := controlplane.Cinder(instance)
+	if volume := controlplane.Cinder(instance); volume != nil {
 		controllerutil.SetControllerReference(instance, volume, r.Scheme)
 		if err := cinder.EnsureCinder(ctx, r.Client, volume, log); err != nil {
 			return ctrl.Result{}, err
@@ -146,54 +145,48 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
-	dashboard := controlplane.Horizon(instance)
-	controllerutil.SetControllerReference(instance, dashboard, r.Scheme)
-	if err := horizon.EnsureHorizon(ctx, r.Client, dashboard, log); err != nil {
-		return ctrl.Result{}, err
+	if dashboard := controlplane.Horizon(instance); dashboard != nil {
+		controllerutil.SetControllerReference(instance, dashboard, r.Scheme)
+		if err := horizon.EnsureHorizon(ctx, r.Client, dashboard, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
-	if instance.Spec.Barbican.Image != "" {
-		keyManager := controlplane.Barbican(instance)
+	if keyManager := controlplane.Barbican(instance); keyManager != nil {
 		controllerutil.SetControllerReference(instance, keyManager, r.Scheme)
 		if err := barbican.EnsureBarbican(ctx, r.Client, keyManager, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
-	if instance.Spec.Heat.Image != "" {
-		orchestration := controlplane.Heat(instance)
+	if orchestration := controlplane.Heat(instance); orchestration != nil {
 		controllerutil.SetControllerReference(instance, orchestration, r.Scheme)
 		if err := heat.EnsureHeat(ctx, r.Client, orchestration, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
-	if instance.Spec.Magnum.Image != "" {
-		containerInfra := controlplane.Magnum(instance)
+	if containerInfra := controlplane.Magnum(instance); containerInfra != nil {
 		controllerutil.SetControllerReference(instance, containerInfra, r.Scheme)
 		if err := magnum.EnsureMagnum(ctx, r.Client, containerInfra, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
-
-	if instance.Spec.Octavia.Image != "" {
-		loadBalancer := controlplane.Octavia(instance)
+	if loadBalancer := controlplane.Octavia(instance); loadBalancer != nil {
 		controllerutil.SetControllerReference(instance, loadBalancer, r.Scheme)
 		if err := octavia.EnsureOctavia(ctx, r.Client, loadBalancer, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
-	if instance.Spec.Manila.Image != "" {
-		sfs := controlplane.Manila(instance)
+	if sfs := controlplane.Manila(instance); sfs != nil {
 		controllerutil.SetControllerReference(instance, sfs, r.Scheme)
 		if err := manila.EnsureManila(ctx, r.Client, sfs, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
-	if instance.Spec.Rally.Image != "" {
-		benchmark := controlplane.Rally(instance)
+	if benchmark := controlplane.Rally(instance); benchmark != nil {
 		controllerutil.SetControllerReference(instance, benchmark, r.Scheme)
 		if err := rally.EnsureRally(ctx, r.Client, benchmark, log); err != nil {
 			return ctrl.Result{}, err

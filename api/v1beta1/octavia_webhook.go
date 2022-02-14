@@ -41,10 +41,17 @@ func (r *Octavia) Default() {
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
+	r.Spec.Image = imageDefault(r.Spec.Image, OctaviaDefaultImage)
 
 	if r.Spec.Amphora.ManagementCIDR == "" {
 		r.Spec.Amphora.ManagementCIDR = "172.28.0.0/24"
 	}
+
+	r.Spec.API.NodeSelector = nodeSelectorDefault(r.Spec.API.NodeSelector, r.Spec.NodeSelector)
+	r.Spec.DriverAgent.NodeSelector = nodeSelectorDefault(r.Spec.DriverAgent.NodeSelector, r.Spec.NodeSelector)
+	r.Spec.HealthManager.NodeSelector = nodeSelectorDefault(r.Spec.HealthManager.NodeSelector, r.Spec.NodeSelector)
+	r.Spec.Housekeeping.NodeSelector = nodeSelectorDefault(r.Spec.Housekeeping.NodeSelector, r.Spec.NodeSelector)
+	r.Spec.Worker.NodeSelector = nodeSelectorDefault(r.Spec.Worker.NodeSelector, r.Spec.NodeSelector)
 }
 
 //+kubebuilder:webhook:path=/validate-openstack-ospk8s-com-v1beta1-octavia,mutating=false,failurePolicy=fail,sideEffects=None,groups=openstack.ospk8s.com,resources=octavias,verbs=create;update,versions=v1beta1,name=voctavia.kb.io,admissionReviewVersions={v1,v1beta1}

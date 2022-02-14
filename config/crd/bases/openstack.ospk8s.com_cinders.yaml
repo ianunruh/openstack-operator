@@ -272,7 +272,7 @@ spec:
                     type: object
                 type: object
             required:
-            - image
+            - backends
             type: object
           status:
             description: CinderStatus defines the observed state of Cinder

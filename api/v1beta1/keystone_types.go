@@ -23,7 +23,8 @@ import (
 
 // KeystoneSpec defines the desired state of Keystone
 type KeystoneSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	API KeystoneAPISpec `json:"api,omitempty"`

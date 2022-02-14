@@ -7,8 +7,10 @@ import (
 )
 
 func Magnum(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Magnum {
-	// TODO labels
 	spec := instance.Spec.Magnum
+	if spec == nil {
+		return nil
+	}
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "magnum")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
@@ -17,11 +19,12 @@ func Magnum(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Magnum {
 
 	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
 
+	// TODO labels
 	return &openstackv1beta1.Magnum{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "magnum",
 			Namespace: instance.Namespace,
 		},
-		Spec: spec,
+		Spec: *spec,
 	}
 }

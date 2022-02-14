@@ -23,7 +23,8 @@ import (
 
 // BarbicanSpec defines the desired state of Barbican
 type BarbicanSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	API BarbicanAPISpec `json:"api,omitempty"`

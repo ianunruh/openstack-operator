@@ -14,3 +14,15 @@ type VolumeSpec struct {
 	// +optional
 	AccessModes []corev1.PersistentVolumeAccessMode `json:"accessModes,omitempty"`
 }
+
+func volumeDefault(spec VolumeSpec) VolumeSpec {
+	if spec.AccessModes == nil {
+		spec.AccessModes = []corev1.PersistentVolumeAccessMode{corev1.ReadWriteOnce}
+	}
+
+	if spec.Capacity == "" {
+		spec.Capacity = "10Gi"
+	}
+
+	return spec
+}

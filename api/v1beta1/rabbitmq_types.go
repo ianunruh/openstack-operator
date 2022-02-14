@@ -23,9 +23,11 @@ import (
 
 // RabbitMQSpec defines the desired state of RabbitMQ
 type RabbitMQSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
-	Volume *VolumeSpec `json:"volume"`
+	// +optional
+	Volume VolumeSpec `json:"volume,omitempty"`
 
 	// +optional
 	Management RabbitMQManagementSpec `json:"management,omitempty"`

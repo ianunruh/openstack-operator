@@ -22,7 +22,8 @@ import (
 
 // RallyTaskSpec defines the desired state of RallyTask
 type RallyTaskSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	Path string `json:"path"`
 }

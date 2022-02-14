@@ -23,7 +23,8 @@ import (
 
 // PlacementSpec defines the desired state of Placement
 type PlacementSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	API PlacementAPISpec `json:"api,omitempty"`

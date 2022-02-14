@@ -23,7 +23,8 @@ import (
 
 // ManilaSpec defines the desired state of Manila
 type ManilaSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	API ManilaAPISpec `json:"api,omitempty"`

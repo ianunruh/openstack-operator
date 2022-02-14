@@ -7,16 +7,19 @@ import (
 )
 
 func Rally(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Rally {
-	// TODO labels
 	spec := instance.Spec.Rally
+	if spec == nil {
+		return nil
+	}
 
 	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
 
+	// TODO labels
 	return &openstackv1beta1.Rally{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "rally",
 			Namespace: instance.Namespace,
 		},
-		Spec: spec,
+		Spec: *spec,
 	}
 }

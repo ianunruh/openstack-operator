@@ -23,7 +23,8 @@ import (
 
 // CinderSpec defines the desired state of Cinder
 type CinderSpec struct {
-	Image string `json:"image"`
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	API CinderAPISpec `json:"api,omitempty"`
@@ -37,8 +38,7 @@ type CinderSpec struct {
 	// +optional
 	Volume CinderVolumeSpec `json:"volume,omitempty"`
 
-	// +optional
-	Backends []CinderBackendSpec `json:"backends,omitempty"`
+	Backends []CinderBackendSpec `json:"backends"`
 
 	// +optional
 	Database MariaDBDatabaseSpec `json:"database,omitempty"`

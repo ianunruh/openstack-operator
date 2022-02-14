@@ -7,8 +7,10 @@ import (
 )
 
 func Manila(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Manila {
-	// TODO labels
 	spec := instance.Spec.Manila
+	if spec == nil {
+		return nil
+	}
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "manila")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
@@ -19,11 +21,12 @@ func Manila(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Manila {
 
 	spec.Share.NodeSelector = controllerNodeSelector(spec.Share.NodeSelector, instance)
 
+	// TODO labels
 	return &openstackv1beta1.Manila{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "manila",
 			Namespace: instance.Namespace,
 		},
-		Spec: spec,
+		Spec: *spec,
 	}
 }
