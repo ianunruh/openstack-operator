@@ -3,14 +3,14 @@ kind: Kustomization
 resources:
 - cinder-storageclass.yaml
 bases:
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/cinder-csi-plugin/cinder-csi-controllerplugin-rbac.yaml
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/cinder-csi-plugin/cinder-csi-controllerplugin.yaml
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/cinder-csi-plugin/cinder-csi-nodeplugin-rbac.yaml
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/cinder-csi-plugin/cinder-csi-nodeplugin.yaml
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/cinder-csi-plugin/csi-cinder-driver.yaml
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/controller-manager/cloud-controller-manager-role-bindings.yaml
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/controller-manager/cloud-controller-manager-roles.yaml
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.22.0/manifests/controller-manager/openstack-cloud-controller-manager-ds.yaml
+- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.23.0/manifests/cinder-csi-plugin/cinder-csi-controllerplugin-rbac.yaml
+- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.23.0/manifests/cinder-csi-plugin/cinder-csi-controllerplugin.yaml
+- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.23.0/manifests/cinder-csi-plugin/cinder-csi-nodeplugin-rbac.yaml
+- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.23.0/manifests/cinder-csi-plugin/cinder-csi-nodeplugin.yaml
+- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.23.0/manifests/cinder-csi-plugin/csi-cinder-driver.yaml
+- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.23.0/manifests/controller-manager/cloud-controller-manager-role-bindings.yaml
+- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.23.0/manifests/controller-manager/cloud-controller-manager-roles.yaml
+- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.23.0/manifests/controller-manager/openstack-cloud-controller-manager-ds.yaml
 patchesJson6902:
 - target:
     kind: DaemonSet
@@ -20,3 +20,6 @@ patchesJson6902:
     - op: add
       path: /spec/template/spec/containers/0/args/-
       value: --cluster-name=$(CLUSTER_NAME)
+images:
+- name: docker.io/k8scloudprovider/openstack-cloud-controller-manager
+  newTag: v1.23.1

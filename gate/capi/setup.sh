@@ -35,6 +35,7 @@ domain-name=$(yq eval .clouds.default.auth.user_domain_name clouds.yaml)
 [LoadBalancer]
 subnet-id=$LB_SUBNET_ID
 floating-network-id=$EXTERNAL_NET_ID
+create-monitor=true
 
 [BlockStorage]
 bs-version=v2
@@ -61,10 +62,7 @@ kubectl kustomize cloud-provider | \
     kubectl apply -f-
 
 log "Applying ingress-nginx manifests"
-curl -sL https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/cloud/deploy.yaml | \
-    # Octavia does not work with Local policy
-    sed -e "s/externalTrafficPolicy: Local/externalTrafficPolicy: Cluster/g" | \
-    kubectl apply -f -
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.1/deploy/static/provider/cloud/deploy.yaml
 
 log "Applying cert-manager manifests"
 kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
