@@ -40,9 +40,8 @@ func ClusterStatefulSet(instance *openstackv1beta1.MariaDB, configHash string) *
 
 	containers := []corev1.Container{
 		{
-			Name:            "mariadb",
-			Image:           instance.Spec.Image,
-			ImagePullPolicy: corev1.PullAlways,
+			Name:  "mariadb",
+			Image: instance.Spec.Image,
 			Env: []corev1.EnvVar{
 				template.EnvVar("CONFIG_HASH", configHash),
 				template.EnvVar("BITNAMI_DEBUG", "false"),
@@ -87,9 +86,8 @@ func ClusterStatefulSet(instance *openstackv1beta1.MariaDB, configHash string) *
 
 func exporterContainer(spec openstackv1beta1.MariaDBExporterSpec, secret string) corev1.Container {
 	return corev1.Container{
-		Name:            "exporter",
-		Image:           spec.Image,
-		ImagePullPolicy: corev1.PullAlways,
+		Name:  "exporter",
+		Image: spec.Image,
 		Command: []string{
 			"bash",
 			"-c",
