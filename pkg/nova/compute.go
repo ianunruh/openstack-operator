@@ -135,7 +135,19 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaCompute, env []corev1.EnvVa
 					"--config-file=/etc/nova/nova.conf",
 					"--config-file=/tmp/pod-shared/nova-hypervisor.conf",
 				},
-				Env:       env,
+				Env: env,
+				LivenessProbe: &corev1.Probe{
+					Handler:             healthProbeHandler("compute", true),
+					InitialDelaySeconds: 120,
+					PeriodSeconds:       90,
+					TimeoutSeconds:      70,
+				},
+				StartupProbe: &corev1.Probe{
+					Handler:             healthProbeHandler("compute", false),
+					InitialDelaySeconds: 80,
+					PeriodSeconds:       90,
+					TimeoutSeconds:      70,
+				},
 				Resources: instance.Spec.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged:             &privileged,
