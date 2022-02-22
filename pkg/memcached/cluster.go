@@ -70,9 +70,8 @@ func ClusterStatefulSet(instance *openstackv1beta1.Memcached) *appsv1.StatefulSe
 
 func exporterContainer(spec openstackv1beta1.MemcachedExporterSpec) corev1.Container {
 	return corev1.Container{
-		Name:            "exporter",
-		Image:           spec.Image,
-		ImagePullPolicy: corev1.PullAlways,
+		Name:  "exporter",
+		Image: spec.Image,
 		Ports: []corev1.ContainerPort{
 			{Name: "metrics", ContainerPort: 9150},
 		},
