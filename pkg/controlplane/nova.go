@@ -44,6 +44,12 @@ func novaCellDefaults(cells []openstackv1beta1.NovaCellSpec, instance *openstack
 	for _, spec := range cells {
 		spec.Conductor.NodeSelector = controllerNodeSelector(spec.Conductor.NodeSelector, instance)
 
+		if spec.Compute == nil {
+			spec.Compute = map[string]openstackv1beta1.NovaComputeSpec{
+				"default": {},
+			}
+		}
+
 		for name, compute := range spec.Compute {
 			spec.Compute[name] = novaComputeDefaults(compute, spec, instance)
 		}
