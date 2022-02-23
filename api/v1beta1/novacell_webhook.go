@@ -44,6 +44,12 @@ func (r *NovaCell) Default() {
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, r.Name)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
+
+	if r.Spec.Compute == nil {
+		r.Spec.Compute = map[string]NovaComputeSpec{
+			"default": {},
+		}
+	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
