@@ -45,6 +45,8 @@ func (r *NovaCompute) Default() {
 	if r.Spec.Cell == "" {
 		r.Spec.Cell = "cell1"
 	}
+
+	r.Spec.Libvirtd.Image = imageDefault(r.Spec.Libvirtd.Image, LibvirtDefaultImage)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
