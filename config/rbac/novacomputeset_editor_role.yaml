@@ -1,0 +1,24 @@
+# permissions for end users to edit novacomputesets.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: novacomputeset-editor-role
+rules:
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novacomputesets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novacomputesets/status
+  verbs:
+  - get
