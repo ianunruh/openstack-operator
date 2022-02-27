@@ -358,4 +358,17 @@ resources:
   kind: NovaFlavor
   path: github.com/ianunruh/openstack-operator/api/v1beta1
   version: v1beta1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: ospk8s.com
+  group: openstack
+  kind: NovaComputeSet
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
+  version: v1beta1
+  webhooks:
+    defaulting: true
+    validation: true
+    webhookVersion: v1
 version: "3"

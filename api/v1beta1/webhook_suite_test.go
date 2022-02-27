@@ -166,6 +166,9 @@ var _ = BeforeSuite(func() {
 	err = (&KeystoneUser{}).SetupWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 
+	err = (&NovaComputeSet{}).SetupWebhookWithManager(mgr)
+	Expect(err).NotTo(HaveOccurred())
+
 	//+kubebuilder:scaffold:webhook
 
 	go func() {
