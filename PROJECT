@@ -371,4 +371,13 @@ resources:
     defaulting: true
     validation: true
     webhookVersion: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: ospk8s.com
+  group: openstack
+  kind: NovaComputeNode
+  path: github.com/ianunruh/openstack-operator/api/v1beta1
+  version: v1beta1
 version: "3"
