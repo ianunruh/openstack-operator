@@ -1,7 +1,9 @@
 apiVersion: openstack.ospk8s.com/v1beta1
 kind: NovaComputeSet
 metadata:
-  name: novacomputeset-sample
+  name: nova-cell1-default
 spec:
-  # Add fields here
-  foo: bar
+  cell: cell1
+  image: ghcr.io/ianunruh/openstack-operator-images/nova:master
+  libvirtd:
+    image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master

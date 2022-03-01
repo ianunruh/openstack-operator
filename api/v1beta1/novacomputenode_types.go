@@ -20,26 +20,44 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // NovaComputeNodeSpec defines the desired state of NovaComputeNode
 type NovaComputeNodeSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Node string `json:"node"`
 
-	// Foo is an example field of NovaComputeNode. Edit novacomputenode_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Cell string `json:"cell"`
+
+	Image string `json:"image"`
+
+	Libvirtd NovaLibvirtdSpec `json:"libvirtd"`
 }
 
 // NovaComputeNodeStatus defines the observed state of NovaComputeNode
 type NovaComputeNodeStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	Conditions []metav1.Condition `json:"conditions"`
+
+	Hypervisor *NovaHypervisorStatus `json:"hypervisor,omitempty"`
+}
+
+type NovaHypervisorStatus struct {
+	Enabled bool `json:"enabled"`
+
+	Up bool `json:"up"`
+
+	HostIP string `json:"hostIP"`
+
+	HypervisorType string `json:"hypervisorType"`
+
+	RunningServerCount int `json:"runningServerCount"`
+
+	TaskCount int `json:"taskCount"`
+
+	ServiceID string `json:"serviceID"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // NovaComputeNode is the Schema for the novacomputenodes API
 type NovaComputeNode struct {

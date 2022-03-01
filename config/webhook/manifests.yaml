@@ -328,6 +328,27 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /mutate-openstack-ospk8s-com-v1beta1-novacomputeset
+  failurePolicy: Fail
+  name: mnovacomputeset.kb.io
+  rules:
+  - apiGroups:
+    - openstack.ospk8s.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - novacomputesets
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
       path: /mutate-openstack-ospk8s-com-v1beta1-octavia
   failurePolicy: Fail
   name: moctavia.kb.io
@@ -790,6 +811,27 @@ webhooks:
     - UPDATE
     resources:
     - novacomputes
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-ospk8s-com-v1beta1-novacomputeset
+  failurePolicy: Fail
+  name: vnovacomputeset.kb.io
+  rules:
+  - apiGroups:
+    - openstack.ospk8s.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - novacomputesets
   sideEffects: None
 - admissionReviewVersions:
   - v1
