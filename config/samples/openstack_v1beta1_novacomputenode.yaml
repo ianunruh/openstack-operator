@@ -1,7 +1,10 @@
 apiVersion: openstack.ospk8s.com/v1beta1
 kind: NovaComputeNode
 metadata:
-  name: novacomputenode-sample
+  name: nova-cell1-default-compute5
 spec:
-  # Add fields here
-  foo: bar
+  node: compute5
+  cell: cell1
+  image: ghcr.io/ianunruh/openstack-operator-images/nova:master
+  libvirtd:
+    image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master

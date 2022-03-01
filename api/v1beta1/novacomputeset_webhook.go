@@ -32,8 +32,6 @@ func (r *NovaComputeSet) SetupWebhookWithManager(mgr ctrl.Manager) error {
 		Complete()
 }
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-
 //+kubebuilder:webhook:path=/mutate-openstack-ospk8s-com-v1beta1-novacomputeset,mutating=true,failurePolicy=fail,sideEffects=None,groups=openstack.ospk8s.com,resources=novacomputesets,verbs=create;update,versions=v1beta1,name=mnovacomputeset.kb.io,admissionReviewVersions={v1,v1beta1}
 
 var _ webhook.Defaulter = &NovaComputeSet{}
@@ -42,7 +40,13 @@ var _ webhook.Defaulter = &NovaComputeSet{}
 func (r *NovaComputeSet) Default() {
 	novacomputesetlog.Info("default", "name", r.Name)
 
-	// TODO(user): fill in your defaulting logic.
+	if r.Spec.Cell == "" {
+		r.Spec.Cell = "cell1"
+	}
+
+	r.Spec.Image = imageDefault(r.Spec.Image, NovaDefaultImage)
+
+	r.Spec.Libvirtd.Image = imageDefault(r.Spec.Libvirtd.Image, LibvirtDefaultImage)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

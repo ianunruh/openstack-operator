@@ -19,44 +19,81 @@ package controllers
 import (
 	"context"
 
+	"github.com/go-logr/logr"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/nova/computeset"
 )
 
 // NovaComputeSetReconciler reconciles a NovaComputeSet object
 type NovaComputeSetReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=novacomputesets,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=novacomputesets/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=novacomputesets/finalizers,verbs=update
+//+kubebuilder:rbac:groups=core,resources=nodes,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the NovaComputeSet object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.9.2/pkg/reconcile
 func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	log := r.Log.WithValues("instance", req.NamespacedName)
 
-	// your logic here
+	instance := &openstackv1beta1.NovaComputeSet{}
+	if err := r.Client.Get(ctx, req.NamespacedName, instance); err != nil {
+		if errors.IsNotFound(err) {
+			return ctrl.Result{}, nil
+		}
+		return ctrl.Result{}, err
+	}
+
+	if err := computeset.Reconcile(ctx, r.Client, instance, log); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *NovaComputeSetReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	nodeRequestsFn := handler.MapFunc(func(object client.Object) []reconcile.Request {
+		c := mgr.GetClient()
+
+		var sets openstackv1beta1.NovaComputeSetList
+		if err := c.List(context.Background(), &sets); err != nil {
+			r.Log.Error(err, "Failed to list NovaComputeSet")
+			return nil
+		}
+
+		var requests []reconcile.Request
+		for _, instance := range sets.Items {
+			// TODO limit to compute sets that matched the changed node
+			name := client.ObjectKey{
+				Namespace: instance.Namespace,
+				Name:      instance.Name,
+			}
+			requests = append(requests, reconcile.Request{NamespacedName: name})
+		}
+
+		return requests
+	})
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&openstackv1beta1.NovaComputeSet{}).
+		Watches(&source.Kind{Type: &corev1.Node{}},
+			handler.EnqueueRequestsFromMapFunc(nodeRequestsFn)).
 		Complete(r)
 }

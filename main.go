@@ -413,8 +413,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.NovaComputeSetReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("NovaComputeSet"),
+		Recorder: mgr.GetEventRecorderFor("NovaComputeSet"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "NovaComputeSet")
 		os.Exit(1)
@@ -424,8 +426,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.NovaComputeNodeReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("NovaComputeNode"),
+		Recorder: mgr.GetEventRecorderFor("NovaComputeNode"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "NovaComputeNode")
 		os.Exit(1)

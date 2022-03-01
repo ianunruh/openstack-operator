@@ -619,6 +619,32 @@ rules:
 - apiGroups:
   - openstack.ospk8s.com
   resources:
+  - novacomputenodes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novacomputenodes/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novacomputenodes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
   - novacomputes
   verbs:
   - create
@@ -638,6 +664,32 @@ rules:
   - openstack.ospk8s.com
   resources:
   - novacomputes/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novacomputesets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novacomputesets/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - openstack.ospk8s.com
+  resources:
+  - novacomputesets/status
   verbs:
   - get
   - patch
