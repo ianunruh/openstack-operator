@@ -45,13 +45,13 @@ func novaCellDefaults(cells []openstackv1beta1.NovaCellSpec, instance *openstack
 		spec.Conductor.NodeSelector = controllerNodeSelector(spec.Conductor.NodeSelector, instance)
 
 		if spec.Compute == nil {
-			spec.Compute = map[string]openstackv1beta1.NovaComputeSpec{
+			spec.Compute = map[string]openstackv1beta1.NovaComputeSetSpec{
 				"default": {},
 			}
 		}
 
 		for name, compute := range spec.Compute {
-			spec.Compute[name] = novaComputeDefaults(compute, spec, instance)
+			spec.Compute[name] = novaComputeSetDefaults(compute, spec, instance)
 		}
 
 		spec.Metadata.NodeSelector = controllerNodeSelector(spec.Metadata.NodeSelector, instance)
@@ -66,7 +66,7 @@ func novaCellDefaults(cells []openstackv1beta1.NovaCellSpec, instance *openstack
 	return out
 }
 
-func novaComputeDefaults(spec openstackv1beta1.NovaComputeSpec, cell openstackv1beta1.NovaCellSpec, instance *openstackv1beta1.ControlPlane) openstackv1beta1.NovaComputeSpec {
+func novaComputeSetDefaults(spec openstackv1beta1.NovaComputeSetSpec, cell openstackv1beta1.NovaCellSpec, instance *openstackv1beta1.ControlPlane) openstackv1beta1.NovaComputeSetSpec {
 	spec.NodeSelector = computeNodeSelector(spec.NodeSelector, instance)
 
 	return spec

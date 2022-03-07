@@ -46,7 +46,7 @@ func (r *NovaCell) Default() {
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 
 	if r.Spec.Compute == nil {
-		r.Spec.Compute = map[string]NovaComputeSpec{
+		r.Spec.Compute = map[string]NovaComputeSetSpec{
 			"default": {},
 		}
 	}
