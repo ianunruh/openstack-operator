@@ -26,7 +26,7 @@ type NovaCellSpec struct {
 	Name string `json:"name"`
 
 	// +optional
-	Compute map[string]NovaComputeSpec `json:"compute,omitempty"`
+	Compute map[string]NovaComputeSetSpec `json:"compute,omitempty"`
 
 	// +optional
 	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`

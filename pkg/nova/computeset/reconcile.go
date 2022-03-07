@@ -13,6 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/nova"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -121,11 +122,24 @@ func newComputeNode(instance *openstackv1beta1.NovaComputeSet, node corev1.Node)
 			},
 		},
 		Spec: openstackv1beta1.NovaComputeNodeSpec{
-			Node:     node.Name,
-			Cell:     instance.Spec.Cell,
-			Image:    instance.Spec.Image,
-			Libvirtd: instance.Spec.Libvirtd,
+			Node: node.Name,
+			Cell: instance.Spec.Cell,
 		},
+	}
+}
+
+func New(cell *openstackv1beta1.NovaCell, name string, spec openstackv1beta1.NovaComputeSetSpec) *openstackv1beta1.NovaComputeSet {
+	labels := template.AppLabels(cell.Name, nova.AppLabel)
+
+	spec.Cell = cell.Spec.Name
+
+	return &openstackv1beta1.NovaComputeSet{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      template.Combine(cell.Name, name),
+			Namespace: cell.Namespace,
+			Labels:    labels,
+		},
+		Spec: spec,
 	}
 }
 

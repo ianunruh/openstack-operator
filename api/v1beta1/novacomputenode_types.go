@@ -25,10 +25,6 @@ type NovaComputeNodeSpec struct {
 	Node string `json:"node"`
 
 	Cell string `json:"cell"`
-
-	Image string `json:"image"`
-
-	Libvirtd NovaLibvirtdSpec `json:"libvirtd"`
 }
 
 // NovaComputeNodeStatus defines the observed state of NovaComputeNode

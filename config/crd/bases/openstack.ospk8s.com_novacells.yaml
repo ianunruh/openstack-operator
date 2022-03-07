@@ -62,9 +62,11 @@ spec:
                 type: object
               compute:
                 additionalProperties:
-                  description: NovaComputeSpec defines the desired state of NovaCompute
+                  description: NovaComputeSetSpec defines the desired state of NovaComputeSet
                   properties:
                     cell:
+                      type: string
+                    image:
                       type: string
                     libvirtd:
                       properties:
@@ -131,8 +133,6 @@ spec:
                             https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/'
                           type: object
                       type: object
-                  required:
-                  - libvirtd
                   type: object
                 type: object
               conductor:

@@ -37,6 +37,7 @@ import (
 	mariadbdatabase "github.com/ianunruh/openstack-operator/pkg/mariadb/database"
 	"github.com/ianunruh/openstack-operator/pkg/nova"
 	novacell "github.com/ianunruh/openstack-operator/pkg/nova/cell"
+	"github.com/ianunruh/openstack-operator/pkg/nova/computeset"
 	rabbitmquser "github.com/ianunruh/openstack-operator/pkg/rabbitmq/user"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -157,12 +158,8 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	for name, spec := range instance.Spec.Compute {
-		compute := nova.Compute(instance, name, spec)
-		controllerutil.SetControllerReference(instance, compute, r.Scheme)
-		if err := nova.EnsureCompute(ctx, r.Client, compute, log); err != nil {
-			return ctrl.Result{}, err
-		}
+	if err := r.reconcileComputeSets(ctx, instance, log); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	condition := novacell.ReadyCondition(instance)
@@ -174,6 +171,18 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *NovaCellReconciler) reconcileComputeSets(ctx context.Context, instance *openstackv1beta1.NovaCell, log logr.Logger) error {
+	for name, spec := range instance.Spec.Compute {
+		set := computeset.New(instance, name, spec)
+		controllerutil.SetControllerReference(instance, set, r.Scheme)
+		if err := computeset.Ensure(ctx, r.Client, set, log); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (r *NovaCellReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
