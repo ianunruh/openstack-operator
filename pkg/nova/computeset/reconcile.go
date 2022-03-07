@@ -63,7 +63,7 @@ func Reconcile(ctx context.Context, c client.Client, instance *openstackv1beta1.
 			if err := c.Create(ctx, intended); err != nil {
 				return err
 			}
-		} else {
+		} else if !template.MatchesAppliedHash(current, hash) {
 			current.Spec = intended.Spec
 			template.SetAppliedHash(current, hash)
 
