@@ -10,6 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/template"
@@ -36,17 +37,18 @@ func Reconcile(ctx context.Context, c client.Client, instance *openstackv1beta1.
 	}
 
 	computeNodesByName := make(map[string]*openstackv1beta1.NovaComputeNode, len(computeNodes))
-	for _, computeNode := range computeNodes {
+	for i, computeNode := range computeNodes {
 		if !seenNodes[computeNode.Spec.Node] {
 			// TODO clean up orphaned compute node
 			continue
 		}
-		computeNodesByName[computeNode.Spec.Node] = &computeNode
+		computeNodesByName[computeNode.Spec.Node] = &computeNodes[i]
 	}
 
 	var computeNodesToUpdate []*openstackv1beta1.NovaComputeNode
 	for _, node := range nodes {
 		intended := newComputeNode(instance, node)
+		controllerutil.SetControllerReference(instance, intended, c.Scheme())
 
 		hash, err := template.ObjectHash(instance)
 		if err != nil {
@@ -55,7 +57,6 @@ func Reconcile(ctx context.Context, c client.Client, instance *openstackv1beta1.
 
 		current := computeNodesByName[node.Name]
 		if current == nil {
-			// create in parallel
 			template.SetAppliedHash(intended, hash)
 
 			log.Info("Creating NovaComputeNode", "Name", intended.Name)
@@ -63,10 +64,10 @@ func Reconcile(ctx context.Context, c client.Client, instance *openstackv1beta1.
 				return err
 			}
 		} else {
-			// queue update for later
 			current.Spec = intended.Spec
 			template.SetAppliedHash(current, hash)
 
+			// queue update for later
 			computeNodesToUpdate = append(computeNodesToUpdate, current)
 		}
 	}
