@@ -7,3 +7,6 @@ spec:
   image: ghcr.io/ianunruh/openstack-operator-images/nova:master
   libvirtd:
     image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
+  nodeSelector:
+    openstack/cloud: openstack
+    openstack/compute-node: enabled

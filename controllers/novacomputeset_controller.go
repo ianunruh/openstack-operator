@@ -95,5 +95,6 @@ func (r *NovaComputeSetReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&openstackv1beta1.NovaComputeSet{}).
 		Watches(&source.Kind{Type: &corev1.Node{}},
 			handler.EnqueueRequestsFromMapFunc(nodeRequestsFn)).
+		Owns(&openstackv1beta1.NovaComputeNode{}).
 		Complete(r)
 }
