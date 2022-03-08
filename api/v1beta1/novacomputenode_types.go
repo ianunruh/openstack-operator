@@ -25,6 +25,8 @@ type NovaComputeNodeSpec struct {
 	Node string `json:"node"`
 
 	Cell string `json:"cell"`
+
+	Set string `json:"set"`
 }
 
 // NovaComputeNodeStatus defines the observed state of NovaComputeNode
@@ -32,6 +34,8 @@ type NovaComputeNodeStatus struct {
 	Conditions []metav1.Condition `json:"conditions"`
 
 	Hypervisor *NovaHypervisorStatus `json:"hypervisor,omitempty"`
+
+	SetupJobHash string `json:"setupJobHash,omitempty"`
 }
 
 type NovaHypervisorStatus struct {

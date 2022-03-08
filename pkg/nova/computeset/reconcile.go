@@ -124,6 +124,7 @@ func newComputeNode(instance *openstackv1beta1.NovaComputeSet, node corev1.Node)
 		Spec: openstackv1beta1.NovaComputeNodeSpec{
 			Node: node.Name,
 			Cell: instance.Spec.Cell,
+			Set:  instance.Name,
 		},
 	}
 }

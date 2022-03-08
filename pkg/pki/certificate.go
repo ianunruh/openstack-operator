@@ -9,6 +9,7 @@ import (
 type CertificateParams struct {
 	Name       string
 	Namespace  string
+	CommonName string
 	SecretName string
 	IssuerName string
 	IsCA       bool
@@ -16,6 +17,9 @@ type CertificateParams struct {
 }
 
 func Certificate(params CertificateParams) *unstructured.Unstructured {
+	if params.CommonName == "" {
+		params.CommonName = params.Name
+	}
 	manifest := template.MustRenderFile("pki", "certificate.yaml", params)
 	return template.MustDecodeManifest(manifest)
 }

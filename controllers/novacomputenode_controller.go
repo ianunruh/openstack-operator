@@ -29,10 +29,12 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/nova"
 	"github.com/ianunruh/openstack-operator/pkg/nova/computenode"
+	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
 // NovaComputeNodeReconciler reconciles a NovaComputeNode object
@@ -61,11 +63,34 @@ func (r *NovaComputeNodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
+	set := &openstackv1beta1.NovaComputeSet{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.Spec.Set,
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(set), set); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	if computenode.ReadyCondition(instance) == nil {
 		reporter.Pending(instance, nil, "ComputeNodePending", "Waiting for compute node to be reconciled")
 		if err := r.Client.Status().Update(ctx, instance); err != nil {
 			return ctrl.Result{}, err
 		}
+	}
+
+	certificate := nova.ComputeCertificate(instance)
+	controllerutil.SetControllerReference(instance, certificate, r.Scheme)
+	if err := template.EnsureResource(ctx, r.Client, certificate, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs.Add(&instance.Status.SetupJobHash,
+		nova.ComputeNodeSetupJob(instance, set.Spec.Image))
+	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	// TODO handle this user not existing on deletion, and remove the finalizer anyway

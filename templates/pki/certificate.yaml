@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Namespace }}
 spec:
   isCA: {{ .IsCA }}
-  commonName: {{ .Name }}
+  commonName: {{ .CommonName }}
   secretName: {{ .SecretName }}
   usages: [{{ StringsJoin .Usages ", " }}]
   privateKey:
