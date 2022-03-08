@@ -76,6 +76,14 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
+	pkiResources := nova.PKIResources(instance)
+	for _, resource := range pkiResources {
+		controllerutil.SetControllerReference(instance, resource, r.Scheme)
+		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	deps := template.NewConditionWaiter(log)
 
 	databases := []*openstackv1beta1.MariaDBDatabase{

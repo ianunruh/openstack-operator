@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
@@ -118,4 +119,42 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 	ds.Spec.Template.Spec.HostPID = true
 
 	return ds
+}
+
+func ComputeNodeSetupJob(instance *openstackv1beta1.NovaComputeNode, containerImage string) *batchv1.Job {
+	labels := template.AppLabels(instance.Name, AppLabel)
+
+	defaultMode := int32(0400)
+
+	// TODO resources
+	job := template.GenericJob(template.Component{
+		Namespace: instance.Namespace,
+		Labels:    labels,
+		Containers: []corev1.Container{
+			{
+				Name:  "setup",
+				Image: containerImage,
+				Command: []string{
+					"bash",
+					"-c",
+					template.MustReadFile(AppLabel, "compute-node-setup.sh"),
+				},
+				VolumeMounts: []corev1.VolumeMount{
+					template.VolumeMount("etc-nova-tls", "/etc/nova/tls"),
+					template.VolumeMount("nova-tls", "/var/run/secrets/nova-tls"),
+				},
+			},
+		},
+		NodeSelector: map[string]string{
+			"kubernetes.io/hostname": instance.Spec.Node,
+		},
+		Volumes: []corev1.Volume{
+			template.HostPathVolume("etc-nova-tls", "/etc/nova/tls"),
+			template.SecretVolume("nova-tls", instance.Name, &defaultMode),
+		},
+	})
+
+	job.Name = template.Combine(instance.Name, "setup")
+
+	return job
 }
