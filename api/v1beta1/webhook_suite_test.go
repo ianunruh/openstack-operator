@@ -160,9 +160,6 @@ var _ = BeforeSuite(func() {
 	err = (&RallyTask{}).SetupWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = (&NovaCompute{}).SetupWebhookWithManager(mgr)
-	Expect(err).NotTo(HaveOccurred())
-
 	err = (&KeystoneUser{}).SetupWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 

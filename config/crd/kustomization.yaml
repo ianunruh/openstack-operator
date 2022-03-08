@@ -27,7 +27,6 @@ resources:
 - bases/openstack.ospk8s.com_manilas.yaml
 - bases/openstack.ospk8s.com_senlins.yaml
 - bases/openstack.ospk8s.com_rallytasks.yaml
-- bases/openstack.ospk8s.com_novacomputes.yaml
 - bases/openstack.ospk8s.com_novahostaggregates.yaml
 - bases/openstack.ospk8s.com_novakeypairs.yaml
 - bases/openstack.ospk8s.com_novaflavors.yaml
@@ -63,7 +62,6 @@ patchesStrategicMerge:
 #- patches/webhook_in_manilas.yaml
 #- patches/webhook_in_senlins.yaml
 #- patches/webhook_in_rallytasks.yaml
-#- patches/webhook_in_novacomputes.yaml
 #- patches/webhook_in_novahostaggregates.yaml
 #- patches/webhook_in_novakeypairs.yaml
 #- patches/webhook_in_novaflavors.yaml
@@ -85,7 +83,6 @@ patchesStrategicMerge:
 #- patches/cainjection_in_rabbitmqusers.yaml
 - patches/cainjection_in_novas.yaml
 - patches/cainjection_in_novacells.yaml
-- patches/cainjection_in_novacomputes.yaml
 - patches/cainjection_in_neutrons.yaml
 - patches/cainjection_in_horizons.yaml
 - patches/cainjection_in_memcacheds.yaml
