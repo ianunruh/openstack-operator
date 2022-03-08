@@ -34,6 +34,14 @@ type NovaComputeSetSpec struct {
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
+type NovaLibvirtdSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
+
 // NovaComputeSetStatus defines the observed state of NovaComputeSet
 type NovaComputeSetStatus struct {
 }
