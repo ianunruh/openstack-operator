@@ -1,6 +1,20 @@
+# -*- coding: utf-8 -*-
+
+# ----------------------------------------------------------------------
+# NOTE: The default values of the settings are defined in
+# openstack_dashboard/defaults.py. Previously most available settings
+# were listed in this example file, but it is no longer true.
+# For available settings, see openstack_dashboard/defaults.py and
+# the horizon setting reference found at
+# https://docs.openstack.org/horizon/latest/configuration/settings.html.
+#
+# Django related settings and HORIZON_CONFIG still exist here.
+# Keep in my mind that they will be revisit in upcoming releases.
+# ----------------------------------------------------------------------
+
 import os
 
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from horizon.utils import secret_key
 
@@ -80,24 +94,17 @@ SECRET_KEY = secret_key.generate_or_read_from_file('/var/lib/openstack-dashboard
 # memcached set CACHES to something like below.
 # For more information, see
 # https://docs.djangoproject.com/en/1.11/topics/http/sessions/.
-
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
         'LOCATION': 'memcached:11211',
     },
 }
 
-#CACHES = {
-#    'default': {
-#        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-#    }
-#}
-
 # If you use ``tox -e runserver`` for developments,then configure
 # SESSION_ENGINE to django.contrib.sessions.backends.signed_cookies
 # as shown below:
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+#SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 
 # Send email to the console by default
@@ -116,7 +123,7 @@ OPENSTACK_KEYSTONE_URL = "http://keystone-api:5000/v3"
 OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = True
 
 OPENSTACK_KEYSTONE_DEFAULT_DOMAIN = "Default"
-OPENSTACK_KEYSTONE_DEFAULT_ROLE = "member"
+OPENSTACK_KEYSTONE_DEFAULT_ROLE = "user"
 
 OPENSTACK_API_VERSIONS = {
     "identity": 3,
@@ -239,6 +246,14 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'level': 'DEBUG',
+            'propagate': False,
+        },
+        # VariableDoesNotExist error in the debug level from django.template
+        # is VERY noisy and it is output even for valid cases,
+        # so set the default log level of django.template to INFO.
+        'django.template': {
+            'handlers': ['console'],
+            'level': 'INFO',
             'propagate': False,
         },
         # Logging from django.db.backends is VERY verbose, send to null
@@ -394,7 +409,7 @@ WEBROOT='/horizon/'
 # By default, validation of the HTTP Host header is disabled.  Production
 # installations should have this set accordingly.  For more information
 # see https://docs.djangoproject.com/en/dev/ref/settings/.
-ALLOWED_HOSTS = '*'
+ALLOWED_HOSTS = ['*']
 
 # Compress all assets offline as part of packaging installation
 COMPRESS_OFFLINE = True
