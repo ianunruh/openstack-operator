@@ -63,6 +63,10 @@ def main():
             print(f"master - Keeping latest image - {version['name']}")
             continue
 
+        if "dev" in version_tags:
+            print(f"dev - Keeping latest image - {version['name']}")
+            continue
+
         version_pull_tag = next((tag for tag in version_tags if tag in open_pull_tags), None)
         if version_pull_tag:
             print(f"{version_pull_tag} - Keeping latest image - {version['name']}")
