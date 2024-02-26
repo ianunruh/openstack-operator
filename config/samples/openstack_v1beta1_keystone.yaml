@@ -22,3 +22,10 @@ spec:
     virtualHost: openstack
   notifications:
     enabled: true
+  oidc:
+    enabled: true
+    identityProvider: gitlab
+    dashboardURL: https://horizon.openstack.k8s.example.com/horizon/auth/websso/
+    providerMetadataURL: https://accounts.google.com/.well-known/openid-configuration
+    redirectURI: https://keystone.openstack.k8s.example.com/v3/OS-FEDERATION/identity_providers/gitlab/protocols/openid/auth
+    secret: keystone-oidc

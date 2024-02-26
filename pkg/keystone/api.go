@@ -31,6 +31,7 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 	}
 
 	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-keystone", "/etc/apache2/sites-available/keystone.conf", "httpd.conf"),
 		template.SubPathVolumeMount("etc-keystone", "/etc/keystone/keystone.conf", "keystone.conf"),
 		template.VolumeMount("pod-credential-keys", "/etc/keystone/credential-keys"),
 		template.VolumeMount("pod-fernet-keys", "/etc/keystone/fernet-keys"),
@@ -44,6 +45,12 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 	extraVolumes := []corev1.Volume{
 		template.EmptyDirVolume("pod-credential-keys"),
 		template.EmptyDirVolume("pod-fernet-keys"),
+	}
+
+	var envFrom []corev1.EnvFromSource
+
+	if oidcSpec := instance.Spec.OIDC; oidcSpec.Enabled {
+		envFrom = append(envFrom, template.EnvFromSecret(oidcSpec.Secret))
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -74,6 +81,7 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 				Command:   httpd.Command(),
 				Lifecycle: httpd.Lifecycle(),
 				Env:       env,
+				EnvFrom:   envFrom,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 5000},
 				},

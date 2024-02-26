@@ -8,6 +8,11 @@ spec:
     tlsSecretName: wildcard-tls
     annotations:
       kubernetes.io/ingress.class: nginx
+  keystone:
+    oidc:
+      enabled: true
+      identityProvider: gitlab
+      providerMetadataURL: https://gitlab.kcloud.io/.well-known/openid-configuration
   glance:
     backends:
     - name: ssd
@@ -39,7 +44,14 @@ spec:
         vcpus: 4
         disk: 60
         isPublic: true
-  horizon: {}
+  horizon:
+    sso:
+      methods:
+      - kind: openid
+        title: GitLab
+        default: true
+      - kind: credentials
+        title: Keystone
   heat: {}
   barbican: {}
   rally: {}

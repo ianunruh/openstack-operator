@@ -11,3 +11,11 @@ spec:
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
+  sso:
+    enabled: true
+    methods:
+    - kind: openid
+      title: OpenID Connect
+    - kind: credentials
+      title: Keystone Credentials
+      default: true
