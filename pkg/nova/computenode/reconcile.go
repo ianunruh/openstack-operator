@@ -40,7 +40,7 @@ func findHypervisor(hostname string, compute *gophercloud.ServiceClient) (*hyper
 	}
 
 	for _, hv := range current {
-		if hv.HypervisorHostname == hostname {
+		if hv.Service.Host == hostname {
 			return &hv, nil
 		}
 	}
