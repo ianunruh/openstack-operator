@@ -12,6 +12,8 @@ func Heat(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Heat {
 		return nil
 	}
 
+	spec.Image = imageDefault(spec.Image, DefaultHeatImage)
+
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "heat")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 

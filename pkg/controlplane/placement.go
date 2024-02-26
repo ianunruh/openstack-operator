@@ -10,6 +10,8 @@ func Placement(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Placem
 	// TODO labels
 	spec := instance.Spec.Placement
 
+	spec.Image = imageDefault(spec.Image, DefaultPlacementImage)
+
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "placement")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 

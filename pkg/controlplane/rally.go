@@ -12,6 +12,8 @@ func Rally(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Rally {
 		return nil
 	}
 
+	spec.Image = imageDefault(spec.Image, DefaultRallyImage)
+
 	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
 
 	// TODO labels
