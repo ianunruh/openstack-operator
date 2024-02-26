@@ -115,9 +115,9 @@ type NovaStatus struct {
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
-// +kubebuilder:resource:path=novas
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+//+kubebuilder:resource:path=novas
 
 // Nova is the Schema for the nova API
 type Nova struct {
@@ -128,7 +128,7 @@ type Nova struct {
 	Status NovaStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // NovaList contains a list of Nova
 type NovaList struct {

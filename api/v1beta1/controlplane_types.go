@@ -106,10 +106,10 @@ type ControlPlaneStatus struct {
 	Conditions []metav1.Condition `json:"conditions"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
-// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // ControlPlane is the Schema for the controlplanes API
 type ControlPlane struct {
@@ -120,7 +120,7 @@ type ControlPlane struct {
 	Status ControlPlaneStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // ControlPlaneList contains a list of ControlPlane
 type ControlPlaneList struct {

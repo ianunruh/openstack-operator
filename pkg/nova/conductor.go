@@ -34,13 +34,13 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 				},
 				Env: env,
 				LivenessProbe: &corev1.Probe{
-					Handler:             healthProbeHandler("conductor", true),
+					ProbeHandler:        healthProbeHandler("conductor", true),
 					InitialDelaySeconds: 120,
 					PeriodSeconds:       90,
 					TimeoutSeconds:      70,
 				},
 				StartupProbe: &corev1.Probe{
-					Handler:             healthProbeHandler("conductor", false),
+					ProbeHandler:        healthProbeHandler("conductor", false),
 					InitialDelaySeconds: 80,
 					PeriodSeconds:       90,
 					TimeoutSeconds:      70,

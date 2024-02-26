@@ -21,6 +21,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 var keystoneuserlog = logf.Log.WithName("keystoneuser-resource")
@@ -57,19 +58,19 @@ func (r *KeystoneUser) Default() {
 var _ webhook.Validator = &KeystoneUser{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *KeystoneUser) ValidateCreate() error {
+func (r *KeystoneUser) ValidateCreate() (admission.Warnings, error) {
 	keystoneuserlog.Info("validate create", "name", r.Name)
-	return nil
+	return admission.Warnings{}, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *KeystoneUser) ValidateUpdate(old runtime.Object) error {
+func (r *KeystoneUser) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	keystoneuserlog.Info("validate update", "name", r.Name)
-	return nil
+	return admission.Warnings{}, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *KeystoneUser) ValidateDelete() error {
+func (r *KeystoneUser) ValidateDelete() (admission.Warnings, error) {
 	keystoneuserlog.Info("validate delete", "name", r.Name)
-	return nil
+	return admission.Warnings{}, nil
 }

@@ -45,12 +45,12 @@ type KeystoneUserStatus struct {
 	Conditions []metav1.Condition `json:"conditions"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Project",type=string,JSONPath=`.spec.project`
-// +kubebuilder:printcolumn:name="Domain",type=string,JSONPath=`.spec.domain`
-// +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
-// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Project",type=string,JSONPath=`.spec.project`
+//+kubebuilder:printcolumn:name="Domain",type=string,JSONPath=`.spec.domain`
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // KeystoneUser is the Schema for the keystoneusers API
 type KeystoneUser struct {
@@ -61,7 +61,7 @@ type KeystoneUser struct {
 	Status KeystoneUserStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // KeystoneUserList contains a list of KeystoneUser
 type KeystoneUserList struct {

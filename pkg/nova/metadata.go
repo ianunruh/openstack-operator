@@ -18,7 +18,7 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 	env = append(env, template.EnvVar("OS_DEFAULT__ENABLED_APIS", "metadata"))
 
 	// probe := &corev1.Probe{
-	// 	Handler: corev1.Handler{
+	// 	ProbeHandler: corev1.ProbeHandler{
 	// 		HTTPGet: &corev1.HTTPGetAction{
 	// 			Path: "/",
 	// 			Port: intstr.FromInt(8775),

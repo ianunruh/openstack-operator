@@ -27,7 +27,7 @@ func OVSDBStatefulSet(instance *openstackv1beta1.OVNControlPlane, component stri
 	startScript := ovsdbStartScript(component)
 
 	probe := &corev1.Probe{
-		Handler: corev1.Handler{
+		ProbeHandler: corev1.ProbeHandler{
 			TCPSocket: &corev1.TCPSocketAction{
 				Port: intstr.FromInt(int(port)),
 			},

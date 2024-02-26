@@ -20,7 +20,7 @@ func APIDeployment(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes
 	env = append(env, template.EnvVar("OS_DEFAULT__ENABLED_APIS", "osapi_compute"))
 
 	probe := &corev1.Probe{
-		Handler: corev1.Handler{
+		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path: "/",
 				Port: intstr.FromInt(8774),

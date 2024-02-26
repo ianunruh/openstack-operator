@@ -19,7 +19,7 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 	labels := template.Labels(instance.Name, AppLabel, ServerComponentLabel)
 
 	probe := &corev1.Probe{
-		Handler: corev1.Handler{
+		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path: "/horizon/auth/login/",
 				Port: intstr.FromInt(8080),

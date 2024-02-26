@@ -32,7 +32,7 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.E
 	privileged := true
 
 	probe := &corev1.Probe{
-		Handler: corev1.Handler{
+		ProbeHandler: corev1.ProbeHandler{
 			Exec: &corev1.ExecAction{
 				Command: []string{"bash", "-c", "/usr/bin/virsh list"},
 			},
@@ -88,7 +88,7 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.E
 					template.MustReadFile(AppLabel, "libvirtd-start.sh"),
 				},
 				Lifecycle: &corev1.Lifecycle{
-					PreStop: &corev1.Handler{
+					PreStop: &corev1.LifecycleHandler{
 						Exec: &corev1.ExecAction{
 							Command: []string{
 								"bash",

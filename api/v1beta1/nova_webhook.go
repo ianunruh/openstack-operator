@@ -23,6 +23,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -64,25 +65,25 @@ func (r *Nova) Default() {
 var _ webhook.Validator = &Nova{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *Nova) ValidateCreate() error {
+func (r *Nova) ValidateCreate() (admission.Warnings, error) {
 	novalog.Info("validate create", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object creation.
-	return nil
+	return admission.Warnings{}, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *Nova) ValidateUpdate(old runtime.Object) error {
+func (r *Nova) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	novalog.Info("validate update", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object update.
-	return nil
+	return admission.Warnings{}, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *Nova) ValidateDelete() error {
+func (r *Nova) ValidateDelete() (admission.Warnings, error) {
 	novalog.Info("validate delete", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object deletion.
-	return nil
+	return admission.Warnings{}, nil
 }

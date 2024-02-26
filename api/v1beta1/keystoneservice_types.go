@@ -35,13 +35,13 @@ type KeystoneServiceStatus struct {
 	Conditions []metav1.Condition `json:"conditions"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.spec.type`
-// +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
-// +kubebuilder:printcolumn:name="URL",type=string,JSONPath=`.spec.publicURL`
-// +kubebuilder:printcolumn:name="Internal URL",type=string,priority=1,JSONPath=`.spec.internalURL`
-// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Type",type=string,JSONPath=`.spec.type`
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="URL",type=string,JSONPath=`.spec.publicURL`
+//+kubebuilder:printcolumn:name="Internal URL",type=string,priority=1,JSONPath=`.spec.internalURL`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // KeystoneService is the Schema for the keystoneservices API
 type KeystoneService struct {
@@ -52,7 +52,7 @@ type KeystoneService struct {
 	Status KeystoneServiceStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // KeystoneServiceList contains a list of KeystoneService
 type KeystoneServiceList struct {

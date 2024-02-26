@@ -13,7 +13,7 @@ func Command() []string {
 
 func Lifecycle() *corev1.Lifecycle {
 	return &corev1.Lifecycle{
-		PreStop: &corev1.Handler{
+		PreStop: &corev1.LifecycleHandler{
 			Exec: &corev1.ExecAction{
 				Command: []string{
 					"apachectl",

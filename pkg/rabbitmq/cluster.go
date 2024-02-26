@@ -40,14 +40,14 @@ func ClusterStatefulSet(instance *openstackv1beta1.RabbitMQ, configHash string) 
 				Name:  "rabbitmq",
 				Image: instance.Spec.Image,
 				Lifecycle: &corev1.Lifecycle{
-					PreStop: &corev1.Handler{
+					PreStop: &corev1.LifecycleHandler{
 						Exec: &corev1.ExecAction{
 							Command: []string{"rabbitmqctl", "stop_app"},
 						},
 					},
 				},
 				LivenessProbe: &corev1.Probe{
-					Handler: corev1.Handler{
+					ProbeHandler: corev1.ProbeHandler{
 						Exec: &corev1.ExecAction{
 							Command: []string{"rabbitmq-diagnostics", "-q", "check_running"},
 						},
@@ -59,7 +59,7 @@ func ClusterStatefulSet(instance *openstackv1beta1.RabbitMQ, configHash string) 
 					FailureThreshold:    6,
 				},
 				ReadinessProbe: &corev1.Probe{
-					Handler: corev1.Handler{
+					ProbeHandler: corev1.ProbeHandler{
 						Exec: &corev1.ExecAction{
 							Command: []string{"rabbitmq-diagnostics", "-q", "ping"},
 						},

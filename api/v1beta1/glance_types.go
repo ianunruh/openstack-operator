@@ -75,8 +75,8 @@ type GlanceStatus struct {
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
 
 // Glance is the Schema for the glances API
 type Glance struct {
@@ -87,7 +87,7 @@ type Glance struct {
 	Status GlanceStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // GlanceList contains a list of Glance
 type GlanceList struct {

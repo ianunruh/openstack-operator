@@ -62,12 +62,12 @@ type RabbitMQUserStatus struct {
 	SetupJobHash string `json:"setupJobHash,omitempty"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Cluster",type=string,JSONPath=`.spec.cluster`
-// +kubebuilder:printcolumn:name="Vhost",type=string,JSONPath=`.spec.virtualHost`
-// +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
-// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Cluster",type=string,JSONPath=`.spec.cluster`
+//+kubebuilder:printcolumn:name="Vhost",type=string,JSONPath=`.spec.virtualHost`
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // RabbitMQUser is the Schema for the rabbitmqusers API
 type RabbitMQUser struct {
@@ -78,7 +78,7 @@ type RabbitMQUser struct {
 	Status RabbitMQUserStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // RabbitMQUserList contains a list of RabbitMQUser
 type RabbitMQUserList struct {

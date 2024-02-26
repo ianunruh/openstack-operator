@@ -101,8 +101,8 @@ type CinderStatus struct {
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
 
 // Cinder is the Schema for the cinders API
 type Cinder struct {
@@ -113,7 +113,7 @@ type Cinder struct {
 	Status CinderStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // CinderList contains a list of Cinder
 type CinderList struct {

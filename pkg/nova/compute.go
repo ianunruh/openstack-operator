@@ -89,13 +89,13 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 				},
 				Env: env,
 				LivenessProbe: &corev1.Probe{
-					Handler:             healthProbeHandler("compute", true),
+					ProbeHandler:        healthProbeHandler("compute", true),
 					InitialDelaySeconds: 120,
 					PeriodSeconds:       90,
 					TimeoutSeconds:      70,
 				},
 				StartupProbe: &corev1.Probe{
-					Handler:             healthProbeHandler("compute", false),
+					ProbeHandler:        healthProbeHandler("compute", false),
 					InitialDelaySeconds: 80,
 					PeriodSeconds:       90,
 					TimeoutSeconds:      70,

@@ -76,8 +76,9 @@ type MagnumStatus struct {
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
+//+kubebuilder:object:root=true
+//+kubebuilder:resource:path=magnums
+//+kubebuilder:subresource:status
 
 // Magnum is the Schema for the magnums API
 type Magnum struct {
@@ -88,7 +89,7 @@ type Magnum struct {
 	Status MagnumStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // MagnumList contains a list of Magnum
 type MagnumList struct {
