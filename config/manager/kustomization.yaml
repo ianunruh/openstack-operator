@@ -3,5 +3,5 @@ resources:
 
 images:
 - name: controller
-  newName: controller
-  newTag: latest
+  newName: ghcr.io/ianunruh/openstack-operator
+  newTag: master
