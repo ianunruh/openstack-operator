@@ -83,6 +83,7 @@ Use the supplied `openrc` file with the Python CLI client.
 source openrc
 
 # starts an interactive shell
+pipenv install
 pipenv run openstack
 
 # the following commands run in the interactive shell
@@ -119,6 +120,8 @@ Launch an instance
 
 ```
 source openrc
+
+pipenv shell
 
 openstack flavor create m1.test --ram 1024 --disk 1
 
@@ -171,7 +174,7 @@ rm -rf /var/lib/nova /var/lib/libvirt /var/run/openvswitch /var/lib/openvswitch
 
 ## Requirements
 
-Tested on Kubernetes 1.21 and later, but may work with earlier versions.
+Tested on Kubernetes 1.26, but may work with other versions.
 
 * cert-manager
 * ingress-nginx
