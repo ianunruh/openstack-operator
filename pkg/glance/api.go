@@ -1,6 +1,8 @@
 package glance
 
 import (
+	"slices"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -33,6 +35,8 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 		template.SubPathVolumeMount("etc-glance", "/etc/glance/glance-api.conf", "glance-api.conf"),
 	}
 
+	var deployStrategyType appsv1.DeploymentStrategyType
+
 	cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
 	for _, backend := range instance.Spec.Backends {
 		if cephSpec := backend.Ceph; cephSpec != nil {
@@ -45,6 +49,11 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 				MountPath: imageBackendPath(backend.Name),
 			})
 			volumes = append(volumes, template.PersistentVolume("images", pvcName))
+
+			if isReadWriteOnce(pvcSpec.AccessModes) {
+				// avoid state where new pods cannot mount PVC due to exclusivity
+				deployStrategyType = appsv1.RecreateDeploymentStrategyType
+			}
 		}
 	}
 
@@ -82,6 +91,7 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 	})
 
 	deploy.Name = template.Combine(instance.Name, "api")
+	deploy.Spec.Strategy.Type = deployStrategyType
 
 	return deploy
 }
@@ -108,4 +118,8 @@ func APIIngress(instance *openstackv1beta1.Glance) *netv1.Ingress {
 	})
 
 	return ingress
+}
+
+func isReadWriteOnce(accessModes []corev1.PersistentVolumeAccessMode) bool {
+	return slices.Contains(accessModes, corev1.ReadWriteOnce) || slices.Contains(accessModes, corev1.ReadWriteOncePod)
 }
