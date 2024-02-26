@@ -10,6 +10,8 @@ func Nova(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Nova {
 	// TODO labels
 	spec := instance.Spec.Nova
 
+	spec.Image = imageDefault(spec.Image, DefaultNovaImage)
+
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "nova")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 
@@ -68,6 +70,8 @@ func novaCellDefaults(cells []openstackv1beta1.NovaCellSpec, instance *openstack
 
 func novaComputeSetDefaults(spec openstackv1beta1.NovaComputeSetSpec, cell openstackv1beta1.NovaCellSpec, instance *openstackv1beta1.ControlPlane) openstackv1beta1.NovaComputeSetSpec {
 	spec.NodeSelector = computeNodeSelector(spec.NodeSelector, instance)
+
+	spec.Libvirtd.Image = imageDefault(spec.Libvirtd.Image, DefaultLibvirtImage)
 
 	return spec
 }

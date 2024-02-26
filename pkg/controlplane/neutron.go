@@ -10,6 +10,8 @@ func Neutron(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Neutron 
 	// TODO labels
 	spec := instance.Spec.Neutron
 
+	spec.Image = imageDefault(spec.Image, DefaultNeutronImage)
+
 	spec.Server.Ingress = ingressDefaults(spec.Server.Ingress, instance, "neutron")
 	spec.Server.NodeSelector = controllerNodeSelector(spec.Server.NodeSelector, instance)
 

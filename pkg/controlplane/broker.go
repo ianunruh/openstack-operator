@@ -9,6 +9,8 @@ import (
 func Broker(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.RabbitMQ {
 	spec := instance.Spec.Broker
 
+	spec.Image = imageDefault(spec.Image, DefaultRabbitMQImage)
+
 	spec.Management.Ingress = ingressDefaults(spec.Management.Ingress, instance, "rabbitmq")
 
 	spec.NodeSelector = controllerNodeSelector(spec.NodeSelector, instance)

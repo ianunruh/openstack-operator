@@ -12,6 +12,8 @@ func Octavia(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Octavia 
 		return nil
 	}
 
+	spec.Image = imageDefault(spec.Image, DefaultOctaviaImage)
+
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "octavia")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 
