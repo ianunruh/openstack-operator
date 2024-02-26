@@ -7,7 +7,7 @@ spec:
   ingress:
     annotations:
       external-dns/enabled: "true"
-      cert-manager.io/cluster-issuer: letsencrypt-prod
+      cert-manager.io/cluster-issuer: letsencrypt
   nodeSelector:
     compute:
       openstack/cloud: openstack
@@ -37,8 +37,7 @@ spec:
     - name: ssd
       pvc:
         capacity: 100Gi
-        storageClass: ceph-fs-ssd
-        accessModes: [ReadWriteMany]
+        storageClass: ceph-block-ssd
   placement:
     image: ghcr.io/ianunruh/openstack-operator-images/placement:master
   nova:
