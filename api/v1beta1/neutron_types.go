@@ -89,8 +89,8 @@ type NeutronStatus struct {
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
 
 // Neutron is the Schema for the neutrons API
 type Neutron struct {
@@ -101,7 +101,7 @@ type Neutron struct {
 	Status NeutronStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // NeutronList contains a list of Neutron
 type NeutronList struct {

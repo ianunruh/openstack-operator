@@ -4,7 +4,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func healthProbeHandler(queueName string, liveness bool) corev1.Handler {
+func healthProbeHandler(queueName string, liveness bool) corev1.ProbeHandler {
 	cmd := []string{
 		"python3",
 		"/usr/local/bin/nova-health-probe",
@@ -18,7 +18,7 @@ func healthProbeHandler(queueName string, liveness bool) corev1.Handler {
 		cmd = append(cmd, "--liveness-probe")
 	}
 
-	return corev1.Handler{
+	return corev1.ProbeHandler{
 		Exec: &corev1.ExecAction{
 			Command: cmd,
 		},

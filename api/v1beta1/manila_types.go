@@ -113,6 +113,7 @@ type ManilaStatus struct {
 }
 
 //+kubebuilder:object:root=true
+//+kubebuilder:resource:path=manilas
 //+kubebuilder:subresource:status
 
 // Manila is the Schema for the manilas API

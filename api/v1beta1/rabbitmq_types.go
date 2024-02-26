@@ -57,10 +57,10 @@ type RabbitMQStatus struct {
 	Conditions []metav1.Condition `json:"conditions"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
-// +kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // RabbitMQ is the Schema for the rabbitmqs API
 type RabbitMQ struct {
@@ -71,7 +71,7 @@ type RabbitMQ struct {
 	Status RabbitMQStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // RabbitMQList contains a list of RabbitMQ
 type RabbitMQList struct {

@@ -5,8 +5,8 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
-func StorageResources(capacity string) corev1.ResourceRequirements {
-	return corev1.ResourceRequirements{
+func StorageResources(capacity string) corev1.VolumeResourceRequirements {
+	return corev1.VolumeResourceRequirements{
 		Requests: corev1.ResourceList{
 			corev1.ResourceStorage: resource.MustParse(capacity),
 		},

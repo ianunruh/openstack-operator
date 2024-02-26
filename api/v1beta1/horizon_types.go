@@ -48,8 +48,8 @@ type HorizonServerSpec struct {
 type HorizonStatus struct {
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
 
 // Horizon is the Schema for the horizons API
 type Horizon struct {
@@ -60,7 +60,7 @@ type Horizon struct {
 	Status HorizonStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // HorizonList contains a list of Horizon
 type HorizonList struct {

@@ -21,6 +21,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 var octavialog = logf.Log.WithName("octavia-resource")
@@ -59,24 +60,24 @@ func (r *Octavia) Default() {
 var _ webhook.Validator = &Octavia{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *Octavia) ValidateCreate() error {
+func (r *Octavia) ValidateCreate() (admission.Warnings, error) {
 	octavialog.Info("validate create", "name", r.Name)
 
-	return nil
+	return admission.Warnings{}, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *Octavia) ValidateUpdate(old runtime.Object) error {
+func (r *Octavia) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	octavialog.Info("validate update", "name", r.Name)
 
 	// TODO amphora managementCIDR should be immutable
 
-	return nil
+	return admission.Warnings{}, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *Octavia) ValidateDelete() error {
+func (r *Octavia) ValidateDelete() (admission.Warnings, error) {
 	octavialog.Info("validate delete", "name", r.Name)
 
-	return nil
+	return admission.Warnings{}, nil
 }

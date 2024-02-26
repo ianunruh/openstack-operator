@@ -59,8 +59,8 @@ type PlacementStatus struct {
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
 
 // Placement is the Schema for the placements API
 type Placement struct {
@@ -71,7 +71,7 @@ type Placement struct {
 	Status PlacementStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // PlacementList contains a list of Placement
 type PlacementList struct {

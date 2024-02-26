@@ -21,6 +21,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -58,25 +59,25 @@ func (r *NovaCell) Default() {
 var _ webhook.Validator = &NovaCell{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *NovaCell) ValidateCreate() error {
+func (r *NovaCell) ValidateCreate() (admission.Warnings, error) {
 	novacelllog.Info("validate create", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object creation.
-	return nil
+	return admission.Warnings{}, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *NovaCell) ValidateUpdate(old runtime.Object) error {
+func (r *NovaCell) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	novacelllog.Info("validate update", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object update.
-	return nil
+	return admission.Warnings{}, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *NovaCell) ValidateDelete() error {
+func (r *NovaCell) ValidateDelete() (admission.Warnings, error) {
 	novacelllog.Info("validate delete", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object deletion.
-	return nil
+	return admission.Warnings{}, nil
 }

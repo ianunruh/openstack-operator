@@ -79,8 +79,8 @@ type HeatStatus struct {
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
 
 // Heat is the Schema for the heats API
 type Heat struct {
@@ -91,7 +91,7 @@ type Heat struct {
 	Status HeatStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // HeatList contains a list of Heat
 type HeatList struct {

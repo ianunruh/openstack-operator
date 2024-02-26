@@ -76,8 +76,8 @@ type BarbicanStatus struct {
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
-// +kubebuilder:object:root=true
-// +kubebuilder:subresource:status
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
 
 // Barbican is the Schema for the barbicans API
 type Barbican struct {
@@ -88,7 +88,7 @@ type Barbican struct {
 	Status BarbicanStatus `json:"status,omitempty"`
 }
 
-// +kubebuilder:object:root=true
+//+kubebuilder:object:root=true
 
 // BarbicanList contains a list of Barbican
 type BarbicanList struct {

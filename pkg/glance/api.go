@@ -19,7 +19,7 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	probe := &corev1.Probe{
-		Handler: corev1.Handler{
+		ProbeHandler: corev1.ProbeHandler{
 			TCPSocket: &corev1.TCPSocketAction{
 				Port: intstr.FromInt(9292),
 			},

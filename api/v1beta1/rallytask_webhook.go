@@ -21,6 +21,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // log is for logging in this package.
@@ -51,25 +52,25 @@ func (r *RallyTask) Default() {
 var _ webhook.Validator = &RallyTask{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *RallyTask) ValidateCreate() error {
+func (r *RallyTask) ValidateCreate() (admission.Warnings, error) {
 	rallytasklog.Info("validate create", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object creation.
-	return nil
+	return admission.Warnings{}, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *RallyTask) ValidateUpdate(old runtime.Object) error {
+func (r *RallyTask) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	rallytasklog.Info("validate update", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object update.
-	return nil
+	return admission.Warnings{}, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *RallyTask) ValidateDelete() error {
+func (r *RallyTask) ValidateDelete() (admission.Warnings, error) {
 	rallytasklog.Info("validate delete", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object deletion.
-	return nil
+	return admission.Warnings{}, nil
 }

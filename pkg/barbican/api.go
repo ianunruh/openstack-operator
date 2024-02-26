@@ -19,7 +19,7 @@ func APIDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, vol
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	probe := &corev1.Probe{
-		Handler: corev1.Handler{
+		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path: "/",
 				Port: intstr.FromInt(9311),
