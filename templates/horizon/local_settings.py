@@ -412,4 +412,5 @@ WEBROOT='/horizon/'
 ALLOWED_HOSTS = ['*']
 
 # Compress all assets offline as part of packaging installation
-COMPRESS_OFFLINE = True
+# TODO(iunruh) enable this when offline compression is fixed
+COMPRESS_OFFLINE = False
