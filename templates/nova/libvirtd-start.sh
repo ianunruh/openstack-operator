@@ -182,6 +182,11 @@ EOF
     virsh secret-set-value --secret "${sec_uuid}" --base64 "${sec_ceph_keyring}"
   }
 
+  # TODO(iunruh) use standard path to avoid needing this patch
+  if [ -z "${CEPH_CINDER_KEYRING}" ] && [ -n "${CEPH_CINDER_USER}" ] && [ -n "${CEPH_CINDER_SECRET}" ] ; then
+    CEPH_CINDER_KEYRING=$(awk '/key/{print $3}' /etc/ceph/${CEPH_CINDER_SECRET}/keyring)
+  fi
+
   if [ -z "${CEPH_CINDER_KEYRING}" ] && [ -n "${CEPH_CINDER_USER}" ] ; then
     CEPH_CINDER_KEYRING=$(awk '/key/{print $3}' /etc/ceph/ceph.client.${CEPH_CINDER_USER}.keyring)
   fi
