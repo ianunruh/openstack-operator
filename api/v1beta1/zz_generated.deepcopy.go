@@ -573,11 +573,7 @@ func (in *ControlPlaneSpec) DeepCopyInto(out *ControlPlaneSpec) {
 	in.Nova.DeepCopyInto(&out.Nova)
 	in.Neutron.DeepCopyInto(&out.Neutron)
 	in.OVN.DeepCopyInto(&out.OVN)
-	if in.Horizon != nil {
-		in, out := &in.Horizon, &out.Horizon
-		*out = new(HorizonSpec)
-		(*in).DeepCopyInto(*out)
-	}
+	in.Horizon.DeepCopyInto(&out.Horizon)
 	if in.Barbican != nil {
 		in, out := &in.Barbican, &out.Barbican
 		*out = new(BarbicanSpec)

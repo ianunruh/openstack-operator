@@ -58,7 +58,7 @@ type ControlPlaneSpec struct {
 	OVN OVNControlPlaneSpec `json:"ovn,omitempty"`
 
 	// +optional
-	Horizon *HorizonSpec `json:"horizon,omitempty"`
+	Horizon HorizonSpec `json:"horizon,omitempty"`
 
 	// +optional
 	Barbican *BarbicanSpec `json:"barbican,omitempty"`
