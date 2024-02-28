@@ -1,0 +1,13 @@
+apiVersion: openstack.ospk8s.com/v1beta1
+kind: ControlPlane
+metadata:
+  name: default
+spec:
+  domain: openstack.k8s.example.com
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt
+  nodeSelector:
+    compute:
+      openstack/cloud: openstack
+      openstack/compute-node: enabled

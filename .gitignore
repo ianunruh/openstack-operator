@@ -24,3 +24,5 @@ testbin/*
 *.swp
 *.swo
 *~
+
+/controlplane.yaml
