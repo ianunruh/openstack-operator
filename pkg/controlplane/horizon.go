@@ -8,9 +8,6 @@ import (
 
 func Horizon(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Horizon {
 	spec := instance.Spec.Horizon
-	if spec == nil {
-		return nil
-	}
 
 	spec.Image = imageDefault(spec.Image, DefaultHorizonImage)
 
@@ -23,6 +20,6 @@ func Horizon(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Horizon 
 			Name:      "horizon",
 			Namespace: instance.Namespace,
 		},
-		Spec: *spec,
+		Spec: spec,
 	}
 }
