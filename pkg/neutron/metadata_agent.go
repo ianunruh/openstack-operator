@@ -55,6 +55,7 @@ func MetadataAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.Env
 
 	ds.Spec.Template.Spec.DNSPolicy = corev1.DNSClusterFirstWithHostNet
 	ds.Spec.Template.Spec.HostNetwork = true
+	ds.Spec.Template.Spec.HostPID = true
 
 	return ds
 }
