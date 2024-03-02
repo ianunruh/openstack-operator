@@ -52,8 +52,11 @@ kubectl -n kube-system get secret cloud-config && kubectl -n kube-system delete 
 kubectl -n kube-system create secret generic cloud-config --from-file=cloud.conf
 
 # Install cluster networking
+log "Applying Calico operator manifests"
+kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/tigera-operator.yaml
+
 log "Applying Calico networking manifests"
-kubectl apply -k calico
+kubectl apply -f calico.yaml
 
 log "Applying cloud provider manifests"
 kubectl kustomize cloud-provider | \
@@ -61,13 +64,13 @@ kubectl kustomize cloud-provider | \
     kubectl apply -f-
 
 log "Applying ingress-nginx manifests"
-curl -sL https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/cloud/deploy.yaml | \
+curl -sL https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.0/deploy/static/provider/cloud/deploy.yaml | \
     # Octavia does not work with Local policy
     sed -e "s/externalTrafficPolicy: Local/externalTrafficPolicy: Cluster/g" | \
     kubectl apply -f -
 
 log "Applying cert-manager manifests"
-kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.14.3/cert-manager.yaml
 
 log "Ensuring cert-manager/google-dns secret"
 if ! kubectl -n cert-manager get secret google-dns; then
