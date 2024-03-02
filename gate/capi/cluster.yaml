@@ -13,11 +13,11 @@ spec:
     kind: KubeadmControlPlane
     name: $(CLUSTER_NAME)-control-plane
   infrastructureRef:
-    apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+    apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
     kind: OpenStackCluster
     name: $(CLUSTER_NAME)
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
 kind: OpenStackCluster
 metadata:
   name: $(CLUSTER_NAME)
@@ -66,13 +66,13 @@ spec:
         name: '{{ local_hostname }}'
   machineTemplate:
     infrastructureRef:
-      apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+      apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
       kind: OpenStackMachineTemplate
       name: $(CLUSTER_NAME)-control-plane
   replicas: 1
   version: 1.26.7
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
 kind: OpenStackMachineTemplate
 metadata:
   name: $(CLUSTER_NAME)-control-plane
@@ -106,12 +106,12 @@ spec:
       clusterName: $(CLUSTER_NAME)
       failureDomain: $(OPENSTACK_FAILURE_DOMAIN)
       infrastructureRef:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+        apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
         kind: OpenStackMachineTemplate
         name: $(CLUSTER_NAME)-md-0
       version: 1.26.7
 ---
-apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
+apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
 kind: OpenStackMachineTemplate
 metadata:
   name: $(CLUSTER_NAME)-md-0
