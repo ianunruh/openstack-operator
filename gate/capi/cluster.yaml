@@ -35,7 +35,7 @@ spec:
     enabled: true
     instance:
       flavor: c1-small
-      image: ubuntu-focal-20210913
+      image: ubuntu-jammy-20240227
       sshKeyName: ianunruh-yubikey
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1beta1
@@ -52,12 +52,6 @@ spec:
         extraArgs:
           cloud-provider: external
       imageRepository: k8s.gcr.io
-    files:
-    - path: /etc/containerd/config.toml
-      contentFrom:
-        secret:
-          name: gate-containerd
-          key: config.toml
     initConfiguration:
       nodeRegistration:
         kubeletExtraArgs:
@@ -76,7 +70,7 @@ spec:
       kind: OpenStackMachineTemplate
       name: $(CLUSTER_NAME)-control-plane
   replicas: 1
-  version: 1.21.7
+  version: 1.26.7
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
 kind: OpenStackMachineTemplate
@@ -90,7 +84,7 @@ spec:
       identityRef:
         kind: Secret
         name: cluster-admin-keystone
-      image: ubuntu-2004-kube-v1.21.7
+      image: ubuntu-2204-kube-v1.26.7
       sshKeyName: ianunruh-yubikey
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
@@ -115,7 +109,7 @@ spec:
         apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
         kind: OpenStackMachineTemplate
         name: $(CLUSTER_NAME)-md-0
-      version: 1.21.7
+      version: 1.26.7
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1alpha4
 kind: OpenStackMachineTemplate
@@ -129,7 +123,7 @@ spec:
       identityRef:
         kind: Secret
         name: cluster-admin-keystone
-      image: ubuntu-2004-kube-v1.21.7
+      image: ubuntu-2204-kube-v1.26.7
       sshKeyName: ianunruh-yubikey
 ---
 apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
@@ -139,12 +133,6 @@ metadata:
 spec:
   template:
     spec:
-      files:
-      - path: /etc/containerd/config.toml
-        contentFrom:
-          secret:
-            name: gate-containerd
-            key: config.toml
       joinConfiguration:
         nodeRegistration:
           kubeletExtraArgs:
