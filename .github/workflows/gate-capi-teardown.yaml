@@ -25,7 +25,7 @@ jobs:
           echo "::add-mask::${{ secrets.GCLOUD_SVC_ACCOUNT_KEY_JSON }}"
 
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ospk8s
           service_account_key: ${{ secrets.GCLOUD_SVC_ACCOUNT_KEY_JSON }}
