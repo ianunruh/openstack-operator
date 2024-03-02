@@ -6,7 +6,7 @@ spec:
   acme:
     email: ianunruh@gmail.com
     privateKeySecretRef:
-      name: letsencrypt-issuer-key
+      name: letsencrypt-google-issuer-key
     server: https://acme-v02.api.letsencrypt.org/directory
     solvers:
     - dns01:
