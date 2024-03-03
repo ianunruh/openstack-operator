@@ -31,6 +31,7 @@ spec:
   apiServerLoadBalancer:
     enabled: true
   managedSecurityGroups: true
+  allowAllInClusterTraffic: true
   nodeCidr: 10.12.0.0/24
   bastion:
     enabled: true
