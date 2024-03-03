@@ -82,7 +82,7 @@ if ! kubectl -n cert-manager get secret google-dns; then
 fi
 
 log "Waiting for cert-manager to become ready"
-kubectl -n cert-manager rollout status deploy cert-manager
+kubectl -n cert-manager rollout status deploy
 
 log "Applying cert-manager issuer and wildcard cert"
 # NOTE cert-manager webhook can take a few seconds to become ready
