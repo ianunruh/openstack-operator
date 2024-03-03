@@ -55,6 +55,8 @@ kubectl -n kube-system create secret generic cloud-config --from-file=cloud.conf
 log "Applying Calico operator manifests"
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/tigera-operator.yaml --server-side=true
 
+kubectl -n tigera-operator rollout status deployment tigera-operator
+
 log "Applying Calico networking manifests"
 kubectl apply -f calico.yaml
 
