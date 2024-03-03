@@ -53,7 +53,7 @@ kubectl -n kube-system create secret generic cloud-config --from-file=cloud.conf
 
 # Install cluster networking
 log "Applying Calico operator manifests"
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/tigera-operator.yaml
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/tigera-operator.yaml --server-side=true
 
 log "Applying Calico networking manifests"
 kubectl apply -f calico.yaml
