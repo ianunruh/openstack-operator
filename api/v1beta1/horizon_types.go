@@ -46,6 +46,7 @@ type HorizonServerSpec struct {
 
 // HorizonStatus defines the observed state of Horizon
 type HorizonStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
 }
 
 //+kubebuilder:object:root=true

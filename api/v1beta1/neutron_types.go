@@ -85,6 +85,8 @@ type NeutronPlacementSpec struct {
 
 // NeutronStatus defines the observed state of Neutron
 type NeutronStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }

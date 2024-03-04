@@ -108,6 +108,8 @@ type ManilaRookCephSpec struct {
 
 // ManilaStatus defines the observed state of Manila
 type ManilaStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }

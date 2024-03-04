@@ -75,6 +75,8 @@ type HeatEngineSpec struct {
 
 // HeatStatus defines the observed state of Heat
 type HeatStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }

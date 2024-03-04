@@ -80,6 +80,7 @@ type OVNNorthdSpec struct {
 
 // OVNControlPlaneStatus defines the observed state of OVNControlPlane
 type OVNControlPlaneStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
 }
 
 //+kubebuilder:object:root=true

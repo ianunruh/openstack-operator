@@ -72,6 +72,8 @@ type MagnumConductorSpec struct {
 
 // MagnumStatus defines the observed state of Magnum
 type MagnumStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }

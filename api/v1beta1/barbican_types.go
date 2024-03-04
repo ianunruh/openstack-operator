@@ -72,6 +72,8 @@ type BarbicanWorkerSpec struct {
 
 // BarbicanStatus defines the observed state of Barbican
 type BarbicanStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
