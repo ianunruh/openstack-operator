@@ -27,7 +27,7 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 		},
 		InitialDelaySeconds: 5,
 		PeriodSeconds:       10,
-		TimeoutSeconds:      5,
+		TimeoutSeconds:      10,
 	}
 
 	volumeMounts := []corev1.VolumeMount{
