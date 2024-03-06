@@ -15,23 +15,35 @@ const (
 	ServerComponentLabel = "server"
 )
 
-func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *appsv1.Deployment {
+func ServerDeployment(instance *openstackv1beta1.Horizon, env []corev1.EnvVar) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, ServerComponentLabel)
 
-	probe := &corev1.Probe{
-		ProbeHandler: corev1.ProbeHandler{
-			HTTPGet: &corev1.HTTPGetAction{
-				Path: "/horizon/auth/login/",
-				Port: intstr.FromInt(8080),
-			},
+	probeHandler := corev1.ProbeHandler{
+		HTTPGet: &corev1.HTTPGetAction{
+			Path: "/auth/login/",
+			Port: intstr.FromInt(8080),
 		},
-		InitialDelaySeconds: 5,
+	}
+
+	livenessProbe := &corev1.Probe{
+		ProbeHandler:        probeHandler,
+		InitialDelaySeconds: 10,
+		PeriodSeconds:       10,
+		TimeoutSeconds:      5,
+	}
+
+	startupProbe := &corev1.Probe{
+		ProbeHandler:        probeHandler,
+		InitialDelaySeconds: 10,
+		FailureThreshold:    30,
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,
 	}
 
 	volumeMounts := []corev1.VolumeMount{
-		template.SubPathVolumeMount("etc-horizon", "/etc/openstack-dashboard/local_settings.py", "local_settings.py"),
+		template.SubPathVolumeMount("etc-horizon", "/etc/apache2/sites-available/000-default.conf", "httpd.conf"),
+		template.SubPathVolumeMount("etc-horizon", "/etc/openstack-dashboard/local_settings", "local_settings.py"),
+		template.SubPathVolumeMount("etc-horizon", "/var/lib/kolla/config_files/config.json", "kolla.json"),
 	}
 
 	volumes := []corev1.Volume{
@@ -50,16 +62,14 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 			{
 				Name:      "server",
 				Image:     instance.Spec.Image,
-				Command:   httpd.Command(),
+				Command:   []string{"/usr/local/bin/kolla_start"},
 				Lifecycle: httpd.Lifecycle(),
-				Env: []corev1.EnvVar{
-					template.EnvVar("CONFIG_HASH", configHash),
-				},
+				Env:       env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 80},
 				},
-				LivenessProbe: probe,
-				StartupProbe:  probe,
+				LivenessProbe: livenessProbe,
+				StartupProbe:  startupProbe,
 				Resources:     instance.Spec.Server.Resources,
 				VolumeMounts:  volumeMounts,
 			},
