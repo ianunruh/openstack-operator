@@ -97,7 +97,9 @@ func (r *HorizonReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
+		// TODO check controlplane for enabled components
 		template.EnvVar("ENABLE_HEAT", "yes"),
+		template.EnvVar("ENABLE_MAGNUM", "yes"),
 		template.EnvVar("ENABLE_MANILA", "yes"),
 		template.EnvVar("ENABLE_OCTAVIA", "yes"),
 		template.SecretEnvVar("HORIZON_SECRET_KEY", secret.Name, "secret-key"),

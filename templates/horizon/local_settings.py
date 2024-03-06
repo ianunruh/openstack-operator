@@ -404,7 +404,7 @@ SECURITY_GROUP_RULES = {
 DEFAULT_THEME = 'ubuntu'
 
 # Default Ubuntu apache configuration uses /horizon as the application root.
-WEBROOT='/horizon/'
+WEBROOT='/'
 
 # By default, validation of the HTTP Host header is disabled.  Production
 # installations should have this set accordingly.  For more information
