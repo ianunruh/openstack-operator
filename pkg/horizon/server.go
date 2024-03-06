@@ -18,14 +18,24 @@ const (
 func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, ServerComponentLabel)
 
-	probe := &corev1.Probe{
-		ProbeHandler: corev1.ProbeHandler{
-			HTTPGet: &corev1.HTTPGetAction{
-				Path: "/horizon/auth/login/",
-				Port: intstr.FromInt(8080),
-			},
+	probeHandler := corev1.ProbeHandler{
+		HTTPGet: &corev1.HTTPGetAction{
+			Path: "/horizon/auth/login/",
+			Port: intstr.FromInt(8080),
 		},
-		InitialDelaySeconds: 5,
+	}
+
+	livenessProbe := &corev1.Probe{
+		ProbeHandler:        probeHandler,
+		InitialDelaySeconds: 10,
+		PeriodSeconds:       10,
+		TimeoutSeconds:      5,
+	}
+
+	startupProbe := &corev1.Probe{
+		ProbeHandler:        probeHandler,
+		InitialDelaySeconds: 10,
+		FailureThreshold:    30,
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,
 	}
@@ -63,8 +73,8 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 80},
 				},
-				LivenessProbe: probe,
-				StartupProbe:  probe,
+				LivenessProbe: livenessProbe,
+				StartupProbe:  startupProbe,
 				Resources:     instance.Spec.Server.Resources,
 				VolumeMounts:  volumeMounts,
 			},
