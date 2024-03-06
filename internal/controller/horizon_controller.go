@@ -73,6 +73,12 @@ func (r *HorizonReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	configHash := template.AppliedHash(cm)
 
+	secret := horizon.Secret(instance)
+	controllerutil.SetControllerReference(instance, secret, r.Scheme)
+	if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	service := horizon.ServerService(instance)
 	controllerutil.SetControllerReference(instance, service, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, service, log); err != nil {
@@ -88,8 +94,16 @@ func (r *HorizonReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{}, err
 		}
 	}
+	env := []corev1.EnvVar{
+		template.EnvVar("CONFIG_HASH", configHash),
+		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
+		template.EnvVar("ENABLE_HEAT", "yes"),
+		template.EnvVar("ENABLE_MANILA", "yes"),
+		template.EnvVar("ENABLE_OCTAVIA", "yes"),
+		template.SecretEnvVar("HORIZON_SECRET_KEY", secret.Name, "secret-key"),
+	}
 
-	deploy := horizon.ServerDeployment(instance, configHash)
+	deploy := horizon.ServerDeployment(instance, env)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err

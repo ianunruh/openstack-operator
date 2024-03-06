@@ -1,10 +1,3 @@
 {
-    "command": "/usr/sbin/apachectl -DFOREGROUND",
-    "permissions": [
-        {
-            "path": "/var/lib/openstack-dashboard",
-            "owner": "horizon:horizon",
-            "recurse": true
-        }
-    ]
+    "command": "/usr/sbin/apachectl -DFOREGROUND"
 }

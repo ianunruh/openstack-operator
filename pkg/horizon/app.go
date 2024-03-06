@@ -28,6 +28,15 @@ func ConfigMap(instance *openstackv1beta1.Horizon) *corev1.ConfigMap {
 	return cm
 }
 
+func Secret(instance *openstackv1beta1.Horizon) *corev1.Secret {
+	labels := template.AppLabels(instance.Name, AppLabel)
+	secret := template.GenericSecret(instance.Name, instance.Namespace, labels)
+
+	secret.StringData["secret-key"] = template.NewPassword()
+
+	return secret
+}
+
 func EnsureHorizon(ctx context.Context, c client.Client, intended *openstackv1beta1.Horizon, log logr.Logger) error {
 	hash, err := template.ObjectHash(intended)
 	if err != nil {

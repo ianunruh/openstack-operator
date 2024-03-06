@@ -87,7 +87,7 @@ LOCAL_PATH = os.path.dirname(os.path.abspath(__file__))
 # (usually behind a load-balancer). Either you have to make sure that a session
 # gets all requests routed to the same dashboard instance or you set the same
 # SECRET_KEY for all of them.
-SECRET_KEY = secret_key.generate_or_read_from_file('/var/lib/openstack-dashboard/secret_key')
+SECRET_KEY = os.environ.get('HORIZON_SECRET_KEY')
 
 # We recommend you use memcached for development; otherwise after every reload
 # of the django development server, you will have to login again. To use
@@ -412,5 +412,4 @@ WEBROOT='/horizon/'
 ALLOWED_HOSTS = ['*']
 
 # Compress all assets offline as part of packaging installation
-# TODO(iunruh) enable this when offline compression is fixed
-COMPRESS_OFFLINE = False
+COMPRESS_OFFLINE = True

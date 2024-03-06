@@ -15,7 +15,7 @@ const (
 	ServerComponentLabel = "server"
 )
 
-func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *appsv1.Deployment {
+func ServerDeployment(instance *openstackv1beta1.Horizon, env []corev1.EnvVar) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, ServerComponentLabel)
 
 	probeHandler := corev1.ProbeHandler{
@@ -64,13 +64,7 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 				Image:     instance.Spec.Image,
 				Command:   []string{"/usr/local/bin/kolla_start"},
 				Lifecycle: httpd.Lifecycle(),
-				Env: []corev1.EnvVar{
-					template.EnvVar("CONFIG_HASH", configHash),
-					template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
-					template.EnvVar("ENABLE_HEAT", "yes"),
-					template.EnvVar("ENABLE_MANILA", "yes"),
-					template.EnvVar("ENABLE_OCTAVIA", "yes"),
-				},
+				Env:       env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 80},
 				},
