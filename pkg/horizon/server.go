@@ -55,6 +55,10 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 				Lifecycle: httpd.Lifecycle(),
 				Env: []corev1.EnvVar{
 					template.EnvVar("CONFIG_HASH", configHash),
+					template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
+					template.EnvVar("ENABLE_HEAT", "yes"),
+					template.EnvVar("ENABLE_MANILA", "yes"),
+					template.EnvVar("ENABLE_OCTAVIA", "yes"),
 				},
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 80},
