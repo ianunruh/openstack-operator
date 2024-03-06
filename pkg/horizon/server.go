@@ -20,7 +20,7 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, env []corev1.EnvVar) *
 
 	probeHandler := corev1.ProbeHandler{
 		HTTPGet: &corev1.HTTPGetAction{
-			Path: "/horizon/auth/login/",
+			Path: "/auth/login/",
 			Port: intstr.FromInt(8080),
 		},
 	}
