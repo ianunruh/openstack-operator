@@ -21,6 +21,7 @@ func ConfigMap(instance *openstackv1beta1.Horizon) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
+	cm.Data["httpd.conf"] = template.MustReadFile(AppLabel, "httpd.conf")
 	cm.Data["kolla.json"] = template.MustReadFile(AppLabel, "kolla.json")
 	cm.Data["local_settings.py"] = template.MustReadFile(AppLabel, "local_settings.py")
 

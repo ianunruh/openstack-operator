@@ -41,6 +41,7 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, configHash string) *ap
 	}
 
 	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-horizon", "/etc/apache2/sites-available/000-default.conf", "httpd.conf"),
 		template.SubPathVolumeMount("etc-horizon", "/etc/openstack-dashboard/local_settings", "local_settings.py"),
 		template.SubPathVolumeMount("etc-horizon", "/var/lib/kolla/config_files/config.json", "kolla.json"),
 	}
