@@ -44,6 +44,7 @@ type NovaLibvirtdSpec struct {
 
 // NovaComputeSetStatus defines the observed state of NovaComputeSet
 type NovaComputeSetStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
 }
 
 //+kubebuilder:object:root=true

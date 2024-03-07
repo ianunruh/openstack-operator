@@ -55,6 +55,8 @@ type PlacementAPISpec struct {
 
 // PlacementStatus defines the observed state of Placement
 type PlacementStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }

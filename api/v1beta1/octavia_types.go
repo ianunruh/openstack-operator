@@ -129,6 +129,8 @@ type OctaviaWorkerSpec struct {
 
 // OctaviaStatus defines the observed state of Octavia
 type OctaviaStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 

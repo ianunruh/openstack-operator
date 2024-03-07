@@ -71,6 +71,8 @@ type GlanceAPISpec struct {
 
 // GlanceStatus defines the observed state of Glance
 type GlanceStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }

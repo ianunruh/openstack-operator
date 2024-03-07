@@ -97,6 +97,8 @@ type CinderVolumeSpec struct {
 
 // CinderStatus defines the observed state of Cinder
 type CinderStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }

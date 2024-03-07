@@ -111,6 +111,8 @@ type NovaPlacementSpec struct {
 
 // NovaStatus defines the observed state of Nova
 type NovaStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }

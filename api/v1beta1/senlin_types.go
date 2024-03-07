@@ -100,6 +100,8 @@ type SenlinHealthManagerSpec struct {
 
 // SenlinStatus defines the observed state of Senlin
 type SenlinStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
