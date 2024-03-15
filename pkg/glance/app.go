@@ -68,6 +68,8 @@ func ConfigMap(instance *openstackv1beta1.Glance) *corev1.ConfigMap {
 
 	cm.Data["glance-api.conf"] = template.MustOutputINI(cfg).String()
 
+	cm.Data["kolla.json"] = template.MustReadFile(AppLabel, "kolla.json")
+
 	return cm
 }
 
