@@ -11,7 +11,7 @@ const (
 	DefaultGlanceImage    = "ghcr.io/ianunruh/openstack-operator-images/glance:master"
 	DefaultHeatImage      = "ghcr.io/ianunruh/openstack-operator-images/heat:master"
 	DefaultHorizonImage   = "kolla/horizon:2023.2-ubuntu-jammy"
-	DefaultKeystoneImage  = "ghcr.io/ianunruh/openstack-operator-images/keystone:master"
+	DefaultKeystoneImage  = "kolla/keystone:2023.2-ubuntu-jammy"
 	DefaultLibvirtImage   = "ghcr.io/ianunruh/openstack-operator-images/libvirt:master"
 	DefaultMagnumImage    = "ghcr.io/ianunruh/openstack-operator-images/magnum:master"
 	DefaultManilaImage    = "ghcr.io/ianunruh/openstack-operator-images/manila:master"
