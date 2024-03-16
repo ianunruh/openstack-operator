@@ -5,7 +5,6 @@ source common.sh
 
 setup_kubectl
 
-export OPENSTACK_CLOUD="default"
 export OPENSTACK_CLOUD_YAML_B64=$(kubectl get secret cluster-admin-keystone -o 'jsonpath={.data.clouds\.yaml}')
 
 log "Generating and applying Cluster API manifests to undercloud"

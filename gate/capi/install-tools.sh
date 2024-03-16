@@ -18,3 +18,5 @@ mv clusterctl $HOME/.local/bin/clusterctl
 curl -sL https://github.com/mikefarah/yq/releases/download/v4.13.5/yq_linux_amd64 -o yq
 chmod +x yq
 mv yq $HOME/.local/bin/yq
+
+pip install --user pipenv

@@ -66,6 +66,12 @@ spec:
           cloud-provider: external
           node-labels: node.kubernetes.io/exclude-from-external-load-balancers=
         name: '{{ local_hostname }}'
+    files:
+    - path: /etc/containerd/config.toml
+      contentFrom:
+        secret:
+          name: gate-containerd
+          key: config.toml
   machineTemplate:
     infrastructureRef:
       apiVersion: infrastructure.cluster.x-k8s.io/v1alpha7
@@ -135,6 +141,12 @@ metadata:
 spec:
   template:
     spec:
+      files:
+      - path: /etc/containerd/config.toml
+        contentFrom:
+          secret:
+            name: gate-containerd
+            key: config.toml
       joinConfiguration:
         nodeRegistration:
           kubeletExtraArgs:
