@@ -21,7 +21,7 @@ func APIDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar, volum
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
 				Path: "/",
-				Port: intstr.FromInt(8778),
+				Port: intstr.FromInt(8777),
 			},
 		},
 		InitialDelaySeconds: 5,
@@ -49,7 +49,7 @@ func APIDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar, volum
 				Command: []string{"/usr/local/bin/kolla_start"},
 				Env:     env,
 				Ports: []corev1.ContainerPort{
-					{Name: "http", ContainerPort: 8778},
+					{Name: "http", ContainerPort: 8777},
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
@@ -75,7 +75,7 @@ func APIService(instance *openstackv1beta1.Senlin) *corev1.Service {
 
 	svc := template.GenericService(name, instance.Namespace, labels)
 	svc.Spec.Ports = []corev1.ServicePort{
-		{Name: "http", Port: 8778},
+		{Name: "http", Port: 8777},
 	}
 
 	return svc
