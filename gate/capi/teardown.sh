@@ -15,6 +15,8 @@ kubectl config set-context --current --namespace default
 log "Tearing down OpenStack control plane"
 kubectl get crd controlplanes.openstack.ospk8s.com && kubectl delete controlplane --all
 
+kubectl wait pod --for delete --all
+
 log "Cleaning up volumes"
 kubectl delete pvc --all
 

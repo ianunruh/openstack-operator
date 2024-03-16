@@ -38,6 +38,14 @@ jobs:
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Cache tools
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/bin
+            ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-${{ hashFiles('Pipfile.lock', 'gate/capi/install-tools.sh') }}
+
       - name: Install tools
         working-directory: gate/capi
         run: ./install-tools.sh
