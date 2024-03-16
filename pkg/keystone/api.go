@@ -31,7 +31,9 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 	}
 
 	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-keystone", "/etc/apache2/sites-available/000-default.conf", "httpd.conf"),
 		template.SubPathVolumeMount("etc-keystone", "/etc/keystone/keystone.conf", "keystone.conf"),
+		template.SubPathVolumeMount("etc-keystone", "/var/lib/kolla/config_files/config.json", "kolla.json"),
 		template.VolumeMount("pod-credential-keys", "/etc/keystone/credential-keys"),
 		template.VolumeMount("pod-fernet-keys", "/etc/keystone/fernet-keys"),
 	}
@@ -71,7 +73,7 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 			{
 				Name:      "api",
 				Image:     instance.Spec.Image,
-				Command:   httpd.Command(),
+				Command:   []string{"/usr/local/bin/kolla_start"},
 				Lifecycle: httpd.Lifecycle(),
 				Env:       env,
 				Ports: []corev1.ContainerPort{

@@ -106,6 +106,7 @@ func (r *PlacementReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
+		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
 		template.SecretEnvVar("OS_PLACEMENT_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 	}

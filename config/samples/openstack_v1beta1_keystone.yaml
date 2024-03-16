@@ -3,7 +3,7 @@ kind: Keystone
 metadata:
   name: keystone
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/keystone:master
+  image: kolla/keystone:2023.2-ubuntu-jammy
   api:
     replicas: 2
     ingress:

@@ -31,7 +31,9 @@ func APIDeployment(instance *openstackv1beta1.Placement, env []corev1.EnvVar, vo
 	}
 
 	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-placement", "/etc/apache2/sites-available/000-default.conf", "httpd.conf"),
 		template.SubPathVolumeMount("etc-placement", "/etc/placement/placement.conf", "placement.conf"),
+		template.SubPathVolumeMount("etc-placement", "/var/lib/kolla/config_files/config.json", "kolla.json"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -46,7 +48,7 @@ func APIDeployment(instance *openstackv1beta1.Placement, env []corev1.EnvVar, vo
 			{
 				Name:      "api",
 				Image:     instance.Spec.Image,
-				Command:   httpd.Command(),
+				Command:   []string{"/usr/local/bin/kolla_start"},
 				Lifecycle: httpd.Lifecycle(),
 				Env:       env,
 				Ports: []corev1.ContainerPort{

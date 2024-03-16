@@ -7,7 +7,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
-	"github.com/ianunruh/openstack-operator/pkg/httpd"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -32,6 +31,7 @@ func APIDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, vol
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-barbican", "/etc/barbican/barbican.conf", "barbican.conf"),
+		template.SubPathVolumeMount("etc-barbican", "/var/lib/kolla/config_files/config.json", "kolla-barbican-api.json"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -44,11 +44,10 @@ func APIDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, vol
 		},
 		Containers: []corev1.Container{
 			{
-				Name:      "api",
-				Image:     instance.Spec.Image,
-				Command:   httpd.Command(),
-				Lifecycle: httpd.Lifecycle(),
-				Env:       env,
+				Name:    "api",
+				Image:   instance.Spec.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 9311},
 				},

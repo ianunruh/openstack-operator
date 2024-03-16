@@ -17,6 +17,7 @@ func ConductorDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar,
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-senlin", "/etc/senlin/senlin.conf", "senlin.conf"),
+		template.SubPathVolumeMount("etc-senlin", "/var/lib/kolla/config_files/config.json", "kolla-senlin-conductor.json"),
 	}
 
 	sts := template.GenericDeployment(template.Component{
@@ -26,12 +27,9 @@ func ConductorDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar,
 		NodeSelector: instance.Spec.Conductor.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "conductor",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"senlin-conductor",
-					"--config-file=/etc/senlin/senlin.conf",
-				},
+				Name:         "conductor",
+				Image:        instance.Spec.Image,
+				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
 				Resources:    instance.Spec.Conductor.Resources,
 				VolumeMounts: volumeMounts,

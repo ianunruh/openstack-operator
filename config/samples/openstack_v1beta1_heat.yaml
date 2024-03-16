@@ -3,7 +3,7 @@ kind: Heat
 metadata:
   name: heat
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/heat:master
+  image: kolla/heat-api:2023.2-ubuntu-jammy
   api:
     replicas: 2
     ingress:

@@ -3,7 +3,7 @@ kind: Glance
 metadata:
   name: glance
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/glance:master
+  image: kolla/glance-api:2023.2-ubuntu-jammy
   api:
     replicas: 2
     ingress:

@@ -21,7 +21,7 @@ func KeystoneService(instance *openstackv1beta1.Senlin) *openstackv1beta1.Keysto
 		Spec: openstackv1beta1.KeystoneServiceSpec{
 			Name:        "senlin",
 			Type:        "clustering",
-			InternalURL: fmt.Sprintf("http://%s-api.%s.svc:8778", instance.Name, instance.Namespace),
+			InternalURL: fmt.Sprintf("http://%s-api.%s.svc:8777", instance.Name, instance.Namespace),
 			PublicURL:   fmt.Sprintf("https://%s", instance.Spec.API.Ingress.Host),
 		},
 	}

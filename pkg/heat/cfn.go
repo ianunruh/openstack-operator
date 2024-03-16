@@ -31,6 +31,7 @@ func CFNDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-heat", "/etc/heat/heat.conf", "heat.conf"),
+		template.SubPathVolumeMount("etc-heat", "/var/lib/kolla/config_files/config.json", "kolla-heat-api-cfn.json"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -43,13 +44,10 @@ func CFNDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 		},
 		Containers: []corev1.Container{
 			{
-				Name:  "cfn",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"heat-api-cfn",
-					"--config-file=/etc/heat/heat.conf",
-				},
-				Env: env,
+				Name:    "cfn",
+				Image:   instance.Spec.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 8000},
 				},

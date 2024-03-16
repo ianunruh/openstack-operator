@@ -33,6 +33,7 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-glance", "/etc/glance/glance-api.conf", "glance-api.conf"),
+		template.SubPathVolumeMount("etc-glance", "/var/lib/kolla/config_files/config.json", "kolla.json"),
 	}
 
 	var deployStrategyType appsv1.DeploymentStrategyType
@@ -67,13 +68,10 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 		},
 		Containers: []corev1.Container{
 			{
-				Name:  "api",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"glance-api",
-					"--config-file=/etc/glance/glance-api.conf",
-				},
-				Env: env,
+				Name:    "api",
+				Image:   instance.Spec.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 9292},
 				},
