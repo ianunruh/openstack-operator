@@ -4,6 +4,7 @@ set -euo pipefail
 source common.sh
 
 setup_kubectl
+setup_openstack
 
 log "Switching kubectl to $CLUSTER_NAME cluster"
 clusterctl get kubeconfig $CLUSTER_NAME > kubeconfig
@@ -22,6 +23,28 @@ kubectl -n ingress-nginx delete svc ingress-nginx-controller
 
 # Switch back to undercluster
 unset KUBECONFIG
+
+log "Waiting for all volumes to be cleaned up"
+while true; do
+    output=$(openstack volume list --long -f json | \
+        yq ".[]|select(.Properties[\"cinder.csi.openstack.org/cluster\"]=="$CLUSTER_NAME")'")
+    if [[ "$output" -eq 0 ]]; then
+        break
+    fi
+    log "Waiting 5 more seconds for all volumes to be cleaned up"
+    sleep 5
+done
+
+log "Waiting for all load balancers to be cleaned up"
+while true; do
+    output=$(openstack loadbalancer list -f json | \
+        yq ".[]|select(.name|contains(\"$CLUSTER_NAME\"))")
+    if [[ "$output" -eq 0 ]]; then
+        break
+    fi
+    log "Waiting 5 more seconds for all load balancers to be cleaned up"
+    sleep 5
+done
 
 log "Tearing down $CLUSTER_NAME Kubernetes cluster"
 kubectl delete cluster $CLUSTER_NAME

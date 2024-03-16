@@ -21,3 +21,12 @@ setup_kubectl() {
     log "Switching kubectl to CI namespace"
     kubectl config set-context --current --namespace ospk8s-ci
 }
+
+export OPENSTACK_CLOUD="default"
+
+alias openstack="pipenv run openstack"
+
+setup_openstack() {
+    mkdir -p $HOME/.config/openstack
+    kubectl get secret cluster-admin-keystone -o 'jsonpath={.data.clouds\.yaml}' | base64 -d > $HOME/.config/openstack/clouds.yaml
+}
