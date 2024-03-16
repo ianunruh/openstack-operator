@@ -9,7 +9,7 @@ const (
 	DefaultBarbicanImage  = "ghcr.io/ianunruh/openstack-operator-images/barbican:master"
 	DefaultCinderImage    = "ghcr.io/ianunruh/openstack-operator-images/cinder:master"
 	DefaultGlanceImage    = "kolla/glance-api:2023.2-ubuntu-jammy"
-	DefaultHeatImage      = "ghcr.io/ianunruh/openstack-operator-images/heat:master"
+	DefaultHeatImage      = "kolla/heat-api:2023.2-ubuntu-jammy"
 	DefaultHorizonImage   = "kolla/horizon:2023.2-ubuntu-jammy"
 	DefaultKeystoneImage  = "kolla/keystone:2023.2-ubuntu-jammy"
 	DefaultLibvirtImage   = "ghcr.io/ianunruh/openstack-operator-images/libvirt:master"

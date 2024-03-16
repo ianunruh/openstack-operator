@@ -17,6 +17,7 @@ func EngineStatefulSet(instance *openstackv1beta1.Heat, env []corev1.EnvVar, vol
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-heat", "/etc/heat/heat.conf", "heat.conf"),
+		template.SubPathVolumeMount("etc-heat", "/var/lib/kolla/config_files/config.json", "kolla-heat-engine.json"),
 	}
 
 	sts := template.GenericStatefulSet(template.Component{
@@ -26,12 +27,9 @@ func EngineStatefulSet(instance *openstackv1beta1.Heat, env []corev1.EnvVar, vol
 		NodeSelector: instance.Spec.Engine.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "engine",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"heat-engine",
-					"--config-file=/etc/heat/heat.conf",
-				},
+				Name:         "engine",
+				Image:        instance.Spec.Image,
+				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
 				Resources:    instance.Spec.Engine.Resources,
 				VolumeMounts: volumeMounts,
