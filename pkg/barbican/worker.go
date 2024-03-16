@@ -17,6 +17,7 @@ func WorkerDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, 
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-barbican", "/etc/barbican/barbican.conf", "barbican.conf"),
+		template.SubPathVolumeMount("etc-barbican", "/var/lib/kolla/config_files/config.json", "kolla-barbican-worker.json"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -26,12 +27,9 @@ func WorkerDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, 
 		NodeSelector: instance.Spec.Worker.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "worker",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"barbican-worker",
-					"--config-file=/etc/barbican/barbican.conf",
-				},
+				Name:         "worker",
+				Image:        instance.Spec.Image,
+				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
 				Resources:    instance.Spec.Worker.Resources,
 				VolumeMounts: volumeMounts,

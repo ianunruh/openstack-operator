@@ -1,0 +1,3 @@
+{
+    "command": "uwsgi --master --emperor /etc/barbican/vassals"
+}

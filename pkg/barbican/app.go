@@ -30,6 +30,9 @@ func ConfigMap(instance *openstackv1beta1.Barbican) *corev1.ConfigMap {
 
 	cm.Data["barbican.conf"] = template.MustOutputINI(cfg).String()
 
+	cm.Data["kolla-barbican-api.json"] = template.MustReadFile(AppLabel, "kolla-barbican-api.json")
+	cm.Data["kolla-barbican-worker.json"] = template.MustReadFile(AppLabel, "kolla-barbican-worker.json")
+
 	return cm
 }
 

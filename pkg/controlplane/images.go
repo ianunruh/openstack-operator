@@ -6,7 +6,7 @@ const (
 	DefaultMariaDBImage   = "docker.io/bitnami/mariadb:10.5.8-debian-10-r21"
 	DefaultRallyImage     = "xrally/xrally-openstack:2.1.0"
 
-	DefaultBarbicanImage  = "ghcr.io/ianunruh/openstack-operator-images/barbican:master"
+	DefaultBarbicanImage  = "kolla/barbican-api:2023.2-ubuntu-jammy"
 	DefaultCinderImage    = "ghcr.io/ianunruh/openstack-operator-images/cinder:master"
 	DefaultGlanceImage    = "kolla/glance-api:2023.2-ubuntu-jammy"
 	DefaultHeatImage      = "kolla/heat-api:2023.2-ubuntu-jammy"
