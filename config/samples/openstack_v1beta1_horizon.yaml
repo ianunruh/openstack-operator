@@ -3,7 +3,7 @@ kind: Horizon
 metadata:
   name: horizon
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/horizon:master
+  image: kolla/horizon:2023.2-ubuntu-jammy
   server:
     replicas: 2
     ingress:

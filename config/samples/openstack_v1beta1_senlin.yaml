@@ -3,7 +3,7 @@ kind: Senlin
 metadata:
   name: senlin
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/senlin:master
+  image: kolla/senlin-api:2023.2-ubuntu-jammy
   api:
     replicas: 2
     ingress:

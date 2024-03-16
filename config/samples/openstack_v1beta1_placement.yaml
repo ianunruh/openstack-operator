@@ -3,7 +3,7 @@ kind: Placement
 metadata:
   name: placement
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/placement:master
+  image: kolla/placement-api:2023.2-ubuntu-jammy
   api:
     replicas: 2
     ingress:
