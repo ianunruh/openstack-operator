@@ -18,7 +18,7 @@ const (
 	DefaultNeutronImage   = "ghcr.io/ianunruh/openstack-operator-images/neutron:master"
 	DefaultNovaImage      = "ghcr.io/ianunruh/openstack-operator-images/nova:master"
 	DefaultOctaviaImage   = "ghcr.io/ianunruh/openstack-operator-images/octavia:master"
-	DefaultPlacementImage = "ghcr.io/ianunruh/openstack-operator-images/placement:master"
+	DefaultPlacementImage = "kolla/placement-api:2023.2-ubuntu-jammy"
 	DefaultSenlinImage    = "ghcr.io/ianunruh/openstack-operator-images/senlin:master"
 )
 

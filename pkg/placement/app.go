@@ -30,6 +30,9 @@ func ConfigMap(instance *openstackv1beta1.Placement) *corev1.ConfigMap {
 
 	cm.Data["placement.conf"] = template.MustOutputINI(cfg).String()
 
+	cm.Data["httpd.conf"] = template.MustReadFile(AppLabel, "httpd.conf")
+	cm.Data["kolla.json"] = template.MustReadFile(AppLabel, "kolla.json")
+
 	return cm
 }
 
