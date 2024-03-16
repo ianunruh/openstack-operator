@@ -17,6 +17,7 @@ func EngineDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar, vo
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-senlin", "/etc/senlin/senlin.conf", "senlin.conf"),
+		template.SubPathVolumeMount("etc-senlin", "/var/lib/kolla/config_files/config.json", "kolla-senlin-engine.json"),
 	}
 
 	sts := template.GenericDeployment(template.Component{
@@ -26,12 +27,9 @@ func EngineDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar, vo
 		NodeSelector: instance.Spec.Engine.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "engine",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"senlin-engine",
-					"--config-file=/etc/senlin/senlin.conf",
-				},
+				Name:         "engine",
+				Image:        instance.Spec.Image,
+				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
 				Resources:    instance.Spec.Engine.Resources,
 				VolumeMounts: volumeMounts,

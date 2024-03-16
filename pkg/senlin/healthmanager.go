@@ -17,6 +17,7 @@ func HealthManagerDeployment(instance *openstackv1beta1.Senlin, env []corev1.Env
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-senlin", "/etc/senlin/senlin.conf", "senlin.conf"),
+		template.SubPathVolumeMount("etc-senlin", "/var/lib/kolla/config_files/config.json", "kolla-senlin-health-manager.json"),
 	}
 
 	sts := template.GenericDeployment(template.Component{
@@ -26,12 +27,9 @@ func HealthManagerDeployment(instance *openstackv1beta1.Senlin, env []corev1.Env
 		NodeSelector: instance.Spec.HealthManager.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "health-manager",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"senlin-health-manager",
-					"--config-file=/etc/senlin/senlin.conf",
-				},
+				Name:         "health-manager",
+				Image:        instance.Spec.Image,
+				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
 				Resources:    instance.Spec.HealthManager.Resources,
 				VolumeMounts: volumeMounts,

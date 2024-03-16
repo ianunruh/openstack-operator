@@ -30,6 +30,11 @@ func ConfigMap(instance *openstackv1beta1.Senlin) *corev1.ConfigMap {
 
 	cm.Data["senlin.conf"] = template.MustOutputINI(cfg).String()
 
+	cm.Data["kolla-senlin-api.json"] = template.MustReadFile(AppLabel, "kolla-senlin-api.json")
+	cm.Data["kolla-senlin-conductor.json"] = template.MustReadFile(AppLabel, "kolla-senlin-conductor.json")
+	cm.Data["kolla-senlin-engine.json"] = template.MustReadFile(AppLabel, "kolla-senlin-engine.json")
+	cm.Data["kolla-senlin-health-manager.json"] = template.MustReadFile(AppLabel, "kolla-senlin-health-manager.json")
+
 	return cm
 }
 

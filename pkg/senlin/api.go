@@ -31,6 +31,7 @@ func APIDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar, volum
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-senlin", "/etc/senlin/senlin.conf", "senlin.conf"),
+		template.SubPathVolumeMount("etc-senlin", "/var/lib/kolla/config_files/config.json", "kolla-senlin-api.json"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -43,13 +44,10 @@ func APIDeployment(instance *openstackv1beta1.Senlin, env []corev1.EnvVar, volum
 		},
 		Containers: []corev1.Container{
 			{
-				Name:  "api",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"senlin-api",
-					"--config-file=/etc/senlin/senlin.conf",
-				},
-				Env: env,
+				Name:    "api",
+				Image:   instance.Spec.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 8778},
 				},

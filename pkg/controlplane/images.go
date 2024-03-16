@@ -19,7 +19,7 @@ const (
 	DefaultNovaImage      = "ghcr.io/ianunruh/openstack-operator-images/nova:master"
 	DefaultOctaviaImage   = "ghcr.io/ianunruh/openstack-operator-images/octavia:master"
 	DefaultPlacementImage = "kolla/placement-api:2023.2-ubuntu-jammy"
-	DefaultSenlinImage    = "ghcr.io/ianunruh/openstack-operator-images/senlin:master"
+	DefaultSenlinImage    = "kolla/senlin-api:2023.2-ubuntu-jammy"
 )
 
 func imageDefault(image, fallback string) string {
