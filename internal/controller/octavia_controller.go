@@ -132,15 +132,6 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return result, nil
 	}
 
-	amphoraSecret := amphora.Secret(instance)
-	if err := template.CreateSecret(ctx, r.Client, amphoraSecret, log); err != nil {
-		return ctrl.Result{}, err
-	}
-
-	if result, err := amphora.Bootstrap(ctx, instance, r.Client, log); err != nil || !result.IsZero() {
-		return result, err
-	}
-
 	cm := octavia.ConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
 	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
@@ -152,9 +143,22 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
-		template.SecretEnvVar("OS_HEALTH_MANAGER__HEARTBEAT_KEY", amphoraSecret.Name, "heartbeat-key"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 		template.ConfigMapEnvVar("OS_OVN__OVN_NB_CONNECTION", "ovn-ovsdb", "OVN_NB_CONNECTION"),
+	}
+
+	if instance.Spec.Amphora.Enabled {
+		// TODO if disabled, clean up resources
+		amphoraSecret := amphora.Secret(instance)
+		if err := template.CreateSecret(ctx, r.Client, amphoraSecret, log); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		if result, err := amphora.Bootstrap(ctx, instance, r.Client, log); err != nil || !result.IsZero() {
+			return result, err
+		}
+
+		env = append(env, template.SecretEnvVar("OS_HEALTH_MANAGER__HEARTBEAT_KEY", amphoraSecret.Name, "heartbeat-key"))
 	}
 
 	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
@@ -238,6 +242,11 @@ func (r *OctaviaReconciler) reconcileDriverAgent(ctx context.Context, instance *
 }
 
 func (r *OctaviaReconciler) reconcileHealthManager(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	if !instance.Spec.Amphora.Enabled {
+		// TODO ensure daemonset does not exist
+		return nil
+	}
+
 	ds := octavia.HealthManagerDaemonSet(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {

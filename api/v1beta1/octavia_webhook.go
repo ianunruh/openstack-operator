@@ -17,6 +17,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"errors"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -25,6 +27,10 @@ import (
 )
 
 var octavialog = logf.Log.WithName("octavia-resource")
+
+const (
+	DefaultAmphoraImageURL = "https://tarballs.opendev.org/openstack/octavia/test-images/test-only-amphora-x64-haproxy-ubuntu-jammy.qcow2"
+)
 
 func (r *Octavia) SetupWebhookWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
@@ -44,8 +50,13 @@ func (r *Octavia) Default() {
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 	r.Spec.Image = imageDefault(r.Spec.Image, OctaviaDefaultImage)
 
-	if r.Spec.Amphora.ManagementCIDR == "" {
-		r.Spec.Amphora.ManagementCIDR = "172.28.0.0/24"
+	if r.Spec.Amphora.Enabled {
+		if r.Spec.Amphora.ImageURL == "" {
+			r.Spec.Amphora.ImageURL = DefaultAmphoraImageURL
+		}
+		if r.Spec.Amphora.ManagementCIDR == "" {
+			r.Spec.Amphora.ManagementCIDR = "172.28.0.0/24"
+		}
 	}
 
 	r.Spec.API.NodeSelector = nodeSelectorDefault(r.Spec.API.NodeSelector, r.Spec.NodeSelector)
@@ -63,12 +74,20 @@ var _ webhook.Validator = &Octavia{}
 func (r *Octavia) ValidateCreate() (admission.Warnings, error) {
 	octavialog.Info("validate create", "name", r.Name)
 
+	if err := r.validateProviders(); err != nil {
+		return admission.Warnings{}, err
+	}
+
 	return admission.Warnings{}, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
 func (r *Octavia) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	octavialog.Info("validate update", "name", r.Name)
+
+	if err := r.validateProviders(); err != nil {
+		return admission.Warnings{}, err
+	}
 
 	// TODO amphora managementCIDR should be immutable
 
@@ -80,4 +99,11 @@ func (r *Octavia) ValidateDelete() (admission.Warnings, error) {
 	octavialog.Info("validate delete", "name", r.Name)
 
 	return admission.Warnings{}, nil
+}
+
+func (r *Octavia) validateProviders() error {
+	if !r.Spec.Amphora.Enabled && !r.Spec.OVN.Enabled {
+		return errors.New("at least one provider must be enabled")
+	}
+	return nil
 }

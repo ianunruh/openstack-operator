@@ -41,12 +41,12 @@ spec:
             properties:
               amphora:
                 properties:
+                  enabled:
+                    type: boolean
                   imageURL:
                     type: string
                   managementCIDR:
                     type: string
-                required:
-                - imageURL
                 type: object
               api:
                 properties:
@@ -503,8 +503,6 @@ spec:
                 required:
                 - nodeSelector
                 type: object
-            required:
-            - amphora
             type: object
           status:
             description: OctaviaStatus defines the observed state of Octavia
