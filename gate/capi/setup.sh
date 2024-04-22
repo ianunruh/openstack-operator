@@ -38,6 +38,9 @@ floating-network-id=$EXTERNAL_NET_ID
 [BlockStorage]
 bs-version=v2
 ignore-volume-az=true
+
+[LoadBalancer]
+lb-provider=ovn
 EOF
 
 log "Switching kubectl to $CLUSTER_NAME cluster"
