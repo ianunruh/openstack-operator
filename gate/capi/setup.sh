@@ -41,6 +41,7 @@ ignore-volume-az=true
 
 [LoadBalancer]
 lb-provider=ovn
+lb-method=SOURCE_IP_PORT
 EOF
 
 log "Switching kubectl to $CLUSTER_NAME cluster"
