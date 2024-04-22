@@ -45,3 +45,5 @@ spec:
   octavia:
     ovn:
       enabled: true
+    nodeSelector:
+      openstack/octavia-controller: enabled
