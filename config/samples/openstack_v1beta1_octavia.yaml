@@ -5,7 +5,7 @@ metadata:
 spec:
   image: ghcr.io/ianunruh/openstack-operator-images/octavia:master
   amphora:
-    imageURL: https://tarballs.opendev.org/openstack/octavia/test-images/test-only-amphora-x64-haproxy-ubuntu-focal.qcow2
+    imageURL: https://tarballs.opendev.org/openstack/octavia/test-images/test-only-amphora-x64-haproxy-ubuntu-jammy.qcow2
     managementCIDR: 192.168.250.0/24
   api:
     replicas: 2

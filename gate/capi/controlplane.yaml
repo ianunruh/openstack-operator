@@ -43,7 +43,7 @@ spec:
   barbican: {}
   rally: {}
   octavia:
-    amphora:
-      imageURL: https://tarballs.opendev.org/openstack/octavia/test-images/test-only-amphora-x64-haproxy-ubuntu-jammy.qcow2
+    ovn:
+      enabled: true
     nodeSelector:
       openstack/octavia-controller: enabled

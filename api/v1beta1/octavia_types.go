@@ -26,6 +26,7 @@ type OctaviaSpec struct {
 	// +optional
 	Image string `json:"image,omitempty"`
 
+	// +optional
 	Amphora OctaviaAmphoraSpec `json:"amphora"`
 
 	// +optional
@@ -63,6 +64,10 @@ type OctaviaSpec struct {
 }
 
 type OctaviaAmphoraSpec struct {
+	// +optional
+	Enabled bool `json:"enabled"`
+
+	// +optional
 	ImageURL string `json:"imageURL"`
 
 	// +optional

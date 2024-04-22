@@ -75,8 +75,11 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 					"octavia-health-manager",
 					"--config-file=/etc/octavia/octavia.conf",
 				},
-				Env:          env,
-				Resources:    instance.Spec.HealthManager.Resources,
+				Env:       env,
+				Resources: instance.Spec.HealthManager.Resources,
+				Ports: []corev1.ContainerPort{
+					{Name: "heartbeat", ContainerPort: 5555, Protocol: corev1.ProtocolUDP},
+				},
 				VolumeMounts: volumeMounts,
 			},
 		},
