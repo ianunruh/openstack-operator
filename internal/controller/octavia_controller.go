@@ -267,6 +267,11 @@ func (r *OctaviaReconciler) reconcileHousekeeping(ctx context.Context, instance 
 }
 
 func (r *OctaviaReconciler) reconcileWorker(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	if !instance.Spec.Amphora.Enabled {
+		// TODO ensure deployment does not exist
+		return nil
+	}
+
 	deploy := octavia.WorkerDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {

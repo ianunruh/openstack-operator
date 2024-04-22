@@ -20,8 +20,10 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
 	}
 
-	volumeMounts = append(volumeMounts, amphora.VolumeMounts(instance)...)
-	volumes = append(volumes, amphora.Volumes(instance)...)
+	if instance.Spec.Amphora.Enabled {
+		volumeMounts = append(volumeMounts, amphora.VolumeMounts(instance)...)
+		volumes = append(volumes, amphora.Volumes(instance)...)
+	}
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
