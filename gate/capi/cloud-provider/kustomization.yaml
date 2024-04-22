@@ -8,3 +8,9 @@ resources:
 - https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.29.0/manifests/controller-manager/cloud-controller-manager-role-bindings.yaml
 - https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.29.0/manifests/controller-manager/cloud-controller-manager-roles.yaml
 - https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.29.0/manifests/controller-manager/openstack-cloud-controller-manager-ds.yaml
+
+patches:
+- target:
+    kind: DaemonSet
+    name: openstack-cloud-controller-manager
+  path: patch-occm.yaml
