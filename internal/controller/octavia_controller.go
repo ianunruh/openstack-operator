@@ -86,14 +86,6 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	pkiResources := amphora.PKIResources(instance)
-	for _, resource := range pkiResources {
-		controllerutil.SetControllerReference(instance, resource, r.Scheme)
-		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
-
 	deps := template.NewConditionWaiter(log)
 
 	db := octavia.Database(instance)
@@ -149,6 +141,14 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	if instance.Spec.Amphora.Enabled {
 		// TODO if disabled, clean up resources
+		pkiResources := amphora.PKIResources(instance)
+		for _, resource := range pkiResources {
+			controllerutil.SetControllerReference(instance, resource, r.Scheme)
+			if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+
 		amphoraSecret := amphora.Secret(instance)
 		if err := template.CreateSecret(ctx, r.Client, amphoraSecret, log); err != nil {
 			return ctrl.Result{}, err
