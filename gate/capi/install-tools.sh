@@ -22,7 +22,7 @@ if ! [ -f $HOME/.local/bin/clusterctl ]; then
 fi
 
 if ! [ -f $HOME/.local/bin/yq ]; then
-    curl -sL https://github.com/mikefarah/yq/releases/download/v4.13.5/yq_linux_amd64 -o yq
+    curl -sL https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64 -o yq
     chmod +x yq
     mv yq $HOME/.local/bin/yq
 fi
