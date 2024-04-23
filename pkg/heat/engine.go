@@ -28,7 +28,7 @@ func EngineStatefulSet(instance *openstackv1beta1.Heat, env []corev1.EnvVar, vol
 		Containers: []corev1.Container{
 			{
 				Name:         "engine",
-				Image:        instance.Spec.Image,
+				Image:        instance.Spec.Engine.Image,
 				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
 				Resources:    instance.Spec.Engine.Resources,

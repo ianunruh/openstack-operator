@@ -61,7 +61,7 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, env []corev1.EnvVar) *
 		Containers: []corev1.Container{
 			{
 				Name:      "server",
-				Image:     instance.Spec.Image,
+				Image:     instance.Spec.Server.Image,
 				Command:   []string{"/usr/local/bin/kolla_start"},
 				Lifecycle: httpd.Lifecycle(),
 				Env:       env,

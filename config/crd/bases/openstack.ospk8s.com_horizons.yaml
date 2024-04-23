@@ -40,9 +40,12 @@ spec:
             description: HorizonSpec defines the desired state of Horizon
             properties:
               image:
+                description: deprecated, use component specific images instead
                 type: string
               server:
                 properties:
+                  image:
+                    type: string
                   ingress:
                     properties:
                       annotations:

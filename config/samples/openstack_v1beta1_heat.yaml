@@ -3,8 +3,8 @@ kind: Heat
 metadata:
   name: heat
 spec:
-  image: kolla/heat-api:2023.2-ubuntu-jammy
   api:
+    image: kolla/heat-api:2023.2-ubuntu-jammy
     replicas: 2
     ingress:
       host: heat.openstack.k8s.example.com
@@ -12,6 +12,7 @@ spec:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
   cfn:
+    image: kolla/heat-api-cfn:2023.2-ubuntu-jammy
     replicas: 2
     ingress:
       host: heat-cfn.openstack.k8s.example.com
@@ -19,6 +20,7 @@ spec:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
   engine:
+    image: kolla/heat-engine:2023.2-ubuntu-jammy
     replicas: 2
   database:
     name: heat

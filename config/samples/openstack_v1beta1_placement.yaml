@@ -3,8 +3,8 @@ kind: Placement
 metadata:
   name: placement
 spec:
-  image: kolla/placement-api:2023.2-ubuntu-jammy
   api:
+    image: kolla/placement-api:2023.2-ubuntu-jammy
     replicas: 2
     ingress:
       host: placement.openstack.k8s.example.com

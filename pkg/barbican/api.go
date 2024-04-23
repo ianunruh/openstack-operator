@@ -45,7 +45,7 @@ func APIDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, vol
 		Containers: []corev1.Container{
 			{
 				Name:    "api",
-				Image:   instance.Spec.Image,
+				Image:   instance.Spec.API.Image,
 				Command: []string{"/usr/local/bin/kolla_start"},
 				Env:     env,
 				Ports: []corev1.ContainerPort{

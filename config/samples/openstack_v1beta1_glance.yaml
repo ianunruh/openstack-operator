@@ -3,8 +3,8 @@ kind: Glance
 metadata:
   name: glance
 spec:
-  image: kolla/glance-api:2023.2-ubuntu-jammy
   api:
+    image: kolla/glance-api:2023.2-ubuntu-jammy
     replicas: 2
     ingress:
       host: glance.openstack.k8s.example.com

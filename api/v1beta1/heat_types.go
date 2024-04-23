@@ -23,6 +23,7 @@ import (
 
 // HeatSpec defines the desired state of Heat
 type HeatSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 
@@ -50,6 +51,9 @@ type HeatSpec struct {
 
 type HeatAPISpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
@@ -63,6 +67,9 @@ type HeatAPISpec struct {
 }
 
 type HeatEngineSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 

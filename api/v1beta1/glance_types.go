@@ -23,6 +23,7 @@ import (
 
 // GlanceSpec defines the desired state of Glance
 type GlanceSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 
@@ -56,6 +57,9 @@ type GlanceBackendSpec struct {
 }
 
 type GlanceAPISpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
