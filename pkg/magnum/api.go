@@ -31,6 +31,7 @@ func APIDeployment(instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volum
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-magnum", "/etc/magnum/magnum.conf", "magnum.conf"),
+		template.SubPathVolumeMount("etc-magnum", "/var/lib/kolla/config_files/config.json", "kolla-magnum-api.json"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -43,13 +44,10 @@ func APIDeployment(instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volum
 		},
 		Containers: []corev1.Container{
 			{
-				Name:  "api",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"magnum-api",
-					"--config-file=/etc/magnum/magnum.conf",
-				},
-				Env: env,
+				Name:    "api",
+				Image:   instance.Spec.API.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 9511},
 				},

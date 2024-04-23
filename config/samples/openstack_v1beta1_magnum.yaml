@@ -3,8 +3,8 @@ kind: Magnum
 metadata:
   name: magnum
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/magnum:master
   api:
+    image: kolla/magnum-api:2023.2-ubuntu-jammy
     replicas: 2
     ingress:
       host: magnum.openstack.k8s.example.com
@@ -12,6 +12,7 @@ spec:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
   conductor:
+    image: kolla/magnum-conductor:2023.2-ubuntu-jammy
     replicas: 1
   database:
     name: magnum

@@ -30,6 +30,9 @@ func ConfigMap(instance *openstackv1beta1.Magnum) *corev1.ConfigMap {
 
 	cm.Data["magnum.conf"] = template.MustOutputINI(cfg).String()
 
+	cm.Data["kolla-magnum-api.json"] = template.MustReadFile(AppLabel, "kolla-magnum-api.json")
+	cm.Data["kolla-magnum-conductor.json"] = template.MustReadFile(AppLabel, "kolla-magnum-conductor.json")
+
 	return cm
 }
 

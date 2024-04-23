@@ -41,6 +41,7 @@ spec:
   horizon: {}
   heat: {}
   barbican: {}
+  magnum: {}
   rally: {}
   octavia:
     ovn:
