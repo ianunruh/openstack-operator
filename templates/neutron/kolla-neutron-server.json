@@ -1,0 +1,3 @@
+{
+    "command": "neutron-server --config-file=/etc/neutron/neutron.conf"
+}

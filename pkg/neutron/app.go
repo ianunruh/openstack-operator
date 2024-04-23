@@ -31,6 +31,9 @@ func ConfigMap(instance *openstackv1beta1.Neutron) *corev1.ConfigMap {
 	cm.Data["neutron.conf"] = template.MustOutputINI(cfg).String()
 	cm.Data["neutron_ovn_metadata_agent.ini"] = template.MustReadFile(AppLabel, "neutron_ovn_metadata_agent.ini")
 
+	cm.Data["kolla-neutron-metadata-agent.json"] = template.MustReadFile(AppLabel, "kolla-neutron-metadata-agent.json")
+	cm.Data["kolla-neutron-server.json"] = template.MustReadFile(AppLabel, "kolla-neutron-server.json")
+
 	return cm
 }
 

@@ -3,8 +3,8 @@ kind: Neutron
 metadata:
   name: neutron
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
   server:
+    image: kolla/neutron-server:2023.2-ubuntu-jammy
     replicas: 2
     ingress:
       host: neutron.openstack.k8s.example.com
@@ -12,6 +12,7 @@ spec:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
   metadataAgent:
+    image: kolla/neutron-metadata-agent:2023.2-ubuntu-jammy
     nodeSelector:
       openstack/network-node: enabled
   database:

@@ -21,7 +21,7 @@ func DBSyncJob(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, volumes 
 		Containers: []corev1.Container{
 			{
 				Name:  "db-sync",
-				Image: instance.Spec.Image,
+				Image: instance.Spec.Server.Image,
 				Command: []string{
 					"bash",
 					"-c",

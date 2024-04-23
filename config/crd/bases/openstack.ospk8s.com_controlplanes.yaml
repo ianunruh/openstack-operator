@@ -2690,9 +2690,12 @@ spec:
                       type: object
                     type: object
                   image:
+                    description: deprecated, use component specific images instead
                     type: string
                   metadataAgent:
                     properties:
+                      image:
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -2766,6 +2769,8 @@ spec:
                     type: object
                   server:
                     properties:
+                      image:
+                        type: string
                       ingress:
                         properties:
                           annotations:

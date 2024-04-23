@@ -51,7 +51,10 @@ spec:
           libvirtd:
             image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
   neutron:
-    image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
+    server:
+      image: kolla/neutron-server:2023.2-ubuntu-jammy
+    metadataAgent:
+      image: kolla/neutron-metadata-agent:2023.2-ubuntu-jammy
   ovn:
     image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
     ovsdbNorth:
