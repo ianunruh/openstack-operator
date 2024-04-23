@@ -30,7 +30,7 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar
 		Containers: []corev1.Container{
 			{
 				Name:         "scheduler",
-				Image:        instance.Spec.Image,
+				Image:        instance.Spec.Scheduler.Image,
 				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
 				Resources:    instance.Spec.Scheduler.Resources,

@@ -36,7 +36,7 @@ func VolumeStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, v
 		Containers: []corev1.Container{
 			{
 				Name:         "volume",
-				Image:        instance.Spec.Image,
+				Image:        instance.Spec.Volume.Image,
 				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
 				Resources:    instance.Spec.Volume.Resources,
