@@ -25,6 +25,7 @@ func MetadataAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.Env
 		template.SubPathVolumeMount("etc-neutron", "/etc/neutron/neutron.conf", "neutron.conf"),
 		template.SubPathVolumeMount("etc-neutron", "/etc/neutron/neutron_ovn_metadata_agent.ini", "neutron_ovn_metadata_agent.ini"),
 		template.BidirectionalVolumeMount("host-run-netns", "/run/netns"),
+		template.SubPathVolumeMount("etc-neutron", "/var/lib/kolla/config_files/config.json", "kolla-neutron-metadata-agent.json"),
 	}
 
 	ds := template.GenericDaemonSet(template.Component{
@@ -33,13 +34,9 @@ func MetadataAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.Env
 		NodeSelector: instance.Spec.MetadataAgent.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "agent",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"neutron-ovn-metadata-agent",
-					"--config-file=/etc/neutron/neutron.conf",
-					"--config-file=/etc/neutron/neutron_ovn_metadata_agent.ini",
-				},
+				Name:      "agent",
+				Image:     instance.Spec.MetadataAgent.Image,
+				Command:   []string{"/usr/local/bin/kolla_start"},
 				Env:       env,
 				Resources: instance.Spec.MetadataAgent.Resources,
 				SecurityContext: &corev1.SecurityContext{

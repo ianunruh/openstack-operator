@@ -116,6 +116,7 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
+		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
 		template.ConfigMapEnvVar("OS_OVN__OVN_SB_CONNECTION", "ovn-ovsdb", "OVN_SB_CONNECTION"),
 	}
 

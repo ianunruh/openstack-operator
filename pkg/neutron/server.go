@@ -31,6 +31,7 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-neutron", "/etc/neutron/neutron.conf", "neutron.conf"),
+		template.SubPathVolumeMount("etc-neutron", "/var/lib/kolla/config_files/config.json", "kolla-neutron-server.json"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -43,13 +44,10 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 		},
 		Containers: []corev1.Container{
 			{
-				Name:  "server",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"neutron-server",
-					"--config-file=/etc/neutron/neutron.conf",
-				},
-				Env: env,
+				Name:    "server",
+				Image:   instance.Spec.Server.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 9696},
 				},

@@ -23,6 +23,7 @@ import (
 
 // NeutronSpec defines the desired state of Neutron
 type NeutronSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 
@@ -53,6 +54,9 @@ type NeutronSpec struct {
 
 type NeutronServerSpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
@@ -66,6 +70,9 @@ type NeutronServerSpec struct {
 }
 
 type NeutronMetadataAgentSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 

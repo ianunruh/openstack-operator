@@ -1,0 +1,3 @@
+{
+    "command": "neutron-ovn-metadata-agent --config-file=/etc/neutron/neutron.conf --config-file=/etc/neutron/neutron_ovn_metadata_agent.ini"
+}
