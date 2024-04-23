@@ -23,6 +23,7 @@ import (
 
 // ManilaSpec defines the desired state of Manila
 type ManilaSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 
@@ -52,6 +53,9 @@ type ManilaSpec struct {
 
 type ManilaAPISpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
@@ -66,6 +70,9 @@ type ManilaAPISpec struct {
 
 type ManilaSchedulerSpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
@@ -76,6 +83,9 @@ type ManilaSchedulerSpec struct {
 }
 
 type ManilaShareSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 

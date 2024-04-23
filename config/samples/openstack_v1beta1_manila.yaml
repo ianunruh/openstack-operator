@@ -3,8 +3,8 @@ kind: Manila
 metadata:
   name: manila
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/manila:master
   api:
+    image: kolla/manila-api:2023.2-ubuntu-jammy
     replicas: 2
     ingress:
       host: manila.openstack.k8s.example.com
@@ -12,7 +12,10 @@ spec:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
   scheduler:
+    image: kolla/manila-scheduler:2023.2-ubuntu-jammy
     replicas: 1
+  share:
+    image: kolla/manila-share:2023.2-ubuntu-jammy
   backends:
   - name: cephfs
     shareBackendName: cephfs

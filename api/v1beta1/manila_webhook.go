@@ -45,7 +45,9 @@ func (r *Manila) Default() {
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
-	r.Spec.Image = imageDefault(r.Spec.Image, DefaultManilaImage)
+	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultManilaAPIImage)
+	r.Spec.Scheduler.Image = imageDefault(r.Spec.Scheduler.Image, DefaultManilaSchedulerImage)
+	r.Spec.Share.Image = imageDefault(r.Spec.Share.Image, DefaultManilaShareImage)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

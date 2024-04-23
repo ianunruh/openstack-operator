@@ -1,0 +1,3 @@
+{
+    "command": "manila-scheduler --config-file /etc/manila/manila.conf"
+}
