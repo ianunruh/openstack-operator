@@ -545,6 +545,8 @@ spec:
                 properties:
                   api:
                     properties:
+                      image:
+                        type: string
                       ingress:
                         properties:
                           annotations:
@@ -762,9 +764,12 @@ spec:
                       type: object
                     type: object
                   image:
+                    description: deprecated, use component specific images instead
                     type: string
                   scheduler:
                     properties:
+                      image:
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -831,6 +836,8 @@ spec:
                     type: object
                   volume:
                     properties:
+                      image:
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
