@@ -44,7 +44,7 @@ func (r *Placement) Default() {
 	placementlog.Info("default", "name", r.Name)
 
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
-	r.Spec.Image = imageDefault(r.Spec.Image, PlacementDefaultImage)
+	r.Spec.Image = imageDefault(r.Spec.Image, DefaultPlacementImage)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

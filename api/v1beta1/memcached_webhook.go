@@ -43,11 +43,11 @@ var _ webhook.Defaulter = &Memcached{}
 func (r *Memcached) Default() {
 	memcachedlog.Info("default", "name", r.Name)
 
-	r.Spec.Image = imageDefault(r.Spec.Image, MemcachedDefaultImage)
+	r.Spec.Image = imageDefault(r.Spec.Image, DefaultMemcachedImage)
 	r.Spec.Volume = volumeDefault(r.Spec.Volume)
 
 	if promSpec := r.Spec.Prometheus; promSpec != nil {
-		promSpec.Exporter.Image = imageDefault(promSpec.Exporter.Image, MemcachedExporterDefaultImage)
+		promSpec.Exporter.Image = imageDefault(promSpec.Exporter.Image, DefaultMemcachedExporterImage)
 	}
 }
 

@@ -43,11 +43,11 @@ var _ webhook.Defaulter = &MariaDB{}
 func (r *MariaDB) Default() {
 	mariadblog.Info("default", "name", r.Name)
 
-	r.Spec.Image = imageDefault(r.Spec.Image, MariaDBDefaultImage)
+	r.Spec.Image = imageDefault(r.Spec.Image, DefaultMariaDBImage)
 	r.Spec.Volume = volumeDefault(r.Spec.Volume)
 
 	if promSpec := r.Spec.Prometheus; promSpec != nil {
-		promSpec.Exporter.Image = imageDefault(promSpec.Exporter.Image, MariaDBExporterDefaultImage)
+		promSpec.Exporter.Image = imageDefault(promSpec.Exporter.Image, DefaultMariaDBExporterImage)
 	}
 }
 

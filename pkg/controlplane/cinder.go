@@ -12,8 +12,6 @@ func Cinder(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Cinder {
 		return nil
 	}
 
-	spec.Image = imageDefault(spec.Image, DefaultCinderImage)
-
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "cinder")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 

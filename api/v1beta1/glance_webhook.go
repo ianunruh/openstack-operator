@@ -44,7 +44,7 @@ func (r *Glance) Default() {
 	glancelog.Info("default", "name", r.Name)
 
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
-	r.Spec.Image = imageDefault(r.Spec.Image, GlanceDefaultImage)
+	r.Spec.Image = imageDefault(r.Spec.Image, DefaultGlanceImage)
 
 	if r.Spec.Backends == nil {
 		r.Spec.Backends = []GlanceBackendSpec{

@@ -45,7 +45,7 @@ func (r *Neutron) Default() {
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
-	r.Spec.Image = imageDefault(r.Spec.Image, NeutronDefaultImage)
+	r.Spec.Image = imageDefault(r.Spec.Image, DefaultNeutronImage)
 
 	if r.Spec.Nova.Secret == "" {
 		r.Spec.Nova.Secret = "nova-keystone"

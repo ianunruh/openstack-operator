@@ -12,8 +12,6 @@ func Manila(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Manila {
 		return nil
 	}
 
-	spec.Image = imageDefault(spec.Image, DefaultManilaImage)
-
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "manila")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 

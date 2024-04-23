@@ -43,7 +43,7 @@ var _ webhook.Defaulter = &RallyTask{}
 func (r *RallyTask) Default() {
 	rallytasklog.Info("default", "name", r.Name)
 
-	r.Spec.Image = imageDefault(r.Spec.Image, RallyDefaultImage)
+	r.Spec.Image = imageDefault(r.Spec.Image, DefaultRallyImage)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

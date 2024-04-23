@@ -23,6 +23,7 @@ import (
 
 // CinderSpec defines the desired state of Cinder
 type CinderSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 
@@ -61,6 +62,9 @@ type CinderBackendSpec struct {
 
 type CinderAPISpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
@@ -75,6 +79,9 @@ type CinderAPISpec struct {
 
 type CinderSchedulerSpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
@@ -85,6 +92,9 @@ type CinderSchedulerSpec struct {
 }
 
 type CinderVolumeSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
