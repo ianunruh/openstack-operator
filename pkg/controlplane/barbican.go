@@ -12,8 +12,6 @@ func Barbican(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Barbica
 		return nil
 	}
 
-	spec.Image = imageDefault(spec.Image, DefaultBarbicanImage)
-
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "barbican")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 

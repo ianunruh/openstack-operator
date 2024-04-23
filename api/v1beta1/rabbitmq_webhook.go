@@ -43,7 +43,7 @@ var _ webhook.Defaulter = &RabbitMQ{}
 func (r *RabbitMQ) Default() {
 	rabbitmqlog.Info("default", "name", r.Name)
 
-	r.Spec.Image = imageDefault(r.Spec.Image, RabbitMQDefaultImage)
+	r.Spec.Image = imageDefault(r.Spec.Image, DefaultRabbitMQImage)
 	r.Spec.Volume = volumeDefault(r.Spec.Volume)
 }
 

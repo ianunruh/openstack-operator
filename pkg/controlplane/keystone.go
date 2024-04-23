@@ -10,8 +10,6 @@ func Keystone(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Keyston
 	// TODO labels
 	spec := instance.Spec.Keystone
 
-	spec.Image = imageDefault(spec.Image, DefaultKeystoneImage)
-
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "keystone")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 

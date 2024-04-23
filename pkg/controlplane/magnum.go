@@ -12,8 +12,6 @@ func Magnum(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Magnum {
 		return nil
 	}
 
-	spec.Image = imageDefault(spec.Image, DefaultMagnumImage)
-
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "magnum")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 

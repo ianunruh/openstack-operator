@@ -32,6 +32,8 @@ func APIDeployment(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volum
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-cinder", "/etc/cinder/cinder.conf", "cinder.conf"),
+		template.SubPathVolumeMount("etc-cinder", "/etc/apache2/sites-available/000-default.conf", "httpd.conf"),
+		template.SubPathVolumeMount("etc-cinder", "/var/lib/kolla/config_files/config.json", "kolla-cinder-api.json"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -45,8 +47,8 @@ func APIDeployment(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volum
 		Containers: []corev1.Container{
 			{
 				Name:      "api",
-				Image:     instance.Spec.Image,
-				Command:   httpd.Command(),
+				Image:     instance.Spec.API.Image,
+				Command:   []string{"/usr/local/bin/kolla_start"},
 				Lifecycle: httpd.Lifecycle(),
 				Env:       env,
 				Ports: []corev1.ContainerPort{

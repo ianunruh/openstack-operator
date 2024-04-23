@@ -28,18 +28,18 @@ spec:
       capacity: 50Gi
       storageClass: ceph-block-ssd
   keystone:
-    image: ghcr.io/ianunruh/openstack-operator-images/keystone:master
+    image: kolla/keystone:2023.2-ubuntu-jammy
     api:
       replicas: 2
   glance:
-    image: ghcr.io/ianunruh/openstack-operator-images/glance:master
+    image: kolla/glance-api:2023.2-ubuntu-jammy
     backends:
     - name: ssd
       pvc:
         capacity: 100Gi
         storageClass: ceph-block-ssd
   placement:
-    image: ghcr.io/ianunruh/openstack-operator-images/placement:master
+    image: kolla/placement-api:2023.2-ubuntu-jammy
   nova:
     image: ghcr.io/ianunruh/openstack-operator-images/nova:master
     cells:
@@ -61,4 +61,4 @@ spec:
         capacity: 20Gi
         storageClass: ceph-block-ssd
   horizon:
-    image: ghcr.io/ianunruh/openstack-operator-images/horizon:master
+    image: kolla/horizon:2023.2-ubuntu-jammy

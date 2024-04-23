@@ -9,8 +9,6 @@ import (
 func Cache(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Memcached {
 	spec := instance.Spec.Cache
 
-	spec.Image = imageDefault(spec.Image, DefaultMemcachedImage)
-
 	spec.NodeSelector = controllerNodeSelector(spec.NodeSelector, instance)
 
 	// TODO labels

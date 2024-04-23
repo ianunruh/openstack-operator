@@ -13,8 +13,6 @@ const (
 func Glance(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Glance {
 	spec := instance.Spec.Glance
 
-	spec.Image = imageDefault(spec.Image, DefaultGlanceImage)
-
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "glance")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 

@@ -9,8 +9,6 @@ import (
 func Database(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.MariaDB {
 	spec := instance.Spec.Database
 
-	spec.Image = imageDefault(spec.Image, DefaultMariaDBImage)
-
 	spec.NodeSelector = controllerNodeSelector(spec.NodeSelector, instance)
 
 	// TODO labels

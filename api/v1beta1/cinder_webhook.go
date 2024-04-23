@@ -45,7 +45,9 @@ func (r *Cinder) Default() {
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
-	r.Spec.Image = imageDefault(r.Spec.Image, CinderDefaultImage)
+	r.Spec.API.Image = imageDefault(r.Spec.Image, DefaultCinderAPIImage)
+	r.Spec.Scheduler.Image = imageDefault(r.Spec.Image, DefaultCinderSchedulerImage)
+	r.Spec.Volume.Image = imageDefault(r.Spec.Image, DefaultCinderVolumeImage)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

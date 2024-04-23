@@ -10,8 +10,6 @@ func OVNControlPlane(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.
 	// TODO labels
 	spec := instance.Spec.OVN
 
-	spec.Image = imageDefault(spec.Image, DefaultNeutronImage)
-
 	spec.Northd.NodeSelector = controllerNodeSelector(spec.Northd.NodeSelector, instance)
 	spec.OVSDBNorth.NodeSelector = controllerNodeSelector(spec.OVSDBNorth.NodeSelector, instance)
 	spec.OVSDBSouth.NodeSelector = controllerNodeSelector(spec.OVSDBSouth.NodeSelector, instance)
