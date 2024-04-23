@@ -52,6 +52,10 @@ func ConfigMap(instance *openstackv1beta1.Manila) *corev1.ConfigMap {
 
 	cm.Data["manila.conf"] = template.MustOutputINI(cfg).String()
 
+	cm.Data["kolla-manila-api.json"] = template.MustReadFile(AppLabel, "kolla-manila-api.json")
+	cm.Data["kolla-manila-scheduler.json"] = template.MustReadFile(AppLabel, "kolla-manila-scheduler.json")
+	cm.Data["kolla-manila-share.json"] = template.MustReadFile(AppLabel, "kolla-manila-share.json")
+
 	return cm
 }
 

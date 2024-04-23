@@ -1,0 +1,3 @@
+{
+    "command": "manila-api --config-file /etc/manila/manila.conf"
+}

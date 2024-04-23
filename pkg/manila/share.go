@@ -18,6 +18,7 @@ func ShareStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar, vo
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-manila", "/etc/manila/manila.conf", "manila.conf"),
+		template.SubPathVolumeMount("etc-manila", "/var/lib/kolla/config_files/config.json", "kolla-manila-share.json"),
 	}
 
 	cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
@@ -34,12 +35,9 @@ func ShareStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar, vo
 		NodeSelector: instance.Spec.Share.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "share",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"manila-share",
-					"--config-file=/etc/manila/manila.conf",
-				},
+				Name:         "share",
+				Image:        instance.Spec.Share.Image,
+				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
 				Resources:    instance.Spec.Share.Resources,
 				VolumeMounts: volumeMounts,

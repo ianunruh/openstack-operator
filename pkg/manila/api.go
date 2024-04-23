@@ -31,6 +31,7 @@ func APIDeployment(instance *openstackv1beta1.Manila, env []corev1.EnvVar, volum
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-manila", "/etc/manila/manila.conf", "manila.conf"),
+		template.SubPathVolumeMount("etc-manila", "/var/lib/kolla/config_files/config.json", "kolla-manila-api.json"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
@@ -43,13 +44,10 @@ func APIDeployment(instance *openstackv1beta1.Manila, env []corev1.EnvVar, volum
 		},
 		Containers: []corev1.Container{
 			{
-				Name:  "api",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"manila-api",
-					"--config-file=/etc/manila/manila.conf",
-				},
-				Env: env,
+				Name:    "api",
+				Image:   instance.Spec.API.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 8786},
 				},

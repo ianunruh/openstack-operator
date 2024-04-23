@@ -1,0 +1,3 @@
+{
+    "command": "manila-share --config-file /etc/manila/manila.conf"
+}
