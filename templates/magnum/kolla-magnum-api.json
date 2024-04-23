@@ -1,0 +1,3 @@
+{
+    "command": "magnum-api --config-file /etc/magnum/magnum.conf"
+}

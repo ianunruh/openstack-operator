@@ -23,6 +23,7 @@ import (
 
 // MagnumSpec defines the desired state of Magnum
 type MagnumSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 
@@ -47,6 +48,9 @@ type MagnumSpec struct {
 
 type MagnumAPISpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
@@ -60,6 +64,9 @@ type MagnumAPISpec struct {
 }
 
 type MagnumConductorSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 

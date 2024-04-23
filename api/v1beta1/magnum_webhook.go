@@ -45,7 +45,8 @@ func (r *Magnum) Default() {
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
-	r.Spec.Image = imageDefault(r.Spec.Image, DefaultMagnumImage)
+	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultMagnumAPIImage)
+	r.Spec.Conductor.Image = imageDefault(r.Spec.Conductor.Image, DefaultMagnumConductorImage)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

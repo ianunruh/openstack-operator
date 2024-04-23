@@ -1,0 +1,3 @@
+{
+    "command": "magnum-conductor --config-file /etc/magnum/magnum.conf"
+}
