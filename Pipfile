@@ -10,7 +10,6 @@ python-magnumclient = "*"
 python-manilaclient = "*"
 python-octaviaclient = "*"
 python-openstackclient = "*"
-python-senlinclient = "*"
 
 [dev-packages]
 

@@ -167,9 +167,6 @@ var _ = BeforeSuite(func() {
 	err = (&Memcached{}).SetupWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 
-	err = (&Senlin{}).SetupWebhookWithManager(mgr)
-	Expect(err).NotTo(HaveOccurred())
-
 	err = (&RallyTask{}).SetupWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 

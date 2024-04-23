@@ -389,18 +389,6 @@ func main() {
 		setupLog.Error(err, "unable to create webhook", "webhook", "Memcached")
 		os.Exit(1)
 	}
-	if err = (&controller.SenlinReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Senlin"),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "Senlin")
-		os.Exit(1)
-	}
-	if err = (&openstackv1beta1.Senlin{}).SetupWebhookWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create webhook", "webhook", "Senlin")
-		os.Exit(1)
-	}
 	if err = (&controller.RallyTaskReconciler{
 		Client: mgr.GetClient(),
 		Log:    ctrl.Log.WithName("controllers").WithName("RallyTask"),
