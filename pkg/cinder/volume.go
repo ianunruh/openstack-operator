@@ -18,6 +18,7 @@ func VolumeStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, v
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-cinder", "/etc/cinder/cinder.conf", "cinder.conf"),
+		template.SubPathVolumeMount("etc-cinder", "/var/lib/kolla/config_files/config.json", "kolla-cinder-volume.json"),
 	}
 
 	cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
@@ -34,12 +35,9 @@ func VolumeStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, v
 		NodeSelector: instance.Spec.Volume.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "volume",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"cinder-volume",
-					"--config-file=/etc/cinder/cinder.conf",
-				},
+				Name:         "volume",
+				Image:        instance.Spec.Image,
+				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
 				Resources:    instance.Spec.Volume.Resources,
 				VolumeMounts: volumeMounts,
