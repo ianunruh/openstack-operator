@@ -23,6 +23,7 @@ import (
 
 // HorizonSpec defines the desired state of Horizon
 type HorizonSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 
@@ -31,6 +32,9 @@ type HorizonSpec struct {
 }
 
 type HorizonServerSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 

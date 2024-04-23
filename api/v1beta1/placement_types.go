@@ -23,6 +23,7 @@ import (
 
 // PlacementSpec defines the desired state of Placement
 type PlacementSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 
@@ -40,6 +41,9 @@ type PlacementSpec struct {
 }
 
 type PlacementAPISpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 

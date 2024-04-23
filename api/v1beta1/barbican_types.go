@@ -23,6 +23,7 @@ import (
 
 // BarbicanSpec defines the desired state of Barbican
 type BarbicanSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 
@@ -47,6 +48,9 @@ type BarbicanSpec struct {
 
 type BarbicanAPISpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
@@ -60,6 +64,9 @@ type BarbicanAPISpec struct {
 }
 
 type BarbicanWorkerSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 

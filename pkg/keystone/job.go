@@ -34,7 +34,7 @@ func BootstrapJob(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, volu
 		Containers: []corev1.Container{
 			{
 				Name:  "bootstrap",
-				Image: instance.Spec.Image,
+				Image: instance.Spec.API.Image,
 				Command: []string{
 					"bash",
 					"-c",
@@ -71,7 +71,7 @@ func DBSyncJob(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, volumes
 		Containers: []corev1.Container{
 			{
 				Name:  "db-sync",
-				Image: instance.Spec.Image,
+				Image: instance.Spec.API.Image,
 				Command: []string{
 					"keystone-manage",
 					"db_sync",

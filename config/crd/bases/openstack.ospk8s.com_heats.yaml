@@ -41,6 +41,8 @@ spec:
             properties:
               api:
                 properties:
+                  image:
+                    type: string
                   ingress:
                     properties:
                       annotations:
@@ -137,6 +139,8 @@ spec:
                 type: object
               cfn:
                 properties:
+                  image:
+                    type: string
                   ingress:
                     properties:
                       annotations:
@@ -293,6 +297,8 @@ spec:
                 type: object
               engine:
                 properties:
+                  image:
+                    type: string
                   nodeSelector:
                     additionalProperties:
                       type: string
@@ -364,6 +370,7 @@ spec:
                   type: object
                 type: object
               image:
+                description: deprecated, use component specific images instead
                 type: string
             type: object
           status:

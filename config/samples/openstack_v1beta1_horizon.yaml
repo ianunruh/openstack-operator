@@ -3,8 +3,8 @@ kind: Horizon
 metadata:
   name: horizon
 spec:
-  image: kolla/horizon:2023.2-ubuntu-jammy
   server:
+    image: kolla/horizon:2023.2-ubuntu-jammy
     replicas: 2
     ingress:
       host: horizon.openstack.k8s.example.com

@@ -45,7 +45,9 @@ func (r *Heat) Default() {
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
-	r.Spec.Image = imageDefault(r.Spec.Image, DefaultHeatImage)
+	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultHeatAPIImage)
+	r.Spec.CFN.Image = imageDefault(r.Spec.CFN.Image, DefaultHeatCFNImage)
+	r.Spec.Engine.Image = imageDefault(r.Spec.Engine.Image, DefaultHeatEngineImage)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

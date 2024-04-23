@@ -3,8 +3,8 @@ kind: Keystone
 metadata:
   name: keystone
 spec:
-  image: kolla/keystone:2023.2-ubuntu-jammy
   api:
+    image: kolla/keystone:2023.2-ubuntu-jammy
     replicas: 2
     ingress:
       host: keystone.openstack.k8s.example.com

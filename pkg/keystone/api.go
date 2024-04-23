@@ -59,7 +59,7 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 		InitContainers: []corev1.Container{
 			{
 				Name:  "init-keys",
-				Image: instance.Spec.Image,
+				Image: instance.Spec.API.Image,
 				Command: []string{
 					"bash",
 					"-c",
@@ -72,7 +72,7 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 		Containers: []corev1.Container{
 			{
 				Name:      "api",
-				Image:     instance.Spec.Image,
+				Image:     instance.Spec.API.Image,
 				Command:   []string{"/usr/local/bin/kolla_start"},
 				Lifecycle: httpd.Lifecycle(),
 				Env:       env,

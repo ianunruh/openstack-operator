@@ -23,6 +23,7 @@ import (
 
 // KeystoneSpec defines the desired state of Keystone
 type KeystoneSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 
@@ -49,6 +50,9 @@ type KeystoneSpec struct {
 }
 
 type KeystoneAPISpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 

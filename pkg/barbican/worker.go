@@ -28,7 +28,7 @@ func WorkerDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, 
 		Containers: []corev1.Container{
 			{
 				Name:         "worker",
-				Image:        instance.Spec.Image,
+				Image:        instance.Spec.Worker.Image,
 				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
 				Resources:    instance.Spec.Worker.Resources,

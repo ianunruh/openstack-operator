@@ -41,6 +41,8 @@ spec:
             properties:
               api:
                 properties:
+                  image:
+                    type: string
                   ingress:
                     properties:
                       annotations:
@@ -250,6 +252,7 @@ spec:
                   type: object
                 type: object
               image:
+                description: deprecated, use component specific images instead
                 type: string
             type: object
           status:
