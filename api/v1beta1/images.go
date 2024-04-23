@@ -19,7 +19,6 @@ const (
 	DefaultNovaImage            = "ghcr.io/ianunruh/openstack-operator-images/nova:master"
 	DefaultOctaviaImage         = "ghcr.io/ianunruh/openstack-operator-images/octavia:master"
 	DefaultPlacementAPIImage    = "kolla/placement-api:2023.2-ubuntu-jammy"
-	DefaultSenlinImage          = "kolla/senlin-api:2023.2-ubuntu-jammy"
 
 	DefaultRallyImage = "xrally/xrally-openstack:2.1.0"
 

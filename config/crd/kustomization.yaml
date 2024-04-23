@@ -25,7 +25,6 @@ resources:
 - bases/openstack.ospk8s.com_octavias.yaml
 - bases/openstack.ospk8s.com_rallies.yaml
 - bases/openstack.ospk8s.com_manilas.yaml
-- bases/openstack.ospk8s.com_senlins.yaml
 - bases/openstack.ospk8s.com_rallytasks.yaml
 - bases/openstack.ospk8s.com_novahostaggregates.yaml
 - bases/openstack.ospk8s.com_novakeypairs.yaml
@@ -60,7 +59,6 @@ patches:
 #- path: patches/webhook_in_octavias.yaml
 #- path: patches/webhook_in_rallies.yaml
 #- path: patches/webhook_in_manilas.yaml
-#- path: patches/webhook_in_senlins.yaml
 #- path: patches/webhook_in_rallytasks.yaml
 #- path: patches/webhook_in_novahostaggregates.yaml
 #- path: patches/webhook_in_novakeypairs.yaml
@@ -95,7 +93,6 @@ patches:
 - path: patches/cainjection_in_rallies.yaml
 - path: patches/cainjection_in_rallytasks.yaml
 - path: patches/cainjection_in_manilas.yaml
-- path: patches/cainjection_in_senlins.yaml
 #- path: patches/cainjection_in_novahostaggregates.yaml
 #- path: patches/cainjection_in_novakeypairs.yaml
 #- path: patches/cainjection_in_novaflavors.yaml

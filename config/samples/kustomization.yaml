@@ -21,7 +21,6 @@ resources:
 - openstack_v1beta1_octavia.yaml
 - openstack_v1beta1_rally.yaml
 - openstack_v1beta1_manila.yaml
-- openstack_v1beta1_senlin.yaml
 - openstack_v1beta1_rallytask.yaml
 - openstack_v1beta1_novahostaggregate.yaml
 - openstack_v1beta1_novakeypair.yaml

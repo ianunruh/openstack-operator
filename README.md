@@ -35,7 +35,6 @@ Also supports the following optional components.
 * Manila (filesystem storage)
 * Octavia (load balancing)
 * Rally (benchmarking)
-* Senlin (clustering)
 
 ## Images
 
