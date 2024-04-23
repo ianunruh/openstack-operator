@@ -17,8 +17,6 @@ import (
 
 const (
 	AppLabel = "cinder"
-
-	DefaultAPIImage = "kolla/cinder-api:2023.2-ubuntu-jammy"
 )
 
 var (

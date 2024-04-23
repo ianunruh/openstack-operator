@@ -10,8 +10,6 @@ import (
 
 const (
 	SchedulerComponentLabel = "scheduler"
-
-	DefaultSchedulerImage = "kolla/cinder-scheduler:2023.2-ubuntu-jammy"
 )
 
 func SchedulerStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
