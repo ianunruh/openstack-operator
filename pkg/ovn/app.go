@@ -29,8 +29,7 @@ func ConfigMap(instance *openstackv1beta1.OVNControlPlane) *corev1.ConfigMap {
 	cm.Data["kolla-northd.json"] = template.MustReadFile(AppLabel, "kolla-northd.json")
 	cm.Data["kolla-openvswitch-ovsdb.json"] = template.MustReadFile(AppLabel, "kolla-openvswitch-ovsdb.json")
 	cm.Data["kolla-openvswitch-vswitchd.json"] = template.MustReadFile(AppLabel, "kolla-openvswitch-vswitchd.json")
-	cm.Data["kolla-ovsdb-nb.json"] = template.MustReadFile(AppLabel, "kolla-ovsdb-nb.json")
-	cm.Data["kolla-ovsdb-sb.json"] = template.MustReadFile(AppLabel, "kolla-ovsdb-sb.json")
+	cm.Data["kolla-ovsdb.json"] = template.MustReadFile(AppLabel, "kolla-ovsdb.json")
 
 	return cm
 }
