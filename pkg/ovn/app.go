@@ -22,6 +22,8 @@ func ConfigMap(instance *openstackv1beta1.OVNControlPlane) *corev1.ConfigMap {
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
 	cm.Data["get-encap-ip.py"] = template.MustReadFile(AppLabel, "get-encap-ip.py")
+	cm.Data["start-ovsdb-nb.sh"] = template.MustReadFile(AppLabel, "start-ovsdb-nb.sh")
+	cm.Data["start-ovsdb-sb.sh"] = template.MustReadFile(AppLabel, "start-ovsdb-sb.sh")
 
 	cm.Data["kolla-controller.json"] = template.MustReadFile(AppLabel, "kolla-controller.json")
 	cm.Data["kolla-northd.json"] = template.MustReadFile(AppLabel, "kolla-northd.json")

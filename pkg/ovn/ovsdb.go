@@ -25,11 +25,12 @@ func OVSDBStatefulSet(instance *openstackv1beta1.OVNControlPlane, component stri
 	port := ovsdbPort(component)
 	spec := ovsdbSpec(instance, component)
 
-	kollaConfig := fmt.Sprintf("kolla-%s.json", component)
+	startScript := fmt.Sprintf("start-%s.sh", component)
 
 	volumeMounts := []corev1.VolumeMount{
 		template.VolumeMount("data", "/var/lib/ovn"),
-		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", kollaConfig),
+		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-ovsdb.json"),
+		template.SubPathVolumeMount("etc-ovn", "/scripts/start.sh", startScript),
 	}
 
 	probe := &corev1.Probe{
