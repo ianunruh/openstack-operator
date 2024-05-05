@@ -55,25 +55,51 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev1.E
 
 	privileged := true
 
+	dbProbe := &corev1.Probe{
+		ProbeHandler: corev1.ProbeHandler{
+			Exec: &corev1.ExecAction{
+				Command: []string{"ovsdb-client", "list-dbs"},
+			},
+		},
+		InitialDelaySeconds: 5,
+		PeriodSeconds:       10,
+		TimeoutSeconds:      5,
+	}
+
+	switchProbe := &corev1.Probe{
+		ProbeHandler: corev1.ProbeHandler{
+			Exec: &corev1.ExecAction{
+				Command: []string{"ovs-appctl", "version"},
+			},
+		},
+		InitialDelaySeconds: 5,
+		PeriodSeconds:       10,
+		TimeoutSeconds:      5,
+	}
+
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
 		NodeSelector: instance.Spec.Node.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:         "ovsdb",
-				Image:        spec.DB.Image,
-				Command:      []string{"/usr/local/bin/kolla_start"},
-				Env:          env,
-				Resources:    spec.DB.Resources,
-				VolumeMounts: append(volumeMounts, dbVolumeMounts...),
+				Name:          "ovsdb",
+				Image:         spec.DB.Image,
+				Command:       []string{"/usr/local/bin/kolla_start"},
+				Env:           env,
+				Resources:     spec.DB.Resources,
+				StartupProbe:  dbProbe,
+				LivenessProbe: dbProbe,
+				VolumeMounts:  append(volumeMounts, dbVolumeMounts...),
 			},
 			{
-				Name:      "vswitchd",
-				Image:     spec.Switch.Image,
-				Command:   []string{"/usr/local/bin/kolla_start"},
-				Env:       env,
-				Resources: spec.Switch.Resources,
+				Name:          "vswitchd",
+				Image:         spec.Switch.Image,
+				Command:       []string{"/usr/local/bin/kolla_start"},
+				Env:           env,
+				Resources:     spec.Switch.Resources,
+				StartupProbe:  switchProbe,
+				LivenessProbe: switchProbe,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 				},
