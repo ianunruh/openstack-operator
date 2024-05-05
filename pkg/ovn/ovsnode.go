@@ -25,13 +25,11 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev1.E
 		template.VolumeMount("host-var-lib-openvswitch", "/var/lib/openvswitch"),
 	}
 
-	dbVolumeMounts := []corev1.VolumeMount{
-		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-openvswitch-ovsdb.json"),
-	}
+	dbVolumeMounts := append(volumeMounts,
+		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-openvswitch-ovsdb.json"))
 
-	switchVolumeMounts := []corev1.VolumeMount{
-		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-openvswitch-vswitchd.json"),
-	}
+	switchVolumeMounts := append(volumeMounts,
+		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-openvswitch-vswitchd.json"))
 
 	volumes = append(volumes,
 		template.HostPathVolume("host-lib-modules", "/lib/modules"),
@@ -77,7 +75,7 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev1.E
 				Resources:     spec.DB.Resources,
 				StartupProbe:  dbProbe,
 				LivenessProbe: dbProbe,
-				VolumeMounts:  append(volumeMounts, dbVolumeMounts...),
+				VolumeMounts:  dbVolumeMounts,
 			},
 			{
 				Name:          "vswitchd",
@@ -90,7 +88,7 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev1.E
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 				},
-				VolumeMounts: append(volumeMounts, switchVolumeMounts...),
+				VolumeMounts: switchVolumeMounts,
 			},
 		},
 		Volumes: volumes,

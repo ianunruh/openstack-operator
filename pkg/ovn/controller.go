@@ -33,6 +33,10 @@ func ControllerDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev
 			template.EnvVar("GATEWAY", "true"))
 	}
 
+	envFrom := []corev1.EnvFromSource{
+		template.EnvFromConfigMap(template.Combine(instance.Name, "ovsdb")),
+	}
+
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-controller.json"),
 		template.VolumeMount("host-etc-openvswitch", "/etc/openvswitch"),
@@ -59,6 +63,7 @@ func ControllerDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev
 				Image:        spec.Image,
 				Command:      []string{"bash", "/scripts/setup-node.sh"},
 				Env:          env,
+				EnvFrom:      envFrom,
 				Resources:    spec.Resources,
 				VolumeMounts: initVolumeMounts,
 			},
@@ -69,6 +74,7 @@ func ControllerDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev
 				Image:     spec.Image,
 				Command:   []string{"/usr/local/bin/kolla_start"},
 				Env:       env,
+				EnvFrom:   envFrom,
 				Resources: spec.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
