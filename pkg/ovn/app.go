@@ -22,6 +22,7 @@ func ConfigMap(instance *openstackv1beta1.OVNControlPlane) *corev1.ConfigMap {
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
 	cm.Data["get-encap-ip.py"] = template.MustReadFile(AppLabel, "get-encap-ip.py")
+	cm.Data["setup-node.sh"] = template.MustReadFile(AppLabel, "setup-node.sh")
 	cm.Data["start-ovsdb-nb.sh"] = template.MustReadFile(AppLabel, "start-ovsdb-nb.sh")
 	cm.Data["start-ovsdb-sb.sh"] = template.MustReadFile(AppLabel, "start-ovsdb-sb.sh")
 
