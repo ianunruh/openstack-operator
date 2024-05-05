@@ -34,7 +34,13 @@ const (
 
 	DefaultOctaviaImage = "ghcr.io/ianunruh/openstack-operator-images/octavia:master"
 
-	DefaultOVNImage = "ghcr.io/ianunruh/openstack-operator-images/neutron:master"
+	DefaultOVNControllerImage = "kolla/ovn-controller:2023.2-ubuntu-jammy"
+	DefaultOVNNorthdImage     = "kolla/ovn-northd:2023.2-ubuntu-jammy"
+	DefaultOVNOVSDBNorthImage = "kolla/ovn-nb-db-server:2023.2-ubuntu-jammy"
+	DefaultOVNOVSDBSouthImage = "kolla/ovn-sb-db-server:2023.2-ubuntu-jammy"
+
+	DefaultOVSDBImage     = "kolla/openvswitch-db-server:2023.2-ubuntu-jammy"
+	DefaultOVSSwitchImage = "kolla/openvswitch-vswitchd:2023.2-ubuntu-jammy"
 
 	DefaultPlacementAPIImage = "kolla/placement-api:2023.2-ubuntu-jammy"
 

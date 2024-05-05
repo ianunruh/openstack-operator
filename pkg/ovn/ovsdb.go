@@ -19,12 +19,19 @@ const (
 	OVSDBSouthPort = 6642
 )
 
-func OVSDBStatefulSet(instance *openstackv1beta1.OVNControlPlane, component string) *appsv1.StatefulSet {
+func OVSDBStatefulSet(instance *openstackv1beta1.OVNControlPlane, component string, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, component)
 
 	port := ovsdbPort(component)
 	spec := ovsdbSpec(instance, component)
-	startScript := ovsdbStartScript(component)
+
+	startScript := fmt.Sprintf("start-%s.sh", component)
+
+	volumeMounts := []corev1.VolumeMount{
+		template.VolumeMount("data", "/var/lib/ovn"),
+		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-ovsdb.json"),
+		template.SubPathVolumeMount("etc-ovn", "/scripts/start-ovsdb.sh", startScript),
+	}
 
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
@@ -43,27 +50,23 @@ func OVSDBStatefulSet(instance *openstackv1beta1.OVNControlPlane, component stri
 		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "ovsdb",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"bash",
-					"-c",
-					startScript,
-				},
+				Name:    "ovsdb",
+				Image:   spec.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				Ports: []corev1.ContainerPort{
 					{Name: "ovsdb", ContainerPort: port},
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
 				Resources:     spec.Resources,
-				VolumeMounts: []corev1.VolumeMount{
-					template.VolumeMount("data", "/var/lib/ovn"),
-				},
+				VolumeMounts:  volumeMounts,
 			},
 		},
 		VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
 			template.PersistentVolumeClaim("data", labels, spec.Volume),
 		},
+		Volumes: volumes,
 	})
 
 	ds.Name = template.Combine(instance.Name, component)
@@ -92,14 +95,7 @@ func ovsdbPort(component string) int32 {
 	return OVSDBSouthPort
 }
 
-func ovsdbStartScript(component string) string {
-	if component == OVSDBNorth {
-		return template.MustReadFile(AppLabel, "start-ovsdb-nb.sh")
-	}
-	return template.MustReadFile(AppLabel, "start-ovsdb-sb.sh")
-}
-
-func ovsdbSpec(instance *openstackv1beta1.OVNControlPlane, component string) openstackv1beta1.OVSDBSpec {
+func ovsdbSpec(instance *openstackv1beta1.OVNControlPlane, component string) openstackv1beta1.OVNDBSpec {
 	if component == OVSDBNorth {
 		return instance.Spec.OVSDBNorth
 	}

@@ -1,8 +1,6 @@
 package ovn
 
 import (
-	"strings"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -14,28 +12,55 @@ const (
 	OVSNodeComponentLabel = "ovs-node"
 )
 
-func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, configHash string) *appsv1.DaemonSet {
+func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, OVSNodeComponentLabel)
 
-	cfg := instance.Spec.Node
+	spec := instance.Spec.Node
 
-	env := []corev1.EnvVar{
-		template.EnvVar("CONFIG_HASH", configHash),
-		template.FieldEnvVar("HOSTNAME", "spec.nodeName"),
-		template.EnvVar("OVERLAY_CIDRS", strings.Join(cfg.OverlayCIDRs, ",")),
+	volumeMounts := []corev1.VolumeMount{
+		template.ReadOnlyVolumeMount("host-lib-modules", "/lib/modules"),
+		template.ReadOnlyVolumeMount("host-sys", "/sys"),
+		template.VolumeMount("host-etc-openvswitch", "/etc/openvswitch"),
+		template.VolumeMount("host-run-openvswitch", "/run/openvswitch"),
+		template.VolumeMount("host-var-lib-openvswitch", "/var/lib/openvswitch"),
 	}
 
-	if len(cfg.BridgeMappings) > 0 {
-		env = append(env,
-			template.EnvVar("BRIDGE_MAPPINGS", strings.Join(cfg.BridgeMappings, ",")),
-			template.EnvVar("BRIDGE_PORTS", strings.Join(cfg.BridgePorts, ",")),
-			template.EnvVar("GATEWAY", "true"))
-	}
+	dbVolumeMounts := append(volumeMounts,
+		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-openvswitch-ovsdb.json"))
 
-	scriptsConfigMap := template.Combine(instance.Name, "scripts")
-	scriptsDefaultMode := int32(0555)
+	switchVolumeMounts := append(volumeMounts,
+		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-openvswitch-vswitchd.json"))
+
+	volumes = append(volumes,
+		template.HostPathVolume("host-lib-modules", "/lib/modules"),
+		template.HostPathVolume("host-sys", "/sys"),
+		template.HostPathVolume("host-etc-openvswitch", "/etc/openvswitch"),
+		template.HostPathVolume("host-run-openvswitch", "/run/openvswitch"),
+		template.HostPathVolume("host-var-lib-openvswitch", "/var/lib/openvswitch"))
 
 	privileged := true
+
+	dbProbe := &corev1.Probe{
+		ProbeHandler: corev1.ProbeHandler{
+			Exec: &corev1.ExecAction{
+				Command: []string{"ovsdb-client", "list-dbs"},
+			},
+		},
+		InitialDelaySeconds: 5,
+		PeriodSeconds:       10,
+		TimeoutSeconds:      5,
+	}
+
+	switchProbe := &corev1.Probe{
+		ProbeHandler: corev1.ProbeHandler{
+			Exec: &corev1.ExecAction{
+				Command: []string{"ovs-appctl", "version"},
+			},
+		},
+		InitialDelaySeconds: 5,
+		PeriodSeconds:       10,
+		TimeoutSeconds:      5,
+	}
 
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,
@@ -43,38 +68,30 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, configHash str
 		NodeSelector: instance.Spec.Node.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "openvswitch",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"bash",
-					"/scripts/start-node.sh",
-				},
-				Env: env,
-				EnvFrom: []corev1.EnvFromSource{
-					template.EnvFromConfigMap(template.Combine(instance.Name, "ovsdb")),
-				},
-				Resources: instance.Spec.Node.Resources,
+				Name:          "ovsdb",
+				Image:         spec.DB.Image,
+				Command:       []string{"/usr/local/bin/kolla_start"},
+				Env:           env,
+				Resources:     spec.DB.Resources,
+				StartupProbe:  dbProbe,
+				LivenessProbe: dbProbe,
+				VolumeMounts:  dbVolumeMounts,
+			},
+			{
+				Name:          "vswitchd",
+				Image:         spec.Switch.Image,
+				Command:       []string{"/usr/local/bin/kolla_start"},
+				Env:           env,
+				Resources:     spec.Switch.Resources,
+				StartupProbe:  switchProbe,
+				LivenessProbe: switchProbe,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 				},
-				VolumeMounts: []corev1.VolumeMount{
-					template.ReadOnlyVolumeMount("host-lib-modules", "/lib/modules"),
-					template.ReadOnlyVolumeMount("host-sys", "/sys"),
-					template.VolumeMount("host-etc-openvswitch", "/etc/openvswitch"),
-					template.VolumeMount("host-run-openvswitch", "/run/openvswitch"),
-					template.VolumeMount("host-var-lib-openvswitch", "/var/lib/openvswitch"),
-					template.ReadOnlyVolumeMount("scripts", "/scripts"),
-				},
+				VolumeMounts: switchVolumeMounts,
 			},
 		},
-		Volumes: []corev1.Volume{
-			template.HostPathVolume("host-lib-modules", "/lib/modules"),
-			template.HostPathVolume("host-sys", "/sys"),
-			template.HostPathVolume("host-etc-openvswitch", "/etc/openvswitch"),
-			template.HostPathVolume("host-run-openvswitch", "/run/openvswitch"),
-			template.HostPathVolume("host-var-lib-openvswitch", "/var/lib/openvswitch"),
-			template.ConfigMapVolume("scripts", scriptsConfigMap, &scriptsDefaultMode),
-		},
+		Volumes: volumes,
 	})
 
 	ds.Name = template.Combine(instance.Name, "ovs-node")

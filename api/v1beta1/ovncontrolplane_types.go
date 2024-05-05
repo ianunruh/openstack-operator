@@ -23,14 +23,18 @@ import (
 
 // OVNControlPlaneSpec defines the desired state of OVNControlPlane
 type OVNControlPlaneSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 
 	// +optional
-	OVSDBNorth OVSDBSpec `json:"ovsdbNorth,omitempty"`
+	OVSDBNorth OVNDBSpec `json:"ovsdbNorth,omitempty"`
 
 	// +optional
-	OVSDBSouth OVSDBSpec `json:"ovsdbSouth,omitempty"`
+	OVSDBSouth OVNDBSpec `json:"ovsdbSouth,omitempty"`
+
+	// +optional
+	Controller OVNControllerSpec `json:"controller,omitempty"`
 
 	// +optional
 	Node OVNNodeSpec `json:"node,omitempty"`
@@ -39,7 +43,10 @@ type OVNControlPlaneSpec struct {
 	Northd OVNNorthdSpec `json:"northd,omitempty"`
 }
 
-type OVSDBSpec struct {
+type OVNDBSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	Volume VolumeSpec `json:"volume"`
 
@@ -52,6 +59,12 @@ type OVSDBSpec struct {
 
 type OVNNodeSpec struct {
 	// +optional
+	DB OVSDBSpec `json:"db,omitempty"`
+
+	// +optional
+	Switch OVSSwitchSpec `json:"switch,omitempty"`
+
+	// +optional
 	OverlayCIDRs []string `json:"overlayCIDRs,omitempty"`
 
 	// +optional
@@ -62,12 +75,36 @@ type OVNNodeSpec struct {
 
 	// +optional
 	BridgePorts []string `json:"bridgePorts,omitempty"`
+}
+
+type OVNControllerSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
+
+type OVSSwitchSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
+
+type OVSDBSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type OVNNorthdSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 

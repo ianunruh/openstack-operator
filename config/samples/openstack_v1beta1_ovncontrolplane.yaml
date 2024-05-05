@@ -3,19 +3,28 @@ kind: OVNControlPlane
 metadata:
   name: ovn
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/neutron:master
+  controller:
+    image: kolla/ovn-controller:2023.2-ubuntu-jammy
   node:
+    db:
+      image: kolla/openvswitch-db-server:2023.2-ubuntu-jammy
+    switch:
+      image: kolla/openvswitch-vswitchd:2023.2-ubuntu-jammy
     nodeSelector:
       openstack/network-agent: ovn
     bridgeMappings:
     - external:br-ex
     bridgePorts:
     - br-ex:vlan3000
+  northd:
+    image: kolla/ovn-northd:2023.2-ubuntu-jammy
   ovsdbNorth:
+    image: kolla/ovn-nb-db-server:2023.2-ubuntu-jammy
     volume:
       capacity: 20Gi
       storageClass: ceph-block-ssd
   ovsdbSouth:
+    image: kolla/ovn-sb-db-server:2023.2-ubuntu-jammy
     volume:
       capacity: 20Gi
       storageClass: ceph-block-ssd

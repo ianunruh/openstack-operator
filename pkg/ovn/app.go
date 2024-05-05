@@ -17,13 +17,20 @@ const (
 	AppLabel = "ovn"
 )
 
-func ScriptsConfigMap(instance *openstackv1beta1.OVNControlPlane) *corev1.ConfigMap {
+func ConfigMap(instance *openstackv1beta1.OVNControlPlane) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
-	name := template.Combine(instance.Name, "scripts")
-	cm := template.GenericConfigMap(name, instance.Namespace, labels)
+	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
 	cm.Data["get-encap-ip.py"] = template.MustReadFile(AppLabel, "get-encap-ip.py")
-	cm.Data["start-node.sh"] = template.MustReadFile(AppLabel, "start-node.sh")
+	cm.Data["setup-node.sh"] = template.MustReadFile(AppLabel, "setup-node.sh")
+	cm.Data["start-ovsdb-nb.sh"] = template.MustReadFile(AppLabel, "start-ovsdb-nb.sh")
+	cm.Data["start-ovsdb-sb.sh"] = template.MustReadFile(AppLabel, "start-ovsdb-sb.sh")
+
+	cm.Data["kolla-controller.json"] = template.MustReadFile(AppLabel, "kolla-controller.json")
+	cm.Data["kolla-northd.json"] = template.MustReadFile(AppLabel, "kolla-northd.json")
+	cm.Data["kolla-openvswitch-ovsdb.json"] = template.MustReadFile(AppLabel, "kolla-openvswitch-ovsdb.json")
+	cm.Data["kolla-openvswitch-vswitchd.json"] = template.MustReadFile(AppLabel, "kolla-openvswitch-vswitchd.json")
+	cm.Data["kolla-ovsdb.json"] = template.MustReadFile(AppLabel, "kolla-ovsdb.json")
 
 	return cm
 }

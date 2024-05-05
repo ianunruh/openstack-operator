@@ -12,32 +12,37 @@ const (
 	NorthdComponentLabel = "northd"
 )
 
-func NorthdDeployment(instance *openstackv1beta1.OVNControlPlane) *appsv1.Deployment {
+func NorthdDeployment(instance *openstackv1beta1.OVNControlPlane, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, NorthdComponentLabel)
+
+	spec := instance.Spec.Northd
+
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-northd.json"),
+	}
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.Northd.Replicas,
-		NodeSelector: instance.Spec.Northd.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: template.NodePodAntiAffinity(labels),
 		},
 		Containers: []corev1.Container{
 			{
-				Name:  "northd",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"bash",
-					"-c",
-					template.MustReadFile(AppLabel, "start-northd.sh"),
-				},
+				Name:    "northd",
+				Image:   spec.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				EnvFrom: []corev1.EnvFromSource{
 					template.EnvFromConfigMap(template.Combine(instance.Name, "ovsdb")),
 				},
-				Resources: instance.Spec.Northd.Resources,
+				Resources:    spec.Resources,
+				VolumeMounts: volumeMounts,
 			},
 		},
+		Volumes: volumes,
 	})
 
 	deploy.Name = template.Combine(instance.Name, "northd")
