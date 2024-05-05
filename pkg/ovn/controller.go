@@ -1,6 +1,7 @@
 package ovn
 
 import (
+	"strconv"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -23,15 +24,9 @@ func ControllerDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev
 	privileged := true
 
 	env = append(env,
-		template.FieldEnvVar("HOSTNAME", "spec.nodeName"),
-		template.EnvVar("OVERLAY_CIDRS", strings.Join(nodeSpec.OverlayCIDRs, ",")))
+		template.FieldEnvVar("HOSTNAME", "spec.nodeName"))
 
-	if len(nodeSpec.BridgeMappings) > 0 {
-		env = append(env,
-			template.EnvVar("BRIDGE_MAPPINGS", strings.Join(nodeSpec.BridgeMappings, ",")),
-			template.EnvVar("BRIDGE_PORTS", strings.Join(nodeSpec.BridgePorts, ",")),
-			template.EnvVar("GATEWAY", "true"))
-	}
+	setupEnv := append(env, setupNodeEnv(nodeSpec)...)
 
 	envFrom := []corev1.EnvFromSource{
 		template.EnvFromConfigMap(template.Combine(instance.Name, "ovsdb")),
@@ -62,7 +57,7 @@ func ControllerDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev
 				Name:         "setup",
 				Image:        spec.Image,
 				Command:      []string{"bash", "/scripts/setup-node.sh"},
-				Env:          env,
+				Env:          setupEnv,
 				EnvFrom:      envFrom,
 				Resources:    spec.Resources,
 				VolumeMounts: initVolumeMounts,
@@ -92,4 +87,21 @@ func ControllerDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev
 	ds.Spec.Template.Spec.DNSPolicy = corev1.DNSClusterFirstWithHostNet
 
 	return ds
+}
+
+func setupNodeEnv(spec openstackv1beta1.OVNNodeSpec) []corev1.EnvVar {
+	gateway := len(spec.BridgeMappings) > 0
+
+	env := []corev1.EnvVar{
+		template.EnvVar("OVERLAY_CIDRS", strings.Join(spec.OverlayCIDRs, ",")),
+		template.EnvVar("GATEWAY", strconv.FormatBool(gateway)),
+	}
+
+	if gateway {
+		env = append(env,
+			template.EnvVar("BRIDGE_MAPPINGS", strings.Join(spec.BridgeMappings, ",")),
+			template.EnvVar("BRIDGE_PORTS", strings.Join(spec.BridgePorts, ",")))
+	}
+
+	return env
 }
