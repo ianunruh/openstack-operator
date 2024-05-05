@@ -1,8 +1,6 @@
 package ovn
 
 import (
-	"strings"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -18,17 +16,6 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev1.E
 	labels := template.Labels(instance.Name, AppLabel, OVSNodeComponentLabel)
 
 	spec := instance.Spec.Node
-
-	env = append(env,
-		template.FieldEnvVar("HOSTNAME", "spec.nodeName"),
-		template.EnvVar("OVERLAY_CIDRS", strings.Join(spec.OverlayCIDRs, ",")))
-
-	if len(spec.BridgeMappings) > 0 {
-		env = append(env,
-			template.EnvVar("BRIDGE_MAPPINGS", strings.Join(spec.BridgeMappings, ",")),
-			template.EnvVar("BRIDGE_PORTS", strings.Join(spec.BridgePorts, ",")),
-			template.EnvVar("GATEWAY", "true"))
-	}
 
 	volumeMounts := []corev1.VolumeMount{
 		template.ReadOnlyVolumeMount("host-lib-modules", "/lib/modules"),
