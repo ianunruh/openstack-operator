@@ -1,0 +1,3 @@
+{
+    "command": "/usr/sbin/ovsdb-server /var/lib/openvswitch/conf.db --remote=punix:/run/openvswitch/db.sock --remote=ptcp:6640:127.0.0.1 --remote=db:Open_vSwitch,Open_vSwitch,manager_options -vconsole:info -vfile:off --pidfile"
+}

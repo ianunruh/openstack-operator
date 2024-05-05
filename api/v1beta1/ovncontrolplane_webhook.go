@@ -43,7 +43,15 @@ var _ webhook.Defaulter = &OVNControlPlane{}
 func (r *OVNControlPlane) Default() {
 	ovncontrolplanelog.Info("default", "name", r.Name)
 
-	r.Spec.Image = imageDefault(r.Spec.Image, DefaultOVNImage)
+	r.Spec.Controller.Image = imageDefault(r.Spec.Controller.Image, DefaultOVNControllerImage)
+
+	r.Spec.Node.DB.Image = imageDefault(r.Spec.Node.DB.Image, DefaultOVSDBImage)
+	r.Spec.Node.Switch.Image = imageDefault(r.Spec.Node.Switch.Image, DefaultOVSSwitchImage)
+
+	r.Spec.Northd.Image = imageDefault(r.Spec.Northd.Image, DefaultOVNNorthdImage)
+
+	r.Spec.OVSDBNorth.Image = imageDefault(r.Spec.OVSDBNorth.Image, DefaultOVNOVSDBNorthImage)
+	r.Spec.OVSDBSouth.Image = imageDefault(r.Spec.OVSDBSouth.Image, DefaultOVNOVSDBSouthImage)
 	r.Spec.OVSDBNorth.Volume = volumeDefault(r.Spec.OVSDBNorth.Volume)
 	r.Spec.OVSDBSouth.Volume = volumeDefault(r.Spec.OVSDBSouth.Volume)
 }

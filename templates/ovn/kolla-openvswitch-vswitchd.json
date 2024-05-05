@@ -1,0 +1,3 @@
+{
+    "command": "/usr/sbin/ovs-vswitchd unix:/run/openvswitch/db.sock -vconsole:info -vfile:off --mlockall --pidfile"
+}
