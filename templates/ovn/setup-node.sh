@@ -4,6 +4,7 @@ set -eu
 OVN_NODE_IP=$(python3 /scripts/get-encap-ip.py)
 
 ovs-vsctl set open . external_ids:hostname=${HOSTNAME}
+ovs-vsctl set open . external_ids:system-id=${HOSTNAME}
 ovs-vsctl set open . external_ids:ovn-bridge=br-int
 ovs-vsctl set open . external_ids:ovn-remote=${OVN_SB_CONNECTION}
 ovs-vsctl set open . external_ids:ovn-encap-type=geneve
