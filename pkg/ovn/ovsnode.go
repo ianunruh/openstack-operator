@@ -65,7 +65,7 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev1.E
 				Image:        spec.DB.Image,
 				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
-				Resources:    spec.Resources,
+				Resources:    spec.DB.Resources,
 				VolumeMounts: append(volumeMounts, dbVolumeMounts...),
 			},
 			{
@@ -73,7 +73,7 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev1.E
 				Image:     spec.Switch.Image,
 				Command:   []string{"/usr/local/bin/kolla_start"},
 				Env:       env,
-				Resources: spec.Resources,
+				Resources: spec.Switch.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 				},

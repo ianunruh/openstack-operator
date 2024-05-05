@@ -75,9 +75,6 @@ type OVNNodeSpec struct {
 
 	// +optional
 	BridgePorts []string `json:"bridgePorts,omitempty"`
-
-	// +optional
-	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type OVNControllerSpec struct {
@@ -91,11 +88,17 @@ type OVNControllerSpec struct {
 type OVSSwitchSpec struct {
 	// +optional
 	Image string `json:"image,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type OVSDBSpec struct {
 	// +optional
 	Image string `json:"image,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type OVNNorthdSpec struct {
