@@ -30,7 +30,7 @@ func OVSDBStatefulSet(instance *openstackv1beta1.OVNControlPlane, component stri
 	volumeMounts := []corev1.VolumeMount{
 		template.VolumeMount("data", "/var/lib/ovn"),
 		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-ovsdb.json"),
-		template.SubPathVolumeMount("etc-ovn", "/scripts/start.sh", startScript),
+		template.SubPathVolumeMount("etc-ovn", "/scripts/start-ovsdb.sh", startScript),
 	}
 
 	probe := &corev1.Probe{
