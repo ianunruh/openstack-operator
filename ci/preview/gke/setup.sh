@@ -54,7 +54,7 @@ done
 sed "s/\$(CLUSTER_DOMAIN)/$CLUSTER_DOMAIN/" certificate.yaml | kubectl apply -f-
 
 # Install operator
-kubectl apply -k ../../../config/default
+kustomize build ../../../config/default | kubectl apply -f-
 
 # Get the ingress-nginx load balancer IP
 ingress_lb_ip=""
