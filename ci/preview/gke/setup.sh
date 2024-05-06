@@ -4,9 +4,9 @@ set -ex
 CLUSTER_DOMAIN=$CLUSTER_NAME.$CLOUDSDK_COMPUTE_ZONE.test.ospk8s.com
 
 if ! gcloud container clusters describe $CLUSTER_NAME >/dev/null; then
-    gcloud container clusters create $CLUSTER_NAME \
+    gcloud container clusters create-auto $CLUSTER_NAME \
         --num-nodes "3" \
-        --cluster-version "1.20.10-gke.301" \
+        --cluster-version "1.28.7-gke.1026000" \
         --release-channel "regular" \
         --machine-type "e2-standard-2" \
         --image-type "UBUNTU_CONTAINERD" \
@@ -26,10 +26,10 @@ else
 fi
 
 # Install ingress-nginx
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/cloud/deploy.yaml
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.0/deploy/static/provider/cloud/deploy.yaml
 
 # Install cert-manager
-kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.5.3/cert-manager.yaml
+kubectl apply -f https://github.com/jetstack/cert-manager/releases/download/v1.14.3/cert-manager.yaml
 
 if ! kubectl -n cert-manager get secret google-dns; then
     echo $GCLOUD_SVC_ACCOUNT_KEY_JSON | base64 -d > key
