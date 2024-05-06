@@ -102,7 +102,7 @@ done
 sed "s/\$(CLUSTER_DOMAIN)/$CLUSTER_DOMAIN/" certificate.yaml | kubectl apply -f-
 
 log "Applying openstack-operator manifests"
-kustomize build ../../config/default | kubectl apply -f-
+kustomize build ../../../config/default | kubectl apply -f-
 
 log "Waiting for ingress load balancer to become ready"
 ingress_lb_ip=""
