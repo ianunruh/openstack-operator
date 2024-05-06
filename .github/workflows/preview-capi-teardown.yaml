@@ -1,17 +1,17 @@
-name: Teardown CAPI gate
+name: Teardown CAPI preview
 
 on:
   pull_request:
     types: [closed]
 
 env:
-  CLUSTER_NAME: gate-pr-${{ github.event.pull_request.number }}
+  CLUSTER_NAME: preview-pr-${{ github.event.pull_request.number }}
   OPENSTACK_FAILURE_DOMAIN: az3
   DNS_ZONE: ospk8s
 
 jobs:
-  setup:
-    if: contains(github.event.pull_request.labels.*.name, 'gate-capi')
+  teardown:
+    if: contains(github.event.pull_request.labels.*.name, 'preview-capi')
 
     runs-on: [self-hosted]
 
@@ -26,7 +26,7 @@ jobs:
 
       - name: Mask secrets
         run: |
-          echo "::add-mask::${{ secrets.GATE_KUBECONFIG }}"
+          echo "::add-mask::${{ secrets.PREVIEW_KUBECONFIG }}"
           echo "::add-mask::${{ secrets.GCLOUD_SVC_ACCOUNT_KEY_JSON }}"
 
       - name: Auth with Google Cloud
@@ -44,14 +44,14 @@ jobs:
           path: |
             ~/.local/bin
             ~/.local/share/virtualenvs
-          key: ${{ runner.os }}-${{ hashFiles('Pipfile.lock', 'gate/capi/install-tools.sh') }}
+          key: ${{ runner.os }}-${{ hashFiles('Pipfile.lock', 'ci/preview/capi/install-tools.sh') }}
 
       - name: Install tools
-        working-directory: gate/capi
+        working-directory: ci/preview/capi
         run: ./install-tools.sh
 
       - name: Teardown CAPI cluster
-        working-directory: gate/capi
+        working-directory: ci/preview/capi
         run: ./teardown.sh
         env:
-          GATE_KUBECONFIG: ${{ secrets.GATE_KUBECONFIG }}
+          PREVIEW_KUBECONFIG: ${{ secrets.PREVIEW_KUBECONFIG }}

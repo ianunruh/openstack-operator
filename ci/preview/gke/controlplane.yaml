@@ -1,0 +1,50 @@
+apiVersion: openstack.ospk8s.com/v1beta1
+kind: ControlPlane
+metadata:
+  name: default
+spec:
+  domain: $(CLUSTER_DOMAIN)
+  ingress:
+    className: nginx
+    tlsSecretName: wildcard-tls
+  glance:
+    backends:
+    - name: ssd
+      pvc:
+        capacity: 30Gi
+  nova:
+    extraConfig:
+      libvirt:
+        # KVM not supported on GKE, fallback to QEMU
+        virt_type: qemu
+    flavors:
+      c1-mini:
+        ram: 256
+        vcpus: 1
+        disk: 10
+        isPublic: true
+      c1-small:
+        ram: 1024
+        vcpus: 1
+        disk: 20
+        isPublic: true
+      c1-medium:
+        ram: 2048
+        vcpus: 2
+        disk: 40
+        isPublic: true
+      c1-large:
+        ram: 4096
+        vcpus: 4
+        disk: 60
+        isPublic: true
+  horizon: {}
+  heat: {}
+  barbican: {}
+  magnum: {}
+  rally: {}
+  octavia:
+    ovn:
+      enabled: true
+    nodeSelector:
+      openstack/octavia-controller: enabled

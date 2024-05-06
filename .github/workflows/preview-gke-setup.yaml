@@ -1,17 +1,17 @@
-name: Setup GKE gate
+name: Setup GKE preview
 
 on:
   pull_request:
     types: [labeled, synchronize, opened, reopened]
 
 env:
-  CLUSTER_NAME: gate-pr-${{ github.event.pull_request.number }}
+  CLUSTER_NAME: preview-pr-${{ github.event.pull_request.number }}
   CLOUDSDK_COMPUTE_ZONE: us-central1-a
   DNS_ZONE: ospk8s
 
 jobs:
   setup:
-    if: contains(github.event.pull_request.labels.*.name, 'gate')
+    if: contains(github.event.pull_request.labels.*.name, 'preview-gke')
 
     runs-on: ubuntu-latest
 
@@ -31,11 +31,13 @@ jobs:
 
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: kubectl
 
       - name: Install kustomize
         run: |
-          curl -OL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.3.0/kustomize_v4.3.0_linux_amd64.tar.gz
-          tar xfv kustomize_v4.3.0_linux_amd64.tar.gz
+          curl -OL https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv5.3.0/kustomize_v5.3.0_linux_amd64.tar.gz
+          tar xfv kustomize_v5.3.0_linux_amd64.tar.gz
           mv kustomize /usr/local/bin/kustomize
 
       - name: Update operator image
@@ -44,7 +46,7 @@ jobs:
           kustomize edit set image ghcr.io/ianunruh/openstack-operator:sha-$GITHUB_SHA
 
       - name: Setup GKE cluster
-        working-directory: gate/gke
+        working-directory: ci/preview/gke
         run: ./setup.sh
         env:
           GCLOUD_SVC_ACCOUNT_KEY_JSON: ${{ secrets.GCLOUD_SVC_ACCOUNT_KEY_JSON }}
