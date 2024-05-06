@@ -10,7 +10,7 @@ env:
   DNS_ZONE: ospk8s
 
 jobs:
-  setup:
+  teardown:
     if: contains(github.event.pull_request.labels.*.name, 'preview-gke')
 
     runs-on: ubuntu-latest
