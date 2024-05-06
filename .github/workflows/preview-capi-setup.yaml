@@ -50,6 +50,9 @@ jobs:
         working-directory: ci/preview/capi
         run: ./install-tools.sh
 
+      - name: Install pipenv deps
+        run: pipenv install
+
       - name: Update operator image
         working-directory: config/manager
         run: |
