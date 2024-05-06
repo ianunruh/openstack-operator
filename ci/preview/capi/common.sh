@@ -15,7 +15,7 @@ log() {
 setup_kubectl() {
     mkdir -p $HOME/.kube
     if [ ! -f $HOME/.kube/config ]; then
-        echo $GATE_KUBECONFIG | base64 -d > $HOME/.kube/config
+        echo $PREVIEW_KUBECONFIG | base64 -d > $HOME/.kube/config
     fi
 
     log "Switching kubectl to CI namespace"

@@ -1,17 +1,17 @@
-name: Teardown GKE gate
+name: Teardown GKE preview
 
 on:
   pull_request:
     types: [closed]
 
 env:
-  CLUSTER_NAME: gate-pr-${{ github.event.pull_request.number }}
+  CLUSTER_NAME: preview-pr-${{ github.event.pull_request.number }}
   CLOUDSDK_COMPUTE_ZONE: us-central1-a
   DNS_ZONE: ospk8s
 
 jobs:
   setup:
-    if: contains(github.event.pull_request.labels.*.name, 'gate')
+    if: contains(github.event.pull_request.labels.*.name, 'preview-gke')
 
     runs-on: ubuntu-latest
 
@@ -33,5 +33,5 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
 
       - name: Teardown GKE cluster
-        working-directory: gate/gke
+        working-directory: ci/preview/gke
         run: ./teardown.sh
