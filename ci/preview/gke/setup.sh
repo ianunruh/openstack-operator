@@ -4,7 +4,7 @@ set -ex
 CLUSTER_DOMAIN=$CLUSTER_NAME.$CLOUDSDK_COMPUTE_ZONE.test.ospk8s.com
 
 if ! gcloud container clusters describe $CLUSTER_NAME >/dev/null; then
-    gcloud container clusters create-auto $CLUSTER_NAME \
+    gcloud container clusters create $CLUSTER_NAME \
         --num-nodes "3" \
         --cluster-version "1.28.7-gke.1026000" \
         --release-channel "regular" \
@@ -37,7 +37,7 @@ if ! kubectl -n cert-manager get secret google-dns; then
     rm key
 fi
 
-kubectl -n cert-manager rollout status deploy cert-manager
+kubectl -n cert-manager rollout status deploy
 
 # Configure letsencrypt issuer and wildcard TLS cert
 # NOTE cert-manager webhook can take a few seconds to become ready
