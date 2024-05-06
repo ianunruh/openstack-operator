@@ -28,4 +28,3 @@ if ! [ -f $HOME/.local/bin/yq ]; then
 fi
 
 pip install pipenv
-pipenv install
