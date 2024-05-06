@@ -31,6 +31,8 @@ jobs:
 
       - name: Setup Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
+        with:
+          install_components: kubectl
 
       - name: Install kustomize
         run: |
