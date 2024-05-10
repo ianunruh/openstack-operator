@@ -153,6 +153,7 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
+		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
 	}
 
@@ -246,7 +247,7 @@ func (r *NovaReconciler) reconcileConductor(ctx context.Context, instance *opens
 		return err
 	}
 
-	sts := nova.ConductorStatefulSet(instance.Name, instance.Namespace, instance.Spec.Conductor, env, volumes, instance.Spec.Image)
+	sts := nova.ConductorStatefulSet(instance.Name, instance.Namespace, instance.Spec.Conductor, env, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err

@@ -48,7 +48,11 @@ func (r *Nova) Default() {
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.APIDatabase = databaseDefault(r.Spec.APIDatabase, fmt.Sprintf("%s-api", r.Name))
 	r.Spec.CellDatabase = databaseDefault(r.Spec.CellDatabase, fmt.Sprintf("%s-cell0", r.Name))
+
 	r.Spec.Image = imageDefault(r.Spec.Image, DefaultNovaImage)
+	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultNovaAPIImage)
+	r.Spec.Conductor.Image = imageDefault(r.Spec.Conductor.Image, DefaultNovaConductorImage)
+	r.Spec.Scheduler.Image = imageDefault(r.Spec.Scheduler.Image, DefaultNovaSchedulerImage)
 
 	if r.Spec.Neutron.Secret == "" {
 		r.Spec.Neutron.Secret = "neutron-keystone"

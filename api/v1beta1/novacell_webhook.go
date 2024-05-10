@@ -46,6 +46,9 @@ func (r *NovaCell) Default() {
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, r.Name)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 
+	r.Spec.Metadata.Image = imageDefault(r.Spec.Metadata.Image, DefaultNovaAPIImage)
+	r.Spec.Conductor.Image = imageDefault(r.Spec.Conductor.Image, DefaultNovaConductorImage)
+
 	if r.Spec.Compute == nil {
 		r.Spec.Compute = map[string]NovaComputeSetSpec{
 			"default": {},

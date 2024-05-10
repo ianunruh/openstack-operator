@@ -15,24 +15,24 @@ const (
 func SchedulerStatefulSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, SchedulerComponentLabel)
 
+	spec := instance.Spec.Scheduler
+
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
+		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-scheduler.json"),
 	}
 
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.Scheduler.Replicas,
-		NodeSelector: instance.Spec.Scheduler.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "scheduler",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"nova-scheduler",
-					"--config-file=/etc/nova/nova.conf",
-				},
-				Env: env,
+				Name:    "scheduler",
+				Image:   spec.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				LivenessProbe: &corev1.Probe{
 					ProbeHandler:        healthProbeHandler("scheduler", true),
 					InitialDelaySeconds: 120,
@@ -45,7 +45,7 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, 
 					PeriodSeconds:       90,
 					TimeoutSeconds:      70,
 				},
-				Resources:    instance.Spec.Scheduler.Resources,
+				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

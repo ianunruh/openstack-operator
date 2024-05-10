@@ -12,11 +12,12 @@ const (
 	ConductorComponentLabel = "conductor"
 )
 
-func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaConductorSpec, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string) *appsv1.StatefulSet {
+func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaConductorSpec, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(name, AppLabel, ConductorComponentLabel)
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
+		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-conductor.json"),
 	}
 
 	sts := template.GenericStatefulSet(template.Component{
@@ -26,13 +27,10 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "conductor",
-				Image: containerImage,
-				Command: []string{
-					"nova-conductor",
-					"--config-file=/etc/nova/nova.conf",
-				},
-				Env: env,
+				Name:    "conductor",
+				Image:   spec.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				LivenessProbe: &corev1.Probe{
 					ProbeHandler:        healthProbeHandler("conductor", true),
 					InitialDelaySeconds: 120,
