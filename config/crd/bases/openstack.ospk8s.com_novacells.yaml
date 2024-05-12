@@ -342,6 +342,8 @@ spec:
                 type: object
               metadata:
                 properties:
+                  image:
+                    type: string
                   nodeSelector:
                     additionalProperties:
                       type: string
