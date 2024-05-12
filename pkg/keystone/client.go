@@ -27,8 +27,13 @@ func MiddlewareEnv(prefix, secret string) []corev1.EnvVar {
 }
 
 func CloudClient(svcUser *corev1.Secret) (*gophercloud.ProviderClient, error) {
+	authURL := svcUser.Data["OS_AUTH_URL"]
+	if wwwAuthURL, ok := svcUser.Data["OS_AUTH_URL_WWW"]; ok {
+		authURL = wwwAuthURL
+	}
+
 	clientOpts := gophercloud.AuthOptions{
-		IdentityEndpoint: string(svcUser.Data["OS_AUTH_URL"]),
+		IdentityEndpoint: string(authURL),
 		Username:         string(svcUser.Data["OS_USERNAME"]),
 		Password:         string(svcUser.Data["OS_PASSWORD"]),
 		TenantName:       string(svcUser.Data["OS_PROJECT_NAME"]),
