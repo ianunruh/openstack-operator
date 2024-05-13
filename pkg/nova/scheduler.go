@@ -17,6 +17,13 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, 
 
 	spec := instance.Spec.Scheduler
 
+	probe := &corev1.Probe{
+		ProbeHandler:        amqpHealthProbeHandler("nova-scheduler"),
+		InitialDelaySeconds: 5,
+		PeriodSeconds:       10,
+		TimeoutSeconds:      5,
+	}
+
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
 		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-scheduler.json"),
@@ -29,24 +36,14 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, 
 		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:    "scheduler",
-				Image:   spec.Image,
-				Command: []string{"/usr/local/bin/kolla_start"},
-				Env:     env,
-				LivenessProbe: &corev1.Probe{
-					ProbeHandler:        healthProbeHandler("scheduler", true),
-					InitialDelaySeconds: 120,
-					PeriodSeconds:       90,
-					TimeoutSeconds:      70,
-				},
-				StartupProbe: &corev1.Probe{
-					ProbeHandler:        healthProbeHandler("scheduler", false),
-					InitialDelaySeconds: 80,
-					PeriodSeconds:       90,
-					TimeoutSeconds:      70,
-				},
-				Resources:    spec.Resources,
-				VolumeMounts: volumeMounts,
+				Name:          "scheduler",
+				Image:         spec.Image,
+				Command:       []string{"/usr/local/bin/kolla_start"},
+				Env:           env,
+				LivenessProbe: probe,
+				StartupProbe:  probe,
+				Resources:     spec.Resources,
+				VolumeMounts:  volumeMounts,
 			},
 		},
 		SecurityContext: &corev1.PodSecurityContext{
