@@ -19,10 +19,10 @@ kubectl -n openstack-system get secret webhook-server-cert \
     -o 'jsonpath={.data.tls\.key}' \
     | base64 -d > "$CERT_PATH/tls.key"
 
-kubectl get validatingwebhookconfiguration openstack-operator-validating-webhook-configuration -o json \
+kubectl get mutatingwebhookconfiguration openstack-operator-mutating-webhook-configuration -o json \
     | hack/webhook-patch.py \
     | kubectl apply -f -
 
-kubectl get mutatingwebhookconfiguration openstack-operator-mutating-webhook-configuration -o json \
+kubectl get validatingwebhookconfiguration openstack-operator-validating-webhook-configuration -o json \
     | hack/webhook-patch.py \
     | kubectl apply -f -
