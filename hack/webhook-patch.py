@@ -2,6 +2,7 @@
 import json
 import os
 import sys
+from urllib.parse import urlparse
 
 
 def main():
@@ -21,11 +22,16 @@ def main():
 
         service = clientConfig.get("service")
 
-        if not service:
-            continue
+        url = None
+
+        if service:
+            url = base_url + service["path"]
+        else:
+            parts = urlparse(clientConfig["url"])
+            url = base_url + parts.path
 
         webhook["clientConfig"] = {
-            "url": base_url + service["path"],
+            "url": url,
         }
 
     print(json.dumps(config, indent=2))
