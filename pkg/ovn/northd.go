@@ -19,6 +19,7 @@ func NorthdDeployment(instance *openstackv1beta1.OVNControlPlane, env []corev1.E
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-northd.json"),
+		template.SubPathVolumeMount("etc-ovn", "/scripts/start-northd.sh", "start-northd.sh"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
