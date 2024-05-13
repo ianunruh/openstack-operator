@@ -2,6 +2,7 @@ package keystone
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
@@ -26,36 +27,40 @@ func MiddlewareEnv(prefix, secret string) []corev1.EnvVar {
 		template.SecretEnvVar(prefix+"WWW_AUTHENTICATE_URI", secret, "OS_AUTH_URL_WWW"))
 }
 
-func CloudClient(svcUser *corev1.Secret) (*gophercloud.ProviderClient, error) {
+func CloudClient(ctx context.Context, svcUser *corev1.Secret) (*gophercloud.ProviderClient, error) {
 	authURL := svcUser.Data["OS_AUTH_URL"]
 	if wwwAuthURL, ok := svcUser.Data["OS_AUTH_URL_WWW"]; ok {
 		authURL = wwwAuthURL
 	}
 
-	clientOpts := gophercloud.AuthOptions{
+	client, err := openstack.AuthenticatedClient(gophercloud.AuthOptions{
 		IdentityEndpoint: string(authURL),
 		Username:         string(svcUser.Data["OS_USERNAME"]),
 		Password:         string(svcUser.Data["OS_PASSWORD"]),
 		TenantName:       string(svcUser.Data["OS_PROJECT_NAME"]),
 		DomainName:       string(svcUser.Data["OS_USER_DOMAIN_NAME"]),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("creating openstack client: %w", err)
 	}
 
-	return openstack.AuthenticatedClient(clientOpts)
+	client.Context = ctx
+
+	return client, nil
+}
+
+func CloudEndpointOpts(svcUser *corev1.Secret) gophercloud.EndpointOpts {
+	return gophercloud.EndpointOpts{
+		Region:       string(svcUser.Data["OS_REGION_NAME"]),
+		Availability: gophercloud.AvailabilityPublic,
+	}
 }
 
 func NewIdentityServiceClient(ctx context.Context, svcUser *corev1.Secret) (*gophercloud.ServiceClient, error) {
-	client, err := CloudClient(svcUser)
+	client, err := CloudClient(ctx, svcUser)
 	if err != nil {
 		return nil, err
 	}
 
-	// pass through context from controller
-	client.Context = ctx
-
-	endpointOpts := gophercloud.EndpointOpts{
-		Region:       string(svcUser.Data["OS_REGION_NAME"]),
-		Availability: gophercloud.AvailabilityPublic,
-	}
-
-	return openstack.NewIdentityV3(client, endpointOpts)
+	return openstack.NewIdentityV3(client, CloudEndpointOpts(svcUser))
 }
