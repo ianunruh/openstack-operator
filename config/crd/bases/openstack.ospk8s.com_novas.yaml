@@ -41,6 +41,8 @@ spec:
             properties:
               api:
                 properties:
+                  image:
+                    type: string
                   ingress:
                     properties:
                       annotations:
@@ -320,6 +322,8 @@ spec:
                       type: object
                     conductor:
                       properties:
+                        image:
+                          type: string
                         nodeSelector:
                           additionalProperties:
                             type: string
@@ -466,6 +470,8 @@ spec:
                       type: object
                     metadata:
                       properties:
+                        image:
+                          type: string
                         nodeSelector:
                           additionalProperties:
                             type: string
@@ -619,6 +625,8 @@ spec:
                 type: array
               conductor:
                 properties:
+                  image:
+                    type: string
                   nodeSelector:
                     additionalProperties:
                       type: string
@@ -790,6 +798,8 @@ spec:
                 type: object
               scheduler:
                 properties:
+                  image:
+                    type: string
                   nodeSelector:
                     additionalProperties:
                       type: string

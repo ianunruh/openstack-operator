@@ -89,7 +89,7 @@ func (r *NovaComputeNodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		if statusErr := r.Client.Status().Update(ctx, instance); statusErr != nil {
 			err = utilerrors.NewAggregate([]error{statusErr, err})
 		}
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, err
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
 	condition := computenode.ReadyCondition(instance)

@@ -125,6 +125,7 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
+		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_API_DATABASE__CONNECTION", cluster.Spec.APIDatabase.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
@@ -146,11 +147,11 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return result, err
 	}
 
-	if err := r.reconcileConductor(ctx, instance, env, volumes, cluster.Spec.Image, log); err != nil {
+	if err := r.reconcileConductor(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileMetadata(ctx, instance, env, volumes, cluster.Spec.Image, log); err != nil {
+	if err := r.reconcileMetadata(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -185,14 +186,14 @@ func (r *NovaCellReconciler) reconcileComputeSets(ctx context.Context, instance 
 	return nil
 }
 
-func (r *NovaCellReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
+func (r *NovaCellReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := nova.ConductorService(instance.Name, instance.Namespace)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
 		return err
 	}
 
-	sts := nova.ConductorStatefulSet(instance.Name, instance.Namespace, instance.Spec.Conductor, env, volumes, containerImage)
+	sts := nova.ConductorStatefulSet(instance.Name, instance.Namespace, instance.Spec.Conductor, env, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
@@ -201,13 +202,10 @@ func (r *NovaCellReconciler) reconcileConductor(ctx context.Context, instance *o
 	return nil
 }
 
-func (r *NovaCellReconciler) reconcileMetadata(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
-	extraEnvVars := []corev1.EnvVar{
+func (r *NovaCellReconciler) reconcileMetadata(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+	env = append(env,
 		// TODO make this configurable
-		template.SecretEnvVar("OS_NEUTRON__METADATA_PROXY_SHARED_SECRET", "nova", "metadata-proxy-secret"),
-	}
-
-	env = append(env, extraEnvVars...)
+		template.SecretEnvVar("OS_NEUTRON__METADATA_PROXY_SHARED_SECRET", "nova", "metadata-proxy-secret"))
 
 	svc := nova.MetadataService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
@@ -215,7 +213,7 @@ func (r *NovaCellReconciler) reconcileMetadata(ctx context.Context, instance *op
 		return err
 	}
 
-	deploy := nova.MetadataDeployment(instance, env, volumes, containerImage)
+	deploy := nova.MetadataDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err

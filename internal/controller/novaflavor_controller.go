@@ -104,7 +104,7 @@ func (r *NovaFlavorReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 			if statusErr := r.Client.Status().Update(ctx, instance); statusErr != nil {
 				err = utilerrors.NewAggregate([]error{statusErr, err})
 			}
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, err
+			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 		}
 
 		controllerutil.RemoveFinalizer(instance, template.Finalizer)
@@ -127,7 +127,7 @@ func (r *NovaFlavorReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		if statusErr := r.Client.Status().Update(ctx, instance); statusErr != nil {
 			err = utilerrors.NewAggregate([]error{statusErr, err})
 		}
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, err
+		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
 	}
 
 	condition := novaflavor.ReadyCondition(instance)

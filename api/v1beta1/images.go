@@ -32,6 +32,10 @@ const (
 
 	DefaultNovaImage = "ghcr.io/ianunruh/openstack-operator-images/nova:master"
 
+	DefaultNovaAPIImage       = "kolla/nova-api:2023.2-ubuntu-jammy"
+	DefaultNovaConductorImage = "kolla/nova-conductor:2023.2-ubuntu-jammy"
+	DefaultNovaSchedulerImage = "kolla/nova-scheduler:2023.2-ubuntu-jammy"
+
 	DefaultOctaviaImage = "ghcr.io/ianunruh/openstack-operator-images/octavia:master"
 
 	DefaultOVNControllerImage = "kolla/ovn-controller:2023.2-ubuntu-jammy"

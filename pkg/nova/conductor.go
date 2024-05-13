@@ -12,11 +12,19 @@ const (
 	ConductorComponentLabel = "conductor"
 )
 
-func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaConductorSpec, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string) *appsv1.StatefulSet {
+func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaConductorSpec, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(name, AppLabel, ConductorComponentLabel)
+
+	probe := &corev1.Probe{
+		ProbeHandler:        amqpHealthProbeHandler("nova-conductor"),
+		InitialDelaySeconds: 5,
+		PeriodSeconds:       10,
+		TimeoutSeconds:      5,
+	}
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
+		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-conductor.json"),
 	}
 
 	sts := template.GenericStatefulSet(template.Component{
@@ -26,27 +34,14 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "conductor",
-				Image: containerImage,
-				Command: []string{
-					"nova-conductor",
-					"--config-file=/etc/nova/nova.conf",
-				},
-				Env: env,
-				LivenessProbe: &corev1.Probe{
-					ProbeHandler:        healthProbeHandler("conductor", true),
-					InitialDelaySeconds: 120,
-					PeriodSeconds:       90,
-					TimeoutSeconds:      70,
-				},
-				StartupProbe: &corev1.Probe{
-					ProbeHandler:        healthProbeHandler("conductor", false),
-					InitialDelaySeconds: 80,
-					PeriodSeconds:       90,
-					TimeoutSeconds:      70,
-				},
-				Resources:    spec.Resources,
-				VolumeMounts: volumeMounts,
+				Name:          "conductor",
+				Image:         spec.Image,
+				Command:       []string{"/usr/local/bin/kolla_start"},
+				Env:           env,
+				LivenessProbe: probe,
+				StartupProbe:  probe,
+				Resources:     spec.Resources,
+				VolumeMounts:  volumeMounts,
 			},
 		},
 		SecurityContext: &corev1.PodSecurityContext{

@@ -65,6 +65,9 @@ type NovaSpec struct {
 
 type NovaAPISpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
@@ -79,6 +82,9 @@ type NovaAPISpec struct {
 
 type NovaConductorSpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
@@ -89,6 +95,9 @@ type NovaConductorSpec struct {
 }
 
 type NovaSchedulerSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
