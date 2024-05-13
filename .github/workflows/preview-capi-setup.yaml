@@ -8,6 +8,7 @@ env:
   CLUSTER_NAME: preview-pr-${{ github.event.pull_request.number }}
   OPENSTACK_FAILURE_DOMAIN: az3
   DNS_ZONE: ospk8s
+  PIPENV_MAX_DEPTH: "4"
 
 jobs:
   setup:
@@ -49,9 +50,6 @@ jobs:
       - name: Install tools
         working-directory: ci/preview/capi
         run: ./install-tools.sh
-
-      - name: Install pipenv deps
-        run: pipenv install
 
       - name: Update operator image
         working-directory: config/manager
