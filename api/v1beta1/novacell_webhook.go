@@ -48,6 +48,7 @@ func (r *NovaCell) Default() {
 
 	r.Spec.Metadata.Image = imageDefault(r.Spec.Metadata.Image, DefaultNovaAPIImage)
 	r.Spec.Conductor.Image = imageDefault(r.Spec.Conductor.Image, DefaultNovaConductorImage)
+	r.Spec.NoVNCProxy.Image = imageDefault(r.Spec.NoVNCProxy.Image, DefaultNovaNoVNCProxyImage)
 
 	if r.Spec.Compute == nil {
 		r.Spec.Compute = map[string]NovaComputeSetSpec{

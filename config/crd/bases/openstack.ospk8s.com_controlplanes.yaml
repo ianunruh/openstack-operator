@@ -3368,6 +3368,8 @@ spec:
                           type: string
                         novncproxy:
                           properties:
+                            image:
+                              type: string
                             ingress:
                               properties:
                                 annotations:
