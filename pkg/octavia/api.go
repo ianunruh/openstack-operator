@@ -62,10 +62,6 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 				VolumeMounts:  volumeMounts,
 			},
 		},
-		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &appUID,
-			FSGroup:   &appUID,
-		},
 		Volumes: volumes,
 	})
 
