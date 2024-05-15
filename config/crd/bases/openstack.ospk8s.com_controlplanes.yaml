@@ -3771,6 +3771,8 @@ spec:
                     type: object
                   api:
                     properties:
+                      image:
+                        type: string
                       ingress:
                         properties:
                           annotations:
@@ -3945,6 +3947,8 @@ spec:
                     type: object
                   driverAgent:
                     properties:
+                      image:
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -4017,6 +4021,8 @@ spec:
                     type: object
                   healthManager:
                     properties:
+                      image:
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -4080,6 +4086,8 @@ spec:
                     type: object
                   housekeeping:
                     properties:
+                      image:
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -4143,10 +4151,9 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                             type: object
                         type: object
-                    required:
-                    - nodeSelector
                     type: object
                   image:
+                    description: deprecated, use component specific images instead
                     type: string
                   nodeSelector:
                     additionalProperties:
@@ -4159,6 +4166,8 @@ spec:
                     type: object
                   worker:
                     properties:
+                      image:
+                        type: string
                       nodeSelector:
                         additionalProperties:
                           type: string
@@ -4222,8 +4231,6 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                             type: object
                         type: object
-                    required:
-                    - nodeSelector
                     type: object
                 type: object
               ovn:
