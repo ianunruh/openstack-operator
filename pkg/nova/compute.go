@@ -20,6 +20,13 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 	runAsRootUser := int64(0)
 	privileged := true
 
+	probe := &corev1.Probe{
+		ProbeHandler:        amqpHealthProbeHandler("nova-compute"),
+		InitialDelaySeconds: 5,
+		PeriodSeconds:       10,
+		TimeoutSeconds:      5,
+	}
+
 	initVolumeMounts := []corev1.VolumeMount{
 		template.VolumeMount("pod-shared", "/tmp/pod-shared"),
 		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
@@ -78,23 +85,13 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 		},
 		Containers: []corev1.Container{
 			{
-				Name:    "compute",
-				Image:   instance.Spec.Image,
-				Command: []string{"/usr/local/bin/kolla_start"},
-				Env:     env,
-				LivenessProbe: &corev1.Probe{
-					ProbeHandler:        healthProbeHandler("compute", true),
-					InitialDelaySeconds: 120,
-					PeriodSeconds:       90,
-					TimeoutSeconds:      70,
-				},
-				StartupProbe: &corev1.Probe{
-					ProbeHandler:        healthProbeHandler("compute", false),
-					InitialDelaySeconds: 80,
-					PeriodSeconds:       90,
-					TimeoutSeconds:      70,
-				},
-				Resources: instance.Spec.Resources,
+				Name:          "compute",
+				Image:         instance.Spec.Image,
+				Command:       []string{"/usr/local/bin/kolla_start"},
+				Env:           env,
+				LivenessProbe: probe,
+				StartupProbe:  probe,
+				Resources:     instance.Spec.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 				},
