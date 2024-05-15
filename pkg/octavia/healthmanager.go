@@ -16,8 +16,11 @@ const (
 func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, HealthManagerComponentLabel)
 
+	spec := instance.Spec.HealthManager
+
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
+		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-health-manager.json"),
 	}
 
 	// openvswitch volumes
@@ -44,12 +47,12 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		NodeSelector: instance.Spec.HealthManager.NodeSelector,
+		NodeSelector: spec.NodeSelector,
 		InitContainers: []corev1.Container{
-			amphora.InitContainer(instance.Spec.Image, instance.Spec.HealthManager.Resources, volumeMounts),
+			amphora.InitContainer(spec.Image, spec.Resources, volumeMounts),
 			{
 				Name:  "init-port",
-				Image: instance.Spec.Image,
+				Image: spec.Image,
 				Command: []string{
 					"bash",
 					"-c",
@@ -59,7 +62,7 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 					template.EnvVar("HM_PORT_ID", port.ID),
 					template.EnvVar("HM_PORT_MAC", port.MACAddress),
 				},
-				Resources: instance.Spec.HealthManager.Resources,
+				Resources: spec.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 					RunAsUser:  &runAsRootUser,
@@ -69,14 +72,11 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 		},
 		Containers: []corev1.Container{
 			{
-				Name:  "manager",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"octavia-health-manager",
-					"--config-file=/etc/octavia/octavia.conf",
-				},
+				Name:      "manager",
+				Image:     spec.Image,
+				Command:   []string{"/usr/local/bin/kolla_start"},
 				Env:       env,
-				Resources: instance.Spec.HealthManager.Resources,
+				Resources: spec.Resources,
 				Ports: []corev1.ContainerPort{
 					{Name: "heartbeat", ContainerPort: 5555, Protocol: corev1.ProtocolUDP},
 				},

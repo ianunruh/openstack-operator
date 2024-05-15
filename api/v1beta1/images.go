@@ -38,7 +38,11 @@ const (
 	DefaultNovaComputeSSHImage = "kolla/nova-ssh:2023.2-ubuntu-jammy"
 	DefaultNovaLibvirtdImage   = "kolla/nova-libvirt:2023.2-ubuntu-jammy"
 
-	DefaultOctaviaImage = "ghcr.io/ianunruh/openstack-operator-images/octavia:master"
+	DefaultOctaviaAPIImage           = "kolla/octavia-api:2023.2-ubuntu-jammy"
+	DefaultOctaviaDriverAgentImage   = "kolla/octavia-driver-agent:2023.2-ubuntu-jammy"
+	DefaultOctaviaHealthManagerImage = "kolla/octavia-health-manager:2023.2-ubuntu-jammy"
+	DefaultOctaviaHousekeepingImage  = "kolla/octavia-housekeeping:2023.2-ubuntu-jammy"
+	DefaultOctaviaWorkerImage        = "kolla/octavia-worker:2023.2-ubuntu-jammy"
 
 	DefaultOVNControllerImage = "kolla/ovn-controller:2023.2-ubuntu-jammy"
 	DefaultOVNNorthdImage     = "kolla/ovn-northd:2023.2-ubuntu-jammy"

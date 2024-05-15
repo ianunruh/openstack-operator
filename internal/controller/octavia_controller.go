@@ -133,6 +133,7 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
+		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),

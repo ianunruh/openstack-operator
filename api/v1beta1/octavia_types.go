@@ -23,6 +23,7 @@ import (
 
 // OctaviaSpec defines the desired state of Octavia
 type OctaviaSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 
@@ -81,6 +82,9 @@ type OctaviaOVNSpec struct {
 
 type OctaviaAPISpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
@@ -95,6 +99,9 @@ type OctaviaAPISpec struct {
 
 type OctaviaDriverAgentSpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional
@@ -106,6 +113,9 @@ type OctaviaDriverAgentSpec struct {
 
 type OctaviaHealthManagerSpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	NodeSelector map[string]string `json:"nodeSelector"`
 
 	// +optional
@@ -113,6 +123,10 @@ type OctaviaHealthManagerSpec struct {
 }
 
 type OctaviaHousekeepingSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	NodeSelector map[string]string `json:"nodeSelector"`
 
 	// +optional
@@ -123,6 +137,10 @@ type OctaviaHousekeepingSpec struct {
 }
 
 type OctaviaWorkerSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	NodeSelector map[string]string `json:"nodeSelector"`
 
 	// +optional

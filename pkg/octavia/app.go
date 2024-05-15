@@ -56,6 +56,14 @@ func ConfigMap(instance *openstackv1beta1.Octavia) *corev1.ConfigMap {
 
 	cm.Data["octavia.conf"] = template.MustOutputINI(cfg).String()
 
+	cm.Data["httpd.conf"] = template.MustReadFile(AppLabel, "httpd.conf")
+
+	cm.Data["kolla-octavia-api.json"] = template.MustReadFile(AppLabel, "kolla-octavia-api.json")
+	cm.Data["kolla-octavia-driver-agent.json"] = template.MustReadFile(AppLabel, "kolla-octavia-driver-agent.json")
+	cm.Data["kolla-octavia-health-manager.json"] = template.MustReadFile(AppLabel, "kolla-octavia-health-manager.json")
+	cm.Data["kolla-octavia-housekeeping.json"] = template.MustReadFile(AppLabel, "kolla-octavia-housekeeping.json")
+	cm.Data["kolla-octavia-worker.json"] = template.MustReadFile(AppLabel, "kolla-octavia-worker.json")
+
 	return cm
 }
 
