@@ -41,7 +41,7 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 		Containers: []corev1.Container{
 			{
 				Name:         "housekeeping",
-				Image:        instance.Spec.Image,
+				Image:        spec.Image,
 				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
 				Resources:    spec.Resources,
