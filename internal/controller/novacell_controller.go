@@ -142,7 +142,7 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.DBSyncJobHash,
-		novacell.DBSyncJob(instance, env, volumes, cluster.Spec.Image))
+		novacell.DBSyncJob(instance, env, volumes, cluster.Spec.API.Image))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}
@@ -155,7 +155,7 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileNoVNCProxy(ctx, instance, env, volumes, cluster.Spec.Image, log); err != nil {
+	if err := r.reconcileNoVNCProxy(ctx, instance, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -222,7 +222,7 @@ func (r *NovaCellReconciler) reconcileMetadata(ctx context.Context, instance *op
 	return nil
 }
 
-func (r *NovaCellReconciler) reconcileNoVNCProxy(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
+func (r *NovaCellReconciler) reconcileNoVNCProxy(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	svc := nova.NoVNCProxyService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -239,7 +239,7 @@ func (r *NovaCellReconciler) reconcileNoVNCProxy(ctx context.Context, instance *
 		}
 	}
 
-	deploy := nova.NoVNCProxyDeployment(instance, env, volumes, containerImage)
+	deploy := nova.NoVNCProxyDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err

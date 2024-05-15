@@ -18,8 +18,6 @@ const (
 
 	DefaultKeystoneAPIImage = "kolla/keystone:2023.2-ubuntu-jammy"
 
-	DefaultLibvirtImage = "ghcr.io/ianunruh/openstack-operator-images/libvirt:master"
-
 	DefaultMagnumAPIImage       = "kolla/magnum-api:2023.2-ubuntu-jammy"
 	DefaultMagnumConductorImage = "kolla/magnum-conductor:2023.2-ubuntu-jammy"
 
@@ -30,11 +28,15 @@ const (
 	DefaultNeutronMetadataAgentImage = "kolla/neutron-metadata-agent:2023.2-ubuntu-jammy"
 	DefaultNeutronServerImage        = "kolla/neutron-server:2023.2-ubuntu-jammy"
 
-	DefaultNovaImage = "ghcr.io/ianunruh/openstack-operator-images/nova:master"
-
 	DefaultNovaAPIImage       = "kolla/nova-api:2023.2-ubuntu-jammy"
 	DefaultNovaConductorImage = "kolla/nova-conductor:2023.2-ubuntu-jammy"
 	DefaultNovaSchedulerImage = "kolla/nova-scheduler:2023.2-ubuntu-jammy"
+
+	DefaultNovaNoVNCProxyImage = "kolla/nova-novncproxy:2023.2-ubuntu-jammy"
+
+	DefaultNovaComputeImage    = "kolla/nova-compute:2023.2-ubuntu-jammy"
+	DefaultNovaComputeSSHImage = "kolla/nova-ssh:2023.2-ubuntu-jammy"
+	DefaultNovaLibvirtdImage   = "kolla/nova-libvirt:2023.2-ubuntu-jammy"
 
 	DefaultOctaviaImage = "ghcr.io/ianunruh/openstack-operator-images/octavia:master"
 

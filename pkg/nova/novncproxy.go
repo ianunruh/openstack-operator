@@ -13,31 +13,31 @@ const (
 	NoVNCProxyComponentLabel = "novncproxy"
 )
 
-func NoVNCProxyDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string) *appsv1.Deployment {
+func NoVNCProxyDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, NoVNCProxyComponentLabel)
+
+	spec := instance.Spec.NoVNCProxy
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
+		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-novncproxy.json"),
 	}
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.NoVNCProxy.Replicas,
-		NodeSelector: instance.Spec.NoVNCProxy.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:  "novncproxy",
-				Image: containerImage,
-				Command: []string{
-					"nova-novncproxy",
-					"--config-file=/etc/nova/nova.conf",
-				},
-				Env: env,
+				Name:    "novncproxy",
+				Image:   spec.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 6080},
 				},
-				Resources:    instance.Spec.NoVNCProxy.Resources,
+				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

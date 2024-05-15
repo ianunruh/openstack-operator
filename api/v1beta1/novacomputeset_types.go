@@ -23,14 +23,30 @@ import (
 
 // NovaComputeSetSpec defines the desired state of NovaComputeSet
 type NovaComputeSetSpec struct {
+	// +optional
 	Cell string `json:"cell,omitempty"`
 
+	// +optional
 	Image string `json:"image,omitempty"`
 
+	// +optional
 	Libvirtd NovaLibvirtdSpec `json:"libvirtd,omitempty"`
 
+	// +optional
+	SSH NovaComputeSSHSpec `json:"ssh,omitempty"`
+
+	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
+
+type NovaComputeSSHSpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 

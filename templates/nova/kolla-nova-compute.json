@@ -1,0 +1,3 @@
+{
+    "command": "nova-compute --config-file /etc/nova/nova.conf --config-file /tmp/pod-shared/nova-hypervisor.conf"
+}

@@ -3,7 +3,6 @@ kind: Nova
 metadata:
   name: nova
 spec:
-  image: ghcr.io/ianunruh/openstack-operator-images/nova:master
   api:
     image: kolla/nova-api:2023.2-ubuntu-jammy
     replicas: 2
@@ -35,8 +34,6 @@ spec:
   - name: cell1
     compute:
       default:
-        libvirtd:
-          image: ghcr.io/ianunruh/openstack-operator-images/libvirtd:master
         nodeSelector:
           openstack/compute-node: enabled
     database:

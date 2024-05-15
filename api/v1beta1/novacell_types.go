@@ -63,6 +63,9 @@ type NovaMetadataSpec struct {
 
 type NovaNoVNCProxySpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
 	// +optional
