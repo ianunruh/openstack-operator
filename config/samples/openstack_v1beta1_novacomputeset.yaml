@@ -4,9 +4,11 @@ metadata:
   name: nova-cell1-default
 spec:
   cell: cell1
-  image: ghcr.io/ianunruh/openstack-operator-images/nova:master
+  image: kolla/nova-compute:2023.2-ubuntu-jammy
   libvirtd:
-    image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
+    image: kolla/nova-libvirt:2023.2-ubuntu-jammy
+  ssh:
+    image: kolla/nova-ssh:2023.2-ubuntu-jammy
   nodeSelector:
     openstack/cloud: openstack
     openstack/compute-node: enabled

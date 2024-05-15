@@ -6,8 +6,6 @@ spec:
   name: cell1
   compute:
     default:
-      libvirtd:
-        image: ghcr.io/ianunruh/openstack-operator-images/libvirt:master
       nodeSelector:
         openstack/compute-node: enabled
   broker:
