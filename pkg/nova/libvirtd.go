@@ -20,11 +20,17 @@ func LibvirtdConfigMap(instance *openstackv1beta1.NovaComputeSet) *corev1.Config
 	cm.Data["libvirtd.conf"] = template.MustReadFile(AppLabel, "libvirtd.conf")
 	cm.Data["qemu.conf"] = template.MustReadFile(AppLabel, "qemu.conf")
 
+	cm.Data["libvirtd-start.sh"] = template.MustReadFile(AppLabel, "libvirtd-start.sh")
+
+	cm.Data["kolla-nova-libvirtd.json"] = template.MustReadFile(AppLabel, "kolla-nova-libvirtd.json")
+
 	return cm
 }
 
 func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, LibvirtdComponentLabel)
+
+	spec := instance.Spec.Libvirtd
 
 	configMapName := template.Combine(instance.Name, "libvirtd")
 
@@ -42,9 +48,11 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.E
 		TimeoutSeconds:      5,
 	}
 
-	extraVolumeMounts := []corev1.VolumeMount{
+	volumeMounts = append(volumeMounts,
 		template.SubPathVolumeMount("etc-libvirt", "/etc/libvirt/libvirtd.conf", "libvirtd.conf"),
 		template.SubPathVolumeMount("etc-libvirt", "/etc/libvirt/qemu.conf", "qemu.conf"),
+		template.SubPathVolumeMount("etc-libvirt", "/scripts/libvirtd-start.sh", "libvirtd-start.sh"),
+		template.SubPathVolumeMount("etc-libvirt", "/var/lib/kolla/config_files/config.json", "kolla-nova-libvirtd.json"),
 		template.VolumeMount("pod-tmp", "/tmp"),
 		template.VolumeMount("host-dev", "/dev"),
 		template.VolumeMount("host-etc-libvirt-qemu", "/etc/libvirt/qemu"),
@@ -54,10 +62,9 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.E
 		template.VolumeMount("host-sys-fs-cgroup", "/sys/fs/cgroup"),
 		template.BidirectionalVolumeMount("host-var-lib-libvirt", "/var/lib/libvirt"),
 		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
-		template.VolumeMount("host-var-log-libvirt", "/var/log/libvirt"),
-	}
+		template.VolumeMount("host-var-log-libvirt", "/var/log/libvirt"))
 
-	extraVolumes := []corev1.Volume{
+	volumes = append(volumes,
 		template.ConfigMapVolume("etc-libvirt", configMapName, nil),
 		template.EmptyDirVolume("pod-tmp"),
 		template.HostPathVolume("host-dev", "/dev"),
@@ -68,8 +75,7 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.E
 		template.HostPathVolume("host-sys-fs-cgroup", "/sys/fs/cgroup"),
 		template.HostPathVolume("host-var-lib-libvirt", "/var/lib/libvirt"),
 		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"),
-		template.HostPathVolume("host-var-log-libvirt", "/var/log/libvirt"),
-	}
+		template.HostPathVolume("host-var-log-libvirt", "/var/log/libvirt"))
 
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,
@@ -80,13 +86,9 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.E
 		},
 		Containers: []corev1.Container{
 			{
-				Name:  "libvirtd",
-				Image: instance.Spec.Libvirtd.Image,
-				Command: []string{
-					"bash",
-					"-c",
-					template.MustReadFile(AppLabel, "libvirtd-start.sh"),
-				},
+				Name:    "libvirtd",
+				Image:   spec.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
 				Lifecycle: &corev1.Lifecycle{
 					PreStop: &corev1.LifecycleHandler{
 						Exec: &corev1.ExecAction{
@@ -101,14 +103,14 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.E
 				Env:           env,
 				LivenessProbe: probe,
 				StartupProbe:  probe,
-				Resources:     instance.Spec.Libvirtd.Resources,
+				Resources:     spec.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 				},
-				VolumeMounts: append(volumeMounts, extraVolumeMounts...),
+				VolumeMounts: volumeMounts,
 			},
 		},
-		Volumes: append(volumes, extraVolumes...),
+		Volumes: volumes,
 	})
 
 	ds.Name = template.Combine(instance.Name, "libvirtd")

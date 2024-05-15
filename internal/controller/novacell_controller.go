@@ -142,7 +142,7 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.DBSyncJobHash,
-		novacell.DBSyncJob(instance, env, volumes, cluster.Spec.Image))
+		novacell.DBSyncJob(instance, env, volumes, cluster.Spec.API.Image))
 	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
 		return result, err
 	}

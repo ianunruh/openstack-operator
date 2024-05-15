@@ -23,6 +23,7 @@ import (
 
 // NovaSpec defines the desired state of Nova
 type NovaSpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
 

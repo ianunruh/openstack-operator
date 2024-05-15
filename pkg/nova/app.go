@@ -41,7 +41,12 @@ func ConfigMap(instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder)
 
 	cm.Data["nova.conf"] = template.MustOutputINI(cfg).String()
 
+	cm.Data["compute-ssh.sh"] = template.MustReadFile(AppLabel, "compute-ssh.sh")
+
 	cm.Data["kolla-nova-api.json"] = template.MustReadFile(AppLabel, "kolla-nova-api.json")
+	cm.Data["kolla-nova-compute.json"] = template.MustReadFile(AppLabel, "kolla-nova-compute.json")
+	cm.Data["kolla-nova-compute-ssh.json"] = template.MustReadFile(AppLabel, "kolla-nova-compute-ssh.json")
+	cm.Data["kolla-nova-compute.json"] = template.MustReadFile(AppLabel, "kolla-nova-compute.json")
 	cm.Data["kolla-nova-conductor.json"] = template.MustReadFile(AppLabel, "kolla-nova-conductor.json")
 	cm.Data["kolla-nova-novncproxy.json"] = template.MustReadFile(AppLabel, "kolla-nova-novncproxy.json")
 	cm.Data["kolla-nova-scheduler.json"] = template.MustReadFile(AppLabel, "kolla-nova-scheduler.json")

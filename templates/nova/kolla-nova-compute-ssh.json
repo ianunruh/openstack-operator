@@ -1,0 +1,3 @@
+{
+    "command": "bash /scripts/compute-ssh.sh"
+}

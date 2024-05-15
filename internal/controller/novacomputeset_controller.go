@@ -120,6 +120,10 @@ func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	// TODO most of these are probably not needed
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
+		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
+		template.EnvVar("KOLLA_SKIP_EXTEND_START", "true"),
+		// TODO make ingress optional
+		template.EnvVar("OS_VNC__NOVNCPROXY_BASE_URL", fmt.Sprintf("https://%s/vnc_auto.html", cell.Spec.NoVNCProxy.Ingress.Host)),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", cell.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", cell.Spec.Database.Secret, "connection"),
 		template.SecretEnvVar("OS_KEYSTONE_AUTHTOKEN__MEMCACHE_SECRET_KEY", "keystone-memcache", "secret-key"),
@@ -137,11 +141,11 @@ func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileCompute(ctx, instance, cell, cinder, env, volumes, cluster.Spec.Image, log); err != nil {
+	if err := r.reconcileCompute(ctx, instance, cinder, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileComputeSSH(ctx, instance, cluster.Spec.Image, log); err != nil {
+	if err := r.reconcileComputeSSH(ctx, instance, configHash, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -158,6 +162,8 @@ func (r *NovaComputeSetReconciler) reconcileLibvirtd(ctx context.Context, instan
 
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
+		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
+		template.EnvVar("KOLLA_SKIP_EXTEND_START", "true"),
 	}
 
 	var (
@@ -188,12 +194,7 @@ func (r *NovaComputeSetReconciler) reconcileLibvirtd(ctx context.Context, instan
 	return nil
 }
 
-func (r *NovaComputeSetReconciler) reconcileCompute(ctx context.Context, instance *openstackv1beta1.NovaComputeSet, cell *openstackv1beta1.NovaCell, cinder *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string, log logr.Logger) error {
-	extraEnvVars := []corev1.EnvVar{
-		// TODO make ingress optional
-		template.EnvVar("OS_VNC__NOVNCPROXY_BASE_URL", fmt.Sprintf("https://%s/vnc_auto.html", cell.Spec.NoVNCProxy.Ingress.Host)),
-	}
-
+func (r *NovaComputeSetReconciler) reconcileCompute(ctx context.Context, instance *openstackv1beta1.NovaComputeSet, cinder *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	var volumeMounts []corev1.VolumeMount
 
 	if cinder != nil {
@@ -209,9 +210,7 @@ func (r *NovaComputeSetReconciler) reconcileCompute(ctx context.Context, instanc
 		}
 	}
 
-	env = append(env, extraEnvVars...)
-
-	ds := nova.ComputeDaemonSet(instance, env, volumeMounts, volumes, containerImage)
+	ds := nova.ComputeDaemonSet(instance, env, volumeMounts, volumes)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err
@@ -220,8 +219,14 @@ func (r *NovaComputeSetReconciler) reconcileCompute(ctx context.Context, instanc
 	return nil
 }
 
-func (r *NovaComputeSetReconciler) reconcileComputeSSH(ctx context.Context, instance *openstackv1beta1.NovaComputeSet, containerImage string, log logr.Logger) error {
-	ds := nova.ComputeSSHDaemonSet(instance, containerImage)
+func (r *NovaComputeSetReconciler) reconcileComputeSSH(ctx context.Context, instance *openstackv1beta1.NovaComputeSet, configHash string, log logr.Logger) error {
+	env := []corev1.EnvVar{
+		template.EnvVar("CONFIG_HASH", configHash),
+		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
+		template.EnvVar("KOLLA_SKIP_EXTEND_START", "true"),
+	}
+
+	ds := nova.ComputeSSHDaemonSet(instance, env)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err

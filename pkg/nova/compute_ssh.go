@@ -12,12 +12,20 @@ import (
 
 const (
 	ComputeSSHComponentLabel = "compute-ssh"
+
+	ComputeSSHPort = 2022
 )
 
-func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaComputeSet, containerImage string) *appsv1.DaemonSet {
+func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.EnvVar) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, ComputeSSHComponentLabel)
 
+	spec := instance.Spec.SSH
+
 	defaultMode := int32(0400)
+
+	env = append(env,
+		template.EnvVar("NOVA_USER_UID", strconv.Itoa(int(appUID))),
+		template.EnvVar("SSH_PORT", strconv.Itoa(ComputeSSHPort)))
 
 	volumes := []corev1.Volume{
 		template.SecretVolume("ssh-keys", "nova-compute-ssh", &defaultMode),
@@ -25,6 +33,8 @@ func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaComputeSet, containerIma
 	}
 
 	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-nova", "/scripts/compute-ssh.sh", "compute-ssh.sh"),
+		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-compute-ssh.json"),
 		template.VolumeMount("ssh-keys", "/tmp/ssh-keys"),
 		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
 	}
@@ -41,20 +51,14 @@ func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaComputeSet, containerIma
 		},
 		Containers: []corev1.Container{
 			{
-				Name:  "ssh",
-				Image: containerImage,
-				Command: []string{
-					"bash",
-					"-c",
-					template.MustReadFile(AppLabel, "compute-ssh.sh"),
-				},
-				Env: []corev1.EnvVar{
-					template.EnvVar("NOVA_USER_UID", strconv.Itoa(int(appUID))),
-					template.EnvVar("SSH_PORT", "2022"),
-				},
+				Name:    "ssh",
+				Image:   spec.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				Ports: []corev1.ContainerPort{
-					{Name: "ssh", ContainerPort: 2022},
+					{Name: "ssh", ContainerPort: ComputeSSHPort},
 				},
+				Resources: spec.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					RunAsUser:  &runAsRootUser,
 					Privileged: &privileged,

@@ -14,7 +14,7 @@ const (
 	ComputeComponentLabel = "compute"
 )
 
-func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume, containerImage string) *appsv1.DaemonSet {
+func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.EnvVar, volumeMounts []corev1.VolumeMount, volumes []corev1.Volume) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, ComputeComponentLabel)
 
 	runAsRootUser := int64(0)
@@ -26,8 +26,9 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
 	}
 
-	extraVolumeMounts := []corev1.VolumeMount{
+	volumeMounts = append(volumeMounts,
 		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
+		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-compute.json"),
 		template.VolumeMount("pod-tmp", "/tmp"),
 		template.VolumeMount("pod-shared", "/tmp/pod-shared"),
 		template.VolumeMount("host-dev", "/dev"),
@@ -36,10 +37,9 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 		template.VolumeMount("host-run", "/run"),
 		template.ReadOnlyVolumeMount("host-sys-fs-cgroup", "/sys/fs/cgroup"),
 		template.BidirectionalVolumeMount("host-var-lib-libvirt", "/var/lib/libvirt"),
-		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
-	}
+		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"))
 
-	extraVolumes := []corev1.Volume{
+	volumes = append(volumes,
 		template.EmptyDirVolume("pod-tmp"),
 		template.EmptyDirVolume("pod-shared"),
 		template.HostPathVolume("host-dev", "/dev"),
@@ -48,8 +48,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 		template.HostPathVolume("host-run", "/run"),
 		template.HostPathVolume("host-sys-fs-cgroup", "/sys/fs/cgroup"),
 		template.HostPathVolume("host-var-lib-libvirt", "/var/lib/libvirt"),
-		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"),
-	}
+		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"))
 
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,
@@ -61,7 +60,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 		InitContainers: []corev1.Container{
 			{
 				Name:  "compute-init",
-				Image: containerImage,
+				Image: instance.Spec.Image,
 				Command: []string{
 					"bash",
 					"-c",
@@ -80,14 +79,10 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 		},
 		Containers: []corev1.Container{
 			{
-				Name:  "compute",
-				Image: containerImage,
-				Command: []string{
-					"nova-compute",
-					"--config-file=/etc/nova/nova.conf",
-					"--config-file=/tmp/pod-shared/nova-hypervisor.conf",
-				},
-				Env: env,
+				Name:    "compute",
+				Image:   instance.Spec.Image,
+				Command: []string{"/usr/local/bin/kolla_start"},
+				Env:     env,
 				LivenessProbe: &corev1.Probe{
 					ProbeHandler:        healthProbeHandler("compute", true),
 					InitialDelaySeconds: 120,
@@ -105,10 +100,10 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 					Privileged:             &privileged,
 					ReadOnlyRootFilesystem: &rootOnlyRootFilesystem,
 				},
-				VolumeMounts: append(volumeMounts, extraVolumeMounts...),
+				VolumeMounts: volumeMounts,
 			},
 		},
-		Volumes: append(volumes, extraVolumes...),
+		Volumes: volumes,
 	})
 
 	ds.Name = template.Combine(instance.Name, "compute")
