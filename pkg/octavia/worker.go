@@ -16,8 +16,11 @@ const (
 func WorkerDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, WorkerComponentLabel)
 
+	spec := instance.Spec.Worker
+
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
+		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-worker.json"),
 	}
 
 	volumeMounts = append(volumeMounts, amphora.VolumeMounts(instance)...)
@@ -26,21 +29,18 @@ func WorkerDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, v
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.Worker.Replicas,
-		NodeSelector: instance.Spec.Worker.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		InitContainers: []corev1.Container{
-			amphora.InitContainer(instance.Spec.Image, instance.Spec.Worker.Resources, volumeMounts),
+			amphora.InitContainer(spec.Image, spec.Resources, volumeMounts),
 		},
 		Containers: []corev1.Container{
 			{
-				Name:  "worker",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"octavia-worker",
-					"--config-file=/etc/octavia/octavia.conf",
-				},
+				Name:         "worker",
+				Image:        spec.Image,
+				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
-				Resources:    instance.Spec.Worker.Resources,
+				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

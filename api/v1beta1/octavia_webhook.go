@@ -48,7 +48,12 @@ func (r *Octavia) Default() {
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
-	r.Spec.Image = imageDefault(r.Spec.Image, DefaultOctaviaImage)
+
+	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultOctaviaAPIImage)
+	r.Spec.DriverAgent.Image = imageDefault(r.Spec.DriverAgent.Image, DefaultOctaviaDriverAgentImage)
+	r.Spec.HealthManager.Image = imageDefault(r.Spec.HealthManager.Image, DefaultOctaviaHealthManagerImage)
+	r.Spec.Housekeeping.Image = imageDefault(r.Spec.Housekeeping.Image, DefaultOctaviaHousekeepingImage)
+	r.Spec.Worker.Image = imageDefault(r.Spec.Worker.Image, DefaultOctaviaWorkerImage)
 
 	if r.Spec.Amphora.Enabled {
 		if r.Spec.Amphora.ImageURL == "" {

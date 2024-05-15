@@ -16,8 +16,11 @@ const (
 func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, HousekeepingComponentLabel)
 
+	spec := instance.Spec.Housekeeping
+
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
+		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-housekeeping.json"),
 	}
 
 	var initContainers []corev1.Container
@@ -26,25 +29,22 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 		volumeMounts = append(volumeMounts, amphora.VolumeMounts(instance)...)
 		volumes = append(volumes, amphora.Volumes(instance)...)
 
-		initContainers = append(initContainers, amphora.InitContainer(instance.Spec.Image, instance.Spec.Housekeeping.Resources, volumeMounts))
+		initContainers = append(initContainers, amphora.InitContainer(spec.Image, spec.Resources, volumeMounts))
 	}
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:      instance.Namespace,
 		Labels:         labels,
-		Replicas:       instance.Spec.Housekeeping.Replicas,
-		NodeSelector:   instance.Spec.Housekeeping.NodeSelector,
+		Replicas:       spec.Replicas,
+		NodeSelector:   spec.NodeSelector,
 		InitContainers: initContainers,
 		Containers: []corev1.Container{
 			{
-				Name:  "housekeeping",
-				Image: instance.Spec.Image,
-				Command: []string{
-					"octavia-housekeeping",
-					"--config-file=/etc/octavia/octavia.conf",
-				},
+				Name:         "housekeeping",
+				Image:        spec.Image,
+				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
-				Resources:    instance.Spec.Housekeeping.Resources,
+				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

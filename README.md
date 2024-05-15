@@ -38,12 +38,8 @@ Also supports the following optional components.
 
 ## Images
 
-This operator utilizes custom container images based on Ubuntu OpenStack, using the 22.04 Jammy release that ships
+This operator utilizes Kolla container images based on Ubuntu OpenStack, using the 22.04 Jammy release that ships
 with [OpenStack 2023.2](https://docs.openstack.org/2023.2/).
-
-These images are built from [openstack-operator-images](https://github.com/ianunruh/openstack-operator-images)
-using GitHub Actions for CI. Currently images are just tagged as `master`, there may be
-a more stable tag in the future.
 
 Stateful services like MariaDB, Memcached, and RabbitMQ use container images from Bitnami.
 
