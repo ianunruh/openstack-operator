@@ -145,7 +145,7 @@ func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileComputeSSH(ctx, instance, configHash, log); err != nil {
+	if err := r.reconcileComputeSSH(ctx, instance, configHash, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -219,14 +219,14 @@ func (r *NovaComputeSetReconciler) reconcileCompute(ctx context.Context, instanc
 	return nil
 }
 
-func (r *NovaComputeSetReconciler) reconcileComputeSSH(ctx context.Context, instance *openstackv1beta1.NovaComputeSet, configHash string, log logr.Logger) error {
+func (r *NovaComputeSetReconciler) reconcileComputeSSH(ctx context.Context, instance *openstackv1beta1.NovaComputeSet, configHash string, volumes []corev1.Volume, log logr.Logger) error {
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
 		template.EnvVar("KOLLA_SKIP_EXTEND_START", "true"),
 	}
 
-	ds := nova.ComputeSSHDaemonSet(instance, env)
+	ds := nova.ComputeSSHDaemonSet(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err

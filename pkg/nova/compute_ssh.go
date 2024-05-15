@@ -16,7 +16,7 @@ const (
 	ComputeSSHPort = 2022
 )
 
-func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.EnvVar) *appsv1.DaemonSet {
+func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, ComputeSSHComponentLabel)
 
 	spec := instance.Spec.SSH
@@ -27,10 +27,9 @@ func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1
 		template.EnvVar("NOVA_USER_UID", strconv.Itoa(int(appUID))),
 		template.EnvVar("SSH_PORT", strconv.Itoa(ComputeSSHPort)))
 
-	volumes := []corev1.Volume{
+	volumes = append(volumes,
 		template.SecretVolume("ssh-keys", "nova-compute-ssh", &defaultMode),
-		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"),
-	}
+		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"))
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-nova", "/scripts/compute-ssh.sh", "compute-ssh.sh"),

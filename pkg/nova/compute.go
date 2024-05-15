@@ -19,7 +19,6 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 
 	runAsRootUser := int64(0)
 	privileged := true
-	rootOnlyRootFilesystem := true
 
 	initVolumeMounts := []corev1.VolumeMount{
 		template.VolumeMount("pod-shared", "/tmp/pod-shared"),
@@ -97,8 +96,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 				},
 				Resources: instance.Spec.Resources,
 				SecurityContext: &corev1.SecurityContext{
-					Privileged:             &privileged,
-					ReadOnlyRootFilesystem: &rootOnlyRootFilesystem,
+					Privileged: &privileged,
 				},
 				VolumeMounts: volumeMounts,
 			},
