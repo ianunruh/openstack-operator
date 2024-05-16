@@ -65,7 +65,7 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev1.E
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		NodeSelector: instance.Spec.Node.NodeSelector,
+		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:          "ovsdb",

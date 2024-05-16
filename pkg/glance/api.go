@@ -20,6 +20,8 @@ const (
 func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
+	spec := instance.Spec.API
+
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			TCPSocket: &corev1.TCPSocketAction{
@@ -61,15 +63,15 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.API.Replicas,
-		NodeSelector: instance.Spec.API.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: template.NodePodAntiAffinity(labels),
 		},
 		Containers: []corev1.Container{
 			{
 				Name:    "api",
-				Image:   instance.Spec.API.Image,
+				Image:   spec.Image,
 				Command: []string{"/usr/local/bin/kolla_start"},
 				Env:     env,
 				Ports: []corev1.ContainerPort{
@@ -77,7 +79,7 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
-				Resources:     instance.Spec.API.Resources,
+				Resources:     spec.Resources,
 				VolumeMounts:  volumeMounts,
 			},
 		},

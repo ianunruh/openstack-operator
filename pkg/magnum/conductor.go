@@ -15,6 +15,8 @@ const (
 func ConductorStatefulSet(instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, ConductorComponentLabel)
 
+	spec := instance.Spec.Conductor
+
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-magnum", "/etc/magnum/magnum.conf", "magnum.conf"),
 		template.SubPathVolumeMount("etc-magnum", "/var/lib/kolla/config_files/config.json", "kolla-magnum-conductor.json"),
@@ -23,15 +25,15 @@ func ConductorStatefulSet(instance *openstackv1beta1.Magnum, env []corev1.EnvVar
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.Conductor.Replicas,
-		NodeSelector: instance.Spec.Conductor.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:         "conductor",
-				Image:        instance.Spec.Conductor.Image,
+				Image:        spec.Image,
 				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
-				Resources:    instance.Spec.Conductor.Resources,
+				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

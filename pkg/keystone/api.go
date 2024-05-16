@@ -18,6 +18,8 @@ const (
 func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
+	spec := instance.Spec.API
+
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
@@ -38,41 +40,39 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 		template.VolumeMount("pod-fernet-keys", "/etc/keystone/fernet-keys"),
 	}
 
-	initVolumeMounts := []corev1.VolumeMount{
+	initVolumeMounts := append(volumeMounts,
 		template.VolumeMount("credential-keys", "/var/run/secrets/credential-keys"),
-		template.VolumeMount("fernet-keys", "/var/run/secrets/fernet-keys"),
-	}
+		template.VolumeMount("fernet-keys", "/var/run/secrets/fernet-keys"))
 
-	extraVolumes := []corev1.Volume{
+	volumes = append(volumes,
 		template.EmptyDirVolume("pod-credential-keys"),
-		template.EmptyDirVolume("pod-fernet-keys"),
-	}
+		template.EmptyDirVolume("pod-fernet-keys"))
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.API.Replicas,
-		NodeSelector: instance.Spec.API.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: template.NodePodAntiAffinity(labels),
 		},
 		InitContainers: []corev1.Container{
 			{
 				Name:  "init-keys",
-				Image: instance.Spec.API.Image,
+				Image: spec.Image,
 				Command: []string{
 					"bash",
 					"-c",
 					template.MustReadFile(AppLabel, "init-keys.sh"),
 				},
-				Resources:    instance.Spec.API.Resources,
-				VolumeMounts: append(volumeMounts, initVolumeMounts...),
+				Resources:    spec.Resources,
+				VolumeMounts: initVolumeMounts,
 			},
 		},
 		Containers: []corev1.Container{
 			{
 				Name:      "api",
-				Image:     instance.Spec.API.Image,
+				Image:     spec.Image,
 				Command:   []string{"/usr/local/bin/kolla_start"},
 				Lifecycle: httpd.Lifecycle(),
 				Env:       env,
@@ -81,11 +81,11 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
-				Resources:     instance.Spec.API.Resources,
+				Resources:     spec.Resources,
 				VolumeMounts:  volumeMounts,
 			},
 		},
-		Volumes: append(volumes, extraVolumes...),
+		Volumes: volumes,
 	})
 
 	deploy.Name = template.Combine(instance.Name, "api")

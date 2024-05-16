@@ -15,11 +15,9 @@ const (
 func MetadataAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.DaemonSet {
 	labels := template.Labels(instance.Name, AppLabel, MetadataAgentComponentLabel)
 
-	privileged := true
+	spec := instance.Spec.MetadataAgent
 
-	extraVolumes := []corev1.Volume{
-		template.HostPathVolume("host-run-netns", "/run/netns"),
-	}
+	privileged := true
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-neutron", "/etc/neutron/neutron.conf", "neutron.conf"),
@@ -28,24 +26,27 @@ func MetadataAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.Env
 		template.SubPathVolumeMount("etc-neutron", "/var/lib/kolla/config_files/config.json", "kolla-neutron-metadata-agent.json"),
 	}
 
+	volumes = append(volumes,
+		template.HostPathVolume("host-run-netns", "/run/netns"))
+
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		NodeSelector: instance.Spec.MetadataAgent.NodeSelector,
+		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:      "agent",
-				Image:     instance.Spec.MetadataAgent.Image,
+				Image:     spec.Image,
 				Command:   []string{"/usr/local/bin/kolla_start"},
 				Env:       env,
-				Resources: instance.Spec.MetadataAgent.Resources,
+				Resources: spec.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,
 				},
 				VolumeMounts: volumeMounts,
 			},
 		},
-		Volumes: append(volumes, extraVolumes...),
+		Volumes: volumes,
 	})
 
 	ds.Name = template.Combine(instance.Name, "metadata-agent")

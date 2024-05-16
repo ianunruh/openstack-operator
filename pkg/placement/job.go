@@ -11,6 +11,8 @@ import (
 func DBSyncJob(instance *openstackv1beta1.Placement, env []corev1.EnvVar, volumes []corev1.Volume) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, AppLabel)
 
+	spec := instance.Spec.DBSyncJob
+
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-placement", "/etc/placement/placement.conf", "placement.conf"),
 	}
@@ -28,11 +30,11 @@ func DBSyncJob(instance *openstackv1beta1.Placement, env []corev1.EnvVar, volume
 					"sync",
 				},
 				Env:          env,
-				Resources:    instance.Spec.DBSyncJob.Resources,
+				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},
-		NodeSelector: instance.Spec.DBSyncJob.NodeSelector,
+		NodeSelector: spec.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
 			RunAsUser: &appUID,
 			FSGroup:   &appUID,

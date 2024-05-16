@@ -22,6 +22,8 @@ var (
 func DBSyncJob(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, containerImage string) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, nova.AppLabel)
 
+	spec := instance.Spec.DBSyncJob
+
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
 	}
@@ -39,11 +41,11 @@ func DBSyncJob(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes
 					template.MustReadFile(nova.AppLabel, "cell-db-sync.sh"),
 				},
 				Env:          env,
-				Resources:    instance.Spec.DBSyncJob.Resources,
+				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},
-		NodeSelector: instance.Spec.DBSyncJob.NodeSelector,
+		NodeSelector: spec.NodeSelector,
 		SecurityContext: &corev1.PodSecurityContext{
 			RunAsUser: &appUID,
 			FSGroup:   &appUID,
