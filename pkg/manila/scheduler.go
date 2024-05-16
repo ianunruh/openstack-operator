@@ -15,6 +15,8 @@ const (
 func SchedulerStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, SchedulerComponentLabel)
 
+	spec := instance.Spec.Scheduler
+
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-manila", "/etc/manila/manila.conf", "manila.conf"),
 		template.SubPathVolumeMount("etc-manila", "/var/lib/kolla/config_files/config.json", "kolla-manila-scheduler.json"),
@@ -23,15 +25,15 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.Scheduler.Replicas,
-		NodeSelector: instance.Spec.Scheduler.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:         "scheduler",
-				Image:        instance.Spec.Scheduler.Image,
+				Image:        spec.Image,
 				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
-				Resources:    instance.Spec.Scheduler.Resources,
+				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

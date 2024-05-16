@@ -18,6 +18,8 @@ const (
 func ServerDeployment(instance *openstackv1beta1.Horizon, env []corev1.EnvVar) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, ServerComponentLabel)
 
+	spec := instance.Spec.Server
+
 	probeHandler := corev1.ProbeHandler{
 		HTTPGet: &corev1.HTTPGetAction{
 			Path: "/auth/login/",
@@ -53,15 +55,15 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, env []corev1.EnvVar) *
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.Server.Replicas,
-		NodeSelector: instance.Spec.Server.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: template.NodePodAntiAffinity(labels),
 		},
 		Containers: []corev1.Container{
 			{
 				Name:      "server",
-				Image:     instance.Spec.Server.Image,
+				Image:     spec.Image,
 				Command:   []string{"/usr/local/bin/kolla_start"},
 				Lifecycle: httpd.Lifecycle(),
 				Env:       env,
@@ -70,7 +72,7 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, env []corev1.EnvVar) *
 				},
 				LivenessProbe: livenessProbe,
 				StartupProbe:  startupProbe,
-				Resources:     instance.Spec.Server.Resources,
+				Resources:     spec.Resources,
 				VolumeMounts:  volumeMounts,
 			},
 		},

@@ -16,6 +16,8 @@ const (
 func VolumeStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, VolumeComponentLabel)
 
+	spec := instance.Spec.Volume
+
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-cinder", "/etc/cinder/cinder.conf", "cinder.conf"),
 		template.SubPathVolumeMount("etc-cinder", "/var/lib/kolla/config_files/config.json", "kolla-cinder-volume.json"),
@@ -31,15 +33,15 @@ func VolumeStatefulSet(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, v
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.Volume.Replicas,
-		NodeSelector: instance.Spec.Volume.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:         "volume",
-				Image:        instance.Spec.Volume.Image,
+				Image:        spec.Image,
 				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
-				Resources:    instance.Spec.Volume.Resources,
+				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

@@ -17,6 +17,8 @@ const (
 func CFNDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, CFNComponentLabel)
 
+	spec := instance.Spec.CFN
+
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
@@ -37,15 +39,15 @@ func CFNDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.CFN.Replicas,
-		NodeSelector: instance.Spec.CFN.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: template.NodePodAntiAffinity(labels),
 		},
 		Containers: []corev1.Container{
 			{
 				Name:    "cfn",
-				Image:   instance.Spec.CFN.Image,
+				Image:   spec.Image,
 				Command: []string{"/usr/local/bin/kolla_start"},
 				Env:     env,
 				Ports: []corev1.ContainerPort{
@@ -53,7 +55,7 @@ func CFNDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
-				Resources:     instance.Spec.CFN.Resources,
+				Resources:     spec.Resources,
 				VolumeMounts:  volumeMounts,
 			},
 		},

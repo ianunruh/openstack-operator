@@ -16,6 +16,8 @@ const (
 func ShareStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(instance.Name, AppLabel, ShareComponentLabel)
 
+	spec := instance.Spec.Share
+
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-manila", "/etc/manila/manila.conf", "manila.conf"),
 		template.SubPathVolumeMount("etc-manila", "/var/lib/kolla/config_files/config.json", "kolla-manila-share.json"),
@@ -31,15 +33,15 @@ func ShareStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar, vo
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.Share.Replicas,
-		NodeSelector: instance.Spec.Share.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:         "share",
-				Image:        instance.Spec.Share.Image,
+				Image:        spec.Image,
 				Command:      []string{"/usr/local/bin/kolla_start"},
 				Env:          env,
-				Resources:    instance.Spec.Share.Resources,
+				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
 		},

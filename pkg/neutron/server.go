@@ -17,6 +17,8 @@ const (
 func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
 	labels := template.Labels(instance.Name, AppLabel, ServerComponentLabel)
 
+	spec := instance.Spec.Server
+
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
@@ -37,15 +39,15 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
-		Replicas:     instance.Spec.Server.Replicas,
-		NodeSelector: instance.Spec.Server.NodeSelector,
+		Replicas:     spec.Replicas,
+		NodeSelector: spec.NodeSelector,
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: template.NodePodAntiAffinity(labels),
 		},
 		Containers: []corev1.Container{
 			{
 				Name:    "server",
-				Image:   instance.Spec.Server.Image,
+				Image:   spec.Image,
 				Command: []string{"/usr/local/bin/kolla_start"},
 				Env:     env,
 				Ports: []corev1.ContainerPort{
@@ -53,7 +55,7 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 				},
 				LivenessProbe: probe,
 				StartupProbe:  probe,
-				Resources:     instance.Spec.Server.Resources,
+				Resources:     spec.Resources,
 				VolumeMounts:  volumeMounts,
 			},
 		},
