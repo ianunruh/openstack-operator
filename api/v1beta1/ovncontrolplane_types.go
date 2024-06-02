@@ -117,10 +117,13 @@ type OVNNorthdSpec struct {
 
 // OVNControlPlaneStatus defines the observed state of OVNControlPlane
 type OVNControlPlaneStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // OVNControlPlane is the Schema for the ovncontrolplanes API
 type OVNControlPlane struct {

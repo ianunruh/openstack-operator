@@ -82,12 +82,16 @@ type HeatEngineSpec struct {
 
 // HeatStatus defines the observed state of Heat
 type HeatStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // Heat is the Schema for the heats API
 type Heat struct {

@@ -121,6 +121,8 @@ type NovaPlacementSpec struct {
 
 // NovaStatus defines the observed state of Nova
 type NovaStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
@@ -128,6 +130,8 @@ type NovaStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+kubebuilder:resource:path=novas
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // Nova is the Schema for the nova API
 type Nova struct {

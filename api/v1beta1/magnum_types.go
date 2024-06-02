@@ -79,6 +79,8 @@ type MagnumConductorSpec struct {
 
 // MagnumStatus defines the observed state of Magnum
 type MagnumStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
@@ -86,6 +88,8 @@ type MagnumStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:resource:path=magnums
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // Magnum is the Schema for the magnums API
 type Magnum struct {
