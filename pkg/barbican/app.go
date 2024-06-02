@@ -40,7 +40,7 @@ func Secret(instance *openstackv1beta1.Barbican) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	secret := template.GenericSecret(instance.Name, instance.Namespace, labels)
 
-	secret.StringData["kek"] = template.NewFernetKey()
+	secret.StringData["kek"] = template.MustGenerateFernetKey()
 
 	return secret
 }

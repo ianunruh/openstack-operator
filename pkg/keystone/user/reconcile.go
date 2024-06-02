@@ -292,7 +292,7 @@ func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.K
 	}
 
 	if password == "" {
-		password = template.NewPassword()
+		password = template.MustGeneratePassword()
 	}
 
 	cloudsYAML := clientconfig.Clouds{

@@ -1,6 +1,8 @@
 module github.com/ianunruh/openstack-operator
 
-go 1.21
+go 1.22
+
+toolchain go1.22.2
 
 require (
 	github.com/go-logr/logr v1.4.1
@@ -8,6 +10,7 @@ require (
 	github.com/gophercloud/utils v0.0.0-20231010081019-80377eca5d56
 	github.com/onsi/ginkgo/v2 v2.14.0
 	github.com/onsi/gomega v1.30.0
+	github.com/sethvargo/go-password v0.3.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/crypto v0.20.0
 	gopkg.in/ini.v1 v1.62.0

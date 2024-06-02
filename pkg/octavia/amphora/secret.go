@@ -11,7 +11,7 @@ func Secret(instance *openstackv1beta1.Octavia) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, "octavia")
 	secret := template.GenericSecret(name, instance.Namespace, labels)
 
-	secret.StringData["heartbeat-key"] = template.NewPassword()
+	secret.StringData["heartbeat-key"] = template.MustGeneratePassword()
 
 	return secret
 }

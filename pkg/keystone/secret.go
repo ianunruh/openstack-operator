@@ -25,7 +25,7 @@ func AdminSecret(instance *openstackv1beta1.Keystone, password string) *corev1.S
 	}
 
 	if password == "" {
-		password = template.NewPassword()
+		password = template.MustGeneratePassword()
 	}
 
 	cloudsYAML := clientconfig.Clouds{
@@ -71,13 +71,13 @@ func Secrets(instance *openstackv1beta1.Keystone) []*corev1.Secret {
 
 func fernetSecret(name, namespace string, labels map[string]string) *corev1.Secret {
 	secret := template.GenericSecret(name, namespace, labels)
-	secret.StringData["0"] = template.NewFernetKey()
-	secret.StringData["1"] = template.NewFernetKey()
+	secret.StringData["0"] = template.MustGenerateFernetKey()
+	secret.StringData["1"] = template.MustGenerateFernetKey()
 	return secret
 }
 
 func memcacheSecret(name, namespace string, labels map[string]string) *corev1.Secret {
 	secret := template.GenericSecret(name, namespace, labels)
-	secret.StringData["secret-key"] = template.NewPassword()
+	secret.StringData["secret-key"] = template.MustGeneratePassword()
 	return secret
 }
