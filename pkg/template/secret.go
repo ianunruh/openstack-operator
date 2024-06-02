@@ -75,5 +75,7 @@ func EnsureSecret(ctx context.Context, c client.Client, intended *corev1.Secret,
 		return c.Update(ctx, found)
 	}
 
+	*intended = *found
+
 	return nil
 }
