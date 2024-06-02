@@ -53,7 +53,7 @@ func Reconcile(instance *openstackv1beta1.KeystoneUser, secret *corev1.Secret, i
 			opts.DefaultProjectID = project.ID
 		}
 
-		log.Info("Creating user", "name", name, "password", password)
+		log.Info("Creating user", "name", name)
 		user, err = users.Create(identity, opts).Extract()
 		if err != nil {
 			return err
@@ -67,7 +67,7 @@ func Reconcile(instance *openstackv1beta1.KeystoneUser, secret *corev1.Secret, i
 			opts.DefaultProjectID = project.ID
 		}
 
-		log.Info("Updating user", "name", name, "password", password)
+		log.Info("Updating user", "name", name)
 		if err := users.Update(identity, user.ID, opts).Err; err != nil {
 			return err
 		}
