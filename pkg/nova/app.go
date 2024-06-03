@@ -58,7 +58,7 @@ func Secret(instance *openstackv1beta1.Nova) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	secret := template.GenericSecret(instance.Name, instance.Namespace, labels)
 
-	secret.StringData["metadata-proxy-secret"] = template.NewPassword()
+	secret.StringData["metadata-proxy-secret"] = template.MustGeneratePassword()
 
 	return secret
 }

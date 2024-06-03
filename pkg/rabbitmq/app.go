@@ -26,9 +26,9 @@ func Secret(instance *openstackv1beta1.RabbitMQ) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	secret := template.GenericSecret(instance.Name, instance.Namespace, labels)
 
-	password := template.NewPassword()
+	password := template.MustGeneratePassword()
 
-	secret.StringData["erlang-cookie"] = template.NewPassword()
+	secret.StringData["erlang-cookie"] = template.MustGeneratePassword()
 	secret.StringData["password"] = password
 	secret.StringData["connection"] = fmt.Sprintf("rabbit://admin:%s@%s:15672", password, instance.Name)
 

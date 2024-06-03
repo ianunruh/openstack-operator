@@ -32,7 +32,7 @@ func Secret(instance *openstackv1beta1.Horizon) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	secret := template.GenericSecret(instance.Name, instance.Namespace, labels)
 
-	secret.StringData["secret-key"] = template.NewPassword()
+	secret.StringData["secret-key"] = template.MustGeneratePassword()
 
 	return secret
 }

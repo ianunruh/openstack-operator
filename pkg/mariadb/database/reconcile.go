@@ -61,7 +61,7 @@ func Secret(instance *openstackv1beta1.MariaDBDatabase) *corev1.Secret {
 
 	hostname := instance.Spec.Cluster
 	username := instance.Spec.Name
-	password := template.NewPassword()
+	password := template.MustGeneratePassword()
 	db := instance.Spec.Name
 
 	secret.StringData["connection"] = fmt.Sprintf("mysql+pymysql://%s:%s@%s:3306/%s", username, password, hostname, db)
