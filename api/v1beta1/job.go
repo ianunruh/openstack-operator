@@ -6,6 +6,9 @@ import (
 
 type JobSpec struct {
 	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional

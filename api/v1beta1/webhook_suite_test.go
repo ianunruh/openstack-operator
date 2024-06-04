@@ -176,6 +176,9 @@ var _ = BeforeSuite(func() {
 	err = (&NovaComputeSet{}).SetupWebhookWithManager(mgr)
 	Expect(err).NotTo(HaveOccurred())
 
+	err = (&MariaDBDatabase{}).SetupWebhookWithManager(mgr)
+	Expect(err).NotTo(HaveOccurred())
+
 	//+kubebuilder:scaffold:webhook
 
 	go func() {

@@ -17,6 +17,8 @@ func Neutron(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Neutron 
 
 	spec.MetadataAgent.NodeSelector = computeNodeSelector(spec.MetadataAgent.NodeSelector, instance)
 
+	spec.Database = databaseDefaults(spec.Database, instance)
+
 	return &openstackv1beta1.Neutron{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "neutron",

@@ -216,6 +216,26 @@ webhooks:
   sideEffects: None
 - admissionReviewVersions:
   - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-ospk8s-com-v1beta1-mariadbdatabase
+  failurePolicy: Fail
+  name: mmariadbdatabase.kb.io
+  rules:
+  - apiGroups:
+    - openstack.ospk8s.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - mariadbdatabases
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
   - v1beta1
   clientConfig:
     service:
@@ -660,6 +680,26 @@ webhooks:
     - UPDATE
     resources:
     - mariadbs
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-ospk8s-com-v1beta1-mariadbdatabase
+  failurePolicy: Fail
+  name: vmariadbdatabase.kb.io
+  rules:
+  - apiGroups:
+    - openstack.ospk8s.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - mariadbdatabases
   sideEffects: None
 - admissionReviewVersions:
   - v1

@@ -40,6 +40,9 @@ type ControlPlaneSpec struct {
 	Database MariaDBSpec `json:"database,omitempty"`
 
 	// +optional
+	ExternalDatabase *ExternalDatabaseSpec `json:"externalDatabase,omitempty"`
+
+	// +optional
 	Keystone KeystoneSpec `json:"keystone,omitempty"`
 
 	// +optional

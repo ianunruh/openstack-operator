@@ -18,6 +18,8 @@ func Glance(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Glance {
 
 	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
 
+	spec.Database = databaseDefaults(spec.Database, instance)
+
 	if spec.Backends == nil {
 		spec.Backends = []openstackv1beta1.GlanceBackendSpec{
 			{

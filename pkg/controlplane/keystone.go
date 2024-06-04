@@ -17,6 +17,8 @@ func Keystone(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Keyston
 
 	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
 
+	spec.Database = databaseDefaults(spec.Database, instance)
+
 	return &openstackv1beta1.Keystone{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone",

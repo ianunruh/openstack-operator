@@ -23,6 +23,8 @@ func Octavia(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Octavia 
 
 	spec.Worker.NodeSelector = controllerNodeSelector(spec.Worker.NodeSelector, instance)
 
+	spec.Database = databaseDefaults(spec.Database, instance)
+
 	// TODO labels
 	return &openstackv1beta1.Octavia{
 		ObjectMeta: metav1.ObjectMeta{

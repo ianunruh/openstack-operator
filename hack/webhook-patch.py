@@ -12,7 +12,7 @@ def main():
 
     base_url = os.environ["WEBHOOK_BASE_URL"]
 
-    annotations = config["metadata"]["annotations"]
+    annotations = config["metadata"].get("annotations", {})
 
     if "cert-manager.io/inject-ca-from" in annotations:
         del annotations["cert-manager.io/inject-ca-from"]

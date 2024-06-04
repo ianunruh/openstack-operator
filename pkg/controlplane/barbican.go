@@ -19,6 +19,8 @@ func Barbican(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Barbica
 
 	spec.Worker.NodeSelector = controllerNodeSelector(spec.Worker.NodeSelector, instance)
 
+	spec.Database = databaseDefaults(spec.Database, instance)
+
 	// TODO labels
 	return &openstackv1beta1.Barbican{
 		ObjectMeta: metav1.ObjectMeta{

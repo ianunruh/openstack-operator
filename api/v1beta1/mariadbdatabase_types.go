@@ -23,24 +23,48 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type ExternalDatabaseAdminSecret struct {
+	Name string `json:"name"`
+
+	// +optional
+	PasswordKey string `json:"passwordKey,omitempty"`
+}
+
+type ExternalDatabaseSpec struct {
+	AdminSecret ExternalDatabaseAdminSecret `json:"adminSecret"`
+
+	Host string `json:"host"`
+
+	// +optional
+	Port uint16 `json:"port,omitempty"`
+}
+
 // MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
 type MariaDBDatabaseSpec struct {
-	Cluster string `json:"cluster"`
-	Name    string `json:"name"`
-	Secret  string `json:"secret"`
+	Name   string `json:"name"`
+	Secret string `json:"secret"`
+
+	// +optional
+	Cluster string `json:"cluster,omitempty"`
+
+	// +optional
+	External *ExternalDatabaseSpec `json:"external,omitempty"`
+
+	// +optional
+	SetupJob JobSpec `json:"setupJob,omitempty"`
 }
 
 func databaseDefault(spec MariaDBDatabaseSpec, instance string) MariaDBDatabaseSpec {
-	if spec.Cluster == "" {
-		spec.Cluster = "mariadb"
-	}
-
 	if spec.Name == "" {
 		spec.Name = strings.ReplaceAll(instance, "-", "_")
 	}
 
 	if spec.Secret == "" {
 		spec.Secret = fmt.Sprintf("%s-db", instance)
+	}
+
+	if spec.Cluster == "" && spec.External == nil {
+		spec.Cluster = "mariadb"
 	}
 
 	return spec

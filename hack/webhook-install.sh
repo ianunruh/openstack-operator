@@ -21,8 +21,8 @@ kubectl -n openstack-system get secret webhook-server-cert \
 
 kubectl get mutatingwebhookconfiguration openstack-operator-mutating-webhook-configuration -o json \
     | hack/webhook-patch.py \
-    | kubectl apply -f -
+    | kubectl replace -f -
 
 kubectl get validatingwebhookconfiguration openstack-operator-validating-webhook-configuration -o json \
     | hack/webhook-patch.py \
-    | kubectl apply -f -
+    | kubectl replace -f -
