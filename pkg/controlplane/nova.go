@@ -21,6 +21,7 @@ func Nova(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Nova {
 
 	spec.Scheduler.NodeSelector = controllerNodeSelector(spec.Scheduler.NodeSelector, instance)
 
+	spec.Broker = brokerUserDefaults(spec.Broker, instance)
 	spec.APIDatabase = databaseDefaults(spec.APIDatabase, instance)
 	spec.CellDatabase = databaseDefaults(spec.CellDatabase, instance)
 
@@ -63,6 +64,7 @@ func novaCellDefaults(cells []openstackv1beta1.NovaCellSpec, instance *openstack
 		spec.NoVNCProxy.Ingress = ingressDefaults(spec.NoVNCProxy.Ingress, instance, "novnc")
 		spec.NoVNCProxy.NodeSelector = controllerNodeSelector(spec.NoVNCProxy.NodeSelector, instance)
 
+		spec.Broker = brokerUserDefaults(spec.Broker, instance)
 		spec.Database = databaseDefaults(spec.Database, instance)
 
 		out = append(out, spec)

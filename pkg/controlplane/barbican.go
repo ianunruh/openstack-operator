@@ -19,6 +19,7 @@ func Barbican(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Barbica
 
 	spec.Worker.NodeSelector = controllerNodeSelector(spec.Worker.NodeSelector, instance)
 
+	spec.Broker = brokerUserDefaults(spec.Broker, instance)
 	spec.Database = databaseDefaults(spec.Database, instance)
 
 	// TODO labels

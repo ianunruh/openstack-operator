@@ -26,19 +26,45 @@ const (
 	defaultVirtualHost = "openstack"
 )
 
+type ExternalBrokerAdminSecret struct {
+	Name string `json:"name"`
+
+	// +optional
+	UsernameKey string `json:"usernameKey,omitempty"`
+
+	// +optional
+	PasswordKey string `json:"passwordKey,omitempty"`
+}
+
+type ExternalBrokerSpec struct {
+	AdminSecret ExternalBrokerAdminSecret `json:"adminSecret"`
+
+	Host string `json:"host"`
+
+	// +optional
+	Port uint16 `json:"port,omitempty"`
+
+	// +optional
+	AdminPort uint16 `json:"adminPort,omitempty"`
+}
+
 // RabbitMQUserSpec defines the desired state of RabbitMQUser
 type RabbitMQUserSpec struct {
-	Cluster     string `json:"cluster"`
 	Name        string `json:"name"`
 	Secret      string `json:"secret"`
 	VirtualHost string `json:"virtualHost"`
+
+	// +optional
+	Cluster string `json:"cluster,omitempty"`
+
+	// +optional
+	External *ExternalBrokerSpec `json:"external,omitempty"`
+
+	// +optional
+	SetupJob JobSpec `json:"setupJob,omitempty"`
 }
 
 func brokerDefault(spec RabbitMQUserSpec, instance, virtualHost string) RabbitMQUserSpec {
-	if spec.Cluster == "" {
-		spec.Cluster = "rabbitmq"
-	}
-
 	if spec.Name == "" {
 		spec.Name = instance
 	}
@@ -49,6 +75,10 @@ func brokerDefault(spec RabbitMQUserSpec, instance, virtualHost string) RabbitMQ
 
 	if spec.VirtualHost == "" {
 		spec.VirtualHost = virtualHost
+	}
+
+	if spec.Cluster == "" && spec.External == nil {
+		spec.Cluster = "rabbitmq"
 	}
 
 	return spec

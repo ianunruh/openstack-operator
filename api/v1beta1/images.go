@@ -62,7 +62,8 @@ const (
 	DefaultMemcachedImage         = "docker.io/bitnami/memcached:1.6.9-debian-10-r0"
 	DefaultMemcachedExporterImage = "docker.io/bitnami/memcached-exporter:0.9.0"
 
-	DefaultRabbitMQImage = "docker.io/bitnami/rabbitmq:3.8.9-debian-10-r58"
+	DefaultRabbitMQImage           = "docker.io/bitnami/rabbitmq:3.8.9-debian-10-r58"
+	DefaultRabbitMQManagementImage = "rabbitmq:3.8.9-management"
 )
 
 func imageDefault(image, fallback string) string {

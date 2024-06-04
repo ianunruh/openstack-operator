@@ -7,6 +7,10 @@ import (
 )
 
 func Broker(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.RabbitMQ {
+	if instance.Spec.ExternalBroker != nil {
+		return nil
+	}
+
 	spec := instance.Spec.Broker
 
 	spec.Management.Ingress = ingressDefaults(spec.Management.Ingress, instance, "rabbitmq")
@@ -21,4 +25,11 @@ func Broker(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.RabbitMQ 
 		},
 		Spec: spec,
 	}
+}
+
+func brokerUserDefaults(spec openstackv1beta1.RabbitMQUserSpec, instance *openstackv1beta1.ControlPlane) openstackv1beta1.RabbitMQUserSpec {
+	if spec.External == nil {
+		spec.External = instance.Spec.ExternalBroker
+	}
+	return spec
 }

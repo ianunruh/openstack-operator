@@ -425,6 +425,26 @@ webhooks:
   sideEffects: None
 - admissionReviewVersions:
   - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /mutate-openstack-ospk8s-com-v1beta1-rabbitmquser
+  failurePolicy: Fail
+  name: mrabbitmquser.kb.io
+  rules:
+  - apiGroups:
+    - openstack.ospk8s.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - rabbitmqusers
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
   - v1beta1
   clientConfig:
     service:
@@ -889,6 +909,26 @@ webhooks:
     - UPDATE
     resources:
     - rabbitmqs
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-openstack-ospk8s-com-v1beta1-rabbitmquser
+  failurePolicy: Fail
+  name: vrabbitmquser.kb.io
+  rules:
+  - apiGroups:
+    - openstack.ospk8s.com
+    apiVersions:
+    - v1beta1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - rabbitmqusers
   sideEffects: None
 - admissionReviewVersions:
   - v1
