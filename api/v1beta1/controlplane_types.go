@@ -34,6 +34,9 @@ type ControlPlaneSpec struct {
 	Broker RabbitMQSpec `json:"broker,omitempty"`
 
 	// +optional
+	ExternalBroker *ExternalBrokerSpec `json:"externalBroker,omitempty"`
+
+	// +optional
 	Cache MemcachedSpec `json:"cache,omitempty"`
 
 	// +optional

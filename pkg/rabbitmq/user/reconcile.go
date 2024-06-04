@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -15,31 +16,71 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func SetupJob(instance *openstackv1beta1.RabbitMQUser, containerImage, databaseHostName, adminSecret string) *batchv1.Job {
+const (
+	defaultBrokerPort uint16 = 5672
+	defaultAdminPort  uint16 = 15672
+)
+
+func SetupJob(instance *openstackv1beta1.RabbitMQUser) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, rabbitmq.AppLabel)
 
+	spec := instance.Spec.SetupJob
+	clusterName := instance.Spec.Cluster
+
+	namePrefix := instance.Spec.Cluster
+
+	hostname := clusterName
+	port := defaultAdminPort
+
+	adminSecret := clusterName
+	adminUsernameEnv := template.EnvVar("RABBITMQ_ADMIN_USERNAME", "admin")
+	secretPasswordKey := "password"
+
+	if clusterName == "" {
+		externalSpec := instance.Spec.External
+
+		namePrefix = "external"
+
+		hostname = externalSpec.Host
+		if externalSpec.AdminPort > 0 {
+			port = externalSpec.AdminPort
+		}
+
+		adminSecret = externalSpec.AdminSecret.Name
+		if externalSpec.AdminSecret.UsernameKey != "" {
+			adminUsernameEnv = template.SecretEnvVar("RABBITMQ_ADMIN_USERNAME", adminSecret, externalSpec.AdminSecret.UsernameKey)
+		}
+		if externalSpec.AdminSecret.PasswordKey != "" {
+			secretPasswordKey = externalSpec.AdminSecret.PasswordKey
+		}
+	}
+
 	job := template.GenericJob(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name: "user",
-				// TODO make configurable
-				Image: "rabbitmq:3.8.9-management",
+				Name:  "user",
+				Image: spec.Image,
 				Command: []string{
 					"bash",
 					"-c",
 					template.MustReadFile(rabbitmq.AppLabel, "user-setup.sh"),
 				},
 				Env: []corev1.EnvVar{
-					template.SecretEnvVar("RABBITMQ_ADMIN_CONNECTION", adminSecret, "connection"),
+					template.EnvVar("RABBIT_HOSTNAME", hostname),
+					template.EnvVar("RABBIT_PORT", strconv.Itoa(int(port))),
+					adminUsernameEnv,
+					template.SecretEnvVar("RABBITMQ_ADMIN_PASSWORD", adminSecret, secretPasswordKey),
 					template.SecretEnvVar("RABBITMQ_USER_CONNECTION", instance.Spec.Secret, "connection"),
 				},
+				Resources: spec.Resources,
 			},
 		},
 	})
 
-	job.Name = template.Combine(instance.Spec.Cluster, "user", instance.Name)
+	job.Name = template.Combine(namePrefix, "user", instance.Name)
 
 	return job
 }
@@ -48,12 +89,24 @@ func Secret(instance *openstackv1beta1.RabbitMQUser) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, rabbitmq.AppLabel)
 	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
 
-	hostname := instance.Spec.Cluster
+	clusterName := instance.Spec.Cluster
+
+	hostname := clusterName
+	port := defaultBrokerPort
 	username := instance.Spec.Name
 	password := template.MustGeneratePassword()
 	vhost := instance.Spec.VirtualHost
 
-	secret.StringData["connection"] = fmt.Sprintf("rabbit://%s:%s@%s:5672/%s", username, password, hostname, vhost)
+	if clusterName == "" {
+		externalSpec := instance.Spec.External
+
+		hostname = externalSpec.Host
+		if externalSpec.Port > 0 {
+			port = externalSpec.Port
+		}
+	}
+
+	secret.StringData["connection"] = fmt.Sprintf("rabbit://%s:%s@%s:%d/%s", username, password, hostname, port, vhost)
 	secret.StringData["password"] = password
 
 	return secret

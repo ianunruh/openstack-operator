@@ -21,6 +21,7 @@ func Cinder(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Cinder {
 
 	spec.Volume.NodeSelector = controllerNodeSelector(spec.Volume.NodeSelector, instance)
 
+	spec.Broker = brokerUserDefaults(spec.Broker, instance)
 	spec.Database = databaseDefaults(spec.Database, instance)
 
 	// TODO labels

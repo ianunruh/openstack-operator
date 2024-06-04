@@ -12,21 +12,6 @@
 # limitations under the License.
 
 set -e
-# Extract connection details
-RABBIT_HOSTNAME=$(echo "${RABBITMQ_ADMIN_CONNECTION}" | \
-  awk -F'[@]' '{print $2}' | \
-  awk -F'[:/]' '{print $1}')
-RABBIT_PORT=$(echo "${RABBITMQ_ADMIN_CONNECTION}" | \
-  awk -F'[@]' '{print $2}' | \
-  awk -F'[:/]' '{print $2}')
-
-# Extract Admin User creadential
-RABBITMQ_ADMIN_USERNAME=$(echo "${RABBITMQ_ADMIN_CONNECTION}" | \
-  awk -F'[@]' '{print $1}' | \
-  awk -F'[//:]' '{print $4}')
-RABBITMQ_ADMIN_PASSWORD=$(echo "${RABBITMQ_ADMIN_CONNECTION}" | \
-  awk -F'[@]' '{print $1}' | \
-  awk -F'[//:]' '{print $5}')
 
 # Extract User creadential
 RABBITMQ_USERNAME=$(echo "${RABBITMQ_USER_CONNECTION}" | \

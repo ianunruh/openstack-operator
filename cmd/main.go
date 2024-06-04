@@ -460,6 +460,10 @@ func main() {
 			os.Exit(1)
 		}
 	}
+	if err = (&openstackv1beta1.RabbitMQUser{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "RabbitMQUser")
+		os.Exit(1)
+	}
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {

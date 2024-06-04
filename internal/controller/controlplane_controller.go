@@ -103,10 +103,11 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		}
 	}
 
-	broker := controlplane.Broker(instance)
-	controllerutil.SetControllerReference(instance, broker, r.Scheme)
-	if err := rabbitmq.EnsureCluster(ctx, r.Client, broker, log); err != nil {
-		return ctrl.Result{}, err
+	if broker := controlplane.Broker(instance); broker != nil {
+		controllerutil.SetControllerReference(instance, broker, r.Scheme)
+		if err := rabbitmq.EnsureCluster(ctx, r.Client, broker, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	identity := controlplane.Keystone(instance)

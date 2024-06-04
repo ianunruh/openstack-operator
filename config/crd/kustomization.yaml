@@ -78,7 +78,7 @@ patches:
 - path: patches/cainjection_in_glances.yaml
 - path: patches/cainjection_in_placements.yaml
 - path: patches/cainjection_in_rabbitmqs.yaml
-#- path: patches/cainjection_in_rabbitmqusers.yaml
+- path: patches/cainjection_in_rabbitmqusers.yaml
 - path: patches/cainjection_in_novas.yaml
 - path: patches/cainjection_in_novacells.yaml
 - path: patches/cainjection_in_neutrons.yaml

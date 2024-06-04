@@ -75,16 +75,20 @@ func (r *RabbitMQUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	deps := template.NewConditionWaiter(log)
 
-	cluster := &openstackv1beta1.RabbitMQ{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Spec.Cluster,
-			Namespace: instance.Namespace,
-		},
+	var cluster *openstackv1beta1.RabbitMQ
+
+	if instance.Spec.Cluster != "" {
+		cluster = &openstackv1beta1.RabbitMQ{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      instance.Spec.Cluster,
+				Namespace: instance.Namespace,
+			},
+		}
+		if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
+			return ctrl.Result{}, err
+		}
+		rabbitmq.AddReadyCheck(deps, cluster)
 	}
-	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
-		return ctrl.Result{}, err
-	}
-	rabbitmq.AddReadyCheck(deps, cluster)
 
 	if result := deps.Wait(); !result.IsZero() {
 		return result, nil
@@ -98,7 +102,7 @@ func (r *RabbitMQUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.SetupJobHash,
-		rabbitmquser.SetupJob(instance, cluster.Spec.Image, cluster.Name, cluster.Name))
+		rabbitmquser.SetupJob(instance))
 	if result, err := jobs.Run(instance); err != nil {
 		// TODO update pending w/error
 		return ctrl.Result{}, err
