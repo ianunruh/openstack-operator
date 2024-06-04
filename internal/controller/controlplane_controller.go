@@ -96,10 +96,11 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
-	database := controlplane.Database(instance)
-	controllerutil.SetControllerReference(instance, database, r.Scheme)
-	if err := mariadb.EnsureCluster(ctx, r.Client, database, log); err != nil {
-		return ctrl.Result{}, err
+	if database := controlplane.Database(instance); database != nil {
+		controllerutil.SetControllerReference(instance, database, r.Scheme)
+		if err := mariadb.EnsureCluster(ctx, r.Client, database, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	broker := controlplane.Broker(instance)

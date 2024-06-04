@@ -21,6 +21,9 @@ func Nova(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Nova {
 
 	spec.Scheduler.NodeSelector = controllerNodeSelector(spec.Scheduler.NodeSelector, instance)
 
+	spec.APIDatabase = databaseDefaults(spec.APIDatabase, instance)
+	spec.CellDatabase = databaseDefaults(spec.CellDatabase, instance)
+
 	return &openstackv1beta1.Nova{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "nova",
@@ -59,6 +62,8 @@ func novaCellDefaults(cells []openstackv1beta1.NovaCellSpec, instance *openstack
 		// TODO handle naming for multiple cells
 		spec.NoVNCProxy.Ingress = ingressDefaults(spec.NoVNCProxy.Ingress, instance, "novnc")
 		spec.NoVNCProxy.NodeSelector = controllerNodeSelector(spec.NoVNCProxy.NodeSelector, instance)
+
+		spec.Database = databaseDefaults(spec.Database, instance)
 
 		out = append(out, spec)
 	}

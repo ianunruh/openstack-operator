@@ -75,16 +75,20 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	deps := template.NewConditionWaiter(log)
 
-	cluster := &openstackv1beta1.MariaDB{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Spec.Cluster,
-			Namespace: instance.Namespace,
-		},
+	var cluster *openstackv1beta1.MariaDB
+
+	if instance.Spec.Cluster != "" {
+		cluster = &openstackv1beta1.MariaDB{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      instance.Spec.Cluster,
+				Namespace: instance.Namespace,
+			},
+		}
+		if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
+			return ctrl.Result{}, err
+		}
+		mariadb.AddReadyCheck(deps, cluster)
 	}
-	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
-		return ctrl.Result{}, err
-	}
-	mariadb.AddReadyCheck(deps, cluster)
 
 	if result := deps.Wait(); !result.IsZero() {
 		return result, nil
@@ -98,7 +102,7 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.SetupJobHash,
-		mariadbdatabase.SetupJob(instance, cluster.Spec.Image, cluster.Name, cluster.Name))
+		mariadbdatabase.SetupJob(instance))
 	if result, err := jobs.Run(instance); err != nil {
 		// TODO update pending w/error
 		return ctrl.Result{}, err

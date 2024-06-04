@@ -7,6 +7,10 @@ import (
 )
 
 func Database(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.MariaDB {
+	if instance.Spec.ExternalDatabase != nil {
+		return nil
+	}
+
 	spec := instance.Spec.Database
 
 	spec.NodeSelector = controllerNodeSelector(spec.NodeSelector, instance)
@@ -19,4 +23,11 @@ func Database(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.MariaDB
 		},
 		Spec: spec,
 	}
+}
+
+func databaseDefaults(spec openstackv1beta1.MariaDBDatabaseSpec, instance *openstackv1beta1.ControlPlane) openstackv1beta1.MariaDBDatabaseSpec {
+	if spec.External == nil {
+		spec.External = instance.Spec.ExternalDatabase
+	}
+	return spec
 }

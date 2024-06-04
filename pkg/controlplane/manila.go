@@ -21,6 +21,8 @@ func Manila(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Manila {
 
 	spec.Share.NodeSelector = controllerNodeSelector(spec.Share.NodeSelector, instance)
 
+	spec.Database = databaseDefaults(spec.Database, instance)
+
 	// TODO labels
 	return &openstackv1beta1.Manila{
 		ObjectMeta: metav1.ObjectMeta{

@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -15,42 +16,65 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-type databaseOptions struct {
-	DatabaseName          string
-	DatabaseHostname      string
-	DatabaseAdminUsername string
-}
+const defaultPort uint16 = 3306
 
-func SetupJob(instance *openstackv1beta1.MariaDBDatabase, containerImage, databaseHostName, adminSecret string) *batchv1.Job {
+func SetupJob(instance *openstackv1beta1.MariaDBDatabase) *batchv1.Job {
 	labels := template.AppLabels(instance.Name, mariadb.AppLabel)
 
-	opts := databaseOptions{
-		DatabaseName:          instance.Spec.Name,
-		DatabaseHostname:      databaseHostName,
-		DatabaseAdminUsername: "root",
+	spec := instance.Spec.SetupJob
+	clusterName := instance.Spec.Cluster
+
+	namePrefix := clusterName
+
+	hostname := clusterName
+	port := defaultPort
+
+	adminSecret := clusterName
+	secretPasswordKey := "password"
+
+	if clusterName == "" {
+		externalSpec := instance.Spec.External
+
+		namePrefix = "external"
+
+		hostname = externalSpec.Host
+		if externalSpec.Port > 0 {
+			port = externalSpec.Port
+		}
+
+		adminSecret = externalSpec.AdminSecret.Name
+		if externalSpec.AdminSecret.PasswordKey != "" {
+			secretPasswordKey = externalSpec.AdminSecret.PasswordKey
+		}
 	}
 
 	job := template.GenericJob(template.Component{
-		Namespace: instance.Namespace,
-		Labels:    labels,
+		Namespace:    instance.Namespace,
+		Labels:       labels,
+		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
 				Name:  "database",
-				Image: containerImage,
+				Image: spec.Image,
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustRenderFile(mariadb.AppLabel, "database.sh", opts),
+					template.MustReadFile(mariadb.AppLabel, "database.sh"),
 				},
 				Env: []corev1.EnvVar{
-					template.SecretEnvVar("MYSQL_PWD", adminSecret, "password"),
+					template.EnvVar("MYSQL_HOST", hostname),
+					template.EnvVar("MYSQL_TCP_PORT", strconv.Itoa(int(port))),
+					template.SecretEnvVar("MYSQL_PWD", adminSecret, secretPasswordKey),
+					template.EnvVar("DATABASE_ADMIN_USER", "root"),
+					template.EnvVar("DATABASE_NAME", instance.Spec.Name),
 					template.SecretEnvVar("DATABASE_PASSWORD", instance.Spec.Secret, "password"),
 				},
+				Resources: spec.Resources,
 			},
 		},
 	})
 
-	job.Name = template.Combine(instance.Spec.Cluster, "database", instance.Name)
+	job.Name = template.Combine(namePrefix, "database", instance.Name)
 
 	return job
 }
@@ -59,12 +83,24 @@ func Secret(instance *openstackv1beta1.MariaDBDatabase) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, mariadb.AppLabel)
 	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
 
-	hostname := instance.Spec.Cluster
+	clusterName := instance.Spec.Cluster
+
+	hostname := clusterName
 	username := instance.Spec.Name
 	password := template.MustGeneratePassword()
 	db := instance.Spec.Name
+	port := defaultPort
 
-	secret.StringData["connection"] = fmt.Sprintf("mysql+pymysql://%s:%s@%s:3306/%s", username, password, hostname, db)
+	if clusterName == "" {
+		externalSpec := instance.Spec.External
+
+		hostname = externalSpec.Host
+		if externalSpec.Port > 0 {
+			port = externalSpec.Port
+		}
+	}
+
+	secret.StringData["connection"] = fmt.Sprintf("mysql+pymysql://%s:%s@%s:%d/%s", username, password, hostname, port, db)
 	secret.StringData["password"] = password
 
 	return secret
