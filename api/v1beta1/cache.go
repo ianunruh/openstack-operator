@@ -13,6 +13,10 @@ type CacheSpec struct {
 	Port uint16 `json:"port,omitempty"`
 }
 
+func (s CacheSpec) IsZero() bool {
+	return s == CacheSpec{}
+}
+
 func cacheDefault(spec CacheSpec) CacheSpec {
 	if spec.Host == "" {
 		spec.Host = DefaultCacheHost

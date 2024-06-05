@@ -7,6 +7,10 @@ import (
 )
 
 func Cache(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Memcached {
+	if instance.Spec.ExternalCache != nil {
+		return nil
+	}
+
 	spec := instance.Spec.Cache
 
 	spec.NodeSelector = controllerNodeSelector(spec.NodeSelector, instance)
@@ -19,4 +23,11 @@ func Cache(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Memcached 
 		},
 		Spec: spec,
 	}
+}
+
+func cacheDefaults(spec openstackv1beta1.CacheSpec, instance *openstackv1beta1.ControlPlane) openstackv1beta1.CacheSpec {
+	if spec.IsZero() {
+		return *instance.Spec.ExternalCache
+	}
+	return spec
 }

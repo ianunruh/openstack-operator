@@ -15,6 +15,7 @@ func Placement(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Placem
 
 	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
 
+	spec.Cache = cacheDefaults(spec.Cache, instance)
 	spec.Database = databaseDefaults(spec.Database, instance)
 
 	return &openstackv1beta1.Placement{
