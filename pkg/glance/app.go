@@ -26,15 +26,18 @@ var (
 func ConfigMap(instance *openstackv1beta1.Glance) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
+	spec := instance.Spec
 
 	cfg := template.MustLoadINI(AppLabel, "glance-api.conf")
+
+	cfg.Section("keystone_authtoken").NewKey("memcached_servers", strings.Join(spec.Cache.Servers, ","))
 
 	var (
 		backendNames   []string
 		defaultBackend string
 	)
 
-	for _, backend := range instance.Spec.Backends {
+	for _, backend := range spec.Backends {
 		var backendType string
 
 		section := cfg.Section(backend.Name)
@@ -64,7 +67,7 @@ func ConfigMap(instance *openstackv1beta1.Glance) *corev1.ConfigMap {
 	cfg.Section("").NewKey("enabled_backends", strings.Join(backendNames, ","))
 	cfg.Section("glance_store").NewKey("default_backend", defaultBackend)
 
-	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+	template.MergeINI(cfg, spec.ExtraConfig)
 
 	cm.Data["glance-api.conf"] = template.MustOutputINI(cfg).String()
 

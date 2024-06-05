@@ -44,6 +44,7 @@ func (r *Manila) Default() {
 	manilalog.Info("default", "name", r.Name)
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
+	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultManilaAPIImage)
 	r.Spec.Scheduler.Image = imageDefault(r.Spec.Scheduler.Image, DefaultManilaSchedulerImage)

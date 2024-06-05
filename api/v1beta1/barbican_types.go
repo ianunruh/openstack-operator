@@ -43,6 +43,9 @@ type BarbicanSpec struct {
 	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 
 	// +optional
+	Cache CacheSpec `json:"cache,omitempty"`
+
+	// +optional
 	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 

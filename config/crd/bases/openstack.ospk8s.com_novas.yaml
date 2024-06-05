@@ -321,6 +321,13 @@ spec:
                 - secret
                 - virtualHost
                 type: object
+              cache:
+                properties:
+                  servers:
+                    items:
+                      type: string
+                    type: array
+                type: object
               cellDatabase:
                 description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
                 properties:

@@ -3,6 +3,7 @@ package nova
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -24,8 +25,11 @@ var (
 func ConfigMap(instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
+	spec := instance.Spec
 
 	cfg := template.MustLoadINI(AppLabel, "nova.conf")
+
+	cfg.Section("keystone_authtoken").NewKey("memcached_servers", strings.Join(spec.Cache.Servers, ","))
 
 	if cinder != nil {
 		for _, backend := range cinder.Spec.Backends {
@@ -37,7 +41,7 @@ func ConfigMap(instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder)
 		}
 	}
 
-	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+	template.MergeINI(cfg, spec.ExtraConfig)
 
 	cm.Data["nova.conf"] = template.MustOutputINI(cfg).String()
 

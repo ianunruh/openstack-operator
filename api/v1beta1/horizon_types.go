@@ -29,6 +29,9 @@ type HorizonSpec struct {
 
 	// +optional
 	Server HorizonServerSpec `json:"server,omitempty"`
+
+	// +optional
+	Cache CacheSpec `json:"cache,omitempty"`
 }
 
 type HorizonServerSpec struct {

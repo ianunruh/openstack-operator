@@ -90,10 +90,11 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
-	cache := controlplane.Cache(instance)
-	controllerutil.SetControllerReference(instance, cache, r.Scheme)
-	if err := memcached.EnsureCluster(ctx, r.Client, cache, log); err != nil {
-		return ctrl.Result{}, err
+	if cache := controlplane.Cache(instance); cache != nil {
+		controllerutil.SetControllerReference(instance, cache, r.Scheme)
+		if err := memcached.EnsureCluster(ctx, r.Client, cache, log); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	if database := controlplane.Database(instance); database != nil {

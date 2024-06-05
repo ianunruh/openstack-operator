@@ -44,6 +44,7 @@ func (r *Neutron) Default() {
 	neutronlog.Info("default", "name", r.Name)
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
+	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 	r.Spec.MetadataAgent.Image = imageDefault(r.Spec.MetadataAgent.Image, DefaultNeutronMetadataAgentImage)
 	r.Spec.Server.Image = imageDefault(r.Spec.Server.Image, DefaultNeutronServerImage)

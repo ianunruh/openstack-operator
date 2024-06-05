@@ -44,6 +44,7 @@ func (r *Heat) Default() {
 	heatlog.Info("default", "name", r.Name)
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
+	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultHeatAPIImage)
 	r.Spec.CFN.Image = imageDefault(r.Spec.CFN.Image, DefaultHeatCFNImage)

@@ -3,6 +3,7 @@ package keystone
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -24,14 +25,18 @@ var (
 func ConfigMap(instance *openstackv1beta1.Keystone) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
+	spec := instance.Spec
 
 	cfg := template.MustLoadINI(AppLabel, "keystone.conf")
 
-	if instance.Spec.Notifications.Enabled {
+	cfg.Section("cache").NewKey("backend_argument",
+		fmt.Sprintf("url:%s", strings.Join(spec.Cache.Servers, ",")))
+
+	if spec.Notifications.Enabled {
 		cfg.Section("oslo_messaging_notifications").NewKey("driver", "messagingv2")
 	}
 
-	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+	template.MergeINI(cfg, spec.ExtraConfig)
 
 	cm.Data["httpd.conf"] = template.MustReadFile(AppLabel, "httpd.conf")
 	cm.Data["kolla.json"] = template.MustReadFile(AppLabel, "kolla.json")

@@ -235,6 +235,13 @@ spec:
                     - secret
                     - virtualHost
                     type: object
+                  cache:
+                    properties:
+                      servers:
+                        items:
+                          type: string
+                        type: array
+                    type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
                       MariaDBDatabase
@@ -946,6 +953,13 @@ spec:
                     - secret
                     - virtualHost
                     type: object
+                  cache:
+                    properties:
+                      servers:
+                        items:
+                          type: string
+                        type: array
+                    type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
                       MariaDBDatabase
@@ -1427,6 +1441,13 @@ spec:
                 - adminSecret
                 - host
                 type: object
+              externalCache:
+                properties:
+                  servers:
+                    items:
+                      type: string
+                    type: array
+                type: object
               externalDatabase:
                 properties:
                   adminSecret:
@@ -1578,6 +1599,13 @@ spec:
                       - name
                       type: object
                     type: array
+                  cache:
+                    properties:
+                      servers:
+                        items:
+                          type: string
+                        type: array
+                    type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
                       MariaDBDatabase
@@ -1941,6 +1969,13 @@ spec:
                     - secret
                     - virtualHost
                     type: object
+                  cache:
+                    properties:
+                      servers:
+                        items:
+                          type: string
+                        type: array
+                    type: object
                   cfn:
                     properties:
                       image:
@@ -2267,6 +2302,13 @@ spec:
               horizon:
                 description: HorizonSpec defines the desired state of Horizon
                 properties:
+                  cache:
+                    properties:
+                      servers:
+                        items:
+                          type: string
+                        type: array
+                    type: object
                   image:
                     description: deprecated, use component specific images instead
                     type: string
@@ -2616,6 +2658,13 @@ spec:
                     - name
                     - secret
                     - virtualHost
+                    type: object
+                  cache:
+                    properties:
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -2984,6 +3033,13 @@ spec:
                     - name
                     - secret
                     - virtualHost
+                    type: object
+                  cache:
+                    properties:
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   conductor:
                     properties:
@@ -3447,6 +3503,13 @@ spec:
                     - secret
                     - virtualHost
                     type: object
+                  cache:
+                    properties:
+                      servers:
+                        items:
+                          type: string
+                        type: array
+                    type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
                       MariaDBDatabase
@@ -3866,6 +3929,13 @@ spec:
                     - name
                     - secret
                     - virtualHost
+                    type: object
+                  cache:
+                    properties:
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -4495,6 +4565,13 @@ spec:
                     - name
                     - secret
                     - virtualHost
+                    type: object
+                  cache:
+                    properties:
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   cellDatabase:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -5735,6 +5812,13 @@ spec:
                     - secret
                     - virtualHost
                     type: object
+                  cache:
+                    properties:
+                      servers:
+                        items:
+                          type: string
+                        type: array
+                    type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
                       MariaDBDatabase
@@ -6701,6 +6785,13 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                             type: object
                         type: object
+                    type: object
+                  cache:
+                    properties:
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of

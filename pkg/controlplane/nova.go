@@ -22,6 +22,7 @@ func Nova(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Nova {
 	spec.Scheduler.NodeSelector = controllerNodeSelector(spec.Scheduler.NodeSelector, instance)
 
 	spec.Broker = brokerUserDefaults(spec.Broker, instance)
+	spec.Cache = cacheDefaults(spec.Cache, instance)
 	spec.APIDatabase = databaseDefaults(spec.APIDatabase, instance)
 	spec.CellDatabase = databaseDefaults(spec.CellDatabase, instance)
 

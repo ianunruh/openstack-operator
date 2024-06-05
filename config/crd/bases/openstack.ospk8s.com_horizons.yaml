@@ -39,6 +39,13 @@ spec:
           spec:
             description: HorizonSpec defines the desired state of Horizon
             properties:
+              cache:
+                properties:
+                  servers:
+                    items:
+                      type: string
+                    type: array
+                type: object
               image:
                 description: deprecated, use component specific images instead
                 type: string
