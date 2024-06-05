@@ -237,10 +237,10 @@ spec:
                     type: object
                   cache:
                     properties:
-                      host:
-                        type: string
-                      port:
-                        type: integer
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -955,10 +955,10 @@ spec:
                     type: object
                   cache:
                     properties:
-                      host:
-                        type: string
-                      port:
-                        type: integer
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -1443,10 +1443,10 @@ spec:
                 type: object
               externalCache:
                 properties:
-                  host:
-                    type: string
-                  port:
-                    type: integer
+                  servers:
+                    items:
+                      type: string
+                    type: array
                 type: object
               externalDatabase:
                 properties:
@@ -1601,10 +1601,10 @@ spec:
                     type: array
                   cache:
                     properties:
-                      host:
-                        type: string
-                      port:
-                        type: integer
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -1971,10 +1971,10 @@ spec:
                     type: object
                   cache:
                     properties:
-                      host:
-                        type: string
-                      port:
-                        type: integer
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   cfn:
                     properties:
@@ -2304,10 +2304,10 @@ spec:
                 properties:
                   cache:
                     properties:
-                      host:
-                        type: string
-                      port:
-                        type: integer
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   image:
                     description: deprecated, use component specific images instead
@@ -2661,10 +2661,10 @@ spec:
                     type: object
                   cache:
                     properties:
-                      host:
-                        type: string
-                      port:
-                        type: integer
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -3036,10 +3036,10 @@ spec:
                     type: object
                   cache:
                     properties:
-                      host:
-                        type: string
-                      port:
-                        type: integer
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   conductor:
                     properties:
@@ -3505,10 +3505,10 @@ spec:
                     type: object
                   cache:
                     properties:
-                      host:
-                        type: string
-                      port:
-                        type: integer
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -3932,10 +3932,10 @@ spec:
                     type: object
                   cache:
                     properties:
-                      host:
-                        type: string
-                      port:
-                        type: integer
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -4568,10 +4568,10 @@ spec:
                     type: object
                   cache:
                     properties:
-                      host:
-                        type: string
-                      port:
-                        type: integer
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   cellDatabase:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -5814,10 +5814,10 @@ spec:
                     type: object
                   cache:
                     properties:
-                      host:
-                        type: string
-                      port:
-                        type: integer
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of
@@ -6788,10 +6788,10 @@ spec:
                     type: object
                   cache:
                     properties:
-                      host:
-                        type: string
-                      port:
-                        type: integer
+                      servers:
+                        items:
+                          type: string
+                        type: array
                     type: object
                   database:
                     description: MariaDBDatabaseSpec defines the desired state of

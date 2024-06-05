@@ -41,10 +41,10 @@ spec:
             properties:
               cache:
                 properties:
-                  host:
-                    type: string
-                  port:
-                    type: integer
+                  servers:
+                    items:
+                      type: string
+                    type: array
                 type: object
               image:
                 description: deprecated, use component specific images instead

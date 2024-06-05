@@ -26,8 +26,8 @@ func Cache(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Memcached 
 }
 
 func cacheDefaults(spec openstackv1beta1.CacheSpec, instance *openstackv1beta1.ControlPlane) openstackv1beta1.CacheSpec {
-	if spec.IsZero() {
-		return *instance.Spec.ExternalCache
+	if spec.Servers == nil {
+		spec.Servers = instance.Spec.ExternalCache.Servers
 	}
 	return spec
 }

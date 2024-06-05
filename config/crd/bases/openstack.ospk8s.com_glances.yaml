@@ -170,10 +170,10 @@ spec:
                 type: array
               cache:
                 properties:
-                  host:
-                    type: string
-                  port:
-                    type: integer
+                  servers:
+                    items:
+                      type: string
+                    type: array
                 type: object
               database:
                 description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
