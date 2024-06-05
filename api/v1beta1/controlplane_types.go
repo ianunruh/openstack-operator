@@ -40,6 +40,9 @@ type ControlPlaneSpec struct {
 	Cache MemcachedSpec `json:"cache,omitempty"`
 
 	// +optional
+	ExternalCache *CacheSpec `json:"externalCache,omitempty"`
+
+	// +optional
 	Database MariaDBSpec `json:"database,omitempty"`
 
 	// +optional

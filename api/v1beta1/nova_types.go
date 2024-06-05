@@ -52,6 +52,9 @@ type NovaSpec struct {
 	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 
 	// +optional
+	Cache CacheSpec `json:"cache,omitempty"`
+
+	// +optional
 	Flavors map[string]NovaFlavorSpec `json:"flavors,omitempty"`
 
 	// +optional

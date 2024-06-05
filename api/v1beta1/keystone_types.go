@@ -43,6 +43,9 @@ type KeystoneSpec struct {
 	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 
 	// +optional
+	Cache CacheSpec `json:"cache,omitempty"`
+
+	// +optional
 	Notifications KeystoneNotificationsSpec `json:"notifications,omitempty"`
 
 	// +optional

@@ -43,6 +43,7 @@ var _ webhook.Defaulter = &Placement{}
 func (r *Placement) Default() {
 	placementlog.Info("default", "name", r.Name)
 
+	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultPlacementAPIImage)
 }

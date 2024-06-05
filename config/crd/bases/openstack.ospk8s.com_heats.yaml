@@ -224,6 +224,13 @@ spec:
                 - secret
                 - virtualHost
                 type: object
+              cache:
+                properties:
+                  host:
+                    type: string
+                  port:
+                    type: integer
+                type: object
               cfn:
                 properties:
                   image:

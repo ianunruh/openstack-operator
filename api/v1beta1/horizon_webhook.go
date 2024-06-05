@@ -43,6 +43,7 @@ var _ webhook.Defaulter = &Horizon{}
 func (r *Horizon) Default() {
 	horizonlog.Info("default", "name", r.Name)
 
+	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.Server.Image = imageDefault(r.Spec.Image, DefaultHorizonServerImage)
 }
 

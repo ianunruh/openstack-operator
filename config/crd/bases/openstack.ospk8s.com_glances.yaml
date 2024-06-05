@@ -168,6 +168,13 @@ spec:
                   - name
                   type: object
                 type: array
+              cache:
+                properties:
+                  host:
+                    type: string
+                  port:
+                    type: integer
+                type: object
               database:
                 description: MariaDBDatabaseSpec defines the desired state of MariaDBDatabase
                 properties:

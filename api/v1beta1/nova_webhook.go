@@ -46,6 +46,7 @@ func (r *Nova) Default() {
 	novalog.Info("default", "name", r.Name)
 
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
+	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.APIDatabase = databaseDefault(r.Spec.APIDatabase, fmt.Sprintf("%s-api", r.Name))
 	r.Spec.CellDatabase = databaseDefault(r.Spec.CellDatabase, fmt.Sprintf("%s-cell0", r.Name))
 
