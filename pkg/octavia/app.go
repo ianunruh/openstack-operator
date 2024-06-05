@@ -25,14 +25,17 @@ var (
 func ConfigMap(instance *openstackv1beta1.Octavia) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
+	spec := instance.Spec
 
 	cfg := template.MustLoadINI(AppLabel, "octavia.conf")
 
+	cfg.Section("keystone_authtoken").NewKey("memcached_servers", strings.Join(spec.Cache.Servers, ","))
+
 	var providerDrivers []string
-	if instance.Spec.Amphora.Enabled {
+	if spec.Amphora.Enabled {
 		providerDrivers = append(providerDrivers, "amphora:The Octavia Amphora driver")
 	}
-	if instance.Spec.OVN.Enabled {
+	if spec.OVN.Enabled {
 		providerDrivers = append(providerDrivers, "ovn:Octavia OVN driver")
 	}
 
@@ -52,7 +55,7 @@ func ConfigMap(instance *openstackv1beta1.Octavia) *corev1.ConfigMap {
 
 	cfg.Section("health_manager").NewKey("controller_ip_port_list", strings.Join(healthManagerAddrs, ","))
 
-	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+	template.MergeINI(cfg, spec.ExtraConfig)
 
 	cm.Data["octavia.conf"] = template.MustOutputINI(cfg).String()
 

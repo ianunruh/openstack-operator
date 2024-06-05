@@ -26,12 +26,15 @@ var (
 func ConfigMap(instance *openstackv1beta1.Manila) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
+	spec := instance.Spec
 
 	cfg := template.MustLoadINI(AppLabel, "manila.conf")
 
+	cfg.Section("keystone_authtoken").NewKey("memcached_servers", strings.Join(spec.Cache.Servers, ","))
+
 	var backendNames []string
 
-	for _, backend := range instance.Spec.Backends {
+	for _, backend := range spec.Backends {
 		section := cfg.Section(backend.Name)
 		section.NewKey("share_backend_name", backend.ShareBackendName)
 
@@ -48,7 +51,7 @@ func ConfigMap(instance *openstackv1beta1.Manila) *corev1.ConfigMap {
 
 	cfg.Section("").NewKey("enabled_share_backends", strings.Join(backendNames, ","))
 
-	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+	template.MergeINI(cfg, spec.ExtraConfig)
 
 	cm.Data["manila.conf"] = template.MustOutputINI(cfg).String()
 

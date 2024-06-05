@@ -3,6 +3,7 @@ package heat
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -24,9 +25,13 @@ var (
 func ConfigMap(instance *openstackv1beta1.Heat) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
+	spec := instance.Spec
 
 	cfg := template.MustLoadINI(AppLabel, "heat.conf")
-	template.MergeINI(cfg, instance.Spec.ExtraConfig)
+
+	cfg.Section("keystone_authtoken").NewKey("memcached_servers", strings.Join(spec.Cache.Servers, ","))
+
+	template.MergeINI(cfg, spec.ExtraConfig)
 
 	cm.Data["heat.conf"] = template.MustOutputINI(cfg).String()
 
