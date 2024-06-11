@@ -70,7 +70,6 @@ func (r *NovaFlavorReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		}
 	}
 
-	// TODO handle this user not existing on deletion, and remove the finalizer anyway
 	svcUser := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "nova-keystone",
@@ -78,6 +77,12 @@ func (r *NovaFlavorReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(svcUser), svcUser); err != nil {
+		if errors.IsNotFound(err) {
+			controllerutil.RemoveFinalizer(instance, template.Finalizer)
+			if err := r.Update(ctx, instance); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
 		return ctrl.Result{}, err
 	}
 
