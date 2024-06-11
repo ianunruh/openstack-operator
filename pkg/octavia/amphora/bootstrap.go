@@ -22,6 +22,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	novakeypair "github.com/ianunruh/openstack-operator/pkg/nova/keypair"
@@ -300,6 +301,7 @@ func (b *bootstrap) EnsureKeypair(ctx context.Context) error {
 			User:      b.instance.Name,
 		},
 	}
+	controllerutil.SetControllerReference(b.instance, keypair, b.client.Scheme())
 	if err := novakeypair.Ensure(ctx, b.client, keypair, b.log); err != nil {
 		return err
 	}

@@ -281,6 +281,7 @@ func (r *NovaReconciler) reconcileFlavors(ctx context.Context, instance *opensta
 			},
 			Spec: spec,
 		}
+		controllerutil.SetControllerReference(instance, flavor, r.Scheme)
 		if err := novaflavor.Ensure(ctx, r.Client, flavor, log); err != nil {
 			return err
 		}
