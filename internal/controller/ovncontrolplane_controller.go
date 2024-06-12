@@ -18,11 +18,13 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -36,8 +38,9 @@ import (
 // OVNControlPlaneReconciler reconciles a OVNControlPlane object
 type OVNControlPlaneReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=ovncontrolplanes,verbs=get;list;watch;create;update;patch;delete
@@ -65,6 +68,8 @@ func (r *OVNControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
+	reporter := ovn.NewReporter(instance, r.Client, r.Recorder)
+
 	pkiResources := ovn.PKIResources(instance)
 	for _, resource := range pkiResources {
 		controllerutil.SetControllerReference(instance, resource, r.Scheme)
@@ -89,20 +94,8 @@ func (r *OVNControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		template.ConfigMapVolume("etc-ovn", cm.Name, nil),
 	}
 
-	ovsdbNorthSvc, err := r.reconcileOVSDB(ctx, instance, ovn.OVSDBNorth, env, volumes, log)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	ovsdbSouthSvc, err := r.reconcileOVSDB(ctx, instance, ovn.OVSDBSouth, env, volumes, log)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	ovsdbConnConfigMap := ovn.OVSDBConnectionConfigMap(instance, ovsdbNorthSvc, ovsdbSouthSvc)
-	controllerutil.SetControllerReference(instance, ovsdbConnConfigMap, r.Scheme)
-	if err := template.EnsureConfigMap(ctx, r.Client, ovsdbConnConfigMap, log); err != nil {
-		return ctrl.Result{}, err
+	if result, err := r.reconcileAllOVSDB(ctx, instance, env, volumes, reporter, log); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	if err := r.reconcileNorthd(ctx, instance, env, volumes, log); err != nil {
@@ -114,6 +107,10 @@ func (r *OVNControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	if err := r.reconcileController(ctx, instance, env, volumes, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := reporter.Running(ctx); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -130,20 +127,47 @@ func (r *OVNControlPlaneReconciler) reconcileNorthd(ctx context.Context, instanc
 	return nil
 }
 
-func (r *OVNControlPlaneReconciler) reconcileOVSDB(ctx context.Context, instance *openstackv1beta1.OVNControlPlane, component string, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) (*corev1.Service, error) {
+func (r *OVNControlPlaneReconciler) reconcileAllOVSDB(ctx context.Context, instance *openstackv1beta1.OVNControlPlane, env []corev1.EnvVar, volumes []corev1.Volume, reporter *ovn.Reporter, log logr.Logger) (ctrl.Result, error) {
+	northSts, northSvc, err := r.reconcileOVSDB(ctx, instance, ovn.OVSDBNorth, env, volumes, log)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	southSts, southSvc, err := r.reconcileOVSDB(ctx, instance, ovn.OVSDBSouth, env, volumes, log)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if northSts.Status.AvailableReplicas == 0 || southSts.Status.AvailableReplicas == 0 {
+		if err := reporter.Pending(ctx, "Waiting for OVSDB to be available"); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
+	ovsdbConnConfigMap := ovn.OVSDBConnectionConfigMap(instance, northSvc, southSvc)
+	controllerutil.SetControllerReference(instance, ovsdbConnConfigMap, r.Scheme)
+	if err := template.EnsureConfigMap(ctx, r.Client, ovsdbConnConfigMap, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+func (r *OVNControlPlaneReconciler) reconcileOVSDB(ctx context.Context, instance *openstackv1beta1.OVNControlPlane, component string, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) (*appsv1.StatefulSet, *corev1.Service, error) {
 	svc := ovn.OVSDBService(instance, component)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	sts := ovn.OVSDBStatefulSet(instance, component, env, volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return svc, nil
+	return sts, svc, nil
 }
 
 func (r *OVNControlPlaneReconciler) reconcileController(ctx context.Context, instance *openstackv1beta1.OVNControlPlane, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
