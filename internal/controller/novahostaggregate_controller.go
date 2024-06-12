@@ -118,7 +118,7 @@ func (r *NovaHostAggregateReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	}
 
 	if err := hostaggregate.Reconcile(ctx, r.Client, instance, compute, log); err != nil {
-		if err := reporter.Error(ctx, "Error reconciling host aggregate: %w", err); err != nil {
+		if err := reporter.Error(ctx, "Error reconciling host aggregate: %v", err); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil

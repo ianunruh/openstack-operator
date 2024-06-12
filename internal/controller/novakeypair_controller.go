@@ -121,7 +121,7 @@ func (r *NovaKeypairReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	if err := keypair.Reconcile(ctx, instance, compute, identity, log); err != nil {
-		if err := reporter.Error(ctx, "Error reconciling Nova keypair: %w", err); err != nil {
+		if err := reporter.Error(ctx, "Error reconciling Nova keypair: %v", err); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil

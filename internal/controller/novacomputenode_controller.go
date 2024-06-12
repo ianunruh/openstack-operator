@@ -78,7 +78,7 @@ func (r *NovaComputeNodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	if err := computenode.Reconcile(ctx, r.Client, instance, compute, log); err != nil {
-		if err := reporter.Error(ctx, "Error reconciling compute node: %w", err); err != nil {
+		if err := reporter.Error(ctx, "Error reconciling compute node: %v", err); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil

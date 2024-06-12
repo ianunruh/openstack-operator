@@ -113,7 +113,7 @@ func (r *NovaFlavorReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	}
 
 	if err := novaflavor.Reconcile(ctx, r.Client, instance, compute, log); err != nil {
-		if err := reporter.Error(ctx, "Error reconciling Nova flavor: %w", err); err != nil {
+		if err := reporter.Error(ctx, "Error reconciling Nova flavor: %v", err); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil

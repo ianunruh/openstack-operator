@@ -100,7 +100,7 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	if err := keystonesvc.Reconcile(instance, identity, log); err != nil {
-		if err := reporter.Error(ctx, "Error reconciling Keystone service", err); err != nil {
+		if err := reporter.Error(ctx, "Error reconciling Keystone service: %v", err); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
