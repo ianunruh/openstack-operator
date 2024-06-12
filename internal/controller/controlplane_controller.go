@@ -21,7 +21,6 @@ import (
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -66,7 +65,6 @@ type ControlPlaneReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
-	reporter := controlplane.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.ControlPlane{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -77,12 +75,7 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
-	if controlplane.ReadyCondition(instance) == nil {
-		reporter.Pending(instance, nil, "ControlPlanePending", "Waiting for ControlPlane to be running")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
+	reporter := controlplane.NewReporter(instance, r.Client, r.Recorder)
 
 	ovnControlPlane := controlplane.OVNControlPlane(instance)
 	controllerutil.SetControllerReference(instance, ovnControlPlane, r.Scheme)
@@ -202,12 +195,8 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
-	condition := controlplane.ReadyCondition(instance)
-	if condition.Status == metav1.ConditionFalse {
-		reporter.Running(instance)
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
+	if err := reporter.Running(ctx); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

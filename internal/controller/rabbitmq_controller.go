@@ -26,7 +26,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -66,7 +65,6 @@ type RabbitMQReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *RabbitMQReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
-	reporter := rabbitmq.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.RabbitMQ{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -77,12 +75,7 @@ func (r *RabbitMQReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	if rabbitmq.ReadyCondition(instance) == nil {
-		reporter.Pending(instance, nil, "RabbitMQPending", "Waiting for RabbitMQ to be running")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
+	reporter := rabbitmq.NewReporter(instance, r.Client, r.Recorder)
 
 	if err := r.reconcileRBAC(ctx, instance, log); err != nil {
 		return ctrl.Result{}, err
@@ -113,18 +106,17 @@ func (r *RabbitMQReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	} else if sts.Status.ReadyReplicas == 0 {
 		log.Info("Waiting for StatefulSet to be available", "name", sts.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	}
-
-	condition := rabbitmq.ReadyCondition(instance)
-	if condition.Status == metav1.ConditionFalse {
-		reporter.Running(instance)
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
+		if err := reporter.Pending(ctx, "Waiting for StatefulSet to be available"); err != nil {
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
 	if err := r.reconcileServiceMonitor(ctx, instance, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := reporter.Running(ctx); err != nil {
 		return ctrl.Result{}, err
 	}
 

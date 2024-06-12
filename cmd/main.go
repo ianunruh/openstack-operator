@@ -285,9 +285,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controller.OVNControlPlaneReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("OVNControlPlane"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("OVNControlPlane"),
+		Recorder: mgr.GetEventRecorderFor("OVNControlPlane"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OVNControlPlane")
 		os.Exit(1)

@@ -24,7 +24,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -53,7 +52,6 @@ type NovaFlavorReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *NovaFlavorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
-	reporter := novaflavor.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.NovaFlavor{}
 	if err := r.Client.Get(ctx, req.NamespacedName, instance); err != nil {
@@ -63,12 +61,7 @@ func (r *NovaFlavorReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return ctrl.Result{}, err
 	}
 
-	if novaflavor.ReadyCondition(instance) == nil {
-		reporter.Pending(instance, nil, "FlavorPending", "Waiting for flavor to be reconciled")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
+	reporter := novaflavor.NewReporter(instance, r.Client, r.Recorder)
 
 	svcUser := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -97,19 +90,11 @@ func (r *NovaFlavorReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 			return ctrl.Result{}, nil
 		}
 
-		if novaflavor.ReadyCondition(instance).Reason != openstackv1beta1.ReasonDeleting {
-			reporter.Deleting(instance, nil, "FlavorDeleting", "Waiting for flavor to be deleted")
-			if err := r.Client.Status().Update(ctx, instance); err != nil {
+		if err := novaflavor.Delete(instance, compute, log); err != nil {
+			if err := reporter.DeleteError(ctx, "Error deleting Nova flavor: %w", err); err != nil {
 				return ctrl.Result{}, err
 			}
-		}
-
-		if err := novaflavor.Delete(instance, compute, log); err != nil {
-			reporter.Deleting(instance, err, "FlavorDeleteError", "Error deleting flavor")
-			if statusErr := r.Client.Status().Update(ctx, instance); statusErr != nil {
-				err = utilerrors.NewAggregate([]error{statusErr, err})
-			}
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 		}
 
 		controllerutil.RemoveFinalizer(instance, template.Finalizer)
@@ -128,19 +113,14 @@ func (r *NovaFlavorReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	}
 
 	if err := novaflavor.Reconcile(ctx, r.Client, instance, compute, log); err != nil {
-		reporter.Pending(instance, err, "FlavorReconcileError", "Error reconciling flavor")
-		if statusErr := r.Client.Status().Update(ctx, instance); statusErr != nil {
-			err = utilerrors.NewAggregate([]error{statusErr, err})
-		}
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	}
-
-	condition := novaflavor.ReadyCondition(instance)
-	if condition.Status == metav1.ConditionFalse {
-		reporter.Succeeded(instance)
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
+		if err := reporter.Error(ctx, "Error reconciling Nova flavor: %v", err); err != nil {
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
+	if err := reporter.Reconciled(ctx); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
