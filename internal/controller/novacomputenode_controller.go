@@ -25,7 +25,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -51,7 +50,6 @@ type NovaComputeNodeReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *NovaComputeNodeReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
-	reporter := computenode.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.NovaComputeNode{}
 	if err := r.Client.Get(ctx, req.NamespacedName, instance); err != nil {
@@ -61,12 +59,7 @@ func (r *NovaComputeNodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	if computenode.ReadyCondition(instance) == nil {
-		reporter.Pending(instance, nil, "ComputeNodePending", "Waiting for compute node to be reconciled")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
+	reporter := computenode.NewReporter(instance, r.Client, r.Recorder)
 
 	// TODO handle this user not existing on deletion, and remove the finalizer anyway
 	svcUser := &corev1.Secret{
@@ -85,19 +78,14 @@ func (r *NovaComputeNodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	if err := computenode.Reconcile(ctx, r.Client, instance, compute, log); err != nil {
-		reporter.Pending(instance, err, "ComputeNodeReconcileError", "Error reconciling compute node")
-		if statusErr := r.Client.Status().Update(ctx, instance); statusErr != nil {
-			err = utilerrors.NewAggregate([]error{statusErr, err})
-		}
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	}
-
-	condition := computenode.ReadyCondition(instance)
-	if condition.Status == metav1.ConditionFalse {
-		reporter.Running(instance)
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
+		if err := reporter.Error(ctx, "Error reconciling compute node: %w", err); err != nil {
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
+	if err := reporter.Running(ctx); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

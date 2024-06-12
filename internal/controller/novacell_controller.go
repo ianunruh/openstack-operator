@@ -58,7 +58,6 @@ type NovaCellReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
-	reporter := novacell.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.NovaCell{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -69,12 +68,7 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	if novacell.ReadyCondition(instance) == nil {
-		reporter.Pending(instance, nil, "NovaCellPending", "Waiting for cell to be running")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
+	reporter := novacell.NewReporter(instance, r.Client, r.Recorder)
 
 	cluster := &openstackv1beta1.Nova{
 		ObjectMeta: metav1.ObjectMeta{
@@ -163,12 +157,8 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	condition := novacell.ReadyCondition(instance)
-	if condition.Status == metav1.ConditionFalse {
-		reporter.Running(instance)
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
+	if err := reporter.Running(ctx); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

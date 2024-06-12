@@ -25,7 +25,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -58,7 +57,6 @@ type NovaHostAggregateReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *NovaHostAggregateReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
-	reporter := hostaggregate.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.NovaHostAggregate{}
 	if err := r.Client.Get(ctx, req.NamespacedName, instance); err != nil {
@@ -68,12 +66,7 @@ func (r *NovaHostAggregateReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		return ctrl.Result{}, err
 	}
 
-	if hostaggregate.ReadyCondition(instance) == nil {
-		reporter.Pending(instance, nil, "HostAggregatePending", "Waiting for host aggregate to be reconciled")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
+	reporter := hostaggregate.NewReporter(instance, r.Client, r.Recorder)
 
 	svcUser := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
@@ -102,19 +95,11 @@ func (r *NovaHostAggregateReconciler) Reconcile(ctx context.Context, req ctrl.Re
 			return ctrl.Result{}, nil
 		}
 
-		if hostaggregate.ReadyCondition(instance).Reason != openstackv1beta1.ReasonDeleting {
-			reporter.Deleting(instance, nil, "HostAggregateDeleting", "Waiting for host aggregate to be deleted")
-			if err := r.Client.Status().Update(ctx, instance); err != nil {
+		if err := hostaggregate.Delete(instance, compute, log); err != nil {
+			if err := reporter.DeleteError(ctx, "Error deleting Nova host aggregate: %w", err); err != nil {
 				return ctrl.Result{}, err
 			}
-		}
-
-		if err := hostaggregate.Delete(instance, compute, log); err != nil {
-			reporter.Deleting(instance, err, "HostAggregateDeleteError", "Error deleting host aggregate")
-			if statusErr := r.Client.Status().Update(ctx, instance); statusErr != nil {
-				err = utilerrors.NewAggregate([]error{statusErr, err})
-			}
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 		}
 
 		controllerutil.RemoveFinalizer(instance, template.Finalizer)
@@ -133,19 +118,14 @@ func (r *NovaHostAggregateReconciler) Reconcile(ctx context.Context, req ctrl.Re
 	}
 
 	if err := hostaggregate.Reconcile(ctx, r.Client, instance, compute, log); err != nil {
-		reporter.Pending(instance, err, "HostAggregateReconcileError", "Error reconciling host aggregate")
-		if statusErr := r.Client.Status().Update(ctx, instance); statusErr != nil {
-			err = utilerrors.NewAggregate([]error{statusErr, err})
-		}
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	}
-
-	condition := hostaggregate.ReadyCondition(instance)
-	if condition.Status == metav1.ConditionFalse {
-		reporter.Succeeded(instance)
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
+		if err := reporter.Error(ctx, "Error reconciling host aggregate: %w", err); err != nil {
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
+	if err := reporter.Reconciled(ctx); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

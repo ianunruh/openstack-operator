@@ -26,7 +26,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -55,7 +54,6 @@ type KeystoneServiceReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
-	reporter := keystonesvc.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.KeystoneService{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -66,12 +64,7 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	if keystonesvc.ReadyCondition(instance) == nil {
-		reporter.Pending(instance, nil, "KeystoneServicePending", "Waiting for service to be reconciled")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
+	reporter := keystonesvc.NewReporter(instance, r.Client, r.Recorder)
 
 	deps := template.NewConditionWaiter(log)
 
@@ -107,19 +100,14 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	if err := keystonesvc.Reconcile(instance, identity, log); err != nil {
-		reporter.Pending(instance, err, "KeystoneServiceReconcileError", "Error reconciling Keystone service")
-		if statusErr := r.Client.Status().Update(ctx, instance); statusErr != nil {
-			err = utilerrors.NewAggregate([]error{statusErr, err})
-		}
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	}
-
-	condition := keystonesvc.ReadyCondition(instance)
-	if condition.Status == metav1.ConditionFalse {
-		reporter.Succeeded(instance)
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
+		if err := reporter.Error(ctx, "Error reconciling Keystone service", err); err != nil {
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
+	if err := reporter.Reconciled(ctx); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

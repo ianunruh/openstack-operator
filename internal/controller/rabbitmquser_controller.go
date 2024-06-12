@@ -55,7 +55,6 @@ type RabbitMQUserReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *RabbitMQUserReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
-	reporter := rabbitmquser.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.RabbitMQUser{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -66,12 +65,7 @@ func (r *RabbitMQUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		return ctrl.Result{}, err
 	}
 
-	if rabbitmquser.ReadyCondition(instance) == nil {
-		reporter.Pending(instance, nil, "RabbitMQUserPending", "Waiting for user to be reconciled")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
+	reporter := rabbitmquser.NewReporter(instance, r.Client, r.Recorder)
 
 	deps := template.NewConditionWaiter(log)
 
@@ -107,19 +101,14 @@ func (r *RabbitMQUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		// TODO update pending w/error
 		return ctrl.Result{}, err
 	} else if !result.IsZero() {
-		reporter.Pending(instance, nil, "RabbitMQUserPending", "Waiting for setup job to complete")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
+		if err := reporter.Pending(ctx, "Waiting for RabbitMQ to be available"); err != nil {
 			return ctrl.Result{}, err
 		}
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
-	condition := rabbitmquser.ReadyCondition(instance)
-	if condition.Status == metav1.ConditionFalse {
-		reporter.Succeeded(instance)
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
+	if err := reporter.Reconciled(ctx); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

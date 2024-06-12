@@ -63,7 +63,6 @@ type KeystoneReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
-	reporter := keystone.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.Keystone{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -74,12 +73,7 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	if keystone.ReadyCondition(instance) == nil {
-		reporter.Pending(instance, nil, "KeystonePending", "Waiting for Keystone to be running")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
+	reporter := keystone.NewReporter(instance, r.Client, r.Recorder)
 
 	deps := template.NewConditionWaiter(log)
 
@@ -162,15 +156,14 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	} else if deploy.Status.AvailableReplicas == 0 {
 		log.Info("Waiting on deployment to be available", "name", deploy.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	}
-
-	condition := keystone.ReadyCondition(instance)
-	if condition.Status == metav1.ConditionFalse {
-		reporter.Running(instance)
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
+		if err := reporter.Pending(ctx, "Waiting for API to be available"); err != nil {
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
+	if err := reporter.Running(ctx); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

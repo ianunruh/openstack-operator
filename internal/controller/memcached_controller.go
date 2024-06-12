@@ -24,7 +24,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -57,7 +56,6 @@ type MemcachedReconciler struct {
 // move the current state of the cluster closer to the desired state.
 func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	log := r.Log.WithValues("instance", req.NamespacedName)
-	reporter := memcached.NewReporter(r.Recorder)
 
 	instance := &openstackv1beta1.Memcached{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
@@ -68,12 +66,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
-	if memcached.ReadyCondition(instance) == nil {
-		reporter.Pending(instance, nil, "MemcachedPending", "Waiting for Memcached to be running")
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
-			return ctrl.Result{}, err
-		}
-	}
+	reporter := memcached.NewReporter(instance, r.Client, r.Recorder)
 
 	if err := r.reconcileServices(ctx, instance, log); err != nil {
 		return ctrl.Result{}, err
@@ -85,18 +78,17 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	} else if sts.Status.ReadyReplicas == 0 {
 		log.Info("Waiting for StatefulSet to be available", "name", sts.Name)
-		return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
-	}
-
-	condition := memcached.ReadyCondition(instance)
-	if condition.Status == metav1.ConditionFalse {
-		reporter.Running(instance)
-		if err := r.Client.Status().Update(ctx, instance); err != nil {
+		if err := reporter.Pending(ctx, "Waiting for StatefulSet to be available"); err != nil {
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
 	if err := r.reconcileServiceMonitor(ctx, instance, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := reporter.Running(ctx); err != nil {
 		return ctrl.Result{}, err
 	}
 
