@@ -97,7 +97,7 @@ func (r *RabbitMQUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.SetupJobHash,
 		rabbitmquser.SetupJob(instance))
-	if result, err := jobs.Run(instance); err != nil {
+	if result, err := jobs.Run(ctx, instance, reporter.Pending); err != nil {
 		// TODO update pending w/error
 		return ctrl.Result{}, err
 	} else if !result.IsZero() {

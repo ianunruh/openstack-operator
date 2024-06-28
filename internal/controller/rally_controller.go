@@ -107,7 +107,7 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.DBSyncJobHash, rally.DBSyncJob(instance, env, volumes))
-	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+	if result, err := jobs.Run(ctx, instance, reporter.Pending); err != nil || !result.IsZero() {
 		return result, err
 	}
 

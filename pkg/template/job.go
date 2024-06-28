@@ -55,11 +55,7 @@ func (r *JobRunner) Add(hashField *string, job *batchv1.Job) {
 	})
 }
 
-func (r *JobRunner) SetReady(readyField *bool) {
-	r.readyField = readyField
-}
-
-func (r *JobRunner) Run(owner client.Object) (ctrl.Result, error) {
+func (r *JobRunner) Run(ctx context.Context, owner client.Object, report ReportFunc) (ctrl.Result, error) {
 	for i, jh := range r.jobs {
 		job := jh.Job
 
@@ -77,8 +73,10 @@ func (r *JobRunner) Run(owner client.Object) (ctrl.Result, error) {
 		if err := CreateJob(r.ctx, r.client, job, r.log); err != nil {
 			return ctrl.Result{}, err
 		} else if job.Status.CompletionTime == nil {
-			r.log.Info("Waiting on job completion", "name", job.Name)
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+			if err := report(ctx, "Waiting on job to complete: %s", job.Name); err != nil {
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 		}
 
 		if err := DeleteJob(r.ctx, r.client, job, r.log); err != nil {
