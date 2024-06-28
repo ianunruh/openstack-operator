@@ -121,6 +121,8 @@ type ManilaRookCephSpec struct {
 
 // ManilaStatus defines the observed state of Manila
 type ManilaStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
@@ -128,6 +130,8 @@ type ManilaStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:resource:path=manilas
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // Manila is the Schema for the manilas API
 type Manila struct {

@@ -155,6 +155,8 @@ type OctaviaWorkerSpec struct {
 
 // OctaviaStatus defines the observed state of Octavia
 type OctaviaStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 
@@ -189,8 +191,10 @@ type OctaviaAmphoraHealthPort struct {
 }
 
 //+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
 //+kubebuilder:resource:path=octavias
+//+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // Octavia is the Schema for the octavia API
 type Octavia struct {

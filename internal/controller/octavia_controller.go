@@ -27,6 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -45,8 +46,9 @@ import (
 // OctaviaReconciler reconciles a Octavia object
 type OctaviaReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=octavias,verbs=get;list;watch;create;update;patch;delete
@@ -85,6 +87,8 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(ks), ks); err != nil {
 		return ctrl.Result{}, err
 	}
+
+	reporter := octavia.NewReporter(instance, r.Client, r.Recorder)
 
 	deps := template.NewConditionWaiter(log)
 
@@ -197,6 +201,10 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	// TODO wait for deploys to be ready then mark status
+
+	if err := reporter.Running(ctx); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }

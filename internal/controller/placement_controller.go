@@ -26,6 +26,7 @@ import (
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -42,8 +43,9 @@ import (
 // PlacementReconciler reconciles a Placement object
 type PlacementReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=placements,verbs=get;list;watch;create;update;patch;delete
@@ -69,6 +71,8 @@ func (r *PlacementReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 		return ctrl.Result{}, err
 	}
+
+	reporter := placement.NewReporter(instance, r.Client, r.Recorder)
 
 	deps := template.NewConditionWaiter(log)
 
@@ -144,7 +148,12 @@ func (r *PlacementReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err
 	}
+
 	// TODO wait for deploy to be ready then mark status
+
+	if err := reporter.Running(ctx); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }
