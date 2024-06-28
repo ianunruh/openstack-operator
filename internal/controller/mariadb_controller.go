@@ -19,7 +19,6 @@ package controller
 import (
 	"context"
 	"strings"
-	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -69,6 +68,8 @@ func (r *MariaDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	reporter := mariadb.NewReporter(instance, r.Client, r.Recorder)
 
+	deps := template.NewConditionWaiter(log)
+
 	// Create admin secret if not found
 	if err := r.reconcileSecret(ctx, instance, log); err != nil {
 		return ctrl.Result{}, err
@@ -88,16 +89,15 @@ func (r *MariaDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return ctrl.Result{}, err
-	} else if sts.Status.ReadyReplicas == 0 {
-		log.Info("Waiting for StatefulSet to be available", "name", sts.Name)
-		if err := reporter.Pending(ctx, "Waiting for StatefulSet to be available"); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
+	template.AddStatefulSetReadyCheck(deps, sts)
 
 	if err := r.reconcileServiceMonitor(ctx, instance, log); err != nil {
 		return ctrl.Result{}, err
+	}
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	if err := reporter.Running(ctx); err != nil {
