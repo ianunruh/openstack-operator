@@ -146,19 +146,21 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileScheduler(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileScheduler(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileVolume(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileVolume(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	// TODO wait for deploys to be ready then mark status
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
 
 	if err := reporter.Running(ctx); err != nil {
 		return ctrl.Result{}, err
@@ -208,7 +210,7 @@ func (r *CinderReconciler) reconcileRookCeph(ctx context.Context, instance *open
 	return nil
 }
 
-func (r *CinderReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *CinderReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := cinder.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -230,11 +232,12 @@ func (r *CinderReconciler) reconcileAPI(ctx context.Context, instance *openstack
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }
 
-func (r *CinderReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *CinderReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := cinder.SchedulerService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -246,11 +249,12 @@ func (r *CinderReconciler) reconcileScheduler(ctx context.Context, instance *ope
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
 	}
+	template.AddStatefulSetReadyCheck(deps, sts)
 
 	return nil
 }
 
-func (r *CinderReconciler) reconcileVolume(ctx context.Context, instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *CinderReconciler) reconcileVolume(ctx context.Context, instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := cinder.VolumeService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -262,6 +266,7 @@ func (r *CinderReconciler) reconcileVolume(ctx context.Context, instance *openst
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
 	}
+	template.AddStatefulSetReadyCheck(deps, sts)
 
 	return nil
 }

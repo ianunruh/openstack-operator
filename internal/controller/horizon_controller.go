@@ -70,6 +70,8 @@ func (r *HorizonReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	reporter := horizon.NewReporter(instance, r.Client, r.Recorder)
 
+	deps := template.NewConditionWaiter(log)
+
 	cm := horizon.ConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
 	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
@@ -114,8 +116,11 @@ func (r *HorizonReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
-	// TODO wait for deploy to be ready then mark status
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
 
 	if err := reporter.Running(ctx); err != nil {
 		return ctrl.Result{}, err

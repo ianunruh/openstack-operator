@@ -148,8 +148,11 @@ func (r *PlacementReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
-	// TODO wait for deploy to be ready then mark status
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
 
 	if err := reporter.Running(ctx); err != nil {
 		return ctrl.Result{}, err

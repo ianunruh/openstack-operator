@@ -30,22 +30,24 @@ type ConditionWaiter struct {
 	resources []conditionWaitResource
 }
 
-func (cw *ConditionWaiter) AddCheck(instance client.Object, conditions []metav1.Condition, conditionType string) *ConditionWaiter {
+func (cw *ConditionWaiter) AddCheck(instance client.Object, conditionType string, ready bool) *ConditionWaiter {
 	cw.resources = append(cw.resources, conditionWaitResource{
 		Instance:      instance,
-		Conditions:    conditions,
 		ConditionType: conditionType,
+		Ready:         ready,
 	})
 	return cw
 }
 
 func (cw *ConditionWaiter) AddReadyCheck(instance client.Object, conditions []metav1.Condition) *ConditionWaiter {
-	return cw.AddCheck(instance, conditions, openstackv1beta1.ConditionReady)
+	return cw.AddCheck(instance,
+		openstackv1beta1.ConditionReady,
+		meta.IsStatusConditionTrue(conditions, openstackv1beta1.ConditionReady))
 }
 
 func (cw *ConditionWaiter) Wait(ctx context.Context, report ReportFunc) (ctrl.Result, error) {
 	for _, res := range cw.resources {
-		if meta.IsStatusConditionTrue(res.Conditions, res.ConditionType) {
+		if res.Ready {
 			continue
 		}
 
@@ -69,8 +71,8 @@ func (cw *ConditionWaiter) Wait(ctx context.Context, report ReportFunc) (ctrl.Re
 
 type conditionWaitResource struct {
 	Instance      client.Object
-	Conditions    []metav1.Condition
 	ConditionType string
+	Ready         bool
 }
 
 func NewReporter(instance client.Object, conditions *[]metav1.Condition, k8sClient client.Client, recorder record.EventRecorder) *Reporter {

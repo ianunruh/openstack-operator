@@ -183,8 +183,12 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, fullEnvVars, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, fullEnvVars, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
+	}
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	for _, cellSpec := range instance.Spec.Cells {
@@ -201,11 +205,11 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return result, err
 	}
 
-	if err := r.reconcileConductor(ctx, instance, fullEnvVars, volumes, log); err != nil {
+	if err := r.reconcileConductor(ctx, instance, fullEnvVars, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileScheduler(ctx, instance, fullEnvVars, volumes, log); err != nil {
+	if err := r.reconcileScheduler(ctx, instance, fullEnvVars, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -213,7 +217,9 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
-	// TODO wait for deploys to be ready then mark status
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
 
 	if err := reporter.Running(ctx); err != nil {
 		return ctrl.Result{}, err
@@ -222,7 +228,7 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	return ctrl.Result{}, nil
 }
 
-func (r *NovaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NovaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := nova.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -244,11 +250,12 @@ func (r *NovaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }
 
-func (r *NovaReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NovaReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := nova.ConductorService(instance.Name, instance.Namespace)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -260,11 +267,12 @@ func (r *NovaReconciler) reconcileConductor(ctx context.Context, instance *opens
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
 	}
+	template.AddStatefulSetReadyCheck(deps, sts)
 
 	return nil
 }
 
-func (r *NovaReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NovaReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := nova.SchedulerService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -276,6 +284,7 @@ func (r *NovaReconciler) reconcileScheduler(ctx context.Context, instance *opens
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
 	}
+	template.AddStatefulSetReadyCheck(deps, sts)
 
 	return nil
 }

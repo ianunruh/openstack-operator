@@ -145,15 +145,17 @@ func (r *BarbicanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileWorker(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileWorker(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	// TODO wait for deploys to be ready then mark status
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
 
 	if err := reporter.Running(ctx); err != nil {
 		return ctrl.Result{}, err
@@ -162,7 +164,7 @@ func (r *BarbicanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	return ctrl.Result{}, nil
 }
 
-func (r *BarbicanReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Barbican, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *BarbicanReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Barbican, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := barbican.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -184,16 +186,18 @@ func (r *BarbicanReconciler) reconcileAPI(ctx context.Context, instance *opensta
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }
 
-func (r *BarbicanReconciler) reconcileWorker(ctx context.Context, instance *openstackv1beta1.Barbican, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *BarbicanReconciler) reconcileWorker(ctx context.Context, instance *openstackv1beta1.Barbican, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	deploy := barbican.WorkerDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }

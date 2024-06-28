@@ -36,3 +36,7 @@ func EnsureStatefulSet(ctx context.Context, c client.Client, instance *appsv1.St
 
 	return nil
 }
+
+func AddStatefulSetReadyCheck(cw *ConditionWaiter, instance *appsv1.StatefulSet) {
+	cw.AddCheck(instance, "Available", instance.Status.AvailableReplicas > 0)
+}

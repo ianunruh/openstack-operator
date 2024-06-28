@@ -145,19 +145,21 @@ func (r *ManilaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileScheduler(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileScheduler(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileShare(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileShare(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	// TODO wait for deploys to be ready then mark status
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
 
 	if err := reporter.Running(ctx); err != nil {
 		return ctrl.Result{}, err
@@ -166,7 +168,7 @@ func (r *ManilaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	return ctrl.Result{}, nil
 }
 
-func (r *ManilaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Manila, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *ManilaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Manila, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := manila.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -188,11 +190,12 @@ func (r *ManilaReconciler) reconcileAPI(ctx context.Context, instance *openstack
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }
 
-func (r *ManilaReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Manila, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *ManilaReconciler) reconcileScheduler(ctx context.Context, instance *openstackv1beta1.Manila, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := manila.SchedulerService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -204,11 +207,12 @@ func (r *ManilaReconciler) reconcileScheduler(ctx context.Context, instance *ope
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
 	}
+	template.AddStatefulSetReadyCheck(deps, sts)
 
 	return nil
 }
 
-func (r *ManilaReconciler) reconcileShare(ctx context.Context, instance *openstackv1beta1.Manila, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *ManilaReconciler) reconcileShare(ctx context.Context, instance *openstackv1beta1.Manila, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := manila.ShareService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -220,6 +224,7 @@ func (r *ManilaReconciler) reconcileShare(ctx context.Context, instance *opensta
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
 	}
+	template.AddStatefulSetReadyCheck(deps, sts)
 
 	return nil
 }
