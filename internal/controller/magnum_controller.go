@@ -113,8 +113,8 @@ func (r *MagnumReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	keystoneuser.AddReadyCheck(deps, keystoneStackUser)
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	cm := magnum.ConfigMap(instance)

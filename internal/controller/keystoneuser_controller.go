@@ -80,8 +80,8 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 	keystone.AddReadyCheck(deps, cluster)
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	var currentPassword string

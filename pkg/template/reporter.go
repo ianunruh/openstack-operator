@@ -16,6 +16,8 @@ import (
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 )
 
+type ReportFunc func(ctx context.Context, message string, args ...any) error
+
 func NewConditionWaiter(log logr.Logger) *ConditionWaiter {
 	return &ConditionWaiter{
 		log: log,
@@ -28,40 +30,47 @@ type ConditionWaiter struct {
 	resources []conditionWaitResource
 }
 
-func (cw *ConditionWaiter) AddReadyCheck(instance client.Object, conditions []metav1.Condition) *ConditionWaiter {
+func (cw *ConditionWaiter) AddCheck(instance client.Object, conditions []metav1.Condition, conditionType string) *ConditionWaiter {
 	cw.resources = append(cw.resources, conditionWaitResource{
-		Instance:   instance,
-		Conditions: conditions,
+		Instance:      instance,
+		Conditions:    conditions,
+		ConditionType: conditionType,
 	})
 	return cw
 }
 
-func (cw *ConditionWaiter) Wait() ctrl.Result {
+func (cw *ConditionWaiter) AddReadyCheck(instance client.Object, conditions []metav1.Condition) *ConditionWaiter {
+	return cw.AddCheck(instance, conditions, openstackv1beta1.ConditionReady)
+}
+
+func (cw *ConditionWaiter) Wait(ctx context.Context, report ReportFunc) (ctrl.Result, error) {
 	for _, res := range cw.resources {
-		if meta.IsStatusConditionTrue(res.Conditions, openstackv1beta1.ConditionReady) {
+		if meta.IsStatusConditionTrue(res.Conditions, res.ConditionType) {
 			continue
 		}
 
-		cw.log.Info("Waiting for dependency to be ready",
-			"kind", res.Instance.GetObjectKind().GroupVersionKind().Kind,
-			"name", res.Instance.GetName(),
-			"namespace", res.Instance.GetNamespace())
+		if err := report(
+			ctx,
+			"Waiting on %s/%s condition %s",
+			res.Instance.GetObjectKind().GroupVersionKind().Kind,
+			res.Instance.GetName(),
+			res.ConditionType,
+		); err != nil {
+			return ctrl.Result{}, err
+		}
 
-		return ctrl.Result{RequeueAfter: 10 * time.Second}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
-	cw.Clear()
-
-	return ctrl.Result{}
-}
-
-func (cw *ConditionWaiter) Clear() {
 	cw.resources = nil
+
+	return ctrl.Result{}, nil
 }
 
 type conditionWaitResource struct {
-	Instance   client.Object
-	Conditions []metav1.Condition
+	Instance      client.Object
+	Conditions    []metav1.Condition
+	ConditionType string
 }
 
 func NewReporter(instance client.Object, conditions *[]metav1.Condition, k8sClient client.Client, recorder record.EventRecorder) *Reporter {
@@ -108,4 +117,8 @@ func (r *Reporter) UpdateCondition(ctx context.Context, conditionType string, st
 
 func (r *Reporter) UpdateReadyCondition(ctx context.Context, status metav1.ConditionStatus, reason, message string, args ...any) error {
 	return r.UpdateCondition(ctx, openstackv1beta1.ConditionReady, status, reason, message, args...)
+}
+
+func (r *Reporter) UpdateCompletedCondition(ctx context.Context, status metav1.ConditionStatus, reason, message string, args ...any) error {
+	return r.UpdateCondition(ctx, openstackv1beta1.ConditionCompleted, status, reason, message, args...)
 }

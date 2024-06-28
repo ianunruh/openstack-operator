@@ -124,8 +124,8 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	cm := octavia.ConfigMap(instance)
@@ -159,7 +159,7 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{}, err
 		}
 
-		if result, err := amphora.Bootstrap(ctx, instance, r.Client, log); err != nil || !result.IsZero() {
+		if result, err := amphora.Bootstrap(ctx, instance, r.Client, reporter.Pending, log); err != nil || !result.IsZero() {
 			return result, err
 		}
 

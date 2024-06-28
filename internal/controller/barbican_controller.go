@@ -106,8 +106,8 @@ func (r *BarbicanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 	keystoneuser.AddReadyCheck(deps, keystoneUser)
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	secret := barbican.Secret(instance)

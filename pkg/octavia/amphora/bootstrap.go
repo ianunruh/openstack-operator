@@ -38,7 +38,7 @@ const (
 	imageSourceProperty = "source"
 )
 
-func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client.Client, log logr.Logger) (ctrl.Result, error) {
+func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client.Client, report template.ReportFunc, log logr.Logger) (ctrl.Result, error) {
 	b, err := newBootstrap(ctx, instance, c, log)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -47,9 +47,7 @@ func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client
 	if err := b.EnsureAll(ctx); err != nil {
 		return ctrl.Result{}, err
 	}
-
-	result := b.Wait()
-	return result, nil
+	return b.Wait(ctx, report)
 }
 
 func newBootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client.Client, log logr.Logger) (*bootstrap, error) {
@@ -163,8 +161,8 @@ func (b *bootstrap) EnsureAll(ctx context.Context) error {
 	return nil
 }
 
-func (b *bootstrap) Wait() ctrl.Result {
-	return b.deps.Wait()
+func (b *bootstrap) Wait(ctx context.Context, report template.ReportFunc) (ctrl.Result, error) {
+	return b.deps.Wait(ctx, report)
 }
 
 func (b *bootstrap) EnsureFlavor(ctx context.Context) error {
