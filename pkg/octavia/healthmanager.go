@@ -35,7 +35,7 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 	volumes = append(volumes,
 		template.EmptyDirVolume("pod-shared"),
 		template.HostPathVolume("host-var-run-openvswitch", "/var/run/openvswitch"),
-		template.SecretVolume("octavia-keystone", "keystone", &defaultMode))
+		template.SecretVolume("keystone", "octavia-keystone", &defaultMode))
 
 	// pki volumes
 	volumeMounts = append(volumeMounts, amphora.VolumeMounts(instance)...)
