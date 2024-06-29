@@ -1,11 +1,13 @@
 #!/bin/bash
 set -eux
 
-PORT_INFO=$(openstack port list --name octavia-health-manager-$HOSTNAME --network $HM_NETWORK_ID -f json | jq '.[0]')
+export OS_CLOUD=default
 
-HM_PORT_ID=$(echo $PORT_INFO | jq -r '.["ID"]')
-HM_PORT_MAC=$(echo $PORT_INFO | jq -r '.["MAC Address"]')
-HM_BIND_IP=$(echo $PORT_INFO | jq -r '.["Fixed IP Addresses"][0].ip_address')
+PORT_INFO=$(openstack port list --name octavia-health-manager-$HOSTNAME --network $HM_NETWORK_ID -f json)
+
+HM_PORT_ID=$(echo $PORT_INFO | python3 -c 'import json, sys; print(json.load(sys.stdin)[0]["ID"])')
+HM_PORT_MAC=$(echo $PORT_INFO | python3 -c 'import json, sys; print(json.load(sys.stdin)[0]["MAC Address"])')
+HM_BIND_IP=$(echo $PORT_INFO | python3 -c 'import json, sys; print(json.load(sys.stdin)[0]["Fixed IP Addresses"][0]["ip_address"])')
 
 HM_IFACE=o-hm0
 
