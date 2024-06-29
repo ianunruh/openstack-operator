@@ -36,7 +36,7 @@ func ConfigMap(instance *openstackv1beta1.OVNControlPlane) *corev1.ConfigMap {
 	return cm
 }
 
-func EnsureControlPlane(ctx context.Context, c client.Client, instance *openstackv1beta1.OVNControlPlane, log logr.Logger) error {
+func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.OVNControlPlane, log logr.Logger) error {
 	hash, err := template.ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)

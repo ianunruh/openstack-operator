@@ -112,7 +112,7 @@ func ClusterServiceMonitor(instance *openstackv1beta1.Memcached) *unstructured.U
 	})
 }
 
-func EnsureCluster(ctx context.Context, c client.Client, instance *openstackv1beta1.Memcached, log logr.Logger) error {
+func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Memcached, log logr.Logger) error {
 	hash, err := template.ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
