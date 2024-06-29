@@ -44,8 +44,7 @@ type JobRunner struct {
 	client client.Client
 	log    logr.Logger
 
-	jobs       []jobHashField
-	readyField *bool
+	jobs []jobHashField
 }
 
 func (r *JobRunner) Add(hashField *string, job *batchv1.Job) {
@@ -56,7 +55,7 @@ func (r *JobRunner) Add(hashField *string, job *batchv1.Job) {
 }
 
 func (r *JobRunner) Run(ctx context.Context, owner client.Object, report ReportFunc) (ctrl.Result, error) {
-	for i, jh := range r.jobs {
+	for _, jh := range r.jobs {
 		job := jh.Job
 
 		controllerutil.SetControllerReference(owner, job, r.client.Scheme())
@@ -84,10 +83,6 @@ func (r *JobRunner) Run(ctx context.Context, owner client.Object, report ReportF
 		}
 
 		*jh.HashField = jobHash
-
-		if i == len(r.jobs)-1 && r.readyField != nil {
-			*r.readyField = true
-		}
 
 		if err := r.client.Status().Update(r.ctx, owner); err != nil {
 			return ctrl.Result{}, err
