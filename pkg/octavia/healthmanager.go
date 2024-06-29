@@ -21,7 +21,6 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
 		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-health-manager.json"),
-		template.VolumeMount("pod-shared", "/tmp/pod-shared"),
 	}
 
 	defaultMode := int32(0400)
@@ -29,6 +28,7 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 	// openvswitch volumes
 	initVolumeMounts := []corev1.VolumeMount{
 		template.VolumeMount("host-var-run-openvswitch", "/var/run/openvswitch"),
+		template.VolumeMount("pod-shared", "/tmp/pod-shared"),
 		template.SubPathVolumeMount("keystone", "/etc/openstack/clouds.yaml", "clouds.yaml"),
 	}
 	volumeMounts = append(volumeMounts, initVolumeMounts...)
