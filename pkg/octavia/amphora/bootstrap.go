@@ -360,26 +360,12 @@ func (b *bootstrap) EnsureHealthPorts(ctx context.Context) error {
 	networkID := status.NetworkIDs[0]
 	securityGroups := status.HealthSecurityGroupIDs
 
-	nodeLabelSelector, err := labels.ValidatedSelectorFromSet(b.instance.Spec.HealthManager.NodeSelector)
+	nodes, err := b.listHealthMangerNodes(ctx)
 	if err != nil {
 		return err
 	}
 
-	nodes := &corev1.NodeList{}
-	if err := b.client.List(ctx, nodes, &client.ListOptions{
-		LabelSelector: nodeLabelSelector,
-	}); err != nil {
-		return err
-	}
-
-	portPage, err := ports.List(b.network, ports.ListOpts{
-		NetworkID:   networkID,
-		DeviceOwner: "Octavia:health-mgr",
-	}).AllPages()
-	if err != nil {
-		return err
-	}
-	currentPorts, err := ports.ExtractPorts(portPage)
+	currentPorts, err := b.listHealthManagerPorts(ctx)
 	if err != nil {
 		return err
 	}
@@ -390,7 +376,7 @@ func (b *bootstrap) EnsureHealthPorts(ctx context.Context) error {
 	}
 
 	portsByName := make(map[string]openstackv1beta1.OctaviaAmphoraHealthPort)
-	for _, node := range nodes.Items {
+	for _, node := range nodes {
 		name := healthPortPrefix + node.Name
 
 		port, ok := currentByName[name]
@@ -444,6 +430,33 @@ func (b *bootstrap) EnsureHealthPorts(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (b *bootstrap) listHealthMangerNodes(ctx context.Context) ([]corev1.Node, error) {
+	nodeLabelSelector, err := labels.ValidatedSelectorFromSet(b.instance.Spec.HealthManager.NodeSelector)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes := &corev1.NodeList{}
+	if err := b.client.List(ctx, nodes, &client.ListOptions{
+		LabelSelector: nodeLabelSelector,
+	}); err != nil {
+		return nil, err
+	}
+
+	return nodes.Items, nil
+}
+
+func (b *bootstrap) listHealthManagerPorts(ctx context.Context) ([]ports.Port, error) {
+	page, err := ports.List(b.network, ports.ListOpts{
+		NetworkID:   b.instance.Status.Amphora.NetworkIDs[0],
+		DeviceOwner: "Octavia:health-mgr",
+	}).AllPages()
+	if err != nil {
+		return nil, err
+	}
+	return ports.ExtractPorts(page)
 }
 
 func sortPortsByName(ports []openstackv1beta1.OctaviaAmphoraHealthPort) {
