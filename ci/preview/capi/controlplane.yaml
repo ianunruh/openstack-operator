@@ -44,7 +44,10 @@ spec:
   magnum: {}
   rally: {}
   octavia:
+    amphora:
+      enabled: true
     ovn:
       enabled: true
-    nodeSelector:
-      openstack/octavia-controller: enabled
+    healthManager:
+      nodeSelector:
+        openstack/octavia-controller: enabled

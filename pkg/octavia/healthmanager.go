@@ -21,25 +21,31 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
 		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-health-manager.json"),
+		template.VolumeMount("pod-shared", "/tmp/pod-shared"),
 	}
+
+	defaultMode := int32(0400)
 
 	// openvswitch volumes
 	initVolumeMounts := []corev1.VolumeMount{
 		template.VolumeMount("host-var-run-openvswitch", "/var/run/openvswitch"),
+		template.SubPathVolumeMount("keystone", "/etc/openstack", "clouds.yaml"),
 	}
 	volumeMounts = append(volumeMounts, initVolumeMounts...)
 	volumes = append(volumes,
-		template.HostPathVolume("host-var-run-openvswitch", "/var/run/openvswitch"))
+		template.EmptyDirVolume("pod-shared"),
+		template.HostPathVolume("host-var-run-openvswitch", "/var/run/openvswitch"),
+		template.SecretVolume("octavia-keystone", "keystone", &defaultMode))
 
 	// pki volumes
 	volumeMounts = append(volumeMounts, amphora.VolumeMounts(instance)...)
 	volumes = append(volumes, amphora.Volumes(instance)...)
 
-	// TODO support multiple replicas of health manager
-	port := instance.Status.Amphora.HealthPorts[0]
+	hmNetworkID := instance.Status.Amphora.NetworkIDs[0]
 
-	env = append(env,
-		template.EnvVar("OS_HEALTH_MANAGER__BIND_IP", port.IPAddress))
+	initEnv := append(env,
+		template.FieldEnvVar("HOSTNAME", "spec.nodeName"),
+		template.EnvVar("HM_NETWORK_ID", hmNetworkID))
 
 	privileged := true
 	runAsRootUser := int64(0)
@@ -58,10 +64,7 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 					"-c",
 					template.MustReadFile(AppLabel, "init-health-manager-port.sh"),
 				},
-				Env: []corev1.EnvVar{
-					template.EnvVar("HM_PORT_ID", port.ID),
-					template.EnvVar("HM_PORT_MAC", port.MACAddress),
-				},
+				Env:       initEnv,
 				Resources: spec.Resources,
 				SecurityContext: &corev1.SecurityContext{
 					Privileged: &privileged,

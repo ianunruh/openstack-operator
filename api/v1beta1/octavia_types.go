@@ -187,9 +187,14 @@ type OctaviaAmphoraStatus struct {
 }
 
 type OctaviaAmphoraHealthPort struct {
-	ID         string `json:"id"`
+	ID string `json:"id"`
+
+	// +optional
+	Name string `json:"name,omitempty"`
+
 	MACAddress string `json:"macAddress"`
-	IPAddress  string `json:"ipAddress"`
+
+	IPAddress string `json:"ipAddress"`
 }
 
 //+kubebuilder:object:root=true

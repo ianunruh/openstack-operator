@@ -715,6 +715,8 @@ spec:
                           type: string
                         macAddress:
                           type: string
+                        name:
+                          type: string
                       required:
                       - id
                       - ipAddress

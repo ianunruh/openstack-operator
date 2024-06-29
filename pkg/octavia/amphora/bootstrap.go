@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sort"
+	"strings"
 
 	"github.com/go-logr/logr"
 	"github.com/gophercloud/gophercloud"
@@ -17,9 +19,11 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/networks"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/ports"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/subnets"
+	"golang.org/x/exp/maps"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -36,6 +40,8 @@ const (
 	amphoraNetworkName = "octavia-lb-mgmt"
 
 	imageSourceProperty = "source"
+
+	healthPortPrefix = "octavia-health-manager-"
 )
 
 func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client.Client, report template.ReportFunc, log logr.Logger) (ctrl.Result, error) {
@@ -154,7 +160,7 @@ func (b *bootstrap) EnsureAll(ctx context.Context) error {
 		return err
 	}
 
-	if err := b.EnsureHealthPort(ctx); err != nil {
+	if err := b.EnsureHealthPorts(ctx); err != nil {
 		return err
 	}
 
@@ -194,11 +200,11 @@ func (b *bootstrap) EnsureFlavor(ctx context.Context) error {
 func (b *bootstrap) EnsureImage(ctx context.Context) error {
 	imageURL := b.instance.Spec.Amphora.ImageURL
 
-	image, err := b.getCurrentImage(ctx, imageURL)
+	image, err := b.getCurrentImage(imageURL)
 	if err != nil {
 		return err
 	} else if image == nil {
-		image, err = b.uploadImage(ctx, imageURL)
+		image, err = b.uploadImage(imageURL)
 		if err != nil {
 			return err
 		}
@@ -211,7 +217,7 @@ func (b *bootstrap) EnsureImage(ctx context.Context) error {
 	return nil
 }
 
-func (b *bootstrap) getCurrentImage(ctx context.Context, imageURL string) (*images.Image, error) {
+func (b *bootstrap) getCurrentImage(imageURL string) (*images.Image, error) {
 	pager := images.List(b.image, images.ListOpts{
 		Tags: []string{amphoraImageTag},
 	})
@@ -235,7 +241,7 @@ func (b *bootstrap) getCurrentImage(ctx context.Context, imageURL string) (*imag
 	return nil, nil
 }
 
-func (b *bootstrap) uploadImage(ctx context.Context, imageURL string) (*images.Image, error) {
+func (b *bootstrap) uploadImage(imageURL string) (*images.Image, error) {
 	b.log.Info("Creating image", "name", amphoraImageName)
 	image, err := images.Create(b.image, images.CreateOpts{
 		Name:            amphoraImageName,
@@ -341,48 +347,114 @@ func (b *bootstrap) EnsureNetwork(ctx context.Context) error {
 	return nil
 }
 
-func (b *bootstrap) EnsureHealthPort(ctx context.Context) error {
+func (b *bootstrap) EnsureHealthPorts(ctx context.Context) error {
 	status := b.instance.Status.Amphora
-
-	if len(status.HealthPorts) > 0 {
-		_, err := ports.Get(b.network, status.HealthPorts[0].ID).Extract()
-		if err != nil {
-			if _, ok := err.(gophercloud.ErrDefault404); !ok {
-				return err
-			}
-		} else {
-			return nil
-		}
-	}
 
 	networkID := status.NetworkIDs[0]
 	securityGroups := status.HealthSecurityGroupIDs
 
-	b.log.Info("Creating port",
-		"name", "octavia-health-manager",
-		"networkID", networkID)
-	port, err := ports.Create(b.network, ports.CreateOpts{
-		Name:           "octavia-health-manager",
-		NetworkID:      networkID,
-		SecurityGroups: &securityGroups,
-		DeviceOwner:    "Octavia:health-mgr",
-	}).Extract()
+	nodeLabelSelector, err := labels.ValidatedSelectorFromSet(b.instance.Spec.HealthManager.NodeSelector)
 	if err != nil {
 		return err
 	}
 
-	b.instance.Status.Amphora.HealthPorts = []openstackv1beta1.OctaviaAmphoraHealthPort{
-		{
+	nodes := &corev1.NodeList{}
+	if err := b.client.List(ctx, nodes, &client.ListOptions{
+		LabelSelector: nodeLabelSelector,
+	}); err != nil {
+		return err
+	}
+
+	portPage, err := ports.List(b.network, ports.ListOpts{
+		NetworkID:   networkID,
+		DeviceOwner: "Octavia:health-mgr",
+	}).AllPages()
+	if err != nil {
+		return err
+	}
+	currentPorts, err := ports.ExtractPorts(portPage)
+	if err != nil {
+		return err
+	}
+
+	currentByName := make(map[string]ports.Port)
+	for _, port := range currentPorts {
+		currentByName[strings.TrimPrefix(port.Name, healthPortPrefix)] = port
+	}
+
+	portsByName := make(map[string]openstackv1beta1.OctaviaAmphoraHealthPort)
+	for _, node := range nodes.Items {
+		name := healthPortPrefix + node.Name
+
+		port, ok := currentByName[name]
+		if !ok {
+			b.log.Info("Creating port",
+				"name", name,
+				"networkID", networkID)
+			result, err := ports.Create(b.network, ports.CreateOpts{
+				Name:           name,
+				NetworkID:      networkID,
+				SecurityGroups: &securityGroups,
+				DeviceOwner:    "Octavia:health-mgr",
+			}).Extract()
+			if err != nil {
+				return err
+			}
+			port = *result
+		}
+
+		portsByName[name] = openstackv1beta1.OctaviaAmphoraHealthPort{
 			ID:         port.ID,
+			Name:       port.Name,
 			MACAddress: port.MACAddress,
 			IPAddress:  port.FixedIPs[0].IPAddress,
-		},
+		}
 	}
+
+	for name, port := range currentByName {
+		if _, ok := portsByName[name]; ok {
+			continue
+		}
+
+		b.log.Info("Deleting port",
+			"name", name,
+			"networkID", networkID)
+		if err := ports.Delete(b.network, port.ID).ExtractErr(); err != nil {
+			return err
+		}
+	}
+
+	healthPorts := maps.Values(portsByName)
+	sortPortsByName(healthPorts)
+
+	if !portsChanged(healthPorts, b.instance.Status.Amphora.HealthPorts) {
+		return nil
+	}
+
+	b.instance.Status.Amphora.HealthPorts = healthPorts
 	if err := b.client.Status().Update(ctx, b.instance); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func sortPortsByName(ports []openstackv1beta1.OctaviaAmphoraHealthPort) {
+	sort.Slice(ports, func(i, j int) bool {
+		return ports[i].Name < ports[j].Name
+	})
+}
+
+func portsChanged(left, right []openstackv1beta1.OctaviaAmphoraHealthPort) bool {
+	if len(left) != len(right) {
+		return true
+	}
+	for i, port := range left {
+		if port != right[i] {
+			return true
+		}
+	}
+	return false
 }
 
 func (b *bootstrap) EnsureSecurityGroup(ctx context.Context) error {
