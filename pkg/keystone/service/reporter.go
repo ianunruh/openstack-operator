@@ -25,6 +25,10 @@ func (r *Reporter) Error(ctx context.Context, message string, args ...any) error
 	return r.reporter.UpdateReadyCondition(ctx, metav1.ConditionFalse, openstackv1beta1.ReasonReconcileError, message, args...)
 }
 
+func (r *Reporter) DeleteError(ctx context.Context, message string, args ...any) error {
+	return r.reporter.UpdateReadyCondition(ctx, metav1.ConditionFalse, openstackv1beta1.ReasonDeleteError, message, args...)
+}
+
 func (r *Reporter) Pending(ctx context.Context, message string, args ...any) error {
 	return r.reporter.UpdateReadyCondition(ctx, metav1.ConditionFalse, openstackv1beta1.ReasonPending, message, args...)
 }
