@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eux
+set -eux -o pipefail
 
 export OS_CLOUD=default
 

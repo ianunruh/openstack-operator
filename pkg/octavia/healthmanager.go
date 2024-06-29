@@ -29,7 +29,7 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 	// openvswitch volumes
 	initVolumeMounts := []corev1.VolumeMount{
 		template.VolumeMount("host-var-run-openvswitch", "/var/run/openvswitch"),
-		template.SubPathVolumeMount("keystone", "/etc/openstack", "clouds.yaml"),
+		template.SubPathVolumeMount("keystone", "/etc/openstack/clouds.yaml", "clouds.yaml"),
 	}
 	volumeMounts = append(volumeMounts, initVolumeMounts...)
 	volumes = append(volumes,
