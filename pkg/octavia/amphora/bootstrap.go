@@ -211,6 +211,10 @@ func (b *bootstrap) EnsureImage(ctx context.Context) error {
 		}
 	}
 
+	if b.instance.Status.Amphora.ImageProjectID == image.Owner {
+		return nil
+	}
+
 	b.instance.Status.Amphora.ImageProjectID = image.Owner
 	if err := b.client.Status().Update(ctx, b.instance); err != nil {
 		return err
