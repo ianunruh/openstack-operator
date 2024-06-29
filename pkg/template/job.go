@@ -74,7 +74,7 @@ func (r *JobRunner) Run(ctx context.Context, report ReportFunc) (ctrl.Result, er
 		if err := CreateJob(r.ctx, r.client, job, r.log); err != nil {
 			return ctrl.Result{}, err
 		} else if job.Status.CompletionTime == nil {
-			if err := report(ctx, "Waiting on job to complete: %s", job.Name); err != nil {
+			if err := report(ctx, "Waiting on Job %s condition Complete", job.Name); err != nil {
 				return ctrl.Result{}, err
 			}
 			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil

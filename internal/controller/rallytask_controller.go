@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -99,10 +100,10 @@ func (r *RallyTaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
 		return ctrl.Result{}, err
 	} else if job.Status.CompletionTime == nil {
-		if err := reporter.Pending(ctx, "Waiting on job to complete: %s", job.Name); err != nil {
+		if err := reporter.Pending(ctx, "Waiting on Job %s condition Complete", job.Name); err != nil {
 			return ctrl.Result{}, err
 		}
-		return ctrl.Result{}, nil
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
 	instance.Status.CompletionTime = job.Status.CompletionTime
