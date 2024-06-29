@@ -63,7 +63,7 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 	reporter := rally.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := rally.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)

@@ -74,7 +74,7 @@ func (r *PlacementReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	reporter := placement.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := placement.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)

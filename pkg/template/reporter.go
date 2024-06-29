@@ -5,27 +5,31 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
-	"github.com/go-logr/logr"
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 )
 
 type ReportFunc func(ctx context.Context, message string, args ...any) error
 
-func NewConditionWaiter(log logr.Logger) *ConditionWaiter {
+func NewConditionWaiter(scheme *runtime.Scheme, log logr.Logger) *ConditionWaiter {
 	return &ConditionWaiter{
-		log: log,
+		log:    log,
+		scheme: scheme,
 	}
 }
 
 type ConditionWaiter struct {
-	log logr.Logger
+	log    logr.Logger
+	scheme *runtime.Scheme
 
 	resources []conditionWaitResource
 }
@@ -51,10 +55,17 @@ func (cw *ConditionWaiter) Wait(ctx context.Context, report ReportFunc) (ctrl.Re
 			continue
 		}
 
+		// NOTE this is needed because there are some cases where the object does
+		// not have the GVK populated
+		gvk, err := apiutil.GVKForObject(res.Instance, cw.scheme)
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf("mapping GVK for object: %w", err)
+		}
+
 		if err := report(
 			ctx,
 			"Waiting on %s %s condition %s",
-			res.Instance.GetObjectKind().GroupVersionKind().Kind,
+			gvk.Kind,
 			res.Instance.GetName(),
 			res.ConditionType,
 		); err != nil {

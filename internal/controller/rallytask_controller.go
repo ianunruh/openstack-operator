@@ -68,7 +68,7 @@ func (r *RallyTaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	reporter := rallytask.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	cluster := &openstackv1beta1.Rally{
 		ObjectMeta: metav1.ObjectMeta{

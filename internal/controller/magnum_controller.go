@@ -75,7 +75,7 @@ func (r *MagnumReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	reporter := magnum.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := magnum.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)

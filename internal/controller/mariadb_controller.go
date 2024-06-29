@@ -68,7 +68,7 @@ func (r *MariaDBReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	reporter := mariadb.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	// Create admin secret if not found
 	if err := r.reconcileSecret(ctx, instance, log); err != nil {

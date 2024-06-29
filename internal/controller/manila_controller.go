@@ -77,7 +77,7 @@ func (r *ManilaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	reporter := manila.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := manila.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)

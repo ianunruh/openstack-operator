@@ -94,7 +94,7 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := heat.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)

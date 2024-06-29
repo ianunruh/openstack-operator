@@ -76,7 +76,7 @@ func (r *RabbitMQReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	reporter := rabbitmq.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	if err := r.reconcileRBAC(ctx, instance, log); err != nil {
 		return ctrl.Result{}, err

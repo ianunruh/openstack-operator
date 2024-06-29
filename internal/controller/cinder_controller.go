@@ -79,7 +79,7 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	reporter := cinder.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := cinder.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)

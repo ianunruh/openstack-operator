@@ -84,7 +84,7 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := nova.CellDatabase(cluster.Name, instance.Spec.Name, instance.Namespace, instance.Spec.Database)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)

@@ -67,7 +67,7 @@ func (r *MemcachedReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 
 	reporter := memcached.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	if err := r.reconcileServices(ctx, instance, log); err != nil {
 		return ctrl.Result{}, err

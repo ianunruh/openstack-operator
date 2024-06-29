@@ -66,7 +66,7 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	reporter := keystonesvc.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	cluster := &openstackv1beta1.Keystone{
 		ObjectMeta: metav1.ObjectMeta{

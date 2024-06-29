@@ -69,7 +69,7 @@ func (r *OVNControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	reporter := ovn.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	pkiResources := ovn.PKIResources(instance)
 	for _, resource := range pkiResources {

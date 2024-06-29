@@ -80,7 +80,7 @@ func (r *NovaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 
 	reporter := nova.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	databases := []*openstackv1beta1.MariaDBDatabase{
 		nova.APIDatabase(instance),

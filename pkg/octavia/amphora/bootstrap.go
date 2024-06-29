@@ -106,7 +106,7 @@ func newBootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c cli
 
 	b := &bootstrap{
 		client:   c,
-		deps:     template.NewConditionWaiter(log),
+		deps:     template.NewConditionWaiter(c.Scheme(), log),
 		instance: instance,
 		log:      log,
 

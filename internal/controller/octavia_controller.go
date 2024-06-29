@@ -97,7 +97,7 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := octavia.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)

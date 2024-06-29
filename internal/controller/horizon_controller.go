@@ -70,7 +70,7 @@ func (r *HorizonReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	reporter := horizon.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	cm := horizon.ConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)

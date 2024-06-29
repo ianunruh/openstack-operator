@@ -76,7 +76,7 @@ func (r *BarbicanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	reporter := barbican.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := barbican.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
