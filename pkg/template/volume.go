@@ -28,11 +28,11 @@ func PersistentVolumeClaim(name string, labels map[string]string, spec openstack
 }
 
 func EnsurePersistentVolumeClaim(ctx context.Context, c client.Client, instance *corev1.PersistentVolumeClaim, log logr.Logger) error {
-	intended := instance.DeepCopy()
-	hash, err := ObjectHash(intended)
+	hash, err := ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
+	intended := instance.DeepCopy()
 
 	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
@@ -41,13 +41,13 @@ func EnsurePersistentVolumeClaim(ctx context.Context, c client.Client, instance 
 
 		SetAppliedHash(instance, hash)
 
-		log.Info("Creating PersistentVolumeClaim", "Name", intended.Name)
+		log.Info("Creating PersistentVolumeClaim", "Name", instance.Name)
 		return c.Create(ctx, instance)
 	} else if !MatchesAppliedHash(instance, hash) {
 		instance.Spec = intended.Spec
 		SetAppliedHash(instance, hash)
 
-		log.Info("Updating PersistentVolumeClaim", "Name", intended.Name)
+		log.Info("Updating PersistentVolumeClaim", "Name", instance.Name)
 		return c.Update(ctx, instance)
 	}
 

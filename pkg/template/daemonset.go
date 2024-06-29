@@ -10,28 +10,28 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-func EnsureDaemonSet(ctx context.Context, c client.Client, intended *appsv1.DaemonSet, log logr.Logger) error {
-	hash, err := ObjectHash(intended)
+func EnsureDaemonSet(ctx context.Context, c client.Client, instance *appsv1.DaemonSet, log logr.Logger) error {
+	hash, err := ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
+	intended := instance.DeepCopy()
 
-	found := &appsv1.DaemonSet{}
-	if err := c.Get(context.TODO(), client.ObjectKeyFromObject(intended), found); err != nil {
+	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
 
-		SetAppliedHash(intended, hash)
+		SetAppliedHash(instance, hash)
 
-		log.Info("Creating DaemonSet", "Name", intended.Name)
-		return c.Create(ctx, intended)
-	} else if !MatchesAppliedHash(found, hash) {
-		found.Spec = intended.Spec
-		SetAppliedHash(found, hash)
+		log.Info("Creating DaemonSet", "Name", instance.Name)
+		return c.Create(ctx, instance)
+	} else if !MatchesAppliedHash(instance, hash) {
+		instance.Spec = intended.Spec
+		SetAppliedHash(instance, hash)
 
-		log.Info("Updating DaemonSet", "Name", intended.Name)
-		return c.Update(ctx, found)
+		log.Info("Updating DaemonSet", "Name", instance.Name)
+		return c.Update(ctx, instance)
 	}
 
 	return nil
