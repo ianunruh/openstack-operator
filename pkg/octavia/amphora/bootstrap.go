@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/go-logr/logr"
 	"github.com/gophercloud/gophercloud"
@@ -47,11 +48,17 @@ const (
 func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client.Client, report template.ReportFunc, log logr.Logger) (ctrl.Result, error) {
 	b, err := newBootstrap(ctx, instance, c, log)
 	if err != nil {
-		return ctrl.Result{}, err
+		if err := report(ctx, "Error during amphora bootstrap: %v", err); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
 	if err := b.EnsureAll(ctx); err != nil {
-		return ctrl.Result{}, err
+		if err := report(ctx, "Error during amphora bootstrap: %v", err); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 	return b.Wait(ctx, report)
 }
