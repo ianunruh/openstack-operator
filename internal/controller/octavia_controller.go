@@ -277,6 +277,7 @@ func (r *OctaviaReconciler) reconcileWorker(ctx context.Context, instance *opens
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }
