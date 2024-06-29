@@ -11,7 +11,6 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/gophercloud/gophercloud"
 	"github.com/gophercloud/gophercloud/openstack"
-	"github.com/gophercloud/gophercloud/openstack/compute/v2/flavors"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/imagedata"
 	"github.com/gophercloud/gophercloud/openstack/imageservice/v2/images"
 	"github.com/gophercloud/gophercloud/openstack/networking/v2/extensions/security/groups"
@@ -29,6 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	novaflavor "github.com/ianunruh/openstack-operator/pkg/nova/flavor"
 	novakeypair "github.com/ianunruh/openstack-operator/pkg/nova/keypair"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -179,24 +179,18 @@ func (b *bootstrap) Wait(ctx context.Context, report template.ReportFunc) (ctrl.
 }
 
 func (b *bootstrap) EnsureFlavor(ctx context.Context) error {
-	if b.instance.Status.Amphora.FlavorID != "" {
+	flavor := newFlavor(b.instance)
+	controllerutil.SetControllerReference(b.instance, flavor, b.client.Scheme())
+	if err := novaflavor.Ensure(ctx, b.client, flavor, b.log); err != nil {
+		return err
+	}
+	novaflavor.AddReadyCheck(b.deps, flavor)
+
+	if b.instance.Status.Amphora.FlavorID == flavor.Status.FlavorID {
 		return nil
 	}
 
-	// TODO make flavor opts configurable
-	flavorDisk := 10
-
-	flavor, err := flavors.Create(b.compute, flavors.CreateOpts{
-		Name:  "c1-amphora",
-		VCPUs: 2,
-		RAM:   2048,
-		Disk:  &flavorDisk,
-	}).Extract()
-	if err != nil {
-		return err
-	}
-
-	b.instance.Status.Amphora.FlavorID = flavor.ID
+	b.instance.Status.Amphora.FlavorID = flavor.Status.FlavorID
 	if err := b.client.Status().Update(ctx, b.instance); err != nil {
 		return err
 	}

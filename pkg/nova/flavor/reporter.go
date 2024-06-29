@@ -36,3 +36,7 @@ func (r *Reporter) Pending(ctx context.Context, message string, args ...any) err
 func (r *Reporter) Reconciled(ctx context.Context) error {
 	return r.reporter.UpdateReadyCondition(ctx, metav1.ConditionTrue, openstackv1beta1.ReasonReconciled, "NovaFlavor is reconciled")
 }
+
+func AddReadyCheck(cw *template.ConditionWaiter, instance *openstackv1beta1.NovaFlavor) {
+	cw.AddReadyCheck(instance, instance.Status.Conditions)
+}
