@@ -70,9 +70,8 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 				VolumeMounts: initVolumeMounts,
 			},
 			{
-				Name: "init-ovs",
-				// XXX make this configurable
-				Image: "kolla/openvswitch-vswitchd:2023.2-ubuntu-jammy",
+				Name:  "init-ovs",
+				Image: spec.InitOVSImage,
 				Command: []string{
 					"bash",
 					"-c",
@@ -87,9 +86,8 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 				VolumeMounts: initVolumeMounts,
 			},
 			{
-				Name: "init-dhcp",
-				// XXX make this configurable
-				Image: "loci/octavia:2023.1-ubuntu_focal",
+				Name:  "init-dhcp",
+				Image: spec.InitDHCPImage,
 				Command: []string{
 					"bash",
 					"-c",

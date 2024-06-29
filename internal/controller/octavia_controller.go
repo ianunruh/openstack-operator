@@ -154,6 +154,8 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		template.ConfigMapEnvVar("OS_OVN__OVN_SB_CONNECTION", "ovn-ovsdb", "OVN_SB_CONNECTION"),
 	}
 
+	var workerEnv []corev1.EnvVar
+
 	if instance.Spec.Amphora.Enabled {
 		// TODO if disabled, clean up resources
 		pkiResources := amphora.PKIResources(instance)
@@ -178,13 +180,17 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			healthManagerAddrs = append(healthManagerAddrs, fmt.Sprintf("%s:5555", port.IPAddress))
 		}
 
+		workerEnv = append(workerEnv,
+			template.EnvVar("OS_HEALTH_MANAGER__CONTROLLER_IP_PORT_LIST", strings.Join(healthManagerAddrs, ",")))
+
 		env = append(env,
-			template.EnvVar("OS_HEALTH_MANAGER__CONTROLLER_IP_PORT_LIST", strings.Join(healthManagerAddrs, ",")),
 			template.SecretEnvVar("OS_HEALTH_MANAGER__HEARTBEAT_KEY", amphoraSecret.Name, "heartbeat-key"))
 	}
 
 	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
 	env = append(env, keystone.ClientEnv("OS_SERVICE_AUTH__", keystoneUser.Spec.Secret)...)
+
+	workerEnv = append(workerEnv, env...)
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-octavia", cm.Name, nil),
@@ -208,7 +214,7 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileWorker(ctx, instance, env, volumes, deps, log); err != nil {
+	if err := r.reconcileWorker(ctx, instance, workerEnv, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
