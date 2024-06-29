@@ -31,18 +31,20 @@ func DeleteJob(ctx context.Context, c client.Client, instance *batchv1.Job, log 
 		client.PropagationPolicy(metav1.DeletePropagationForeground))
 }
 
-func NewJobRunner(ctx context.Context, c client.Client, log logr.Logger) *JobRunner {
+func NewJobRunner(ctx context.Context, c client.Client, instance client.Object, log logr.Logger) *JobRunner {
 	return &JobRunner{
-		ctx:    ctx,
-		client: c,
-		log:    log,
+		ctx:      ctx,
+		client:   c,
+		instance: instance,
+		log:      log,
 	}
 }
 
 type JobRunner struct {
-	ctx    context.Context
-	client client.Client
-	log    logr.Logger
+	ctx      context.Context
+	client   client.Client
+	instance client.Object
+	log      logr.Logger
 
 	jobs []jobHashField
 }
@@ -54,11 +56,11 @@ func (r *JobRunner) Add(hashField *string, job *batchv1.Job) {
 	})
 }
 
-func (r *JobRunner) Run(ctx context.Context, owner client.Object, report ReportFunc) (ctrl.Result, error) {
+func (r *JobRunner) Run(ctx context.Context, report ReportFunc) (ctrl.Result, error) {
 	for _, jh := range r.jobs {
 		job := jh.Job
 
-		controllerutil.SetControllerReference(owner, job, r.client.Scheme())
+		controllerutil.SetControllerReference(r.instance, job, r.client.Scheme())
 
 		jobHash, err := ObjectHash(job)
 		if err != nil {
@@ -84,7 +86,7 @@ func (r *JobRunner) Run(ctx context.Context, owner client.Object, report ReportF
 
 		*jh.HashField = jobHash
 
-		if err := r.client.Status().Update(r.ctx, owner); err != nil {
+		if err := r.client.Status().Update(r.ctx, r.instance); err != nil {
 			return ctrl.Result{}, err
 		}
 	}

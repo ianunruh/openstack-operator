@@ -134,10 +134,10 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		template.ConfigMapVolume("etc-nova", cm.Name, nil),
 	}
 
-	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs := template.NewJobRunner(ctx, r.Client, instance, log)
 	jobs.Add(&instance.Status.DBSyncJobHash,
 		novacell.DBSyncJob(instance, env, volumes, cluster.Spec.API.Image))
-	if result, err := jobs.Run(ctx, instance, reporter.Pending); err != nil || !result.IsZero() {
+	if result, err := jobs.Run(ctx, reporter.Pending); err != nil || !result.IsZero() {
 		return result, err
 	}
 
