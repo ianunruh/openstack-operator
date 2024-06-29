@@ -5990,8 +5990,12 @@ spec:
                       nodeSelector:
                         additionalProperties:
                           type: string
+                        description: deprecated, driver agent has been merged with
+                          API
                         type: object
                       replicas:
+                        description: deprecated, driver agent has been merged with
+                          API
                         format: int32
                         type: integer
                       resources:

@@ -28,10 +28,10 @@ type OctaviaSpec struct {
 	Image string `json:"image,omitempty"`
 
 	// +optional
-	Amphora OctaviaAmphoraSpec `json:"amphora"`
+	Amphora OctaviaAmphoraSpec `json:"amphora,omitempty"`
 
 	// +optional
-	NodeSelector map[string]string `json:"nodeSelector"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional
 	OVN OctaviaOVNSpec `json:"ovn,omitempty"`
@@ -69,13 +69,13 @@ type OctaviaSpec struct {
 
 type OctaviaAmphoraSpec struct {
 	// +optional
-	Enabled bool `json:"enabled"`
+	Enabled bool `json:"enabled,omitempty"`
 
 	// +optional
-	ImageURL string `json:"imageURL"`
+	ImageURL string `json:"imageURL,omitempty"`
 
 	// +optional
-	ManagementCIDR string `json:"managementCIDR"`
+	ManagementCIDR string `json:"managementCIDR,omitempty"`
 }
 
 type OctaviaOVNSpec struct {
@@ -104,9 +104,11 @@ type OctaviaDriverAgentSpec struct {
 	// +optional
 	Image string `json:"image,omitempty"`
 
+	// deprecated, driver agent has been merged with API
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
+	// deprecated, driver agent has been merged with API
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 
@@ -119,7 +121,7 @@ type OctaviaHealthManagerSpec struct {
 	Image string `json:"image,omitempty"`
 
 	// +optional
-	NodeSelector map[string]string `json:"nodeSelector"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
@@ -130,7 +132,7 @@ type OctaviaHousekeepingSpec struct {
 	Image string `json:"image,omitempty"`
 
 	// +optional
-	NodeSelector map[string]string `json:"nodeSelector"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
@@ -144,7 +146,7 @@ type OctaviaWorkerSpec struct {
 	Image string `json:"image,omitempty"`
 
 	// +optional
-	NodeSelector map[string]string `json:"nodeSelector"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
@@ -185,9 +187,14 @@ type OctaviaAmphoraStatus struct {
 }
 
 type OctaviaAmphoraHealthPort struct {
-	ID         string `json:"id"`
+	ID string `json:"id"`
+
+	// +optional
+	Name string `json:"name,omitempty"`
+
 	MACAddress string `json:"macAddress"`
-	IPAddress  string `json:"ipAddress"`
+
+	IPAddress string `json:"ipAddress"`
 }
 
 //+kubebuilder:object:root=true
