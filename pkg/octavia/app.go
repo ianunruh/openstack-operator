@@ -43,17 +43,10 @@ func ConfigMap(instance *openstackv1beta1.Octavia) *corev1.ConfigMap {
 
 	amphora := instance.Status.Amphora
 
-	var healthManagerAddrs []string
-	for _, port := range amphora.HealthPorts {
-		healthManagerAddrs = append(healthManagerAddrs, fmt.Sprintf("%s:5555", port.IPAddress))
-	}
-
 	cfg.Section("controller_worker").NewKey("amp_flavor_id", amphora.FlavorID)
 	cfg.Section("controller_worker").NewKey("amp_image_owner_id", amphora.ImageProjectID)
 	cfg.Section("controller_worker").NewKey("amp_secgroup_list", strings.Join(amphora.SecurityGroupIDs, ","))
 	cfg.Section("controller_worker").NewKey("amp_boot_network_list", strings.Join(amphora.NetworkIDs, ","))
-
-	cfg.Section("health_manager").NewKey("controller_ip_port_list", strings.Join(healthManagerAddrs, ","))
 
 	template.MergeINI(cfg, spec.ExtraConfig)
 

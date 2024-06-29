@@ -18,6 +18,8 @@ package controller
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -171,7 +173,14 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return result, err
 		}
 
-		env = append(env, template.SecretEnvVar("OS_HEALTH_MANAGER__HEARTBEAT_KEY", amphoraSecret.Name, "heartbeat-key"))
+		var healthManagerAddrs []string
+		for _, port := range instance.Status.Amphora.HealthPorts {
+			healthManagerAddrs = append(healthManagerAddrs, fmt.Sprintf("%s:5555", port.IPAddress))
+		}
+
+		env = append(env,
+			template.EnvVar("OS_HEALTH_MANAGER__CONTROLLER_IP_PORT_LIST", strings.Join(healthManagerAddrs, ",")),
+			template.SecretEnvVar("OS_HEALTH_MANAGER__HEARTBEAT_KEY", amphoraSecret.Name, "heartbeat-key"))
 	}
 
 	env = append(env, keystone.MiddlewareEnv("OS_KEYSTONE_AUTHTOKEN__", keystoneUser.Spec.Secret)...)
