@@ -146,7 +146,7 @@ type OctaviaWorkerSpec struct {
 	Image string `json:"image,omitempty"`
 
 	// +optional
-	NodeSelector map[string]string `json:"nodeSelector"`
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
