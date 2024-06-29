@@ -104,9 +104,11 @@ type OctaviaDriverAgentSpec struct {
 	// +optional
 	Image string `json:"image,omitempty"`
 
+	// deprecated, driver agent has been merged with API
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
+	// deprecated, driver agent has been merged with API
 	// +optional
 	Replicas int32 `json:"replicas,omitempty"`
 

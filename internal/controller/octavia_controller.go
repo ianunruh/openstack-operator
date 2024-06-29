@@ -178,7 +178,6 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	volumes := []corev1.Volume{
 		template.ConfigMapVolume("etc-octavia", cm.Name, nil),
-		template.HostPathVolume("host-var-run-octavia", "/var/run/octavia"),
 	}
 
 	jobs := template.NewJobRunner(ctx, r.Client, instance, log)
@@ -188,10 +187,6 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	if err := r.reconcileAPI(ctx, instance, env, volumes, deps, log); err != nil {
-		return ctrl.Result{}, err
-	}
-
-	if err := r.reconcileDriverAgent(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -236,22 +231,6 @@ func (r *OctaviaReconciler) reconcileAPI(ctx context.Context, instance *openstac
 	}
 
 	deploy := octavia.APIDeployment(instance, env, volumes)
-	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
-	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
-		return err
-	}
-	template.AddDeploymentReadyCheck(deps, deploy)
-
-	return nil
-}
-
-func (r *OctaviaReconciler) reconcileDriverAgent(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
-	if !instance.Spec.OVN.Enabled {
-		// TODO ensure deployment does not exist
-		return nil
-	}
-
-	deploy := octavia.DriverAgentDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err

@@ -18,13 +18,24 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	spec := instance.Spec.API
+	driverAgentSpec := instance.Spec.DriverAgent
+
+	runAsRootUser := int64(0)
+
+	volumes = append(volumes,
+		template.EmptyDirVolume("pod-var-run-octavia"))
 
 	volumeMounts := []corev1.VolumeMount{
-		template.SubPathVolumeMount("etc-octavia", "/etc/apache2/sites-available/000-default.conf", "httpd.conf"),
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
-		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-api.json"),
-		template.VolumeMount("host-var-run-octavia", "/var/run/octavia"),
+		template.VolumeMount("pod-var-run-octavia", "/var/run/octavia"),
 	}
+
+	apiVolumeMounts := append(volumeMounts,
+		template.SubPathVolumeMount("etc-octavia", "/etc/apache2/sites-available/000-default.conf", "httpd.conf"),
+		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-api.json"))
+
+	driverAgentVolumeMounts := append(volumeMounts,
+		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-driver-agent.json"))
 
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
@@ -47,6 +58,22 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: template.NodePodAntiAffinity(labels),
 		},
+		InitContainers: []corev1.Container{
+			{
+				Name:  "init",
+				Image: spec.Image,
+				Command: []string{
+					"bash",
+					"-c",
+					template.MustReadFile(AppLabel, "init-driver-agent.sh"),
+				},
+				Resources: spec.Resources,
+				SecurityContext: &corev1.SecurityContext{
+					RunAsUser: &runAsRootUser,
+				},
+				VolumeMounts: volumeMounts,
+			},
+		},
 		Containers: []corev1.Container{
 			{
 				Name:    "api",
@@ -59,8 +86,20 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 				LivenessProbe: probe,
 				StartupProbe:  probe,
 				Resources:     spec.Resources,
-				VolumeMounts:  volumeMounts,
+				VolumeMounts:  apiVolumeMounts,
 			},
+			{
+				Name:         "driver-agent",
+				Image:        driverAgentSpec.Image,
+				Command:      []string{"/usr/local/bin/kolla_start"},
+				Env:          env,
+				Resources:    driverAgentSpec.Resources,
+				VolumeMounts: driverAgentVolumeMounts,
+			},
+		},
+		SecurityContext: &corev1.PodSecurityContext{
+			RunAsUser: &appUID,
+			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})
