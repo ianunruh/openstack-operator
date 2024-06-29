@@ -45,6 +45,7 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 
 	initEnv := append(env,
 		template.FieldEnvVar("HOSTNAME", "spec.nodeName"),
+		template.EnvVar("HM_IFACE", "o-hm0"),
 		template.EnvVar("HM_NETWORK_ID", hmNetworkID))
 
 	privileged := true
@@ -63,6 +64,36 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 					"bash",
 					"-c",
 					template.MustReadFile(AppLabel, "init-health-manager-port.sh"),
+				},
+				Env:          initEnv,
+				Resources:    spec.Resources,
+				VolumeMounts: initVolumeMounts,
+			},
+			{
+				Name: "init-ovs",
+				// XXX make this configurable
+				Image: "kolla/openvswitch-vswitchd:2023.2-ubuntu-jammy",
+				Command: []string{
+					"bash",
+					"-c",
+					template.MustReadFile(AppLabel, "init-health-manager-ovs.sh"),
+				},
+				Env:       initEnv,
+				Resources: spec.Resources,
+				SecurityContext: &corev1.SecurityContext{
+					Privileged: &privileged,
+					RunAsUser:  &runAsRootUser,
+				},
+				VolumeMounts: initVolumeMounts,
+			},
+			{
+				Name: "init-dhcp",
+				// XXX make this configurable
+				Image: "loci/octavia:2023.1-ubuntu_focal",
+				Command: []string{
+					"bash",
+					"-c",
+					template.MustReadFile(AppLabel, "init-health-manager-dhcp.sh"),
 				},
 				Env:       initEnv,
 				Resources: spec.Resources,
