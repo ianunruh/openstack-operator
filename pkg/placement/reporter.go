@@ -11,11 +11,6 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-const (
-	PendingReason = "PlacementPending"
-	RunningReason = "PlacementRunning"
-)
-
 func NewReporter(instance *openstackv1beta1.Placement, k8sClient client.Client, recorder record.EventRecorder) *Reporter {
 	return &Reporter{
 		reporter: template.NewReporter(instance, &instance.Status.Conditions, k8sClient, recorder),
@@ -27,9 +22,9 @@ type Reporter struct {
 }
 
 func (r *Reporter) Pending(ctx context.Context, message string, args ...any) error {
-	return r.reporter.UpdateReadyCondition(ctx, metav1.ConditionFalse, PendingReason, message, args...)
+	return r.reporter.UpdateReadyCondition(ctx, metav1.ConditionFalse, openstackv1beta1.ReasonPending, message, args...)
 }
 
 func (r *Reporter) Running(ctx context.Context) error {
-	return r.reporter.UpdateReadyCondition(ctx, metav1.ConditionTrue, RunningReason, "Placement is running")
+	return r.reporter.UpdateReadyCondition(ctx, metav1.ConditionTrue, openstackv1beta1.ReasonRunning, "Placement is running")
 }

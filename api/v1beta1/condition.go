@@ -4,8 +4,10 @@ const (
 	ConditionReady     = "Ready"
 	ConditionCompleted = "Completed"
 
-	ReasonDeleting  = "Deleting"
-	ReasonPending   = "Pending"
-	ReasonRunning   = "Running"
-	ReasonSucceeded = "Succeeded"
+	ReasonCompleted      = "Completed"
+	ReasonDeleteError    = "DeleteError"
+	ReasonPending        = "Pending"
+	ReasonReconciled     = "Reconciled"
+	ReasonReconcileError = "ReconcileError"
+	ReasonRunning        = "Running"
 )
