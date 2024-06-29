@@ -143,6 +143,26 @@ func filterEndpoints(current []endpoints.Endpoint, region string, availability g
 	return nil
 }
 
+func Delete(instance *openstackv1beta1.KeystoneService, identity *gophercloud.ServiceClient, log logr.Logger) error {
+	svc, err := getService(instance, identity)
+	if err != nil {
+		return err
+	} else if svc == nil {
+		log.Info("Service not found for deletion", "name", instance.Name)
+		return nil
+	}
+
+	log.Info("Deleting service", "name", instance.Name)
+	if err := services.Delete(identity, svc.ID).Err; err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+			return err
+		}
+		log.Info("Service not found on deletion", "name", instance.Name)
+	}
+
+	return nil
+}
+
 func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.KeystoneService, log logr.Logger) error {
 	hash, err := template.ObjectHash(instance)
 	if err != nil {

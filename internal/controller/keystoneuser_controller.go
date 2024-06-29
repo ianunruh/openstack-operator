@@ -76,12 +76,67 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
+		if errors.IsNotFound(err) {
+			controllerutil.RemoveFinalizer(instance, template.Finalizer)
+			if err := r.Update(ctx, instance); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
 		return ctrl.Result{}, err
 	}
 	keystone.AddReadyCheck(deps, cluster)
 
 	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
 		return result, err
+	}
+
+	svcUser := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "keystone",
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(svcUser), svcUser); err != nil {
+		if errors.IsNotFound(err) {
+			controllerutil.RemoveFinalizer(instance, template.Finalizer)
+			if err := r.Update(ctx, instance); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+		return ctrl.Result{}, err
+	}
+
+	identity, err := keystone.NewIdentityServiceClient(ctx, svcUser)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if instance.DeletionTimestamp != nil {
+		// resource marked for deletion
+		if !controllerutil.ContainsFinalizer(instance, template.Finalizer) {
+			return ctrl.Result{}, nil
+		}
+
+		if err := keystoneuser.Delete(instance, identity, log); err != nil {
+			if err := reporter.DeleteError(ctx, "Error deleting Keystone user: %w", err); err != nil {
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+		}
+
+		controllerutil.RemoveFinalizer(instance, template.Finalizer)
+		if err := r.Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		return ctrl.Result{}, nil
+	}
+
+	if !controllerutil.ContainsFinalizer(instance, template.Finalizer) {
+		controllerutil.AddFinalizer(instance, template.Finalizer)
+		if err := r.Client.Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	var currentPassword string
@@ -102,22 +157,6 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	secret := keystoneuser.Secret(instance, cluster, currentPassword)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
 	if err := template.EnsureSecret(ctx, r.Client, secret, log); err != nil {
-		return ctrl.Result{}, err
-	}
-
-	// TODO handle this user not existing on deletion, and remove the finalizer anyway
-	svcUser := &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "keystone",
-			Namespace: instance.Namespace,
-		},
-	}
-	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(svcUser), svcUser); err != nil {
-		return ctrl.Result{}, err
-	}
-
-	identity, err := keystone.NewIdentityServiceClient(ctx, svcUser)
-	if err != nil {
 		return ctrl.Result{}, err
 	}
 

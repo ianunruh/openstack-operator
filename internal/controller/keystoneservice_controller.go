@@ -29,6 +29,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/keystone"
@@ -75,6 +76,12 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
+		if errors.IsNotFound(err) {
+			controllerutil.RemoveFinalizer(instance, template.Finalizer)
+			if err := r.Update(ctx, instance); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
 		return ctrl.Result{}, err
 	}
 	keystone.AddReadyCheck(deps, cluster)
@@ -83,7 +90,6 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return result, err
 	}
 
-	// TODO handle this user not existing on deletion, and remove the finalizer anyway
 	svcUser := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone",
@@ -91,12 +97,46 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(svcUser), svcUser); err != nil {
+		if errors.IsNotFound(err) {
+			controllerutil.RemoveFinalizer(instance, template.Finalizer)
+			if err := r.Update(ctx, instance); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
 		return ctrl.Result{}, err
 	}
 
 	identity, err := keystone.NewIdentityServiceClient(ctx, svcUser)
 	if err != nil {
 		return ctrl.Result{}, err
+	}
+
+	if instance.DeletionTimestamp != nil {
+		// resource marked for deletion
+		if !controllerutil.ContainsFinalizer(instance, template.Finalizer) {
+			return ctrl.Result{}, nil
+		}
+
+		if err := keystonesvc.Delete(instance, identity, log); err != nil {
+			if err := reporter.DeleteError(ctx, "Error deleting Keystone service: %w", err); err != nil {
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+		}
+
+		controllerutil.RemoveFinalizer(instance, template.Finalizer)
+		if err := r.Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		return ctrl.Result{}, nil
+	}
+
+	if !controllerutil.ContainsFinalizer(instance, template.Finalizer) {
+		controllerutil.AddFinalizer(instance, template.Finalizer)
+		if err := r.Client.Update(ctx, instance); err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
 	if err := keystonesvc.Reconcile(instance, identity, log); err != nil {

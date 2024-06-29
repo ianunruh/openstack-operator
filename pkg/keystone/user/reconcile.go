@@ -31,10 +31,7 @@ func Reconcile(instance *openstackv1beta1.KeystoneUser, secret *corev1.Secret, i
 		return err
 	}
 
-	name := instance.Spec.Name
-	if name == "" {
-		name = instance.Name
-	}
+	name := userName(instance)
 
 	password := string(secret.Data["OS_PASSWORD"])
 
@@ -83,6 +80,13 @@ func Reconcile(instance *openstackv1beta1.KeystoneUser, secret *corev1.Secret, i
 	}
 
 	return nil
+}
+
+func userName(instance *openstackv1beta1.KeystoneUser) string {
+	if instance.Spec.Name == "" {
+		return instance.Name
+	}
+	return instance.Spec.Name
 }
 
 func reconcileDomain(name string, identity *gophercloud.ServiceClient, log logr.Logger) (*domains.Domain, error) {
@@ -269,10 +273,7 @@ func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.K
 	labels := template.AppLabels(instance.Name, keystone.AppLabel)
 	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
 
-	username := instance.Spec.Name
-	if username == "" {
-		username = instance.Name
-	}
+	username := userName(instance)
 
 	domainName := instance.Spec.Domain
 	if domainName == "" {
@@ -329,6 +330,33 @@ func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.K
 
 func PasswordFromSecret(secret *corev1.Secret) string {
 	return string(secret.Data["OS_PASSWORD"])
+}
+
+func Delete(instance *openstackv1beta1.KeystoneUser, identity *gophercloud.ServiceClient, log logr.Logger) error {
+	domain, err := reconcileDomain(instance.Spec.Domain, identity, log)
+	if err != nil {
+		return err
+	}
+
+	name := userName(instance)
+
+	user, err := findUserByName(name, domain.ID, identity)
+	if err != nil {
+		return err
+	} else if user == nil {
+		log.Info("User not found for deletion", "name", instance.Name)
+		return nil
+	}
+
+	log.Info("Deleting user", "name", instance.Name)
+	if err := users.Delete(identity, user.ID).Err; err != nil {
+		if _, ok := err.(gophercloud.ErrDefault404); !ok {
+			return err
+		}
+		log.Info("User not found on deletion", "name", instance.Name)
+	}
+
+	return nil
 }
 
 func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.KeystoneUser, log logr.Logger) error {
