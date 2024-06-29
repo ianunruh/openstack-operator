@@ -32,6 +32,7 @@ func EnsureIngress(ctx context.Context, c client.Client, instance *netv1.Ingress
 	} else if !MatchesAppliedHash(instance, hash) {
 		instance.Spec = intended.Spec
 		instance.Annotations = intended.Annotations
+
 		SetAppliedHash(instance, hash)
 
 		log.Info("Updating Ingress", "Name", instance.Name)

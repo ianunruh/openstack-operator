@@ -40,6 +40,7 @@ func EnsureConfigMap(ctx context.Context, c client.Client, instance *corev1.Conf
 		return c.Create(ctx, instance)
 	} else if !MatchesAppliedHash(instance, hash) {
 		instance.Data = intended.Data
+
 		SetAppliedHash(instance, hash)
 
 		log.Info("Updating ConfigMap", "Name", instance.Name)

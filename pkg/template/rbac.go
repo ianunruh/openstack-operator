@@ -98,6 +98,7 @@ func EnsureRole(ctx context.Context, c client.Client, instance *rbacv1.Role, log
 		return c.Create(ctx, instance)
 	} else if !MatchesAppliedHash(instance, hash) {
 		instance.Rules = intended.Rules
+
 		SetAppliedHash(instance, hash)
 
 		log.Info("Updating Role", "Name", instance.Name)
@@ -126,6 +127,7 @@ func EnsureRoleBinding(ctx context.Context, c client.Client, instance *rbacv1.Ro
 	} else if !MatchesAppliedHash(instance, hash) {
 		instance.RoleRef = intended.RoleRef
 		instance.Subjects = intended.Subjects
+
 		SetAppliedHash(instance, hash)
 
 		log.Info("Updating RoleBinding", "Name", instance.Name)

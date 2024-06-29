@@ -28,6 +28,7 @@ func EnsureDaemonSet(ctx context.Context, c client.Client, instance *appsv1.Daem
 		return c.Create(ctx, instance)
 	} else if !MatchesAppliedHash(instance, hash) {
 		instance.Spec = intended.Spec
+
 		SetAppliedHash(instance, hash)
 
 		log.Info("Updating DaemonSet", "Name", instance.Name)

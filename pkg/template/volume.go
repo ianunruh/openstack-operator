@@ -45,6 +45,7 @@ func EnsurePersistentVolumeClaim(ctx context.Context, c client.Client, instance 
 		return c.Create(ctx, instance)
 	} else if !MatchesAppliedHash(instance, hash) {
 		instance.Spec = intended.Spec
+
 		SetAppliedHash(instance, hash)
 
 		log.Info("Updating PersistentVolumeClaim", "Name", instance.Name)

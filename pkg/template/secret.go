@@ -55,6 +55,7 @@ func EnsureSecret(ctx context.Context, c client.Client, instance *corev1.Secret,
 	} else if !MatchesAppliedHash(instance, hash) {
 		instance.Data = intended.Data
 		instance.StringData = intended.StringData
+
 		SetAppliedHash(instance, hash)
 
 		log.Info("Updating Secret", "Name", instance.Name)

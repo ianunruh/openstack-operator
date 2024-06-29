@@ -130,23 +130,24 @@ func flavorName(instance *openstackv1beta1.NovaFlavor) string {
 }
 
 func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.NovaFlavor, log logr.Logger) error {
-	intended := instance.DeepCopy()
 	hash, err := template.ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
+	intended := instance.DeepCopy()
 
 	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !apierrors.IsNotFound(err) {
 			return err
 		}
 
-		template.SetAppliedHash(intended, hash)
+		template.SetAppliedHash(instance, hash)
 
 		log.Info("Creating NovaFlavor", "Name", instance.Name)
 		return c.Create(ctx, instance)
 	} else if !template.MatchesAppliedHash(instance, hash) {
 		instance.Spec = intended.Spec
+
 		template.SetAppliedHash(instance, hash)
 
 		log.Info("Updating NovaFlavor", "Name", instance.Name)
