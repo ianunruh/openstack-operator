@@ -86,7 +86,10 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 				LivenessProbe: probe,
 				StartupProbe:  probe,
 				Resources:     spec.Resources,
-				VolumeMounts:  apiVolumeMounts,
+				SecurityContext: &corev1.SecurityContext{
+					RunAsUser: &runAsRootUser,
+				},
+				VolumeMounts: apiVolumeMounts,
 			},
 			{
 				Name:         "driver-agent",
