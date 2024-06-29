@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -78,6 +79,8 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
+	reporter := octavia.NewReporter(instance, r.Client, r.Recorder)
+
 	ks := &openstackv1beta1.Keystone{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone",
@@ -85,10 +88,14 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(ks), ks); err != nil {
+		if errors.IsNotFound(err) {
+			if err := reporter.Pending(ctx, "Waiting on Keystone admin secret"); err != nil {
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+		}
 		return ctrl.Result{}, err
 	}
-
-	reporter := octavia.NewReporter(instance, r.Client, r.Recorder)
 
 	deps := template.NewConditionWaiter(log)
 
