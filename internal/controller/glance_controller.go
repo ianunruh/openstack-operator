@@ -26,6 +26,7 @@ import (
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -42,8 +43,9 @@ import (
 // GlanceReconciler reconciles a Glance object
 type GlanceReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=glances,verbs=get;list;watch;create;update;patch;delete
@@ -74,7 +76,9 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	deps := template.NewConditionWaiter(log)
+	reporter := glance.NewReporter(instance, r.Client, r.Recorder)
+
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := glance.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
@@ -97,8 +101,8 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	keystoneuser.AddReadyCheck(deps, keystoneUser)
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	cm := glance.ConfigMap(instance)
@@ -132,9 +136,9 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs := template.NewJobRunner(ctx, r.Client, instance, log)
 	jobs.Add(&instance.Status.DBSyncJobHash, glance.DBSyncJob(instance, env, volumes))
-	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+	if result, err := jobs.Run(ctx, reporter.Pending); err != nil || !result.IsZero() {
 		return result, err
 	}
 
@@ -159,7 +163,15 @@ func (r *GlanceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err
 	}
-	// TODO wait for deploy to be ready then mark status
+	template.AddDeploymentReadyCheck(deps, deploy)
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
+
+	if err := reporter.Running(ctx); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }

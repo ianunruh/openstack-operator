@@ -31,21 +31,22 @@ func DeleteJob(ctx context.Context, c client.Client, instance *batchv1.Job, log 
 		client.PropagationPolicy(metav1.DeletePropagationForeground))
 }
 
-func NewJobRunner(ctx context.Context, c client.Client, log logr.Logger) *JobRunner {
+func NewJobRunner(ctx context.Context, c client.Client, instance client.Object, log logr.Logger) *JobRunner {
 	return &JobRunner{
-		ctx:    ctx,
-		client: c,
-		log:    log,
+		ctx:      ctx,
+		client:   c,
+		instance: instance,
+		log:      log,
 	}
 }
 
 type JobRunner struct {
-	ctx    context.Context
-	client client.Client
-	log    logr.Logger
+	ctx      context.Context
+	client   client.Client
+	instance client.Object
+	log      logr.Logger
 
-	jobs       []jobHashField
-	readyField *bool
+	jobs []jobHashField
 }
 
 func (r *JobRunner) Add(hashField *string, job *batchv1.Job) {
@@ -55,15 +56,11 @@ func (r *JobRunner) Add(hashField *string, job *batchv1.Job) {
 	})
 }
 
-func (r *JobRunner) SetReady(readyField *bool) {
-	r.readyField = readyField
-}
-
-func (r *JobRunner) Run(owner client.Object) (ctrl.Result, error) {
-	for i, jh := range r.jobs {
+func (r *JobRunner) Run(ctx context.Context, report ReportFunc) (ctrl.Result, error) {
+	for _, jh := range r.jobs {
 		job := jh.Job
 
-		controllerutil.SetControllerReference(owner, job, r.client.Scheme())
+		controllerutil.SetControllerReference(r.instance, job, r.client.Scheme())
 
 		jobHash, err := ObjectHash(job)
 		if err != nil {
@@ -77,8 +74,10 @@ func (r *JobRunner) Run(owner client.Object) (ctrl.Result, error) {
 		if err := CreateJob(r.ctx, r.client, job, r.log); err != nil {
 			return ctrl.Result{}, err
 		} else if job.Status.CompletionTime == nil {
-			r.log.Info("Waiting on job completion", "name", job.Name)
-			return ctrl.Result{RequeueAfter: 10 * time.Second}, nil
+			if err := report(ctx, "Waiting on Job %s condition Complete", job.Name); err != nil {
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 		}
 
 		if err := DeleteJob(r.ctx, r.client, job, r.log); err != nil {
@@ -87,11 +86,7 @@ func (r *JobRunner) Run(owner client.Object) (ctrl.Result, error) {
 
 		*jh.HashField = jobHash
 
-		if i == len(r.jobs)-1 && r.readyField != nil {
-			*r.readyField = true
-		}
-
-		if err := r.client.Status().Update(r.ctx, owner); err != nil {
+		if err := r.client.Status().Update(r.ctx, r.instance); err != nil {
 			return ctrl.Result{}, err
 		}
 	}

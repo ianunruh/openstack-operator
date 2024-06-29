@@ -79,112 +79,112 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	ovnControlPlane := controlplane.OVNControlPlane(instance)
 	controllerutil.SetControllerReference(instance, ovnControlPlane, r.Scheme)
-	if err := ovn.EnsureControlPlane(ctx, r.Client, ovnControlPlane, log); err != nil {
+	if err := ovn.Ensure(ctx, r.Client, ovnControlPlane, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if cache := controlplane.Cache(instance); cache != nil {
 		controllerutil.SetControllerReference(instance, cache, r.Scheme)
-		if err := memcached.EnsureCluster(ctx, r.Client, cache, log); err != nil {
+		if err := memcached.Ensure(ctx, r.Client, cache, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
 	if database := controlplane.Database(instance); database != nil {
 		controllerutil.SetControllerReference(instance, database, r.Scheme)
-		if err := mariadb.EnsureCluster(ctx, r.Client, database, log); err != nil {
+		if err := mariadb.Ensure(ctx, r.Client, database, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
 	if broker := controlplane.Broker(instance); broker != nil {
 		controllerutil.SetControllerReference(instance, broker, r.Scheme)
-		if err := rabbitmq.EnsureCluster(ctx, r.Client, broker, log); err != nil {
+		if err := rabbitmq.Ensure(ctx, r.Client, broker, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
 	identity := controlplane.Keystone(instance)
 	controllerutil.SetControllerReference(instance, identity, r.Scheme)
-	if err := keystone.EnsureKeystone(ctx, r.Client, identity, log); err != nil {
+	if err := keystone.Ensure(ctx, r.Client, identity, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	image := controlplane.Glance(instance)
 	controllerutil.SetControllerReference(instance, image, r.Scheme)
-	if err := glance.EnsureGlance(ctx, r.Client, image, log); err != nil {
+	if err := glance.Ensure(ctx, r.Client, image, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	pm := controlplane.Placement(instance)
 	controllerutil.SetControllerReference(instance, pm, r.Scheme)
-	if err := placement.EnsurePlacement(ctx, r.Client, pm, log); err != nil {
+	if err := placement.Ensure(ctx, r.Client, pm, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if volume := controlplane.Cinder(instance); volume != nil {
 		controllerutil.SetControllerReference(instance, volume, r.Scheme)
-		if err := cinder.EnsureCinder(ctx, r.Client, volume, log); err != nil {
+		if err := cinder.Ensure(ctx, r.Client, volume, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
 	compute := controlplane.Nova(instance)
 	controllerutil.SetControllerReference(instance, compute, r.Scheme)
-	if err := nova.EnsureNova(ctx, r.Client, compute, log); err != nil {
+	if err := nova.Ensure(ctx, r.Client, compute, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	network := controlplane.Neutron(instance)
 	controllerutil.SetControllerReference(instance, network, r.Scheme)
-	if err := neutron.EnsureNeutron(ctx, r.Client, network, log); err != nil {
+	if err := neutron.Ensure(ctx, r.Client, network, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if dashboard := controlplane.Horizon(instance); dashboard != nil {
 		controllerutil.SetControllerReference(instance, dashboard, r.Scheme)
-		if err := horizon.EnsureHorizon(ctx, r.Client, dashboard, log); err != nil {
+		if err := horizon.Ensure(ctx, r.Client, dashboard, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
 	if keyManager := controlplane.Barbican(instance); keyManager != nil {
 		controllerutil.SetControllerReference(instance, keyManager, r.Scheme)
-		if err := barbican.EnsureBarbican(ctx, r.Client, keyManager, log); err != nil {
+		if err := barbican.Ensure(ctx, r.Client, keyManager, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
 	if orchestration := controlplane.Heat(instance); orchestration != nil {
 		controllerutil.SetControllerReference(instance, orchestration, r.Scheme)
-		if err := heat.EnsureHeat(ctx, r.Client, orchestration, log); err != nil {
+		if err := heat.Ensure(ctx, r.Client, orchestration, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
 	if containerInfra := controlplane.Magnum(instance); containerInfra != nil {
 		controllerutil.SetControllerReference(instance, containerInfra, r.Scheme)
-		if err := magnum.EnsureMagnum(ctx, r.Client, containerInfra, log); err != nil {
+		if err := magnum.Ensure(ctx, r.Client, containerInfra, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 	if loadBalancer := controlplane.Octavia(instance); loadBalancer != nil {
 		controllerutil.SetControllerReference(instance, loadBalancer, r.Scheme)
-		if err := octavia.EnsureOctavia(ctx, r.Client, loadBalancer, log); err != nil {
+		if err := octavia.Ensure(ctx, r.Client, loadBalancer, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
 	if sfs := controlplane.Manila(instance); sfs != nil {
 		controllerutil.SetControllerReference(instance, sfs, r.Scheme)
-		if err := manila.EnsureManila(ctx, r.Client, sfs, log); err != nil {
+		if err := manila.Ensure(ctx, r.Client, sfs, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}
 
 	if benchmark := controlplane.Rally(instance); benchmark != nil {
 		controllerutil.SetControllerReference(instance, benchmark, r.Scheme)
-		if err := rally.EnsureRally(ctx, r.Client, benchmark, log); err != nil {
+		if err := rally.Ensure(ctx, r.Client, benchmark, log); err != nil {
 			return ctrl.Result{}, err
 		}
 	}

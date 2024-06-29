@@ -19,6 +19,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -28,6 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -45,8 +47,9 @@ import (
 // HeatReconciler reconciles a Heat object
 type HeatReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=heats,verbs=get;list;watch;create;update;patch;delete
@@ -73,6 +76,8 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		return ctrl.Result{}, err
 	}
 
+	reporter := heat.NewReporter(instance, r.Client, r.Recorder)
+
 	ks := &openstackv1beta1.Keystone{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone",
@@ -80,10 +85,16 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(ks), ks); err != nil {
+		if errors.IsNotFound(err) {
+			if err := reporter.Pending(ctx, "Waiting on Keystone admin secret"); err != nil {
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+		}
 		return ctrl.Result{}, err
 	}
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := heat.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
@@ -124,8 +135,8 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 	}
 	keystoneuser.AddReadyCheck(deps, keystoneStackUser)
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	cm := heat.ConfigMap(instance)
@@ -153,30 +164,36 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		template.ConfigMapVolume("etc-heat", cm.Name, nil),
 	}
 
-	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs := template.NewJobRunner(ctx, r.Client, instance, log)
 	jobs.Add(&instance.Status.DBSyncJobHash, heat.DBSyncJob(instance, env, volumes))
-	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+	if result, err := jobs.Run(ctx, reporter.Pending); err != nil || !result.IsZero() {
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileCFN(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileCFN(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileEngine(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileEngine(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	// TODO wait for deploys to be ready then mark status
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
+
+	if err := reporter.Running(ctx); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }
 
-func (r *HeatReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *HeatReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := heat.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -198,11 +215,12 @@ func (r *HeatReconciler) reconcileAPI(ctx context.Context, instance *openstackv1
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }
 
-func (r *HeatReconciler) reconcileCFN(ctx context.Context, instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *HeatReconciler) reconcileCFN(ctx context.Context, instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := heat.CFNService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -224,11 +242,12 @@ func (r *HeatReconciler) reconcileCFN(ctx context.Context, instance *openstackv1
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }
 
-func (r *HeatReconciler) reconcileEngine(ctx context.Context, instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *HeatReconciler) reconcileEngine(ctx context.Context, instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := heat.EngineService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -240,6 +259,7 @@ func (r *HeatReconciler) reconcileEngine(ctx context.Context, instance *openstac
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
 	}
+	template.AddStatefulSetReadyCheck(deps, sts)
 
 	return nil
 }

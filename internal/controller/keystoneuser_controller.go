@@ -67,7 +67,7 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	reporter := keystoneuser.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	cluster := &openstackv1beta1.Keystone{
 		ObjectMeta: metav1.ObjectMeta{
@@ -80,8 +80,8 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 	keystone.AddReadyCheck(deps, cluster)
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	var currentPassword string

@@ -42,28 +42,29 @@ func ConfigMap(instance *openstackv1beta1.Heat) *corev1.ConfigMap {
 	return cm
 }
 
-func EnsureHeat(ctx context.Context, c client.Client, intended *openstackv1beta1.Heat, log logr.Logger) error {
-	hash, err := template.ObjectHash(intended)
+func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Heat, log logr.Logger) error {
+	hash, err := template.ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
+	intended := instance.DeepCopy()
 
-	found := &openstackv1beta1.Heat{}
-	if err := c.Get(ctx, client.ObjectKeyFromObject(intended), found); err != nil {
+	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
 
-		template.SetAppliedHash(intended, hash)
+		template.SetAppliedHash(instance, hash)
 
-		log.Info("Creating Heat", "Name", intended.Name)
-		return c.Create(ctx, intended)
-	} else if !template.MatchesAppliedHash(found, hash) {
-		found.Spec = intended.Spec
-		template.SetAppliedHash(found, hash)
+		log.Info("Creating Heat", "Name", instance.Name)
+		return c.Create(ctx, instance)
+	} else if !template.MatchesAppliedHash(instance, hash) {
+		instance.Spec = intended.Spec
 
-		log.Info("Updating Heat", "Name", intended.Name)
-		return c.Update(ctx, found)
+		template.SetAppliedHash(instance, hash)
+
+		log.Info("Updating Heat", "Name", instance.Name)
+		return c.Update(ctx, instance)
 	}
 
 	return nil

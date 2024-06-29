@@ -18,12 +18,14 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -31,14 +33,16 @@ import (
 	"github.com/go-logr/logr"
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/rally"
+	rallytask "github.com/ianunruh/openstack-operator/pkg/rally/task"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
 // RallyTaskReconciler reconciles a RallyTask object
 type RallyTaskReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=rallytasks,verbs=get;list;watch;create;update;patch;delete
@@ -62,7 +66,9 @@ func (r *RallyTaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, nil
 	}
 
-	deps := template.NewConditionWaiter(log)
+	reporter := rallytask.NewReporter(instance, r.Client, r.Recorder)
+
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	cluster := &openstackv1beta1.Rally{
 		ObjectMeta: metav1.ObjectMeta{
@@ -75,8 +81,8 @@ func (r *RallyTaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 	rally.AddReadyCheck(deps, cluster)
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	env := []corev1.EnvVar{
@@ -89,16 +95,20 @@ func (r *RallyTaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		// template.PersistentVolume("data", template.Combine(cluster.Name, "data")),
 	}
 
-	job := rally.TaskRunnerJob(instance, cluster, env, volumes)
+	job := rallytask.RunnerJob(instance, cluster, env, volumes)
 	controllerutil.SetControllerReference(instance, job, r.Scheme)
 	if err := template.CreateJob(ctx, r.Client, job, log); err != nil {
 		return ctrl.Result{}, err
 	} else if job.Status.CompletionTime == nil {
-		return ctrl.Result{}, nil
+		if err := reporter.Pending(ctx, "Waiting on Job %s condition Complete", job.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
 	instance.Status.CompletionTime = job.Status.CompletionTime
-	if err := r.Client.Status().Update(ctx, instance); err != nil {
+
+	if err := reporter.Completed(ctx); err != nil {
 		return ctrl.Result{}, err
 	}
 

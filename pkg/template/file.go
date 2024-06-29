@@ -100,19 +100,19 @@ func MustDecodeManifest(encoded string) *unstructured.Unstructured {
 }
 
 func EnsureResource(ctx context.Context, c client.Client, instance *unstructured.Unstructured, log logr.Logger) error {
-	intended := instance.DeepCopy()
-	hash, err := ObjectHash(intended)
+	hash, err := ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
+	intended := instance.DeepCopy()
 
 	fields := []interface{}{
-		"Name", intended.GetName(),
-		"Namespace", intended.GetNamespace(),
-		"Kind", intended.GetObjectKind().GroupVersionKind(),
+		"Name", instance.GetName(),
+		"Namespace", instance.GetNamespace(),
+		"Kind", instance.GetObjectKind().GroupVersionKind(),
 	}
 
-	if err := c.Get(context.TODO(), client.ObjectKeyFromObject(instance), instance); err != nil {
+	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}

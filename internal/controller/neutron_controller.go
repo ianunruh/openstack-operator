@@ -26,6 +26,7 @@ import (
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -43,8 +44,9 @@ import (
 // NeutronReconciler reconciles a Neutron object
 type NeutronReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=neutrons,verbs=get;list;watch;create;update;patch;delete
@@ -73,7 +75,9 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	deps := template.NewConditionWaiter(log)
+	reporter := neutron.NewReporter(instance, r.Client, r.Recorder)
+
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := neutron.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
@@ -103,8 +107,8 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 	keystoneuser.AddReadyCheck(deps, keystoneUser)
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	cm := neutron.ConfigMap(instance)
@@ -137,13 +141,13 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		template.ConfigMapVolume("etc-neutron", cm.Name, nil),
 	}
 
-	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs := template.NewJobRunner(ctx, r.Client, instance, log)
 	jobs.Add(&instance.Status.DBSyncJobHash, neutron.DBSyncJob(instance, fullEnvVars, volumes))
-	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+	if result, err := jobs.Run(ctx, reporter.Pending); err != nil || !result.IsZero() {
 		return result, err
 	}
 
-	if err := r.reconcileServer(ctx, instance, serverEnvVars, volumes, log); err != nil {
+	if err := r.reconcileServer(ctx, instance, serverEnvVars, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -151,12 +155,18 @@ func (r *NeutronReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	// TODO wait for deploys to be ready then mark status
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
+
+	if err := reporter.Running(ctx); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }
 
-func (r *NeutronReconciler) reconcileServer(ctx context.Context, instance *openstackv1beta1.Neutron, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NeutronReconciler) reconcileServer(ctx context.Context, instance *openstackv1beta1.Neutron, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := neutron.ServerService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -178,6 +188,7 @@ func (r *NeutronReconciler) reconcileServer(ctx context.Context, instance *opens
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }

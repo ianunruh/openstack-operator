@@ -26,6 +26,7 @@ import (
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -38,8 +39,9 @@ import (
 // HorizonReconciler reconciles a Horizon object
 type HorizonReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=horizons,verbs=get;list;watch;create;update;patch;delete
@@ -65,6 +67,10 @@ func (r *HorizonReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		}
 		return ctrl.Result{}, err
 	}
+
+	reporter := horizon.NewReporter(instance, r.Client, r.Recorder)
+
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	cm := horizon.ConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
@@ -110,7 +116,15 @@ func (r *HorizonReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err
 	}
-	// TODO wait for deploy to be ready then mark status
+	template.AddDeploymentReadyCheck(deps, deploy)
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
+
+	if err := reporter.Running(ctx); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }

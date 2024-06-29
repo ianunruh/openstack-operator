@@ -5,63 +5,85 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 
-	"github.com/go-logr/logr"
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 )
 
-func NewConditionWaiter(log logr.Logger) *ConditionWaiter {
+type ReportFunc func(ctx context.Context, message string, args ...any) error
+
+func NewConditionWaiter(scheme *runtime.Scheme, log logr.Logger) *ConditionWaiter {
 	return &ConditionWaiter{
-		log: log,
+		log:    log,
+		scheme: scheme,
 	}
 }
 
 type ConditionWaiter struct {
-	log logr.Logger
+	log    logr.Logger
+	scheme *runtime.Scheme
 
 	resources []conditionWaitResource
 }
 
-func (cw *ConditionWaiter) AddReadyCheck(instance client.Object, conditions []metav1.Condition) *ConditionWaiter {
+func (cw *ConditionWaiter) AddCheck(instance client.Object, conditionType string, ready bool) *ConditionWaiter {
 	cw.resources = append(cw.resources, conditionWaitResource{
-		Instance:   instance,
-		Conditions: conditions,
+		Instance:      instance,
+		ConditionType: conditionType,
+		Ready:         ready,
 	})
 	return cw
 }
 
-func (cw *ConditionWaiter) Wait() ctrl.Result {
+func (cw *ConditionWaiter) AddReadyCheck(instance client.Object, conditions []metav1.Condition) *ConditionWaiter {
+	return cw.AddCheck(instance,
+		openstackv1beta1.ConditionReady,
+		meta.IsStatusConditionTrue(conditions, openstackv1beta1.ConditionReady))
+}
+
+func (cw *ConditionWaiter) Wait(ctx context.Context, report ReportFunc) (ctrl.Result, error) {
 	for _, res := range cw.resources {
-		if meta.IsStatusConditionTrue(res.Conditions, openstackv1beta1.ConditionReady) {
+		if res.Ready {
 			continue
 		}
 
-		cw.log.Info("Waiting for dependency to be ready",
-			"kind", res.Instance.GetObjectKind().GroupVersionKind().Kind,
-			"name", res.Instance.GetName(),
-			"namespace", res.Instance.GetNamespace())
+		// NOTE this is needed because there are some cases where the object does
+		// not have the GVK populated
+		gvk, err := apiutil.GVKForObject(res.Instance, cw.scheme)
+		if err != nil {
+			return ctrl.Result{}, fmt.Errorf("mapping GVK for object: %w", err)
+		}
 
-		return ctrl.Result{RequeueAfter: 10 * time.Second}
+		if err := report(
+			ctx,
+			"Waiting on %s %s condition %s",
+			gvk.Kind,
+			res.Instance.GetName(),
+			res.ConditionType,
+		); err != nil {
+			return ctrl.Result{}, err
+		}
+
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
-	cw.Clear()
-
-	return ctrl.Result{}
-}
-
-func (cw *ConditionWaiter) Clear() {
 	cw.resources = nil
+
+	return ctrl.Result{}, nil
 }
 
 type conditionWaitResource struct {
-	Instance   client.Object
-	Conditions []metav1.Condition
+	Instance      client.Object
+	ConditionType string
+	Ready         bool
 }
 
 func NewReporter(instance client.Object, conditions *[]metav1.Condition, k8sClient client.Client, recorder record.EventRecorder) *Reporter {
@@ -108,4 +130,8 @@ func (r *Reporter) UpdateCondition(ctx context.Context, conditionType string, st
 
 func (r *Reporter) UpdateReadyCondition(ctx context.Context, status metav1.ConditionStatus, reason, message string, args ...any) error {
 	return r.UpdateCondition(ctx, openstackv1beta1.ConditionReady, status, reason, message, args...)
+}
+
+func (r *Reporter) UpdateCompletedCondition(ctx context.Context, status metav1.ConditionStatus, reason, message string, args ...any) error {
+	return r.UpdateCondition(ctx, openstackv1beta1.ConditionCompleted, status, reason, message, args...)
 }

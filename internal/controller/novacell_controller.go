@@ -84,7 +84,7 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := nova.CellDatabase(cluster.Name, instance.Spec.Name, instance.Namespace, instance.Spec.Database)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
@@ -100,8 +100,8 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 	rabbitmquser.AddReadyCheck(deps, brokerUser)
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	cm := &corev1.ConfigMap{
@@ -134,27 +134,31 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		template.ConfigMapVolume("etc-nova", cm.Name, nil),
 	}
 
-	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs := template.NewJobRunner(ctx, r.Client, instance, log)
 	jobs.Add(&instance.Status.DBSyncJobHash,
 		novacell.DBSyncJob(instance, env, volumes, cluster.Spec.API.Image))
-	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+	if result, err := jobs.Run(ctx, reporter.Pending); err != nil || !result.IsZero() {
 		return result, err
 	}
 
-	if err := r.reconcileConductor(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileConductor(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileMetadata(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileMetadata(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileNoVNCProxy(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileNoVNCProxy(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if err := r.reconcileComputeSets(ctx, instance, log); err != nil {
 		return ctrl.Result{}, err
+	}
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	if err := reporter.Running(ctx); err != nil {
@@ -176,7 +180,7 @@ func (r *NovaCellReconciler) reconcileComputeSets(ctx context.Context, instance 
 	return nil
 }
 
-func (r *NovaCellReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NovaCellReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := nova.ConductorService(instance.Name, instance.Namespace)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -188,11 +192,12 @@ func (r *NovaCellReconciler) reconcileConductor(ctx context.Context, instance *o
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
 	}
+	template.AddStatefulSetReadyCheck(deps, sts)
 
 	return nil
 }
 
-func (r *NovaCellReconciler) reconcileMetadata(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NovaCellReconciler) reconcileMetadata(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	env = append(env,
 		// TODO make this configurable
 		template.SecretEnvVar("OS_NEUTRON__METADATA_PROXY_SHARED_SECRET", "nova", "metadata-proxy-secret"))
@@ -208,11 +213,12 @@ func (r *NovaCellReconciler) reconcileMetadata(ctx context.Context, instance *op
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }
 
-func (r *NovaCellReconciler) reconcileNoVNCProxy(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NovaCellReconciler) reconcileNoVNCProxy(ctx context.Context, instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := nova.NoVNCProxyService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -234,6 +240,7 @@ func (r *NovaCellReconciler) reconcileNoVNCProxy(ctx context.Context, instance *
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }

@@ -78,12 +78,16 @@ type GlanceAPISpec struct {
 
 // GlanceStatus defines the observed state of Glance
 type GlanceStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // Glance is the Schema for the glances API
 type Glance struct {

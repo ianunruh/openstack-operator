@@ -82,12 +82,16 @@ type BarbicanWorkerSpec struct {
 
 // BarbicanStatus defines the observed state of Barbican
 type BarbicanStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
+
 	// +optional
 	DBSyncJobHash string `json:"dbSyncJobHash,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // Barbican is the Schema for the barbicans API
 type Barbican struct {

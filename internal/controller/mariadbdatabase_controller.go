@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"time"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -67,7 +66,7 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	reporter := mariadbdatabase.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	var cluster *openstackv1beta1.MariaDB
 
@@ -84,8 +83,8 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		mariadb.AddReadyCheck(deps, cluster)
 	}
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	secret := mariadbdatabase.Secret(instance)
@@ -94,17 +93,11 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs := template.NewJobRunner(ctx, r.Client, instance, log)
 	jobs.Add(&instance.Status.SetupJobHash,
 		mariadbdatabase.SetupJob(instance))
-	if result, err := jobs.Run(instance); err != nil {
-		// TODO update pending w/error
-		return ctrl.Result{}, err
-	} else if !result.IsZero() {
-		if err := reporter.Pending(ctx, "Waiting for MariaDB to be available"); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	if result, err := jobs.Run(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	if err := reporter.Reconciled(ctx); err != nil {

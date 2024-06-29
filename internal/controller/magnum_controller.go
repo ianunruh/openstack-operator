@@ -26,6 +26,7 @@ import (
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -43,8 +44,9 @@ import (
 // MagnumReconciler reconciles a Magnum object
 type MagnumReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=magnums,verbs=get;list;watch;create;update;patch;delete
@@ -71,7 +73,9 @@ func (r *MagnumReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	deps := template.NewConditionWaiter(log)
+	reporter := magnum.NewReporter(instance, r.Client, r.Recorder)
+
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := magnum.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
@@ -109,8 +113,8 @@ func (r *MagnumReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	keystoneuser.AddReadyCheck(deps, keystoneStackUser)
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	cm := magnum.ConfigMap(instance)
@@ -137,26 +141,32 @@ func (r *MagnumReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		template.ConfigMapVolume("etc-magnum", cm.Name, nil),
 	}
 
-	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs := template.NewJobRunner(ctx, r.Client, instance, log)
 	jobs.Add(&instance.Status.DBSyncJobHash, magnum.DBSyncJob(instance, env, volumes))
-	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+	if result, err := jobs.Run(ctx, reporter.Pending); err != nil || !result.IsZero() {
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileConductor(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileConductor(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	// TODO wait for deploys to be ready then mark status
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
+
+	if err := reporter.Running(ctx); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }
 
-func (r *MagnumReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *MagnumReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := magnum.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -178,11 +188,12 @@ func (r *MagnumReconciler) reconcileAPI(ctx context.Context, instance *openstack
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }
 
-func (r *MagnumReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *MagnumReconciler) reconcileConductor(ctx context.Context, instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := magnum.ConductorService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -194,6 +205,7 @@ func (r *MagnumReconciler) reconcileConductor(ctx context.Context, instance *ope
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err
 	}
+	template.AddStatefulSetReadyCheck(deps, sts)
 
 	return nil
 }

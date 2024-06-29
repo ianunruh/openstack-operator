@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -75,7 +74,7 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	reporter := keystone.NewReporter(instance, r.Client, r.Recorder)
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := keystone.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
@@ -91,8 +90,8 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	}
 	rabbitmquser.AddReadyCheck(deps, brokerUser)
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	secrets := keystone.Secrets(instance)
@@ -127,10 +126,10 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		template.SecretVolume("fernet-keys", template.Combine(instance.Name, "fernet-keys"), nil),
 	}
 
-	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs := template.NewJobRunner(ctx, r.Client, instance, log)
 	jobs.Add(&instance.Status.DBSyncJobHash, keystone.DBSyncJob(instance, env, volumes))
 	jobs.Add(&instance.Status.BootstrapJobHash, keystone.BootstrapJob(instance, env, volumes))
-	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+	if result, err := jobs.Run(ctx, reporter.Pending); err != nil || !result.IsZero() {
 		return result, err
 	}
 
@@ -154,12 +153,11 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return ctrl.Result{}, err
-	} else if deploy.Status.AvailableReplicas == 0 {
-		log.Info("Waiting on deployment to be available", "name", deploy.Name)
-		if err := reporter.Pending(ctx, "Waiting for API to be available"); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+	template.AddDeploymentReadyCheck(deps, deploy)
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	if err := reporter.Running(ctx); err != nil {

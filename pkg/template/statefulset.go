@@ -11,11 +11,11 @@ import (
 )
 
 func EnsureStatefulSet(ctx context.Context, c client.Client, instance *appsv1.StatefulSet, log logr.Logger) error {
-	intended := instance.DeepCopy()
-	hash, err := ObjectHash(intended)
+	hash, err := ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
+	intended := instance.DeepCopy()
 
 	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
@@ -24,15 +24,20 @@ func EnsureStatefulSet(ctx context.Context, c client.Client, instance *appsv1.St
 
 		SetAppliedHash(instance, hash)
 
-		log.Info("Creating StatefulSet", "Name", intended.Name)
+		log.Info("Creating StatefulSet", "Name", instance.Name)
 		return c.Create(ctx, instance)
 	} else if !MatchesAppliedHash(instance, hash) {
 		instance.Spec = intended.Spec
+
 		SetAppliedHash(instance, hash)
 
-		log.Info("Updating StatefulSet", "Name", intended.Name)
+		log.Info("Updating StatefulSet", "Name", instance.Name)
 		return c.Update(ctx, instance)
 	}
 
 	return nil
+}
+
+func AddStatefulSetReadyCheck(cw *ConditionWaiter, instance *appsv1.StatefulSet) {
+	cw.AddCheck(instance, "Available", instance.Status.AvailableReplicas > 0)
 }

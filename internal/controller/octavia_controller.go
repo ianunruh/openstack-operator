@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -27,6 +28,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -45,8 +47,9 @@ import (
 // OctaviaReconciler reconciles a Octavia object
 type OctaviaReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Log      logr.Logger
+	Recorder record.EventRecorder
+	Scheme   *runtime.Scheme
 }
 
 //+kubebuilder:rbac:groups=openstack.ospk8s.com,resources=octavias,verbs=get;list;watch;create;update;patch;delete
@@ -76,6 +79,8 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
+	reporter := octavia.NewReporter(instance, r.Client, r.Recorder)
+
 	ks := &openstackv1beta1.Keystone{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone",
@@ -83,10 +88,16 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(ks), ks); err != nil {
+		if errors.IsNotFound(err) {
+			if err := reporter.Pending(ctx, "Waiting on Keystone admin secret"); err != nil {
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+		}
 		return ctrl.Result{}, err
 	}
 
-	deps := template.NewConditionWaiter(log)
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	db := octavia.Database(instance)
 	controllerutil.SetControllerReference(instance, db, r.Scheme)
@@ -120,8 +131,8 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	if result := deps.Wait(); !result.IsZero() {
-		return result, nil
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	cm := octavia.ConfigMap(instance)
@@ -155,7 +166,7 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			return ctrl.Result{}, err
 		}
 
-		if result, err := amphora.Bootstrap(ctx, instance, r.Client, log); err != nil || !result.IsZero() {
+		if result, err := amphora.Bootstrap(ctx, instance, r.Client, reporter.Pending, log); err != nil || !result.IsZero() {
 			return result, err
 		}
 
@@ -170,17 +181,17 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		template.HostPathVolume("host-var-run-octavia", "/var/run/octavia"),
 	}
 
-	jobs := template.NewJobRunner(ctx, r.Client, log)
+	jobs := template.NewJobRunner(ctx, r.Client, instance, log)
 	jobs.Add(&instance.Status.DBSyncJobHash, octavia.DBSyncJob(instance, env, volumes))
-	if result, err := jobs.Run(instance); err != nil || !result.IsZero() {
+	if result, err := jobs.Run(ctx, reporter.Pending); err != nil || !result.IsZero() {
 		return result, err
 	}
 
-	if err := r.reconcileAPI(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileAPI(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileDriverAgent(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileDriverAgent(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -188,20 +199,26 @@ func (r *OctaviaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileHousekeeping(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileHousekeeping(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileWorker(ctx, instance, env, volumes, log); err != nil {
+	if err := r.reconcileWorker(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
-	// TODO wait for deploys to be ready then mark status
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
+
+	if err := reporter.Running(ctx); err != nil {
+		return ctrl.Result{}, err
+	}
 
 	return ctrl.Result{}, nil
 }
 
-func (r *OctaviaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *OctaviaReconciler) reconcileAPI(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	svc := octavia.APIService(instance)
 	controllerutil.SetControllerReference(instance, svc, r.Scheme)
 	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
@@ -223,11 +240,12 @@ func (r *OctaviaReconciler) reconcileAPI(ctx context.Context, instance *openstac
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }
 
-func (r *OctaviaReconciler) reconcileDriverAgent(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *OctaviaReconciler) reconcileDriverAgent(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	if !instance.Spec.OVN.Enabled {
 		// TODO ensure deployment does not exist
 		return nil
@@ -238,6 +256,7 @@ func (r *OctaviaReconciler) reconcileDriverAgent(ctx context.Context, instance *
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }
@@ -257,17 +276,18 @@ func (r *OctaviaReconciler) reconcileHealthManager(ctx context.Context, instance
 	return nil
 }
 
-func (r *OctaviaReconciler) reconcileHousekeeping(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *OctaviaReconciler) reconcileHousekeeping(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	deploy := octavia.HousekeepingDeployment(instance, env, volumes)
 	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
 	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
 		return err
 	}
+	template.AddDeploymentReadyCheck(deps, deploy)
 
 	return nil
 }
 
-func (r *OctaviaReconciler) reconcileWorker(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *OctaviaReconciler) reconcileWorker(ctx context.Context, instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
 	if !instance.Spec.Amphora.Enabled {
 		// TODO ensure deployment does not exist
 		return nil

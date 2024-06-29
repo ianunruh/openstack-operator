@@ -1,14 +1,16 @@
-package rally
+package task
 
 import (
-	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
-	"github.com/ianunruh/openstack-operator/pkg/template"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+
+	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/rally"
+	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func TaskRunnerJob(instance *openstackv1beta1.RallyTask, cluster *openstackv1beta1.Rally, env []corev1.EnvVar, volumes []corev1.Volume) *batchv1.Job {
-	labels := template.AppLabels(instance.Name, AppLabel)
+func RunnerJob(instance *openstackv1beta1.RallyTask, cluster *openstackv1beta1.Rally, env []corev1.EnvVar, volumes []corev1.Volume) *batchv1.Job {
+	labels := template.AppLabels(instance.Name, rally.AppLabel)
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-rally", "/home/rally/.rally/rally.conf", "rally.conf"),
@@ -25,7 +27,7 @@ func TaskRunnerJob(instance *openstackv1beta1.RallyTask, cluster *openstackv1bet
 				Command: []string{
 					"bash",
 					"-c",
-					template.MustReadFile(AppLabel, "run-task.sh"),
+					template.MustReadFile(rally.AppLabel, "run-task.sh"),
 				},
 				Env: env,
 				EnvFrom: []corev1.EnvFromSource{

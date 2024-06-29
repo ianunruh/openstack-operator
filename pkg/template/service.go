@@ -29,29 +29,30 @@ func GenericService(name, namespace string, labels map[string]string) *corev1.Se
 }
 
 func EnsureService(ctx context.Context, c client.Client, instance *corev1.Service, log logr.Logger) error {
-	intended := instance.DeepCopy()
-	hash, err := ObjectHash(intended)
+	hash, err := ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
+	intended := instance.DeepCopy()
 
-	if err := c.Get(ctx, client.ObjectKeyFromObject(intended), instance); err != nil {
+	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
 
-		SetAppliedHash(intended, hash)
+		SetAppliedHash(instance, hash)
 
-		log.Info("Creating Service", "Name", intended.Name)
-		return c.Create(ctx, intended)
+		log.Info("Creating Service", "Name", instance.Name)
+		return c.Create(ctx, instance)
 	} else if !MatchesAppliedHash(instance, hash) {
 		// copy immutable fields
 		intended.Spec.ClusterIP = instance.Spec.ClusterIP
 
 		instance.Spec = intended.Spec
+
 		SetAppliedHash(instance, hash)
 
-		log.Info("Updating Service", "Name", intended.Name)
+		log.Info("Updating Service", "Name", instance.Name)
 		return c.Update(ctx, instance)
 	}
 

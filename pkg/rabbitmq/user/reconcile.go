@@ -113,11 +113,11 @@ func Secret(instance *openstackv1beta1.RabbitMQUser) *corev1.Secret {
 }
 
 func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.RabbitMQUser, log logr.Logger) error {
-	intended := instance.DeepCopy()
-	hash, err := template.ObjectHash(intended)
+	hash, err := template.ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
+	intended := instance.DeepCopy()
 
 	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {

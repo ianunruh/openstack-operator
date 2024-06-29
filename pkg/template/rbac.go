@@ -51,83 +51,87 @@ func RoleRef(name string) rbacv1.RoleRef {
 	}
 }
 
-func EnsureServiceAccount(ctx context.Context, c client.Client, intended *corev1.ServiceAccount, log logr.Logger) error {
-	hash, err := ObjectHash(intended)
+func EnsureServiceAccount(ctx context.Context, c client.Client, instance *corev1.ServiceAccount, log logr.Logger) error {
+	hash, err := ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
+	intended := instance.DeepCopy()
 
-	found := &corev1.ServiceAccount{}
-	if err := c.Get(ctx, client.ObjectKeyFromObject(intended), found); err != nil {
+	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
 
-		SetAppliedHash(intended, hash)
+		SetAppliedHash(instance, hash)
 
-		log.Info("Creating ServiceAccount", "Name", intended.Name)
-		return c.Create(ctx, intended)
-	} else if !MatchesAppliedHash(found, hash) {
-		// found.Spec = intended.Spec
-		SetAppliedHash(found, hash)
+		log.Info("Creating ServiceAccount", "Name", instance.Name)
+		return c.Create(ctx, instance)
+	} else if !MatchesAppliedHash(instance, hash) {
+		instance.Secrets = intended.Secrets
+		instance.ImagePullSecrets = intended.ImagePullSecrets
 
-		log.Info("Updating ServiceAccount", "Name", intended.Name)
-		return c.Update(ctx, found)
+		SetAppliedHash(instance, hash)
+
+		log.Info("Updating ServiceAccount", "Name", instance.Name)
+		return c.Update(ctx, instance)
 	}
 
 	return nil
 }
 
-func EnsureRole(ctx context.Context, c client.Client, intended *rbacv1.Role, log logr.Logger) error {
-	hash, err := ObjectHash(intended)
+func EnsureRole(ctx context.Context, c client.Client, instance *rbacv1.Role, log logr.Logger) error {
+	hash, err := ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
+	intended := instance.DeepCopy()
 
-	found := &rbacv1.Role{}
-	if err := c.Get(ctx, client.ObjectKeyFromObject(intended), found); err != nil {
+	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
 
-		SetAppliedHash(intended, hash)
+		SetAppliedHash(instance, hash)
 
-		log.Info("Creating Role", "Name", intended.Name)
-		return c.Create(ctx, intended)
-	} else if !MatchesAppliedHash(found, hash) {
-		found.Rules = intended.Rules
-		SetAppliedHash(found, hash)
+		log.Info("Creating Role", "Name", instance.Name)
+		return c.Create(ctx, instance)
+	} else if !MatchesAppliedHash(instance, hash) {
+		instance.Rules = intended.Rules
 
-		log.Info("Updating Role", "Name", intended.Name)
-		return c.Update(ctx, found)
+		SetAppliedHash(instance, hash)
+
+		log.Info("Updating Role", "Name", instance.Name)
+		return c.Update(ctx, instance)
 	}
 
 	return nil
 }
 
-func EnsureRoleBinding(ctx context.Context, c client.Client, intended *rbacv1.RoleBinding, log logr.Logger) error {
-	hash, err := ObjectHash(intended)
+func EnsureRoleBinding(ctx context.Context, c client.Client, instance *rbacv1.RoleBinding, log logr.Logger) error {
+	hash, err := ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
+	intended := instance.DeepCopy()
 
-	found := &rbacv1.RoleBinding{}
-	if err := c.Get(ctx, client.ObjectKeyFromObject(intended), found); err != nil {
+	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
 
-		SetAppliedHash(intended, hash)
+		SetAppliedHash(instance, hash)
 
-		log.Info("Creating RoleBinding", "Name", intended.Name)
-		return c.Create(ctx, intended)
-	} else if !MatchesAppliedHash(found, hash) {
-		found.RoleRef = intended.RoleRef
-		found.Subjects = intended.Subjects
-		SetAppliedHash(found, hash)
+		log.Info("Creating RoleBinding", "Name", instance.Name)
+		return c.Create(ctx, instance)
+	} else if !MatchesAppliedHash(instance, hash) {
+		instance.RoleRef = intended.RoleRef
+		instance.Subjects = intended.Subjects
 
-		log.Info("Updating RoleBinding", "Name", intended.Name)
-		return c.Update(ctx, found)
+		SetAppliedHash(instance, hash)
+
+		log.Info("Updating RoleBinding", "Name", instance.Name)
+		return c.Update(ctx, instance)
 	}
 
 	return nil

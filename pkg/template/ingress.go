@@ -13,29 +13,30 @@ import (
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 )
 
-func EnsureIngress(ctx context.Context, c client.Client, intended *netv1.Ingress, log logr.Logger) error {
-	hash, err := ObjectHash(intended)
+func EnsureIngress(ctx context.Context, c client.Client, instance *netv1.Ingress, log logr.Logger) error {
+	hash, err := ObjectHash(instance)
 	if err != nil {
 		return fmt.Errorf("error hashing object: %w", err)
 	}
+	intended := instance.DeepCopy()
 
-	found := &netv1.Ingress{}
-	if err := c.Get(ctx, client.ObjectKeyFromObject(intended), found); err != nil {
+	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
 		if !errors.IsNotFound(err) {
 			return err
 		}
 
-		SetAppliedHash(intended, hash)
+		SetAppliedHash(instance, hash)
 
-		log.Info("Creating Ingress", "Name", intended.Name)
-		return c.Create(ctx, intended)
-	} else if !MatchesAppliedHash(found, hash) {
-		found.Spec = intended.Spec
-		found.Annotations = intended.Annotations
-		SetAppliedHash(found, hash)
+		log.Info("Creating Ingress", "Name", instance.Name)
+		return c.Create(ctx, instance)
+	} else if !MatchesAppliedHash(instance, hash) {
+		instance.Spec = intended.Spec
+		instance.Annotations = intended.Annotations
 
-		log.Info("Updating Ingress", "Name", intended.Name)
-		return c.Update(ctx, found)
+		SetAppliedHash(instance, hash)
+
+		log.Info("Updating Ingress", "Name", instance.Name)
+		return c.Update(ctx, instance)
 	}
 
 	return nil

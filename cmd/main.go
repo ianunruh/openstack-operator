@@ -177,17 +177,19 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controller.GlanceReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Glance"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Glance"),
+		Recorder: mgr.GetEventRecorderFor("Glance"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Glance")
 		os.Exit(1)
 	}
 	if err = (&controller.PlacementReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Placement"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Placement"),
+		Recorder: mgr.GetEventRecorderFor("Placement"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Placement")
 		os.Exit(1)
@@ -211,9 +213,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controller.NovaReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Nova"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Nova"),
+		Recorder: mgr.GetEventRecorderFor("Nova"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Nova")
 		os.Exit(1)
@@ -228,17 +231,19 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controller.NeutronReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Neutron"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Neutron"),
+		Recorder: mgr.GetEventRecorderFor("Neutron"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Neutron")
 		os.Exit(1)
 	}
 	if err = (&controller.HorizonReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Horizon"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Horizon"),
+		Recorder: mgr.GetEventRecorderFor("Horizon"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Horizon")
 		os.Exit(1)
@@ -253,33 +258,37 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controller.CinderReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Cinder"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Cinder"),
+		Recorder: mgr.GetEventRecorderFor("Cinder"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Cinder")
 		os.Exit(1)
 	}
 	if err = (&controller.HeatReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Heat"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Heat"),
+		Recorder: mgr.GetEventRecorderFor("Heat"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Heat")
 		os.Exit(1)
 	}
 	if err = (&controller.MagnumReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Magnum"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Magnum"),
+		Recorder: mgr.GetEventRecorderFor("Magnum"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Magnum")
 		os.Exit(1)
 	}
 	if err = (&controller.BarbicanReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Barbican"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Barbican"),
+		Recorder: mgr.GetEventRecorderFor("Barbican"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Barbican")
 		os.Exit(1)
@@ -294,9 +303,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controller.OctaviaReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Octavia"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Octavia"),
+		Recorder: mgr.GetEventRecorderFor("Octavia"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Octavia")
 		os.Exit(1)
@@ -311,9 +321,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controller.ManilaReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("Manila"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("Manila"),
+		Recorder: mgr.GetEventRecorderFor("Manila"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Manila")
 		os.Exit(1)
@@ -391,9 +402,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controller.RallyTaskReconciler{
-		Client: mgr.GetClient(),
-		Log:    ctrl.Log.WithName("controllers").WithName("RallyTask"),
-		Scheme: mgr.GetScheme(),
+		Client:   mgr.GetClient(),
+		Log:      ctrl.Log.WithName("controllers").WithName("RallyTask"),
+		Recorder: mgr.GetEventRecorderFor("RallyTask"),
+		Scheme:   mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "RallyTask")
 		os.Exit(1)
