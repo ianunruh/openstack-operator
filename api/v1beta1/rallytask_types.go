@@ -30,7 +30,7 @@ type RallyTaskSpec struct {
 
 // RallyTaskStatus defines the observed state of RallyTask
 type RallyTaskStatus struct {
-	Conditions []metav1.Condition
+	Conditions []metav1.Condition `json:"conditions"`
 
 	// +optional
 	CompletionTime *metav1.Time `json:"completionTime,omitempty"`
