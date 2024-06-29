@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -42,7 +41,8 @@ const (
 
 	imageSourceProperty = "source"
 
-	healthPortPrefix = "octavia-health-manager-"
+	healthPortDeviceOwner = "Octavia:health-mgr"
+	healthPortPrefix      = "octavia-health-manager-"
 )
 
 func Bootstrap(ctx context.Context, instance *openstackv1beta1.Octavia, c client.Client, report template.ReportFunc, log logr.Logger) (ctrl.Result, error) {
@@ -365,14 +365,9 @@ func (b *bootstrap) EnsureHealthPorts(ctx context.Context) error {
 		return err
 	}
 
-	currentPorts, err := b.listHealthManagerPorts(ctx)
+	currentByName, err := b.listHealthManagerPorts()
 	if err != nil {
 		return err
-	}
-
-	currentByName := make(map[string]ports.Port)
-	for _, port := range currentPorts {
-		currentByName[strings.TrimPrefix(port.Name, healthPortPrefix)] = port
 	}
 
 	portsByName := make(map[string]openstackv1beta1.OctaviaAmphoraHealthPort)
@@ -388,7 +383,7 @@ func (b *bootstrap) EnsureHealthPorts(ctx context.Context) error {
 				Name:           name,
 				NetworkID:      networkID,
 				SecurityGroups: &securityGroups,
-				DeviceOwner:    "Octavia:health-mgr",
+				DeviceOwner:    healthPortDeviceOwner,
 			}).Extract()
 			if err != nil {
 				return err
@@ -448,15 +443,25 @@ func (b *bootstrap) listHealthMangerNodes(ctx context.Context) ([]corev1.Node, e
 	return nodes.Items, nil
 }
 
-func (b *bootstrap) listHealthManagerPorts(ctx context.Context) ([]ports.Port, error) {
+func (b *bootstrap) listHealthManagerPorts() (map[string]ports.Port, error) {
 	page, err := ports.List(b.network, ports.ListOpts{
 		NetworkID:   b.instance.Status.Amphora.NetworkIDs[0],
-		DeviceOwner: "Octavia:health-mgr",
+		DeviceOwner: healthPortDeviceOwner,
 	}).AllPages()
 	if err != nil {
 		return nil, err
 	}
-	return ports.ExtractPorts(page)
+
+	result, err := ports.ExtractPorts(page)
+	if err != nil {
+		return nil, err
+	}
+
+	byName := make(map[string]ports.Port)
+	for _, port := range result {
+		byName[port.Name] = port
+	}
+	return byName, nil
 }
 
 func sortPortsByName(ports []openstackv1beta1.OctaviaAmphoraHealthPort) {
