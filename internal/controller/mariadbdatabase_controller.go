@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"time"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -97,14 +96,8 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	jobs := template.NewJobRunner(ctx, r.Client, log)
 	jobs.Add(&instance.Status.SetupJobHash,
 		mariadbdatabase.SetupJob(instance))
-	if result, err := jobs.Run(ctx, instance, reporter.Pending); err != nil {
-		// TODO update pending w/error
-		return ctrl.Result{}, err
-	} else if !result.IsZero() {
-		if err := reporter.Pending(ctx, "Waiting for MariaDB to be available"); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	if result, err := jobs.Run(ctx, instance, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	if err := reporter.Reconciled(ctx); err != nil {
