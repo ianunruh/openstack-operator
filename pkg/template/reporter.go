@@ -53,7 +53,7 @@ func (cw *ConditionWaiter) Wait(ctx context.Context, report ReportFunc) (ctrl.Re
 
 		if err := report(
 			ctx,
-			"Waiting on %s/%s condition %s",
+			"Waiting on %s %s condition %s",
 			res.Instance.GetObjectKind().GroupVersionKind().Kind,
 			res.Instance.GetName(),
 			res.ConditionType,
