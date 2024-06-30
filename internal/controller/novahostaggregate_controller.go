@@ -75,13 +75,18 @@ func (r *NovaHostAggregateReconciler) Reconcile(ctx context.Context, req ctrl.Re
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(svcUser), svcUser); err != nil {
-		if errors.IsNotFound(err) {
-			controllerutil.RemoveFinalizer(instance, template.Finalizer)
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if controllerutil.RemoveFinalizer(instance, template.Finalizer) {
 			if err := r.Update(ctx, instance); err != nil {
 				return ctrl.Result{}, err
 			}
 		}
-		return ctrl.Result{}, err
+		if err := reporter.Pending(ctx, "Secret %s not found", svcUser.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
 	compute, err := nova.NewComputeServiceClient(ctx, svcUser)

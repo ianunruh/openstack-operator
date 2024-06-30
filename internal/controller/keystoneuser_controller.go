@@ -76,13 +76,18 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
-		if errors.IsNotFound(err) {
-			controllerutil.RemoveFinalizer(instance, template.Finalizer)
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if controllerutil.RemoveFinalizer(instance, template.Finalizer) {
 			if err := r.Update(ctx, instance); err != nil {
 				return ctrl.Result{}, err
 			}
 		}
-		return ctrl.Result{}, err
+		if err := reporter.Pending(ctx, "Keystone %s not found", instance.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 	keystone.AddReadyCheck(deps, cluster)
 
@@ -97,13 +102,18 @@ func (r *KeystoneUserReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(svcUser), svcUser); err != nil {
-		if errors.IsNotFound(err) {
-			controllerutil.RemoveFinalizer(instance, template.Finalizer)
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if controllerutil.RemoveFinalizer(instance, template.Finalizer) {
 			if err := r.Update(ctx, instance); err != nil {
 				return ctrl.Result{}, err
 			}
 		}
-		return ctrl.Result{}, err
+		if err := reporter.Pending(ctx, "Secret %s not found", svcUser.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
 	identity, err := keystone.NewIdentityServiceClient(ctx, svcUser)
