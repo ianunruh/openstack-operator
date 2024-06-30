@@ -2,11 +2,9 @@ package template
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	netv1 "k8s.io/api/networking/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -14,32 +12,10 @@ import (
 )
 
 func EnsureIngress(ctx context.Context, c client.Client, instance *netv1.Ingress, log logr.Logger) error {
-	hash, err := ObjectHash(instance)
-	if err != nil {
-		return fmt.Errorf("error hashing object: %w", err)
-	}
-	intended := instance.DeepCopy()
-
-	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
-		if !errors.IsNotFound(err) {
-			return err
-		}
-
-		SetAppliedHash(instance, hash)
-
-		log.Info("Creating Ingress", "Name", instance.Name)
-		return c.Create(ctx, instance)
-	} else if !MatchesAppliedHash(instance, hash) {
+	return Ensure(ctx, c, instance, log, func(intended *netv1.Ingress) {
 		instance.Spec = intended.Spec
 		instance.Annotations = intended.Annotations
-
-		SetAppliedHash(instance, hash)
-
-		log.Info("Updating Ingress", "Name", instance.Name)
-		return c.Update(ctx, instance)
-	}
-
-	return nil
+	})
 }
 
 func IngressServiceBackend(svcName, portName string) netv1.IngressBackend {

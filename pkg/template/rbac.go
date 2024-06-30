@@ -2,12 +2,10 @@ package template
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -52,87 +50,21 @@ func RoleRef(name string) rbacv1.RoleRef {
 }
 
 func EnsureServiceAccount(ctx context.Context, c client.Client, instance *corev1.ServiceAccount, log logr.Logger) error {
-	hash, err := ObjectHash(instance)
-	if err != nil {
-		return fmt.Errorf("error hashing object: %w", err)
-	}
-	intended := instance.DeepCopy()
-
-	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
-		if !errors.IsNotFound(err) {
-			return err
-		}
-
-		SetAppliedHash(instance, hash)
-
-		log.Info("Creating ServiceAccount", "Name", instance.Name)
-		return c.Create(ctx, instance)
-	} else if !MatchesAppliedHash(instance, hash) {
+	return Ensure(ctx, c, instance, log, func(intended *corev1.ServiceAccount) {
 		instance.Secrets = intended.Secrets
 		instance.ImagePullSecrets = intended.ImagePullSecrets
-
-		SetAppliedHash(instance, hash)
-
-		log.Info("Updating ServiceAccount", "Name", instance.Name)
-		return c.Update(ctx, instance)
-	}
-
-	return nil
+	})
 }
 
 func EnsureRole(ctx context.Context, c client.Client, instance *rbacv1.Role, log logr.Logger) error {
-	hash, err := ObjectHash(instance)
-	if err != nil {
-		return fmt.Errorf("error hashing object: %w", err)
-	}
-	intended := instance.DeepCopy()
-
-	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
-		if !errors.IsNotFound(err) {
-			return err
-		}
-
-		SetAppliedHash(instance, hash)
-
-		log.Info("Creating Role", "Name", instance.Name)
-		return c.Create(ctx, instance)
-	} else if !MatchesAppliedHash(instance, hash) {
+	return Ensure(ctx, c, instance, log, func(intended *rbacv1.Role) {
 		instance.Rules = intended.Rules
-
-		SetAppliedHash(instance, hash)
-
-		log.Info("Updating Role", "Name", instance.Name)
-		return c.Update(ctx, instance)
-	}
-
-	return nil
+	})
 }
 
 func EnsureRoleBinding(ctx context.Context, c client.Client, instance *rbacv1.RoleBinding, log logr.Logger) error {
-	hash, err := ObjectHash(instance)
-	if err != nil {
-		return fmt.Errorf("error hashing object: %w", err)
-	}
-	intended := instance.DeepCopy()
-
-	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
-		if !errors.IsNotFound(err) {
-			return err
-		}
-
-		SetAppliedHash(instance, hash)
-
-		log.Info("Creating RoleBinding", "Name", instance.Name)
-		return c.Create(ctx, instance)
-	} else if !MatchesAppliedHash(instance, hash) {
+	return Ensure(ctx, c, instance, log, func(intended *rbacv1.RoleBinding) {
 		instance.RoleRef = intended.RoleRef
 		instance.Subjects = intended.Subjects
-
-		SetAppliedHash(instance, hash)
-
-		log.Info("Updating RoleBinding", "Name", instance.Name)
-		return c.Update(ctx, instance)
-	}
-
-	return nil
+	})
 }

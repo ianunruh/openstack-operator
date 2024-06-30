@@ -2,11 +2,9 @@ package cell
 
 import (
 	"context"
-	"fmt"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/go-logr/logr"
@@ -59,29 +57,7 @@ func DBSyncJob(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes
 }
 
 func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.NovaCell, log logr.Logger) error {
-	hash, err := template.ObjectHash(instance)
-	if err != nil {
-		return fmt.Errorf("error hashing object: %w", err)
-	}
-	intended := instance.DeepCopy()
-
-	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
-		if !errors.IsNotFound(err) {
-			return err
-		}
-
-		template.SetAppliedHash(instance, hash)
-
-		log.Info("Creating NovaCell", "Name", instance.Name)
-		return c.Create(ctx, instance)
-	} else if !template.MatchesAppliedHash(instance, hash) {
+	return template.Ensure(ctx, c, instance, log, func(intended *openstackv1beta1.NovaCell) {
 		instance.Spec = intended.Spec
-
-		template.SetAppliedHash(instance, hash)
-
-		log.Info("Updating NovaCell", "Name", instance.Name)
-		return c.Update(ctx, instance)
-	}
-
-	return nil
+	})
 }
