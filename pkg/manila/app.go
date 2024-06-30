@@ -2,13 +2,11 @@ package manila
 
 import (
 	"context"
-	"fmt"
 	"path/filepath"
 	"strings"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
@@ -63,29 +61,7 @@ func ConfigMap(instance *openstackv1beta1.Manila) *corev1.ConfigMap {
 }
 
 func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Manila, log logr.Logger) error {
-	hash, err := template.ObjectHash(instance)
-	if err != nil {
-		return fmt.Errorf("error hashing object: %w", err)
-	}
-	intended := instance.DeepCopy()
-
-	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
-		if !errors.IsNotFound(err) {
-			return err
-		}
-
-		template.SetAppliedHash(instance, hash)
-
-		log.Info("Creating Manila", "Name", instance.Name)
-		return c.Create(ctx, instance)
-	} else if !template.MatchesAppliedHash(instance, hash) {
+	return template.Ensure(ctx, c, instance, log, func(intended *openstackv1beta1.Manila) {
 		instance.Spec = intended.Spec
-
-		template.SetAppliedHash(instance, hash)
-
-		log.Info("Updating Manila", "Name", instance.Name)
-		return c.Update(ctx, instance)
-	}
-
-	return nil
+	})
 }

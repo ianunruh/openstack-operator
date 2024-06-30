@@ -2,13 +2,11 @@ package rabbitmq
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -171,29 +169,7 @@ func ClusterServiceMonitor(instance *openstackv1beta1.RabbitMQ) *unstructured.Un
 }
 
 func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.RabbitMQ, log logr.Logger) error {
-	hash, err := template.ObjectHash(instance)
-	if err != nil {
-		return fmt.Errorf("error hashing object: %w", err)
-	}
-	intended := instance.DeepCopy()
-
-	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
-		if !errors.IsNotFound(err) {
-			return err
-		}
-
-		template.SetAppliedHash(instance, hash)
-
-		log.Info("Creating RabbitMQ", "Name", instance.Name)
-		return c.Create(ctx, instance)
-	} else if !template.MatchesAppliedHash(instance, hash) {
+	return template.Ensure(ctx, c, instance, log, func(intended *openstackv1beta1.RabbitMQ) {
 		instance.Spec = intended.Spec
-
-		template.SetAppliedHash(instance, hash)
-
-		log.Info("Updating RabbitMQ", "Name", instance.Name)
-		return c.Update(ctx, instance)
-	}
-
-	return nil
+	})
 }

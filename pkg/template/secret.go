@@ -2,7 +2,6 @@ package template
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -37,30 +36,8 @@ func CreateSecret(ctx context.Context, c client.Client, instance *corev1.Secret,
 }
 
 func EnsureSecret(ctx context.Context, c client.Client, instance *corev1.Secret, log logr.Logger) error {
-	hash, err := ObjectHash(instance)
-	if err != nil {
-		return fmt.Errorf("error hashing object: %w", err)
-	}
-	intended := instance.DeepCopy()
-
-	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
-		if !errors.IsNotFound(err) {
-			return err
-		}
-
-		SetAppliedHash(instance, hash)
-
-		log.Info("Creating Secret", "Name", instance.Name)
-		return c.Create(ctx, instance)
-	} else if !MatchesAppliedHash(instance, hash) {
+	return Ensure(ctx, c, instance, log, func(intended *corev1.Secret) {
 		instance.Data = intended.Data
 		instance.StringData = intended.StringData
-
-		SetAppliedHash(instance, hash)
-
-		log.Info("Updating Secret", "Name", instance.Name)
-		return c.Update(ctx, instance)
-	}
-
-	return nil
+	})
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/gophercloud/gophercloud/openstack/compute/v2/extensions/keypairs"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/domains"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/users"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
@@ -149,29 +148,7 @@ func getDomainID(instance *openstackv1beta1.NovaKeypair, identity *gophercloud.S
 }
 
 func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.NovaKeypair, log logr.Logger) error {
-	hash, err := template.ObjectHash(instance)
-	if err != nil {
-		return fmt.Errorf("error hashing object: %w", err)
-	}
-	intended := instance.DeepCopy()
-
-	if err := c.Get(ctx, client.ObjectKeyFromObject(instance), instance); err != nil {
-		if !apierrors.IsNotFound(err) {
-			return err
-		}
-
-		template.SetAppliedHash(instance, hash)
-
-		log.Info("Creating NovaKeypair", "Name", instance.Name)
-		return c.Create(ctx, instance)
-	} else if !template.MatchesAppliedHash(instance, hash) {
+	return template.Ensure(ctx, c, instance, log, func(intended *openstackv1beta1.NovaKeypair) {
 		instance.Spec = intended.Spec
-
-		template.SetAppliedHash(instance, hash)
-
-		log.Info("Updating NovaKeypair", "Name", instance.Name)
-		return c.Update(ctx, instance)
-	}
-
-	return nil
+	})
 }
