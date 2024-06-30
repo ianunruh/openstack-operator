@@ -69,12 +69,7 @@ func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 
 	reporter := computeset.NewReporter(instance, r.Client, r.Recorder)
 
-	if err := computeset.Reconcile(ctx, r.Client, instance, log); err != nil {
-		if err := reporter.Error(ctx, "Error reconciling Nova compute set: %v", err); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
-	}
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	cluster := &openstackv1beta1.Nova{
 		ObjectMeta: metav1.ObjectMeta{
@@ -87,6 +82,19 @@ func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 			return ctrl.Result{}, err
 		}
 		if err := reporter.Pending(ctx, "Nova %s not found", cluster.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
+	nova.AddReadyCheck(deps, cluster)
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
+
+	if err := computeset.Reconcile(ctx, r.Client, instance, log); err != nil {
+		if err := reporter.Error(ctx, "Error reconciling Nova compute set: %v", err); err != nil {
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil

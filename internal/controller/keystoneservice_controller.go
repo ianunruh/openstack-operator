@@ -89,6 +89,7 @@ func (r *KeystoneServiceReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		}
 		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
+
 	keystone.AddReadyCheck(deps, cluster)
 
 	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {

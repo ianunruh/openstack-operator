@@ -77,8 +77,7 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			Namespace: instance.Namespace,
 		},
 	}
-	err = r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster)
-	if err != nil {
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
 		if !errors.IsNotFound(err) {
 			return ctrl.Result{}, err
 		}

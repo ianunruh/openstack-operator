@@ -63,6 +63,35 @@ func (r *NovaFlavorReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 	reporter := novaflavor.NewReporter(instance, r.Client, r.Recorder)
 
+	deps := template.NewConditionWaiter(r.Scheme, log)
+
+	cluster := &openstackv1beta1.Nova{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "nova",
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if controllerutil.RemoveFinalizer(instance, template.Finalizer) {
+			if err := r.Update(ctx, instance); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+		if err := reporter.Pending(ctx, "Nova %s not found", cluster.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
+	nova.AddReadyCheck(deps, cluster)
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
+
 	svcUser := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "nova-keystone",
