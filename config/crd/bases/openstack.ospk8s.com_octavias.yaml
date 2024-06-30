@@ -489,6 +489,10 @@ spec:
                 properties:
                   image:
                     type: string
+                  initDHCPImage:
+                    type: string
+                  initOVSImage:
+                    type: string
                   nodeSelector:
                     additionalProperties:
                       type: string

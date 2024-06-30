@@ -121,6 +121,12 @@ type OctaviaHealthManagerSpec struct {
 	Image string `json:"image,omitempty"`
 
 	// +optional
+	InitDHCPImage string `json:"initDHCPImage,omitempty"`
+
+	// +optional
+	InitOVSImage string `json:"initOVSImage,omitempty"`
+
+	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional

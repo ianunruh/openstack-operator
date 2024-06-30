@@ -44,6 +44,9 @@ const (
 	DefaultOctaviaHousekeepingImage  = "kolla/octavia-housekeeping:2023.2-ubuntu-jammy"
 	DefaultOctaviaWorkerImage        = "kolla/octavia-worker:2023.2-ubuntu-jammy"
 
+	// NOTE this is needed because dhcp client is not baked into any kolla images
+	DefaultOctaviaHealthManagerInitDHCPImage = "loci/octavia:2023.1-ubuntu_focal"
+
 	DefaultOVNControllerImage = "kolla/ovn-controller:2023.2-ubuntu-jammy"
 	DefaultOVNNorthdImage     = "kolla/ovn-northd:2023.2-ubuntu-jammy"
 	DefaultOVNOVSDBNorthImage = "kolla/ovn-nb-db-server:2023.2-ubuntu-jammy"
