@@ -31,6 +31,9 @@ type ControlPlaneSpec struct {
 	NodeSelector ControlPlaneNodeSelector `json:"nodeSelector,omitempty"`
 
 	// +optional
+	TLS ControlPlaneTLSSpec `json:"tls,omitempty"`
+
+	// +optional
 	Broker RabbitMQSpec `json:"broker,omitempty"`
 
 	// +optional
@@ -108,6 +111,17 @@ type ControlPlaneIngressSpec struct {
 
 	// +optional
 	TLSSecretName string `json:"tlsSecretName,omitempty"`
+}
+
+type ControlPlaneTLSSpec struct {
+	// +optional
+	Disabled bool `json:"disabled,omitempty"`
+
+	// +optional
+	Client TLSClientSpec `json:"client,omitempty"`
+
+	// +optional
+	Server TLSServerSpec `json:"server,omitempty"`
 }
 
 // ControlPlaneStatus defines the observed state of ControlPlane

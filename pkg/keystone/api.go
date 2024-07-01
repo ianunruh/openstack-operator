@@ -40,6 +40,12 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 		template.VolumeMount("pod-fernet-keys", "/etc/keystone/fernet-keys"),
 	}
 
+	if spec.TLS.Secret != "" {
+		defaultMode := int32(0444)
+		volumeMounts = append(volumeMounts, template.VolumeMount("secret-tls", "/etc/keystone/certs"))
+		volumes = append(volumes, template.SecretVolume("secret-tls", spec.TLS.Secret, &defaultMode))
+	}
+
 	initVolumeMounts := append(volumeMounts,
 		template.VolumeMount("credential-keys", "/var/run/secrets/credential-keys"),
 		template.VolumeMount("fernet-keys", "/var/run/secrets/fernet-keys"))

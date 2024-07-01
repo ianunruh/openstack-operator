@@ -94,6 +94,15 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return result, err
 	}
 
+	// TODO if disabled, clean up resources
+	pkiResources := keystone.PKIResources(instance)
+	for _, resource := range pkiResources {
+		controllerutil.SetControllerReference(instance, resource, r.Scheme)
+		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	secrets := keystone.Secrets(instance)
 	for _, secret := range secrets {
 		controllerutil.SetControllerReference(instance, secret, r.Scheme)

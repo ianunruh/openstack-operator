@@ -11,11 +11,17 @@ type CertificateParams struct {
 	Namespace  string
 	SecretName string
 	IssuerName string
+	IssuerKind string
+	DNSNames   []string
 	IsCA       bool
 	Usages     []string
 }
 
 func Certificate(params CertificateParams) *unstructured.Unstructured {
+	if params.IssuerKind == "" {
+		params.IssuerKind = "Issuer"
+	}
+
 	manifest := template.MustRenderFile("pki", "certificate.yaml", params)
 	return template.MustDecodeManifest(manifest)
 }

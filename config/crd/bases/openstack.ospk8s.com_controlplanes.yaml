@@ -2579,6 +2579,18 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                             type: object
                         type: object
+                      tls:
+                        properties:
+                          issuer:
+                            properties:
+                              kind:
+                                type: string
+                              name:
+                                type: string
+                            type: object
+                          secret:
+                            type: string
+                        type: object
                     type: object
                   bootstrapJob:
                     properties:
@@ -2961,6 +2973,13 @@ spec:
                         type: array
                       secret:
                         type: string
+                    type: object
+                  tls:
+                    properties:
+                      caSecrets:
+                        items:
+                          type: string
+                        type: array
                     type: object
                 type: object
               magnum:
@@ -7291,6 +7310,30 @@ spec:
                     type: object
                   image:
                     type: string
+                type: object
+              tls:
+                properties:
+                  client:
+                    properties:
+                      caSecrets:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  disabled:
+                    type: boolean
+                  server:
+                    properties:
+                      issuer:
+                        properties:
+                          kind:
+                            type: string
+                          name:
+                            type: string
+                        type: object
+                      secret:
+                        type: string
+                    type: object
                 type: object
             required:
             - domain
