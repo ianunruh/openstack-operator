@@ -58,37 +58,45 @@ func (r *JobRunner) Add(hashField *string, job *batchv1.Job) {
 
 func (r *JobRunner) Run(ctx context.Context, report ReportFunc) (ctrl.Result, error) {
 	for _, jh := range r.jobs {
-		job := jh.Job
+		if result, err := r.run(ctx, jh.Job, jh.HashField, report); err != nil || !result.IsZero() {
+			return result, err
+		}
+	}
 
-		controllerutil.SetControllerReference(r.instance, job, r.client.Scheme())
+	return ctrl.Result{}, nil
+}
 
-		jobHash, err := ObjectHash(job)
-		if err != nil {
+func (r *JobRunner) run(ctx context.Context, job *batchv1.Job, hashField *string, report ReportFunc) (ctrl.Result, error) {
+	controllerutil.SetControllerReference(r.instance, job, r.client.Scheme())
+
+	jobHash, err := ObjectHash(job)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if *hashField == jobHash {
+		// matching job has already run
+		return ctrl.Result{}, nil
+	}
+
+	if err := CreateJob(r.ctx, r.client, job, r.log); err != nil {
+		return ctrl.Result{}, err
+	} else if job.Status.CompletionTime == nil {
+		if err := report(ctx, "Waiting on Job %s condition Complete", job.Name); err != nil {
 			return ctrl.Result{}, err
 		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
 
-		if *jh.HashField == jobHash {
-			continue
-		}
+	if err := DeleteJob(r.ctx, r.client, job, r.log); err != nil {
+		return ctrl.Result{}, err
+	}
 
-		if err := CreateJob(r.ctx, r.client, job, r.log); err != nil {
-			return ctrl.Result{}, err
-		} else if job.Status.CompletionTime == nil {
-			if err := report(ctx, "Waiting on Job %s condition Complete", job.Name); err != nil {
-				return ctrl.Result{}, err
-			}
-			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
-		}
+	// update status field with last run job hash
+	*hashField = jobHash
 
-		if err := DeleteJob(r.ctx, r.client, job, r.log); err != nil {
-			return ctrl.Result{}, err
-		}
-
-		*jh.HashField = jobHash
-
-		if err := r.client.Status().Update(r.ctx, r.instance); err != nil {
-			return ctrl.Result{}, err
-		}
+	if err := r.client.Status().Update(r.ctx, r.instance); err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

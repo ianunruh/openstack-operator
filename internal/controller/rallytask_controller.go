@@ -77,7 +77,13 @@ func (r *RallyTaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
-		return ctrl.Result{}, err
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if err := reporter.Pending(ctx, "Rally %s not found", cluster.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 	rally.AddReadyCheck(deps, cluster)
 

@@ -32,6 +32,7 @@ import (
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/nova"
 	"github.com/ianunruh/openstack-operator/pkg/nova/computenode"
+	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
 // NovaComputeNodeReconciler reconciles a NovaComputeNode object
@@ -61,7 +62,30 @@ func (r *NovaComputeNodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 
 	reporter := computenode.NewReporter(instance, r.Client, r.Recorder)
 
-	// TODO handle this user not existing on deletion, and remove the finalizer anyway
+	deps := template.NewConditionWaiter(r.Scheme, log)
+
+	cluster := &openstackv1beta1.Nova{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "nova",
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if err := reporter.Pending(ctx, "Nova %s not found", cluster.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
+	nova.AddReadyCheck(deps, cluster)
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
+
 	svcUser := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "nova-keystone",
@@ -69,7 +93,13 @@ func (r *NovaComputeNodeReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(svcUser), svcUser); err != nil {
-		return ctrl.Result{}, err
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if err := reporter.Pending(ctx, "Secret %s not found", svcUser.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
 	compute, err := nova.NewComputeServiceClient(ctx, svcUser)

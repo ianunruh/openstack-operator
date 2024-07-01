@@ -19,6 +19,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/go-logr/logr"
 	corev1 "k8s.io/api/core/v1"
@@ -66,9 +67,9 @@ func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{}, err
 	}
 
-	if err := computeset.Reconcile(ctx, r.Client, instance, log); err != nil {
-		return ctrl.Result{}, err
-	}
+	reporter := computeset.NewReporter(instance, r.Client, r.Recorder)
+
+	deps := template.NewConditionWaiter(r.Scheme, log)
 
 	cluster := &openstackv1beta1.Nova{
 		ObjectMeta: metav1.ObjectMeta{
@@ -77,7 +78,26 @@ func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
-		return ctrl.Result{}, err
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if err := reporter.Pending(ctx, "Nova %s not found", cluster.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
+	nova.AddReadyCheck(deps, cluster)
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
+
+	if err := computeset.Reconcile(ctx, r.Client, instance, log); err != nil {
+		if err := reporter.Error(ctx, "Error reconciling Nova compute set: %v", err); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
 	cell := &openstackv1beta1.NovaCell{
@@ -87,7 +107,13 @@ func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cell), cell); err != nil {
-		return ctrl.Result{}, err
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if err := reporter.Pending(ctx, "NovaCell %s not found", cell.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
 	cinder := &openstackv1beta1.Cinder{
@@ -146,6 +172,10 @@ func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	}
 
 	if err := r.reconcileComputeSSH(ctx, instance, configHash, volumes, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if err := reporter.Reconciled(ctx); err != nil {
 		return ctrl.Result{}, err
 	}
 

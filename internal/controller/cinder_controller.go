@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -115,6 +116,23 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return result, err
 	}
 
+	// TODO make this configurable
+	glance := &openstackv1beta1.Glance{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "glance",
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(glance), glance); err != nil {
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if err := reporter.Pending(ctx, "Glance %s not found", glance.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
 	cm := cinder.ConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
 	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
@@ -122,7 +140,7 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	configHash := template.AppliedHash(cm)
 
-	if err := r.reconcileRookCeph(ctx, instance, log); err != nil {
+	if err := r.reconcileRookCeph(ctx, instance, glance, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -169,18 +187,7 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	return ctrl.Result{}, nil
 }
 
-func (r *CinderReconciler) reconcileRookCeph(ctx context.Context, instance *openstackv1beta1.Cinder, log logr.Logger) error {
-	// TODO make this configurable
-	glance := &openstackv1beta1.Glance{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "glance",
-			Namespace: instance.Namespace,
-		},
-	}
-	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(glance), glance); err != nil {
-		return err
-	}
-
+func (r *CinderReconciler) reconcileRookCeph(ctx context.Context, instance *openstackv1beta1.Cinder, glance *openstackv1beta1.Glance, log logr.Logger) error {
 	var imagePools []string
 	for _, backend := range glance.Spec.Backends {
 		if backend.Ceph == nil {

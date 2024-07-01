@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -76,12 +77,14 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 			Namespace: instance.Namespace,
 		},
 	}
-	err = r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return ctrl.Result{}, nil
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
 		}
-		return ctrl.Result{}, err
+		if err := reporter.Pending(ctx, "Nova %s not found", cluster.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
 	deps := template.NewConditionWaiter(r.Scheme, log)
@@ -111,7 +114,13 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cm), cm); err != nil {
-		return ctrl.Result{}, err
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if err := reporter.Pending(ctx, "ConfigMap %s not found", cm.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 	configHash := template.AppliedHash(cm)
 

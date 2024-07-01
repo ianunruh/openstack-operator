@@ -85,13 +85,13 @@ func (r *HeatReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		},
 	}
 	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(ks), ks); err != nil {
-		if errors.IsNotFound(err) {
-			if err := reporter.Pending(ctx, "Waiting on Keystone admin secret"); err != nil {
-				return ctrl.Result{}, err
-			}
-			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
 		}
-		return ctrl.Result{}, err
+		if err := reporter.Pending(ctx, "Keystone %s not found", ks.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 	}
 
 	deps := template.NewConditionWaiter(r.Scheme, log)

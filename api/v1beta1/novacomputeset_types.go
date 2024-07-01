@@ -60,10 +60,13 @@ type NovaLibvirtdSpec struct {
 
 // NovaComputeSetStatus defines the observed state of NovaComputeSet
 type NovaComputeSetStatus struct {
+	Conditions []metav1.Condition `json:"conditions"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+//+kubebuilder:printcolumn:name="Age",type=date,JSONPath=`.metadata.creationTimestamp`
 
 // NovaComputeSet is the Schema for the novacomputesets API
 type NovaComputeSet struct {

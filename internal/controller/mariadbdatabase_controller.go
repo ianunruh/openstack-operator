@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -78,7 +79,13 @@ func (r *MariaDBDatabaseReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 			},
 		}
 		if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cluster), cluster); err != nil {
-			return ctrl.Result{}, err
+			if !errors.IsNotFound(err) {
+				return ctrl.Result{}, err
+			}
+			if err := reporter.Pending(ctx, "MariaDB %s not found", cluster.Name); err != nil {
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
 		}
 		mariadb.AddReadyCheck(deps, cluster)
 	}
