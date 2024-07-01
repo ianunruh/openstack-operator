@@ -37,9 +37,7 @@ if ! openstack group show federated_users --domain default; then
     openstack group create federated_users --domain default
 fi
 
-if ! openstack role assignment list --role admin --group federated_users --project admin; then
-    openstack role add admin --group federated_users --project admin
-fi
+openstack role add admin --group federated_users --project admin
 
 if ! openstack identity provider show gitlab; then
     openstack identity provider create gitlab --remote-id https://gitlab.kcloud.io
