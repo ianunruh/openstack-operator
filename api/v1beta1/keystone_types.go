@@ -100,7 +100,7 @@ type KeystoneOIDCSpec struct {
 	Scopes []string `json:"scopes,omitempty"`
 
 	// +optional
-	RequiredClaims []string `json:"requiredClaims,omitempty"`
+	RequireClaims []string `json:"requireClaims,omitempty"`
 
 	// +optional
 	ExtraConfig map[string]string `json:"extraConfig,omitempty"`

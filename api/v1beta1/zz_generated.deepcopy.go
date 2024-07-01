@@ -1484,8 +1484,8 @@ func (in *KeystoneOIDCSpec) DeepCopyInto(out *KeystoneOIDCSpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
-	if in.RequiredClaims != nil {
-		in, out := &in.RequiredClaims, &out.RequiredClaims
+	if in.RequireClaims != nil {
+		in, out := &in.RequireClaims, &out.RequireClaims
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}

@@ -2951,7 +2951,7 @@ spec:
                         type: string
                       redirectURI:
                         type: string
-                      requiredClaims:
+                      requireClaims:
                         items:
                           type: string
                         type: array

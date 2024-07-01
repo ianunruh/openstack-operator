@@ -49,6 +49,9 @@ func (r *Keystone) Default() {
 	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultKeystoneAPIImage)
 
 	if r.Spec.OIDC.Enabled {
+		if len(r.Spec.OIDC.Scopes) == 0 {
+			r.Spec.OIDC.Scopes = []string{"openid", "email", "profile"}
+		}
 		if r.Spec.OIDC.Secret == "" {
 			r.Spec.OIDC.Secret = "keystone-oidc"
 		}
