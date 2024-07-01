@@ -43,6 +43,8 @@ spec:
       enabled: true
       identityProvider: gitlab
       providerMetadataURL: https://gitlab.kcloud.io/.well-known/openid-configuration
+      extraConfig:
+        OIDCRemoteUserClaim: preferred_username@
   horizon:
     sso:
       methods:

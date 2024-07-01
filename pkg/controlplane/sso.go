@@ -21,19 +21,22 @@ func horizonSSOMethods() []openstackv1beta1.HorizonSSOMethod {
 }
 
 func horizonSSOKeystoneURL(instance *openstackv1beta1.ControlPlane) string {
-	ingress := ingressDefaults(instance.Spec.Keystone.API.Ingress, instance, "keystone")
+	spec := instance.Spec.Keystone
+	ingress := ingressDefaults(spec.API.Ingress, instance, "keystone")
 	return fmt.Sprintf("https://%s/v3", ingress.Host)
 }
 
 func keystoneOIDCDashboardURL(instance *openstackv1beta1.ControlPlane) string {
-	ingress := ingressDefaults(instance.Spec.Horizon.Server.Ingress, instance, "horizon")
+	spec := instance.Spec.Horizon
+	ingress := ingressDefaults(spec.Server.Ingress, instance, "horizon")
 	return fmt.Sprintf("https://%s/auth/websso/", ingress.Host)
 }
 
 func keystoneOIDCRedirectURI(instance *openstackv1beta1.ControlPlane) string {
-	ingress := ingressDefaults(instance.Spec.Keystone.API.Ingress, instance, "keystone")
+	spec := instance.Spec.Keystone
+	ingress := ingressDefaults(spec.API.Ingress, instance, "keystone")
 	return fmt.Sprintf(
 		"https://%s/v3/OS-FEDERATION/identity_providers/%s/protocols/openid/auth",
 		ingress.Host,
-		instance.Spec.Keystone.OIDC.IdentityProvider)
+		spec.OIDC.IdentityProvider)
 }
