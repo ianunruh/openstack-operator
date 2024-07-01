@@ -28,7 +28,7 @@ fi
 log "Waiting for keystone-api to become ready"
 kubectl rollout status deploy keystone-api
 
-setup_openstack
+setup_openstack keystone
 
 log "Ensuring Keystone federation set up"
 if ! openstack group show federated_users; then

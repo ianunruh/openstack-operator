@@ -26,7 +26,7 @@ export OS_CLOUD="default"
 
 setup_openstack() {
     mkdir -p $HOME/.config/openstack
-    kubectl get secret cluster-admin-keystone -o 'jsonpath={.data.clouds\.yaml}' | base64 -d > $HOME/.config/openstack/clouds.yaml
+    kubectl get secret $1 -o 'jsonpath={.data.clouds\.yaml}' | base64 -d > $HOME/.config/openstack/clouds.yaml
     export OS_VOLUME_API_VERSION=3.33
 }
 
