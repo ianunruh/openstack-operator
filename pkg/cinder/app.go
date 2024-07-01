@@ -57,6 +57,7 @@ func ConfigMap(instance *openstackv1beta1.Cinder) *corev1.ConfigMap {
 	cm.Data["httpd.conf"] = template.MustReadFile(AppLabel, "httpd.conf")
 
 	cm.Data["kolla-cinder-api.json"] = template.MustReadFile(AppLabel, "kolla-cinder-api.json")
+	cm.Data["kolla-cinder-backup.json"] = template.MustReadFile(AppLabel, "kolla-cinder-backup.json")
 	cm.Data["kolla-cinder-scheduler.json"] = template.MustReadFile(AppLabel, "kolla-cinder-scheduler.json")
 	cm.Data["kolla-cinder-volume.json"] = template.MustReadFile(AppLabel, "kolla-cinder-volume.json")
 
