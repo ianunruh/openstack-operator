@@ -26,6 +26,17 @@ if ! kubectl get secret keystone-oidc; then
 fi
 
 log "Waiting for keystone-api to become ready"
+# NOTE keystone-api can take awhile to be provisioned
+attempts=0
+until kubectl get deploy keystone-api; do
+    attempts=$((attempts + 1))
+    if [ $attempts -lt 60 ]; then
+        sleep 5
+    else
+        exit 1
+    fi
+done
+
 kubectl rollout status deploy keystone-api
 
 setup_openstack keystone
