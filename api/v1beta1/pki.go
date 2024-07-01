@@ -26,7 +26,7 @@ type IssuerRef struct {
 func tlsServerDefault(spec TLSServerSpec, name, component string) TLSServerSpec {
 	if spec.Secret == "" {
 		if spec.Issuer.Name != "" {
-			spec.Secret = fmt.Sprintf("%s-%s", name, component)
+			spec.Secret = fmt.Sprintf("%s-%s-tls", name, component)
 		}
 	}
 	return spec
