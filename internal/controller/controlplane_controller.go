@@ -47,6 +47,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/placement"
 	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
 	"github.com/ianunruh/openstack-operator/pkg/rally"
+	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
 // ControlPlaneReconciler reconciles a ControlPlane object
@@ -76,6 +77,15 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 
 	reporter := controlplane.NewReporter(instance, r.Client, r.Recorder)
+
+	// TODO if disabled, clean up resources
+	pkiResources := controlplane.PKIResources(instance)
+	for _, resource := range pkiResources {
+		controllerutil.SetControllerReference(instance, resource, r.Scheme)
+		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
 
 	ovnControlPlane := controlplane.OVNControlPlane(instance)
 	controllerutil.SetControllerReference(instance, ovnControlPlane, r.Scheme)

@@ -9,6 +9,11 @@ import (
 )
 
 func PKIResources(instance *openstackv1beta1.ControlPlane) []*unstructured.Unstructured {
+	spec := instance.Spec.TLS
+	if spec.Disabled || spec.Server.Issuer.Name == "" {
+		return nil
+	}
+
 	return []*unstructured.Unstructured{
 		CARootCertificate(instance),
 		CAIssuer(instance),
@@ -17,20 +22,22 @@ func PKIResources(instance *openstackv1beta1.ControlPlane) []*unstructured.Unstr
 }
 
 func CARootCertificate(instance *openstackv1beta1.ControlPlane) *unstructured.Unstructured {
+	spec := instance.Spec.TLS.Server
 	return pki.Certificate(pki.CertificateParams{
-		Name:       template.Combine(instance.Name, "ca-root"),
+		Name:       template.Combine(spec.Issuer.Name, "root"),
 		Namespace:  instance.Namespace,
-		SecretName: template.Combine(instance.Name, "ca-root"),
+		SecretName: template.Combine(spec.Issuer.Name, "root"),
 		IssuerName: template.Combine(instance.Name, "self-signed"),
 		IsCA:       true,
 	})
 }
 
 func CAIssuer(instance *openstackv1beta1.ControlPlane) *unstructured.Unstructured {
+	spec := instance.Spec.TLS.Server
 	return pki.CAIssuer(pki.IssuerParams{
-		Name:       template.Combine(instance.Name, "ca"),
+		Name:       spec.Issuer.Name,
 		Namespace:  instance.Namespace,
-		SecretName: template.Combine(instance.Name, "ca-root"),
+		SecretName: template.Combine(spec.Issuer.Name, "root"),
 	})
 }
 
