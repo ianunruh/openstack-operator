@@ -29,7 +29,7 @@ log "Waiting for keystone-api to become ready"
 kubectl rollout status deploy keystone-api
 
 log "Setting up OpenStack client"
-kubectl get secret $1 -o 'jsonpath={.data.clouds\.yaml}' | base64 -d > $HOME/.config/openstack/clouds.yaml
+kubectl get secret keystone -o 'jsonpath={.data.clouds\.yaml}' | base64 -d > $HOME/.config/openstack/clouds.yaml
 openstack catalog list
 
 log "Ensuring Keystone federation set up"
