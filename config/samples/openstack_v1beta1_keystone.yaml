@@ -26,11 +26,14 @@ spec:
     enabled: true
     secret: keystone-oidc
     identityProvider: google
-    dashboardURL: https://horizon.openstack.k8s.example.com/horizon/auth/websso/
+    dashboardURL: https://horizon.openstack.k8s.example.com/auth/websso/
     providerMetadataURL: https://accounts.google.com/.well-known/openid-configuration
     redirectURI: https://keystone.openstack.k8s.example.com/v3/OS-FEDERATION/identity_providers/gitlab/protocols/openid/auth
-    requiredClaims:
+    requireClaims:
     - hd:example.com
     scopes:
     - openid
     - email
+    - profile
+    extraConfig:
+      OIDCRemoteUserClaim: preferred_username@
