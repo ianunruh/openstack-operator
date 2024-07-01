@@ -125,7 +125,7 @@ log "Ensuring OIDC set up"
 if ! kubectl get secret keystone-oidc; then
     oidc_redirect_uri=https://keystone.$CLUSTER_DOMAIN/v3/OS-FEDERATION/identity_providers/gitlab/protocols/openid/auth
 
-    gitlab_app=$(curl -H "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+    gitlab_app=$(curl -s -H "PRIVATE-TOKEN: $GITLAB_TOKEN" \
         -d "name=$CLUSTER_NAME&redirect_uri=$oidc_redirect_uri&scopes=read_user openid profile email" \
         "https://gitlab.kcloud.io/api/v4/applications")
 
