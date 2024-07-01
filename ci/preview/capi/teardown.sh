@@ -37,7 +37,7 @@ if gcloud dns record-sets describe "*.$CLUSTER_DOMAIN" --type=A --zone=$DNS_ZONE
 fi
 
 log "Cleaning up OAuth apps"
-for app_id in $(curl -s -H "PRIVATE-TOKEN: $GITLAB_TOKEN" https://gitlab.kcloud.io/api/v4/applications | yq -r ".[]|select(.application_name==\"$CLUSTER_NAME\").application_id"); do
+for app_id in $(curl -s -H "PRIVATE-TOKEN: $GITLAB_TOKEN" https://gitlab.kcloud.io/api/v4/applications | yq -r ".[]|select(.application_name==\"$CLUSTER_NAME\").id"); do
     log "Deleting OAuth app $app_id"
     curl -s -H "PRIVATE-TOKEN: $GITLAB_TOKEN" -XDELETE https://gitlab.kcloud.io/api/v4/applications/$app_id
 done
