@@ -168,6 +168,10 @@ func (r *CinderReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
+	if err := r.reconcileBackup(ctx, instance, env, volumes, deps, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	if err := r.reconcileScheduler(ctx, instance, env, volumes, deps, log); err != nil {
 		return ctrl.Result{}, err
 	}
@@ -240,6 +244,28 @@ func (r *CinderReconciler) reconcileAPI(ctx context.Context, instance *openstack
 		return err
 	}
 	template.AddDeploymentReadyCheck(deps, deploy)
+
+	return nil
+}
+
+func (r *CinderReconciler) reconcileBackup(ctx context.Context, instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
+	if !instance.Spec.Backup.Enabled {
+		// TODO ensure statefulset does not exist
+		return nil
+	}
+
+	svc := cinder.BackupService(instance)
+	controllerutil.SetControllerReference(instance, svc, r.Scheme)
+	if err := template.EnsureService(ctx, r.Client, svc, log); err != nil {
+		return err
+	}
+
+	sts := cinder.BackupStatefulSet(instance, env, volumes)
+	controllerutil.SetControllerReference(instance, sts, r.Scheme)
+	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
+		return err
+	}
+	template.AddStatefulSetReadyCheck(deps, sts)
 
 	return nil
 }

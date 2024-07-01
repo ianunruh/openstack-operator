@@ -11,6 +11,9 @@ spec:
       annotations:
         external-dns/enabled: "true"
         cert-manager.io/cluster-issuer: letsencrypt-prod
+  backup:
+    enabled: true
+    image: kolla/cinder-backup:2023.2-ubuntu-jammy
   scheduler:
     image: kolla/cinder-scheduler:2023.2-ubuntu-jammy
     replicas: 2
