@@ -41,7 +41,9 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 	}
 
 	if spec.TLS.Secret != "" {
-		defaultMode := int32(0444)
+		probe.ProbeHandler.HTTPGet.Scheme = corev1.URISchemeHTTPS
+
+		defaultMode := int32(0400)
 		volumeMounts = append(volumeMounts, template.VolumeMount("secret-tls", "/etc/keystone/certs"))
 		volumes = append(volumes, template.SecretVolume("secret-tls", spec.TLS.Secret, &defaultMode))
 	}
