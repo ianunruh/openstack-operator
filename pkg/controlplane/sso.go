@@ -32,5 +32,8 @@ func keystoneOIDCDashboardURL(instance *openstackv1beta1.ControlPlane) string {
 
 func keystoneOIDCRedirectURI(instance *openstackv1beta1.ControlPlane) string {
 	ingress := ingressDefaults(instance.Spec.Keystone.API.Ingress, instance, "keystone")
-	return fmt.Sprintf("https://%s/v3/auth/OS-FEDERATION/websso/openid/redirect", ingress.Host)
+	return fmt.Sprintf(
+		"https://%s/v3/OS-FEDERATION/identity_providers/%s/protocols/openid/auth",
+		ingress.Host,
+		instance.Spec.Keystone.OIDC.IdentityProvider)
 }

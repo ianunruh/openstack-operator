@@ -485,6 +485,10 @@ spec:
                     type: string
                   enabled:
                     type: boolean
+                  extraConfig:
+                    additionalProperties:
+                      type: string
+                    type: object
                   identityProvider:
                     type: string
                   providerMetadataURL:

@@ -101,6 +101,9 @@ type KeystoneOIDCSpec struct {
 
 	// +optional
 	RequiredClaims []string `json:"requiredClaims,omitempty"`
+
+	// +optional
+	ExtraConfig map[string]string `json:"extraConfig,omitempty"`
 }
 
 // KeystoneStatus defines the observed state of Keystone

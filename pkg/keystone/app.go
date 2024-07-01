@@ -42,7 +42,7 @@ func ConfigMap(instance *openstackv1beta1.Keystone) *corev1.ConfigMap {
 
 	template.MergeINI(cfg, spec.ExtraConfig)
 
-	// XXX wire in required claims, scopes
+	// XXX wire in required claims, scopes, extra config
 	cm.Data["httpd.conf"] = template.MustRenderFile(AppLabel, "httpd.conf", httpdParamsFrom(instance))
 	cm.Data["kolla.json"] = template.MustReadFile(AppLabel, "kolla.json")
 
@@ -63,6 +63,7 @@ type httpdParams struct {
 
 type httpdOIDCParams struct {
 	Enabled             bool
+	IdentityProvider    string
 	ProviderMetadataURL string
 	RedirectURI         string
 }
@@ -73,6 +74,7 @@ func httpdParamsFrom(instance *openstackv1beta1.Keystone) httpdParams {
 	if oidcSpec := instance.Spec.OIDC; oidcSpec.Enabled {
 		params.OIDC = httpdOIDCParams{
 			Enabled:             true,
+			IdentityProvider:    oidcSpec.IdentityProvider,
 			ProviderMetadataURL: oidcSpec.ProviderMetadataURL,
 			RedirectURI:         oidcSpec.RedirectURI,
 		}
