@@ -54,6 +54,8 @@ log "Ensuring kube-system/cloud-config secret"
 kubectl -n kube-system get secret cloud-config && kubectl -n kube-system delete secret cloud-config
 kubectl -n kube-system create secret generic cloud-config --from-file=cloud.conf
 
+rm cloud.conf clouds.yaml
+
 # Install cluster networking
 log "Applying Calico operator manifests"
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/tigera-operator.yaml --server-side=true
