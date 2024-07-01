@@ -130,13 +130,9 @@ func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		cinder = nil
 	}
 
-	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cluster.Name,
-			Namespace: cluster.Namespace,
-		},
-	}
-	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cm), cm); err != nil {
+	cm := computeset.ConfigMap(instance, cell, cluster, cinder)
+	controllerutil.SetControllerReference(instance, cm, r.Scheme)
+	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
 		return ctrl.Result{}, err
 	}
 	configHash := template.AppliedHash(cm)

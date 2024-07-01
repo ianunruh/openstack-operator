@@ -4907,6 +4907,12 @@ spec:
                             properties:
                               cell:
                                 type: string
+                              extraConfig:
+                                additionalProperties:
+                                  additionalProperties:
+                                    type: string
+                                  type: object
+                                type: object
                               image:
                                 type: string
                               libvirtd:
@@ -5329,6 +5335,12 @@ spec:
                                     More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                                   type: object
                               type: object
+                          type: object
+                        extraConfig:
+                          additionalProperties:
+                            additionalProperties:
+                              type: string
+                            type: object
                           type: object
                         metadata:
                           properties:
