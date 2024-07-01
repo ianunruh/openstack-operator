@@ -4,10 +4,7 @@ set -euo pipefail
 source common.sh
 
 setup_kubectl
-
-log "Setting up OpenStack client"
-kubectl get secret cluster-admin-keystone -o 'jsonpath={.data.clouds\.yaml}' | base64 -d > $HOME/.config/openstack/clouds.yaml
-openstack catalog list
+setup_openstack cluster-admin-keystone
 
 log "Switching kubectl to $CLUSTER_NAME cluster"
 clusterctl get kubeconfig $CLUSTER_NAME > kubeconfig

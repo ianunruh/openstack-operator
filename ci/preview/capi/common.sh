@@ -28,6 +28,12 @@ export OS_VOLUME_API_VERSION=3.33
 
 mkdir -p $HOME/.config/openstack
 
+setup_openstack() {
+    log "Setting up OpenStack CLI"
+    kubectl get secret $1 -o 'jsonpath={.data.clouds\.yaml}' | base64 -d > $HOME/.config/openstack/clouds.yaml
+    openstack endpoint list --service identity
+}
+
 openstack() {
     pipenv run openstack $@
 }
