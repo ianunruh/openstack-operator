@@ -64,7 +64,6 @@ jobs:
           PREVIEW_KUBECONFIG: ${{ secrets.PREVIEW_KUBECONFIG }}
           GCLOUD_SVC_ACCOUNT_KEY_JSON: ${{ secrets.GCLOUD_SVC_ACCOUNT_KEY_JSON }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_READ }}
-          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
 
       - name: Post comment to PR
         uses: marocchino/sticky-pull-request-comment@v2
@@ -82,3 +81,10 @@ jobs:
 
             kubectl get secret keystone -o 'jsonpath={.data.OS_PASSWORD}' | base64 -d
             ```
+
+      - name: Setup Keystone OIDC
+        working-directory: ci/preview/capi
+        run: ./setup-oidc.sh
+        env:
+          PREVIEW_KUBECONFIG: ${{ secrets.PREVIEW_KUBECONFIG }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}

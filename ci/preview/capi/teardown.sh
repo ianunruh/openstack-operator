@@ -4,7 +4,7 @@ set -euo pipefail
 source common.sh
 
 setup_kubectl
-setup_openstack
+setup_openstack cluster-admin-keystone
 
 log "Switching kubectl to $CLUSTER_NAME cluster"
 clusterctl get kubeconfig $CLUSTER_NAME > kubeconfig
