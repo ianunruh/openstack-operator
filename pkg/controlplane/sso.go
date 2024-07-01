@@ -27,7 +27,7 @@ func horizonSSOKeystoneURL(instance *openstackv1beta1.ControlPlane) string {
 
 func keystoneOIDCDashboardURL(instance *openstackv1beta1.ControlPlane) string {
 	ingress := ingressDefaults(instance.Spec.Horizon.Server.Ingress, instance, "horizon")
-	return fmt.Sprintf("https://%s/horizon/auth/websso/", ingress.Host)
+	return fmt.Sprintf("https://%s/auth/websso/", ingress.Host)
 }
 
 func keystoneOIDCRedirectURI(instance *openstackv1beta1.ControlPlane) string {
