@@ -30,9 +30,12 @@ kubectl rollout status deploy keystone-api
 
 setup_openstack keystone
 
+log "Setting up OpenStack client"
+openstack catalog list
+
 log "Ensuring Keystone federation set up"
-if ! openstack group show federated_users; then
-    openstack group create federated_users
+if ! openstack group show federated_users --domain default; then
+    openstack group create federated_users --domain default
 fi
 
 if ! openstack role assignment list --role admin --group federated_users --project admin; then
