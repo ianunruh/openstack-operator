@@ -12,8 +12,9 @@ log() {
     echo "${blue}$(date -u) [INFO] $1${reset}" >&2
 }
 
+mkdir -p $HOME/.kube
+
 setup_kubectl() {
-    mkdir -p $HOME/.kube
     if [ ! -f $HOME/.kube/config ]; then
         echo $PREVIEW_KUBECONFIG | base64 -d > $HOME/.kube/config
     fi
@@ -23,12 +24,9 @@ setup_kubectl() {
 }
 
 export OS_CLOUD="default"
+export OS_VOLUME_API_VERSION=3.33
 
-setup_openstack() {
-    mkdir -p $HOME/.config/openstack
-    kubectl get secret $1 -o 'jsonpath={.data.clouds\.yaml}' | base64 -d > $HOME/.config/openstack/clouds.yaml
-    export OS_VOLUME_API_VERSION=3.33
-}
+mkdir -p $HOME/.config/openstack
 
 openstack() {
     pipenv run openstack $@
