@@ -35,9 +35,14 @@ func ConfigMap(instance *openstackv1beta1.Keystone) *corev1.ConfigMap {
 		cfg.Section("oslo_messaging_notifications").NewKey("driver", "messagingv2")
 	}
 
+	if spec.OIDC.Enabled {
+		cfg.Section("auth").NewKey("methods", "password,token,oauth1,openid,mapped,application_credential")
+		cfg.Section("federation").NewKey("trusted_dashboard", spec.OIDC.DashboardURL)
+	}
+
 	template.MergeINI(cfg, spec.ExtraConfig)
 
-	cm.Data["httpd.conf"] = template.MustReadFile(AppLabel, "httpd.conf")
+	cm.Data["httpd.conf"] = template.MustRenderFile(AppLabel, "httpd.conf", httpdParamsFrom(instance))
 	cm.Data["kolla.json"] = template.MustReadFile(AppLabel, "kolla.json")
 
 	cm.Data["keystone.conf"] = template.MustOutputINI(cfg).String()
@@ -49,4 +54,36 @@ func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Key
 	return template.Ensure(ctx, c, instance, log, func(intended *openstackv1beta1.Keystone) {
 		instance.Spec = intended.Spec
 	})
+}
+
+type httpdParams struct {
+	OIDC httpdOIDCParams
+}
+
+type httpdOIDCParams struct {
+	Enabled             bool
+	ExtraConfig         map[string]string
+	IdentityProvider    string
+	ProviderMetadataURL string
+	RedirectURI         string
+	RequireClaims       []string
+	Scopes              string
+}
+
+func httpdParamsFrom(instance *openstackv1beta1.Keystone) httpdParams {
+	params := httpdParams{}
+
+	if oidcSpec := instance.Spec.OIDC; oidcSpec.Enabled {
+		params.OIDC = httpdOIDCParams{
+			Enabled:             true,
+			ExtraConfig:         oidcSpec.ExtraConfig,
+			IdentityProvider:    oidcSpec.IdentityProvider,
+			ProviderMetadataURL: oidcSpec.ProviderMetadataURL,
+			RedirectURI:         oidcSpec.RedirectURI,
+			RequireClaims:       oidcSpec.RequireClaims,
+			Scopes:              strings.Join(oidcSpec.Scopes, " "),
+		}
+	}
+
+	return params
 }

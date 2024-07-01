@@ -38,7 +38,21 @@ spec:
         vcpus: 4
         disk: 60
         isPublic: true
-  horizon: {}
+  keystone:
+    oidc:
+      enabled: true
+      identityProvider: gitlab
+      providerMetadataURL: https://gitlab.kcloud.io/.well-known/openid-configuration
+      extraConfig:
+        OIDCRemoteUserClaim: preferred_username@
+  horizon:
+    sso:
+      methods:
+      - kind: openid
+        title: GitLab
+        default: true
+      - kind: credentials
+        title: Keystone
   heat: {}
   barbican: {}
   magnum: {}

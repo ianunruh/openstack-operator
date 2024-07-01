@@ -48,6 +48,12 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 		template.EmptyDirVolume("pod-credential-keys"),
 		template.EmptyDirVolume("pod-fernet-keys"))
 
+	var envFrom []corev1.EnvFromSource
+
+	if oidcSpec := instance.Spec.OIDC; oidcSpec.Enabled {
+		envFrom = append(envFrom, template.EnvFromSecret(oidcSpec.Secret))
+	}
+
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
@@ -76,6 +82,7 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 				Command:   []string{"/usr/local/bin/kolla_start"},
 				Lifecycle: httpd.Lifecycle(),
 				Env:       env,
+				EnvFrom:   envFrom,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 5000},
 				},

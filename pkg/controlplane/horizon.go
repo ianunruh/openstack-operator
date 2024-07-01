@@ -14,6 +14,18 @@ func Horizon(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Horizon 
 
 	spec.Cache = cacheDefaults(spec.Cache, instance)
 
+	if instance.Spec.Keystone.OIDC.Enabled {
+		spec.SSO.Enabled = true
+
+		if spec.SSO.KeystoneURL == "" {
+			spec.SSO.KeystoneURL = horizonSSOKeystoneURL(instance)
+		}
+
+		if spec.SSO.Methods == nil {
+			spec.SSO.Methods = horizonSSOMethods()
+		}
+	}
+
 	// TODO labels
 	return &openstackv1beta1.Horizon{
 		ObjectMeta: metav1.ObjectMeta{

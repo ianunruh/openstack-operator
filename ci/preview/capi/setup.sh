@@ -121,5 +121,19 @@ fi
 log "Waiting for openstack-operator to become ready"
 kubectl -n openstack-system rollout status deploy openstack-operator-controller-manager
 
+log "Ensuring OIDC set up"
+if ! kubectl get secret keystone-oidc; then
+    oidc_redirect_uri=https://keystone.$CLUSTER_DOMAIN/v3/OS-FEDERATION/identity_providers/gitlab/protocols/openid/auth
+
+    gitlab_app=$(curl -s -H "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+        -d "name=$CLUSTER_NAME&redirect_uri=$oidc_redirect_uri&scopes=read_user openid profile email" \
+        "https://gitlab.kcloud.io/api/v4/applications")
+
+    kubectl create secret generic keystone-oidc \
+        --from-literal=KEYSTONE_OIDC_CLIENT_ID=$(echo $gitlab_app | yq -r '.application_id') \
+        --from-literal=KEYSTONE_OIDC_CLIENT_SECRET=$(echo $gitlab_app | yq -r '.secret') \
+        --from-literal=KEYSTONE_OIDC_CRYPTO_PASSPHRASE=$(python -c 'import secrets; print(secrets.token_hex(24))')
+fi
+
 log "Applying OpenStack control plane manifests"
 sed "s/\$(CLUSTER_DOMAIN)/$CLUSTER_DOMAIN/" controlplane.yaml | kubectl apply -f-

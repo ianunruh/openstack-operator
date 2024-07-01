@@ -2463,6 +2463,27 @@ spec:
                             type: object
                         type: object
                     type: object
+                  sso:
+                    properties:
+                      enabled:
+                        type: boolean
+                      keystoneURL:
+                        type: string
+                      methods:
+                        items:
+                          properties:
+                            default:
+                              type: boolean
+                            kind:
+                              type: string
+                            title:
+                              type: string
+                          required:
+                          - kind
+                          - title
+                          type: object
+                        type: array
+                    type: object
                 type: object
               ingress:
                 properties:
@@ -2913,6 +2934,33 @@ spec:
                     properties:
                       enabled:
                         type: boolean
+                    type: object
+                  oidc:
+                    properties:
+                      dashboardURL:
+                        type: string
+                      enabled:
+                        type: boolean
+                      extraConfig:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      identityProvider:
+                        type: string
+                      providerMetadataURL:
+                        type: string
+                      redirectURI:
+                        type: string
+                      requireClaims:
+                        items:
+                          type: string
+                        type: array
+                      scopes:
+                        items:
+                          type: string
+                        type: array
+                      secret:
+                        type: string
                     type: object
                 type: object
               magnum:
