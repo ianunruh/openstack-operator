@@ -48,9 +48,9 @@ func (r *Keystone) Default() {
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultKeystoneAPIImage)
 
-	if oidcSpec := r.Spec.OIDC; oidcSpec.Enabled {
-		if oidcSpec.Secret == "" {
-			oidcSpec.Secret = "keystone-oidc"
+	if r.Spec.OIDC.Enabled {
+		if r.Spec.OIDC.Secret == "" {
+			r.Spec.OIDC.Secret = "keystone-oidc"
 		}
 	}
 }
