@@ -31,6 +31,9 @@ type HorizonSpec struct {
 	Server HorizonServerSpec `json:"server,omitempty"`
 
 	// +optional
+	SSO HorizonSSOSpec `json:"sso,omitempty"`
+
+	// +optional
 	Cache CacheSpec `json:"cache,omitempty"`
 }
 
@@ -49,6 +52,26 @@ type HorizonServerSpec struct {
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
+
+type HorizonSSOSpec struct {
+	// +optional
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +optional
+	KeystoneURL string `json:"keystoneURL,omitempty"`
+
+	// +optional
+	Methods []HorizonSSOMethod `json:"methods,omitempty"`
+}
+
+type HorizonSSOMethod struct {
+	Kind string `json:"kind"`
+
+	Title string `json:"title"`
+
+	// +optional
+	Default bool `json:"default,omitempty"`
 }
 
 // HorizonStatus defines the observed state of Horizon

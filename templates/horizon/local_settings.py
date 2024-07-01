@@ -46,7 +46,7 @@ OPENSTACK_ENDPOINT_TYPE = 'internalURL'
 # and don't forget to strip it from the client's request.
 # For more information see:
 # https://docs.djangoproject.com/en/dev/ref/settings/#secure-proxy-ssl-header
-#SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # If Horizon is being served through SSL, then uncomment the following two
 # settings to better secure the cookies from security exploits
@@ -413,3 +413,17 @@ ALLOWED_HOSTS = ['*']
 
 # Compress all assets offline as part of packaging installation
 COMPRESS_OFFLINE = True
+
+{{ if .SSO.Enabled }}
+WEBSSO_ENABLED = True
+
+WEBSSO_KEYSTONE_URL = "{{ .SSO.KeystoneURL }}"
+
+WEBSSO_INITIAL_CHOICE = "{{ .SSO.InitialChoice }}"
+
+WEBSSO_CHOICES = (
+{{ range $choice := .SSO.Choices }}
+    ("{{ $choice.Kind }}", _("{{ $choice.Title }}")),
+{{ end }}
+)
+{{ end }}

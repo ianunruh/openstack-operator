@@ -47,6 +47,12 @@ func (r *Keystone) Default() {
 	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultKeystoneAPIImage)
+
+	if oidcSpec := r.Spec.OIDC; oidcSpec.Enabled {
+		if oidcSpec.Secret == "" {
+			oidcSpec.Secret = "keystone-oidc"
+		}
+	}
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

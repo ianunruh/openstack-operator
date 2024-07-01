@@ -479,6 +479,29 @@ spec:
                   enabled:
                     type: boolean
                 type: object
+              oidc:
+                properties:
+                  dashboardURL:
+                    type: string
+                  enabled:
+                    type: boolean
+                  identityProvider:
+                    type: string
+                  providerMetadataURL:
+                    type: string
+                  redirectURI:
+                    type: string
+                  requiredClaims:
+                    items:
+                      type: string
+                    type: array
+                  scopes:
+                    items:
+                      type: string
+                    type: array
+                  secret:
+                    type: string
+                type: object
             type: object
           status:
             description: KeystoneStatus defines the observed state of Keystone

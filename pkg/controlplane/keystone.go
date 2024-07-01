@@ -21,6 +21,16 @@ func Keystone(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Keyston
 	spec.Cache = cacheDefaults(spec.Cache, instance)
 	spec.Database = databaseDefaults(spec.Database, instance)
 
+	if spec.OIDC.Enabled {
+		if spec.OIDC.DashboardURL == "" {
+			spec.OIDC.DashboardURL = keystoneOIDCDashboardURL(instance)
+		}
+
+		if spec.OIDC.RedirectURI == "" {
+			spec.OIDC.RedirectURI = keystoneOIDCRedirectURI(instance)
+		}
+	}
+
 	return &openstackv1beta1.Keystone{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "keystone",

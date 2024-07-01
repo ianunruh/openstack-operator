@@ -49,6 +49,9 @@ type KeystoneSpec struct {
 	Notifications KeystoneNotificationsSpec `json:"notifications,omitempty"`
 
 	// +optional
+	OIDC KeystoneOIDCSpec `json:"oidc,omitempty"`
+
+	// +optional
 	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 
@@ -72,6 +75,32 @@ type KeystoneAPISpec struct {
 type KeystoneNotificationsSpec struct {
 	// +optional
 	Enabled bool `json:"enabled,omitempty"`
+}
+
+type KeystoneOIDCSpec struct {
+	// +optional
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +optional
+	Secret string `json:"secret,omitempty"`
+
+	// +optional
+	IdentityProvider string `json:"identityProvider,omitempty"`
+
+	// +optional
+	DashboardURL string `json:"dashboardURL,omitempty"`
+
+	// +optional
+	ProviderMetadataURL string `json:"providerMetadataURL,omitempty"`
+
+	// +optional
+	RedirectURI string `json:"redirectURI,omitempty"`
+
+	// +optional
+	Scopes []string `json:"scopes,omitempty"`
+
+	// +optional
+	RequiredClaims []string `json:"requiredClaims,omitempty"`
 }
 
 // KeystoneStatus defines the observed state of Keystone
