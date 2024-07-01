@@ -31,6 +31,9 @@ type CinderSpec struct {
 	API CinderAPISpec `json:"api,omitempty"`
 
 	// +optional
+	Backup CinderBackupSpec `json:"backup,omitempty"`
+
+	// +optional
 	DBSyncJob JobSpec `json:"dbSyncJob,omitempty"`
 
 	// +optional
@@ -75,6 +78,23 @@ type CinderAPISpec struct {
 
 	// +optional
 	Ingress *IngressSpec `json:"ingress,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+}
+
+type CinderBackupSpec struct {
+	// +optional
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
+	Replicas int32 `json:"replicas,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`

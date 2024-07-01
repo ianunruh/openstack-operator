@@ -15,6 +15,8 @@ func Cinder(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Cinder {
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "cinder")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
 
+	spec.Backup.NodeSelector = controllerNodeSelector(spec.Backup.NodeSelector, instance)
+
 	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
 
 	spec.Scheduler.NodeSelector = controllerNodeSelector(spec.Scheduler.NodeSelector, instance)

@@ -5,6 +5,7 @@ const (
 	DefaultBarbicanWorkerImage = "kolla/barbican-worker:2023.2-ubuntu-jammy"
 
 	DefaultCinderAPIImage       = "kolla/cinder-api:2023.2-ubuntu-jammy"
+	DefaultCinderBackupImage    = "kolla/cinder-backup:2023.2-ubuntu-jammy"
 	DefaultCinderSchedulerImage = "kolla/cinder-scheduler:2023.2-ubuntu-jammy"
 	DefaultCinderVolumeImage    = "kolla/cinder-volume:2023.2-ubuntu-jammy"
 

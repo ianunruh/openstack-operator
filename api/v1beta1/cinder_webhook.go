@@ -47,6 +47,7 @@ func (r *Cinder) Default() {
 	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 	r.Spec.API.Image = imageDefault(r.Spec.Image, DefaultCinderAPIImage)
+	r.Spec.Backup.Image = imageDefault(r.Spec.Image, DefaultCinderBackupImage)
 	r.Spec.Scheduler.Image = imageDefault(r.Spec.Image, DefaultCinderSchedulerImage)
 	r.Spec.Volume.Image = imageDefault(r.Spec.Image, DefaultCinderVolumeImage)
 }
