@@ -48,6 +48,12 @@ spec:
             properties:
               cell:
                 type: string
+              extraConfig:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: object
               image:
                 type: string
               libvirtd:

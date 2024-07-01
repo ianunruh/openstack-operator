@@ -40,6 +40,9 @@ type NovaComputeSetSpec struct {
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// +optional
+	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 
 type NovaComputeSSHSpec struct {

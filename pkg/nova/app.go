@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/go-logr/logr"
+	"gopkg.in/ini.v1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -23,6 +24,19 @@ var (
 func ConfigMap(instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
+
+	cfg := BuildConfig(instance, cinder)
+
+	cm.Data["nova.conf"] = template.MustOutputINI(cfg).String()
+
+	cm.Data["kolla-nova-api.json"] = template.MustReadFile(AppLabel, "kolla-nova-api.json")
+	cm.Data["kolla-nova-conductor.json"] = template.MustReadFile(AppLabel, "kolla-nova-conductor.json")
+	cm.Data["kolla-nova-scheduler.json"] = template.MustReadFile(AppLabel, "kolla-nova-scheduler.json")
+
+	return cm
+}
+
+func BuildConfig(instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder) *ini.File {
 	spec := instance.Spec
 
 	cfg := template.MustLoadINI(AppLabel, "nova.conf")
@@ -41,19 +55,7 @@ func ConfigMap(instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder)
 
 	template.MergeINI(cfg, spec.ExtraConfig)
 
-	cm.Data["nova.conf"] = template.MustOutputINI(cfg).String()
-
-	cm.Data["compute-ssh.sh"] = template.MustReadFile(AppLabel, "compute-ssh.sh")
-
-	cm.Data["kolla-nova-api.json"] = template.MustReadFile(AppLabel, "kolla-nova-api.json")
-	cm.Data["kolla-nova-compute.json"] = template.MustReadFile(AppLabel, "kolla-nova-compute.json")
-	cm.Data["kolla-nova-compute-ssh.json"] = template.MustReadFile(AppLabel, "kolla-nova-compute-ssh.json")
-	cm.Data["kolla-nova-compute.json"] = template.MustReadFile(AppLabel, "kolla-nova-compute.json")
-	cm.Data["kolla-nova-conductor.json"] = template.MustReadFile(AppLabel, "kolla-nova-conductor.json")
-	cm.Data["kolla-nova-novncproxy.json"] = template.MustReadFile(AppLabel, "kolla-nova-novncproxy.json")
-	cm.Data["kolla-nova-scheduler.json"] = template.MustReadFile(AppLabel, "kolla-nova-scheduler.json")
-
-	return cm
+	return cfg
 }
 
 func Secret(instance *openstackv1beta1.Nova) *corev1.Secret {

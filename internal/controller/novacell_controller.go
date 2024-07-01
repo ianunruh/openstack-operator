@@ -107,20 +107,24 @@ func (r *NovaCellReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return result, err
 	}
 
-	cm := &corev1.ConfigMap{
+	cinder := &openstackv1beta1.Cinder{
+		// TODO make this configurable
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cluster.Name,
-			Namespace: cluster.Namespace,
+			Name:      "cinder",
+			Namespace: instance.Namespace,
 		},
 	}
-	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cm), cm); err != nil {
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(cinder), cinder); err != nil {
 		if !errors.IsNotFound(err) {
 			return ctrl.Result{}, err
 		}
-		if err := reporter.Pending(ctx, "ConfigMap %s not found", cm.Name); err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+		cinder = nil
+	}
+
+	cm := novacell.ConfigMap(instance, cluster, cinder)
+	controllerutil.SetControllerReference(instance, cm, r.Scheme)
+	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
+		return ctrl.Result{}, err
 	}
 	configHash := template.AppliedHash(cm)
 

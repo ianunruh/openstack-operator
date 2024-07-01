@@ -45,6 +45,9 @@ type NovaCellSpec struct {
 
 	// +optional
 	NoVNCProxy NovaNoVNCProxySpec `json:"novncproxy,omitempty"`
+
+	// +optional
+	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 
 type NovaMetadataSpec struct {
