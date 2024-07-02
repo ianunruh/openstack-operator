@@ -37,6 +37,7 @@ func APIDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, vol
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-barbican", "/etc/barbican/barbican.conf", "barbican.conf"),
+		template.SubPathVolumeMount("etc-barbican", "/etc/barbican/vassals/barbican-api.ini", "barbican-api.ini"),
 		template.SubPathVolumeMount("etc-barbican", "/var/lib/kolla/config_files/config.json", "kolla-barbican-api.json"),
 	}
 
