@@ -634,6 +634,11 @@ spec:
                   enabled:
                     type: boolean
                 type: object
+              tls:
+                properties:
+                  caBundle:
+                    type: string
+                type: object
               worker:
                 properties:
                   image:

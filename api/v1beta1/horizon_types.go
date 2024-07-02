@@ -35,6 +35,9 @@ type HorizonSpec struct {
 
 	// +optional
 	Cache CacheSpec `json:"cache,omitempty"`
+
+	// +optional
+	TLS TLSClientSpec `json:"tls,omitempty"`
 }
 
 type HorizonServerSpec struct {

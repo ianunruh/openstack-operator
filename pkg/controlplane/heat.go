@@ -23,6 +23,7 @@ func Heat(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Heat {
 	spec.Broker = brokerUserDefaults(spec.Broker, instance)
 	spec.Cache = cacheDefaults(spec.Cache, instance)
 	spec.Database = databaseDefaults(spec.Database, instance)
+	spec.TLS = tlsClientDefaults(spec.TLS, instance)
 
 	// TODO labels
 	return &openstackv1beta1.Heat{

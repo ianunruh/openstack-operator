@@ -5,6 +5,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -12,7 +13,7 @@ const (
 	ConductorComponentLabel = "conductor"
 )
 
-func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaConductorSpec, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
+func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaConductorSpec, tlsSpec openstackv1beta1.TLSClientSpec, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(name, AppLabel, ConductorComponentLabel)
 
 	probe := &corev1.Probe{
@@ -26,6 +27,8 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
 		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-conductor.json"),
 	}
+
+	pki.AppendTLSClientVolumes(tlsSpec, &volumes, &volumeMounts)
 
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    namespace,

@@ -576,6 +576,11 @@ spec:
                         type: object
                     type: object
                 type: object
+              tls:
+                properties:
+                  caBundle:
+                    type: string
+                type: object
             required:
             - backends
             type: object

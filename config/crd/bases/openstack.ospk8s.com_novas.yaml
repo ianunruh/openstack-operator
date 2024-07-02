@@ -741,6 +741,11 @@ spec:
                                     type: object
                                 type: object
                             type: object
+                          tls:
+                            properties:
+                              caBundle:
+                                type: string
+                            type: object
                         type: object
                       type: object
                     conductor:
@@ -1136,6 +1141,11 @@ spec:
                               type: object
                           type: object
                       type: object
+                    tls:
+                      properties:
+                        caBundle:
+                          type: string
+                      type: object
                   required:
                   - name
                   type: object
@@ -1383,6 +1393,11 @@ spec:
                           More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                         type: object
                     type: object
+                type: object
+              tls:
+                properties:
+                  caBundle:
+                    type: string
                 type: object
             type: object
           status:

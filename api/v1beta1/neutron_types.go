@@ -46,6 +46,9 @@ type NeutronSpec struct {
 	Cache CacheSpec `json:"cache,omitempty"`
 
 	// +optional
+	TLS TLSClientSpec `json:"tls,omitempty"`
+
+	// +optional
 	Nova NeutronNovaSpec `json:"nova,omitempty"`
 
 	// +optional

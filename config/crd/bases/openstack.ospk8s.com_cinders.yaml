@@ -585,6 +585,11 @@ spec:
                         type: object
                     type: object
                 type: object
+              tls:
+                properties:
+                  caBundle:
+                    type: string
+                type: object
               volume:
                 properties:
                   image:

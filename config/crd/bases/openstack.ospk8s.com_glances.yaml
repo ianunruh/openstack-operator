@@ -353,6 +353,11 @@ spec:
               image:
                 description: deprecated, use component specific images instead
                 type: string
+              tls:
+                properties:
+                  caBundle:
+                    type: string
+                type: object
             type: object
           status:
             description: GlanceStatus defines the observed state of Glance

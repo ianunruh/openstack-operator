@@ -144,6 +144,7 @@ func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
 		template.EnvVar("KOLLA_SKIP_EXTEND_START", "true"),
+		template.EnvVar("REQUESTS_CA_BUNDLE", "/etc/ssl/certs/ca-certificates.crt"),
 		// TODO make ingress optional
 		template.EnvVar("OS_VNC__NOVNCPROXY_BASE_URL", fmt.Sprintf("https://%s/vnc_auto.html", cell.Spec.NoVNCProxy.Ingress.Host)),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", cell.Spec.Broker.Secret, "connection"),

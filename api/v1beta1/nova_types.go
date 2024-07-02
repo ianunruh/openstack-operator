@@ -55,6 +55,9 @@ type NovaSpec struct {
 	Cache CacheSpec `json:"cache,omitempty"`
 
 	// +optional
+	TLS TLSClientSpec `json:"tls,omitempty"`
+
+	// +optional
 	Flavors map[string]NovaFlavorSpec `json:"flavors,omitempty"`
 
 	// +optional

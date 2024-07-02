@@ -30,6 +30,9 @@ type NovaComputeSetSpec struct {
 	Image string `json:"image,omitempty"`
 
 	// +optional
+	TLS TLSClientSpec `json:"tls,omitempty"`
+
+	// +optional
 	Libvirtd NovaLibvirtdSpec `json:"libvirtd,omitempty"`
 
 	// +optional
