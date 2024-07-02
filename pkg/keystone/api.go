@@ -1,6 +1,8 @@
 package keystone
 
 import (
+	"fmt"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -127,4 +129,19 @@ func APIIngress(instance *openstackv1beta1.Keystone) *netv1.Ingress {
 	spec := instance.Spec.API
 
 	return template.GenericIngressWithTLS(name, instance.Namespace, spec.Ingress, spec.TLS, labels)
+}
+
+func APIInternalURL(instance *openstackv1beta1.Keystone) string {
+	scheme := "http"
+	if instance.Spec.API.TLS.Secret != "" {
+		scheme = "https"
+	}
+	return fmt.Sprintf("%s://%s-api.%s.svc:5000/v3", scheme, instance.Name, instance.Namespace)
+}
+
+func APIPublicURL(instance *openstackv1beta1.Keystone) string {
+	if instance.Spec.API.Ingress == nil {
+		return APIInternalURL(instance)
+	}
+	return fmt.Sprintf("https://%s/v3", instance.Spec.API.Ingress.Host)
 }

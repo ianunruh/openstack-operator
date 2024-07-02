@@ -284,12 +284,8 @@ func Secret(instance *openstackv1beta1.KeystoneUser, cluster *openstackv1beta1.K
 		projectDomainName = domainName
 	}
 
-	authURL := fmt.Sprintf("http://%s-api.%s.svc:5000/v3", cluster.Name, cluster.Namespace)
-
-	wwwAuthURL := authURL
-	if cluster.Spec.API.Ingress != nil {
-		wwwAuthURL = fmt.Sprintf("https://%s/v3", cluster.Spec.API.Ingress.Host)
-	}
+	authURL := keystone.APIInternalURL(cluster)
+	wwwAuthURL := keystone.APIPublicURL(cluster)
 
 	if password == "" {
 		password = template.MustGeneratePassword()

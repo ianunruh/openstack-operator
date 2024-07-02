@@ -1,8 +1,6 @@
 package keystone
 
 import (
-	"fmt"
-
 	corev1 "k8s.io/api/core/v1"
 
 	"github.com/gophercloud/utils/openstack/clientconfig"
@@ -15,14 +13,7 @@ func AdminSecret(instance *openstackv1beta1.Keystone, password string) *corev1.S
 	labels := template.AppLabels(instance.Name, AppLabel)
 	secret := template.GenericSecret(instance.Name, instance.Namespace, labels)
 
-	ingress := instance.Spec.API.Ingress
-
-	var authURL string
-	if ingress == nil {
-		authURL = fmt.Sprintf("http://%s-api.%s.svc:5000/v3", instance.Name, instance.Namespace)
-	} else {
-		authURL = fmt.Sprintf("https://%s/v3", ingress.Host)
-	}
+	authURL := APIPublicURL(instance)
 
 	if password == "" {
 		password = template.MustGeneratePassword()
