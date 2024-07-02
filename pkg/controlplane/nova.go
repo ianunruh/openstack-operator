@@ -14,7 +14,7 @@ func Nova(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Nova {
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "nova")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
-	spec.API.TLS = tlsServerDefaults(spec.API.TLS, instance)
+	// spec.API.TLS = tlsServerDefaults(spec.API.TLS, instance)
 
 	spec.Cells = novaCellDefaults(spec.Cells, instance)
 
