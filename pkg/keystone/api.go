@@ -124,6 +124,7 @@ func APIIngress(instance *openstackv1beta1.Keystone) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	name := template.Combine(instance.Name, "api")
+	spec := instance.Spec.API
 
-	return template.GenericIngress(name, instance.Namespace, instance.Spec.API.Ingress, labels)
+	return template.GenericIngressWithTLS(name, instance.Namespace, spec.Ingress, spec.TLS, labels)
 }
