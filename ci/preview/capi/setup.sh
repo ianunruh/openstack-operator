@@ -65,6 +65,20 @@ kubectl -n tigera-operator rollout status deployment tigera-operator
 log "Applying Calico networking manifests"
 kubectl apply -f calico.yaml
 
+log "Waiting for Calico to be ready"
+# NOTE it can take awhile until the calico operator creates the deployment
+attempts=0
+until kubectl -n calico-system get deploy calico-kube-controllers; do
+    attempts=$((attempts + 1))
+    if [ $attempts -lt 10 ]; then
+        sleep 3
+    else
+        exit 1
+    fi
+done
+
+kubectl -n calico-system rollout status deploy calico-kube-controllers
+
 log "Applying cloud provider manifests"
 kubectl kustomize cloud-provider | \
     sed "s/\$(CLUSTER_NAME)/$CLUSTER_NAME/" | \
