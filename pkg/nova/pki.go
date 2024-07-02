@@ -18,5 +18,5 @@ func PKIResources(instance *openstackv1beta1.Nova) []*unstructured.Unstructured 
 
 func APICertificate(instance *openstackv1beta1.Nova) *unstructured.Unstructured {
 	name := template.Combine(instance.Name, "api")
-	return pki.ServerCertificate(name, instance.Name, instance.Spec.API.TLS)
+	return pki.ServerCertificate(name, instance.Namespace, instance.Spec.API.TLS)
 }

@@ -18,5 +18,5 @@ func PKIResources(instance *openstackv1beta1.Horizon) []*unstructured.Unstructur
 
 func ServerCertificate(instance *openstackv1beta1.Horizon) *unstructured.Unstructured {
 	name := template.Combine(instance.Name, "server")
-	return pki.ServerCertificate(name, instance.Name, instance.Spec.Server.TLS)
+	return pki.ServerCertificate(name, instance.Namespace, instance.Spec.Server.TLS)
 }

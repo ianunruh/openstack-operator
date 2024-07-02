@@ -21,10 +21,10 @@ func PKIResources(instance *openstackv1beta1.Heat) []*unstructured.Unstructured 
 
 func APICertificate(instance *openstackv1beta1.Heat) *unstructured.Unstructured {
 	name := template.Combine(instance.Name, "api")
-	return pki.ServerCertificate(name, instance.Name, instance.Spec.API.TLS)
+	return pki.ServerCertificate(name, instance.Namespace, instance.Spec.API.TLS)
 }
 
 func CFNCertificate(instance *openstackv1beta1.Heat) *unstructured.Unstructured {
 	name := template.Combine(instance.Name, "cfn")
-	return pki.ServerCertificate(name, instance.Name, instance.Spec.CFN.TLS)
+	return pki.ServerCertificate(name, instance.Namespace, instance.Spec.CFN.TLS)
 }
