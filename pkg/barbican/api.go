@@ -25,7 +25,7 @@ func APIDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, vol
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Path:   "/",
+				Path:   "/healthcheck",
 				Port:   intstr.FromInt(9311),
 				Scheme: pki.HTTPActionScheme(spec.TLS),
 			},

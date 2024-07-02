@@ -25,7 +25,7 @@ func CFNDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Path:   "/",
+				Path:   "/healthcheck",
 				Port:   intstr.FromInt(8000),
 				Scheme: pki.HTTPActionScheme(spec.TLS),
 			},
