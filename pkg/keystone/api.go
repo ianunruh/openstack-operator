@@ -10,6 +10,7 @@ import (
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/httpd"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -25,8 +26,9 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Path: "/v3/",
-				Port: intstr.FromInt(5000),
+				Path:   "/v3/",
+				Port:   intstr.FromInt(5000),
+				Scheme: pki.HTTPActionScheme(spec.TLS),
 			},
 		},
 		InitialDelaySeconds: 5,
@@ -42,13 +44,8 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 		template.VolumeMount("pod-fernet-keys", "/etc/keystone/fernet-keys"),
 	}
 
-	if spec.TLS.Secret != "" {
-		probe.ProbeHandler.HTTPGet.Scheme = corev1.URISchemeHTTPS
-
-		defaultMode := int32(0400)
-		volumeMounts = append(volumeMounts, template.VolumeMount("secret-tls", "/etc/keystone/certs"))
-		volumes = append(volumes, template.SecretVolume("secret-tls", spec.TLS.Secret, &defaultMode))
-	}
+	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, &volumes, &volumeMounts)
 
 	initVolumeMounts := append(volumeMounts,
 		template.VolumeMount("credential-keys", "/var/run/secrets/credential-keys"),

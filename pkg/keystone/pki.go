@@ -1,8 +1,6 @@
 package keystone
 
 import (
-	"fmt"
-
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
@@ -11,26 +9,14 @@ import (
 )
 
 func PKIResources(instance *openstackv1beta1.Keystone) []*unstructured.Unstructured {
-	if instance.Spec.API.TLS.Secret == "" {
-		return nil
+	var resources []*unstructured.Unstructured
+	if cert := APICertificate(instance); cert != nil {
+		resources = append(resources, cert)
 	}
-
-	return []*unstructured.Unstructured{
-		APICertificate(instance),
-	}
+	return resources
 }
 
 func APICertificate(instance *openstackv1beta1.Keystone) *unstructured.Unstructured {
 	name := template.Combine(instance.Name, "api")
-	spec := instance.Spec.API
-	return pki.Certificate(pki.CertificateParams{
-		Name:       name,
-		Namespace:  instance.Namespace,
-		SecretName: spec.TLS.Secret,
-		IssuerName: spec.TLS.Issuer.Name,
-		IssuerKind: spec.TLS.Issuer.Kind,
-		DNSNames: []string{
-			fmt.Sprintf("%s.%s.svc", name, instance.Namespace),
-		},
-	})
+	return pki.ServerCertificate(name, instance.Name, instance.Spec.API.TLS)
 }

@@ -9,6 +9,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -29,9 +30,7 @@ func ConfigMap(instance *openstackv1beta1.Placement) *corev1.ConfigMap {
 
 	cfg.Section("keystone_authtoken").NewKey("memcached_servers", strings.Join(spec.Cache.Servers, ","))
 
-	if instance.Spec.TLS.CABundle != "" {
-		cfg.Section("keystone_authtoken").NewKey("cafile", "/etc/ssl/certs/openstack-ca.crt")
-	}
+	pki.SetupKeystoneMiddleware(cfg, spec.TLS)
 
 	template.MergeINI(cfg, spec.ExtraConfig)
 
