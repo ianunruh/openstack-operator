@@ -13,6 +13,7 @@ func Octavia(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Octavia 
 	}
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "octavia")
+	spec.API.TLS = tlsServerDefaults(spec.API.TLS, instance)
 
 	spec.NodeSelector = controllerNodeSelector(spec.NodeSelector, instance)
 

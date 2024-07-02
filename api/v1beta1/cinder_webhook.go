@@ -46,9 +46,14 @@ func (r *Cinder) Default() {
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
+
 	r.Spec.API.Image = imageDefault(r.Spec.Image, DefaultCinderAPIImage)
+	r.Spec.API.TLS = tlsServerDefault(r.Spec.API.TLS, r.Name, "api")
+
 	r.Spec.Backup.Image = imageDefault(r.Spec.Image, DefaultCinderBackupImage)
+
 	r.Spec.Scheduler.Image = imageDefault(r.Spec.Image, DefaultCinderSchedulerImage)
+
 	r.Spec.Volume.Image = imageDefault(r.Spec.Image, DefaultCinderVolumeImage)
 }
 

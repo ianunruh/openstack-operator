@@ -1,6 +1,8 @@
 package neutron
 
 import (
+	"fmt"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -23,8 +25,9 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Path: "/",
-				Port: intstr.FromInt(9696),
+				Path:   "/",
+				Port:   intstr.FromInt(9696),
+				Scheme: pki.HTTPActionScheme(spec.TLS),
 			},
 		},
 		InitialDelaySeconds: 5,
@@ -38,6 +41,7 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/neutron/certs", 0444, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
@@ -90,6 +94,22 @@ func ServerIngress(instance *openstackv1beta1.Neutron) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, ServerComponentLabel)
 
 	name := template.Combine(instance.Name, "server")
+	spec := instance.Spec.Server
 
-	return template.GenericIngress(name, instance.Namespace, instance.Spec.Server.Ingress, labels)
+	return template.GenericIngressWithTLS(name, instance.Namespace, spec.Ingress, spec.TLS, labels)
+}
+
+func ServerInternalURL(instance *openstackv1beta1.Neutron) string {
+	scheme := "http"
+	if instance.Spec.Server.TLS.Secret != "" {
+		scheme = "https"
+	}
+	return fmt.Sprintf("%s://%s-server.%s.svc:9696", scheme, instance.Name, instance.Namespace)
+}
+
+func ServerPublicURL(instance *openstackv1beta1.Neutron) string {
+	if instance.Spec.Server.Ingress == nil {
+		return ServerInternalURL(instance)
+	}
+	return fmt.Sprintf("https://%s", instance.Spec.Server.Ingress.Host)
 }

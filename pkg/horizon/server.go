@@ -23,8 +23,9 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, env []corev1.EnvVar) *
 
 	probeHandler := corev1.ProbeHandler{
 		HTTPGet: &corev1.HTTPGetAction{
-			Path: "/auth/login/",
-			Port: intstr.FromInt(8080),
+			Path:   "/auth/login/",
+			Port:   intstr.FromInt(8080),
+			Scheme: pki.HTTPActionScheme(spec.TLS),
 		},
 	}
 
@@ -54,6 +55,7 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, env []corev1.EnvVar) *
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/openstack-dashboard/certs", 0400, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
@@ -101,9 +103,11 @@ func ServerService(instance *openstackv1beta1.Horizon) *corev1.Service {
 
 func ServerIngress(instance *openstackv1beta1.Horizon) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, ServerComponentLabel)
-	name := template.Combine(instance.Name, ServerComponentLabel)
 
-	ingress := template.GenericIngress(name, instance.Namespace, instance.Spec.Server.Ingress, labels)
+	name := template.Combine(instance.Name, ServerComponentLabel)
+	spec := instance.Spec.Server
+
+	ingress := template.GenericIngressWithTLS(name, instance.Namespace, spec.Ingress, spec.TLS, labels)
 	ingress.Annotations = template.MergeStringMaps(ingress.Annotations, map[string]string{
 		"nginx.ingress.kubernetes.io/proxy-body-size": "0",
 	})

@@ -50,7 +50,7 @@ func ConfigMap(instance *openstackv1beta1.Octavia) *corev1.ConfigMap {
 
 	cm.Data["octavia.conf"] = template.MustOutputINI(cfg).String()
 
-	cm.Data["httpd.conf"] = template.MustReadFile(AppLabel, "httpd.conf")
+	cm.Data["httpd.conf"] = template.MustRenderFile(AppLabel, "httpd.conf", httpdParamsFrom(instance))
 
 	cm.Data["kolla-octavia-api.json"] = template.MustReadFile(AppLabel, "kolla-octavia-api.json")
 	cm.Data["kolla-octavia-driver-agent.json"] = template.MustReadFile(AppLabel, "kolla-octavia-driver-agent.json")
@@ -65,4 +65,14 @@ func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Oct
 	return template.Ensure(ctx, c, instance, log, func(intended *openstackv1beta1.Octavia) {
 		instance.Spec = intended.Spec
 	})
+}
+
+type httpdParams struct {
+	TLS bool
+}
+
+func httpdParamsFrom(instance *openstackv1beta1.Octavia) httpdParams {
+	return httpdParams{
+		TLS: instance.Spec.API.TLS.Secret != "",
+	}
 }

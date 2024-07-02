@@ -14,6 +14,7 @@ func Barbican(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Barbica
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "barbican")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
+	spec.API.TLS = tlsServerDefaults(spec.API.TLS, instance)
 
 	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
 

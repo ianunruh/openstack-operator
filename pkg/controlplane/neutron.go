@@ -12,6 +12,7 @@ func Neutron(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Neutron 
 
 	spec.Server.Ingress = ingressDefaults(spec.Server.Ingress, instance, "neutron")
 	spec.Server.NodeSelector = controllerNodeSelector(spec.Server.NodeSelector, instance)
+	// spec.Server.TLS = tlsServerDefaults(spec.Server.TLS, instance)
 
 	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
 

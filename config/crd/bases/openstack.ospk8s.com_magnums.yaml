@@ -126,6 +126,18 @@ spec:
                           More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                         type: object
                     type: object
+                  tls:
+                    properties:
+                      issuer:
+                        properties:
+                          kind:
+                            type: string
+                          name:
+                            type: string
+                        type: object
+                      secret:
+                        type: string
+                    type: object
                 type: object
               broker:
                 description: RabbitMQUserSpec defines the desired state of RabbitMQUser

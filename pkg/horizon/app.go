@@ -19,7 +19,7 @@ func ConfigMap(instance *openstackv1beta1.Horizon) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["httpd.conf"] = template.MustReadFile(AppLabel, "httpd.conf")
+	cm.Data["httpd.conf"] = template.MustRenderFile(AppLabel, "httpd.conf", httpdParamsFrom(instance))
 	cm.Data["kolla.json"] = template.MustReadFile(AppLabel, "kolla.json")
 	cm.Data["local_settings.py"] = template.MustRenderFile(AppLabel, "local_settings.py", configParamsFrom(instance))
 
@@ -85,4 +85,14 @@ func configParamsFrom(instance *openstackv1beta1.Horizon) configParams {
 	}
 
 	return params
+}
+
+type httpdParams struct {
+	TLS bool
+}
+
+func httpdParamsFrom(instance *openstackv1beta1.Horizon) httpdParams {
+	return httpdParams{
+		TLS: instance.Spec.Server.TLS.Secret != "",
+	}
 }

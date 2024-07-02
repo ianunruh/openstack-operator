@@ -33,7 +33,7 @@ func ConfigMap(instance *openstackv1beta1.Placement) *corev1.ConfigMap {
 
 	cm.Data["placement.conf"] = template.MustOutputINI(cfg).String()
 
-	cm.Data["httpd.conf"] = template.MustReadFile(AppLabel, "httpd.conf")
+	cm.Data["httpd.conf"] = template.MustRenderFile(AppLabel, "httpd.conf", httpdParamsFrom(instance))
 	cm.Data["kolla.json"] = template.MustReadFile(AppLabel, "kolla.json")
 
 	return cm
@@ -43,4 +43,14 @@ func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Pla
 	return template.Ensure(ctx, c, instance, log, func(intended *openstackv1beta1.Placement) {
 		instance.Spec = intended.Spec
 	})
+}
+
+type httpdParams struct {
+	TLS bool
+}
+
+func httpdParamsFrom(instance *openstackv1beta1.Placement) httpdParams {
+	return httpdParams{
+		TLS: instance.Spec.API.TLS.Secret != "",
+	}
 }

@@ -1,12 +1,15 @@
 package octavia
 
 import (
+	"fmt"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/httpd"
 	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -32,6 +35,7 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/octavia/certs", 0400, &volumes, &volumeMounts)
 
 	apiVolumeMounts := append(volumeMounts,
 		template.SubPathVolumeMount("etc-octavia", "/etc/apache2/sites-available/000-default.conf", "httpd.conf"),
@@ -43,8 +47,9 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Path: "/",
-				Port: intstr.FromInt(9876),
+				Path:   "/",
+				Port:   intstr.FromInt(9876),
+				Scheme: pki.HTTPActionScheme(spec.TLS),
 			},
 		},
 		InitialDelaySeconds: 5,
@@ -79,10 +84,11 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 		},
 		Containers: []corev1.Container{
 			{
-				Name:    "api",
-				Image:   spec.Image,
-				Command: []string{"/usr/local/bin/kolla_start"},
-				Env:     env,
+				Name:      "api",
+				Image:     spec.Image,
+				Command:   []string{"/usr/local/bin/kolla_start"},
+				Lifecycle: httpd.Lifecycle(),
+				Env:       env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 9876},
 				},
@@ -131,6 +137,22 @@ func APIIngress(instance *openstackv1beta1.Octavia) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	name := template.Combine(instance.Name, "api")
+	spec := instance.Spec.API
 
-	return template.GenericIngress(name, instance.Namespace, instance.Spec.API.Ingress, labels)
+	return template.GenericIngressWithTLS(name, instance.Namespace, spec.Ingress, spec.TLS, labels)
+}
+
+func APIInternalURL(instance *openstackv1beta1.Octavia) string {
+	scheme := "http"
+	if instance.Spec.API.TLS.Secret != "" {
+		scheme = "https"
+	}
+	return fmt.Sprintf("%s://%s-api.%s.svc:9876", scheme, instance.Name, instance.Namespace)
+}
+
+func APIPublicURL(instance *openstackv1beta1.Octavia) string {
+	if instance.Spec.API.Ingress == nil {
+		return APIInternalURL(instance)
+	}
+	return fmt.Sprintf("https://%s", instance.Spec.API.Ingress.Host)
 }

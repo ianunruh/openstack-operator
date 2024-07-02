@@ -73,6 +73,9 @@ type NeutronServerSpec struct {
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// +optional
+	TLS TLSServerSpec `json:"tls,omitempty"`
 }
 
 type NeutronMetadataAgentSpec struct {

@@ -1,6 +1,8 @@
 package manila
 
 import (
+	"fmt"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -23,8 +25,9 @@ func APIDeployment(instance *openstackv1beta1.Manila, env []corev1.EnvVar, volum
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Path: "/",
-				Port: intstr.FromInt(8786),
+				Path:   "/",
+				Port:   intstr.FromInt(8786),
+				Scheme: pki.HTTPActionScheme(spec.TLS),
 			},
 		},
 		InitialDelaySeconds: 5,
@@ -38,6 +41,7 @@ func APIDeployment(instance *openstackv1beta1.Manila, env []corev1.EnvVar, volum
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/manila/certs", 0444, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
@@ -90,6 +94,22 @@ func APIIngress(instance *openstackv1beta1.Manila) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 
 	name := template.Combine(instance.Name, "api")
+	spec := instance.Spec.API
 
-	return template.GenericIngress(name, instance.Namespace, instance.Spec.API.Ingress, labels)
+	return template.GenericIngressWithTLS(name, instance.Namespace, spec.Ingress, spec.TLS, labels)
+}
+
+func APIInternalURL(instance *openstackv1beta1.Manila, path string) string {
+	scheme := "http"
+	if instance.Spec.API.TLS.Secret != "" {
+		scheme = "https"
+	}
+	return fmt.Sprintf("%s://%s-api.%s.svc:8786%s", scheme, instance.Name, instance.Namespace, path)
+}
+
+func APIPublicURL(instance *openstackv1beta1.Manila, path string) string {
+	if instance.Spec.API.Ingress == nil {
+		return APIInternalURL(instance, path)
+	}
+	return fmt.Sprintf("https://%s%s", instance.Spec.API.Ingress.Host, path)
 }

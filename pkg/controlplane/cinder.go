@@ -14,6 +14,7 @@ func Cinder(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Cinder {
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "cinder")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
+	spec.API.TLS = tlsServerDefaults(spec.API.TLS, instance)
 
 	spec.Backup.NodeSelector = controllerNodeSelector(spec.Backup.NodeSelector, instance)
 

@@ -61,6 +61,9 @@ type PlacementAPISpec struct {
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// +optional
+	TLS TLSServerSpec `json:"tls,omitempty"`
 }
 
 // PlacementStatus defines the observed state of Placement

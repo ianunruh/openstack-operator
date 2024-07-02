@@ -1,8 +1,6 @@
 package heat
 
 import (
-	"fmt"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
@@ -22,8 +20,8 @@ func KeystoneServices(instance *openstackv1beta1.Heat) []*openstackv1beta1.Keyst
 			Spec: openstackv1beta1.KeystoneServiceSpec{
 				Name:        "heat",
 				Type:        "orchestration",
-				InternalURL: fmt.Sprintf("http://%s-api.%s.svc:8004/v1/$(project_id)s", instance.Name, instance.Namespace),
-				PublicURL:   fmt.Sprintf("https://%s/v1/$(project_id)s", instance.Spec.API.Ingress.Host),
+				InternalURL: APIInternalURL(instance),
+				PublicURL:   APIPublicURL(instance),
 			},
 		},
 		{
@@ -35,8 +33,8 @@ func KeystoneServices(instance *openstackv1beta1.Heat) []*openstackv1beta1.Keyst
 			Spec: openstackv1beta1.KeystoneServiceSpec{
 				Name:        "heat-cfn",
 				Type:        "cloudformation",
-				InternalURL: fmt.Sprintf("http://%s-cfn.%s.svc:8000/v1", instance.Name, instance.Namespace),
-				PublicURL:   fmt.Sprintf("https://%s/v1", instance.Spec.CFN.Ingress.Host),
+				InternalURL: CFNInternalURL(instance),
+				PublicURL:   CFNPublicURL(instance),
 			},
 		},
 	}
