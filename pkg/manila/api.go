@@ -41,7 +41,7 @@ func APIDeployment(instance *openstackv1beta1.Manila, env []corev1.EnvVar, volum
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
-	pki.AppendTLSServerVolumes(spec.TLS, "/etc/manila/certs", &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/manila/certs", 0444, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,

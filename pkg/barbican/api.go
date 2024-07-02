@@ -41,7 +41,7 @@ func APIDeployment(instance *openstackv1beta1.Barbican, env []corev1.EnvVar, vol
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
-	pki.AppendTLSServerVolumes(spec.TLS, "/etc/barbican/certs", &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/barbican/certs", 0444, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,

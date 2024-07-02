@@ -55,7 +55,7 @@ func ServerDeployment(instance *openstackv1beta1.Horizon, env []corev1.EnvVar) *
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
-	pki.AppendTLSServerVolumes(spec.TLS, "/etc/openstack-dashboard/certs", &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/openstack-dashboard/certs", 0400, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,

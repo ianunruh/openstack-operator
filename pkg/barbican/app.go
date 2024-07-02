@@ -31,6 +31,7 @@ func ConfigMap(instance *openstackv1beta1.Barbican) *corev1.ConfigMap {
 
 	template.MergeINI(cfg, spec.ExtraConfig)
 
+	cm.Data["barbican-api.ini"] = template.MustRenderFile(AppLabel, "barbican-api.ini", uwsgiParamsFrom(instance))
 	cm.Data["barbican.conf"] = template.MustOutputINI(cfg).String()
 
 	cm.Data["kolla-barbican-api.json"] = template.MustReadFile(AppLabel, "kolla-barbican-api.json")
@@ -52,4 +53,14 @@ func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Bar
 	return template.Ensure(ctx, c, instance, log, func(intended *openstackv1beta1.Barbican) {
 		instance.Spec = intended.Spec
 	})
+}
+
+type uwsgiParams struct {
+	TLS bool
+}
+
+func uwsgiParamsFrom(instance *openstackv1beta1.Barbican) uwsgiParams {
+	return uwsgiParams{
+		TLS: instance.Spec.API.TLS.Secret != "",
+	}
 }
