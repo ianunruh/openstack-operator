@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-logr/logr"
 	appsv1 "k8s.io/api/apps/v1"
@@ -25,6 +26,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -33,6 +35,7 @@ import (
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/horizon"
+	"github.com/ianunruh/openstack-operator/pkg/keystone"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -72,6 +75,28 @@ func (r *HorizonReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 
 	deps := template.NewConditionWaiter(r.Scheme, log)
 
+	ks := &openstackv1beta1.Keystone{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "keystone",
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(ks), ks); err != nil {
+		if !errors.IsNotFound(err) {
+			return ctrl.Result{}, err
+		}
+		if err := reporter.Pending(ctx, "Keystone %s not found", ks.Name); err != nil {
+			return ctrl.Result{}, err
+		}
+		return ctrl.Result{RequeueAfter: 5 * time.Second}, nil
+	}
+
+	keystone.AddReadyCheck(deps, ks)
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
+
 	cm := horizon.ConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
 	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {
@@ -109,6 +134,7 @@ func (r *HorizonReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		template.EnvVar("ENABLE_MAGNUM", "yes"),
 		template.EnvVar("ENABLE_MANILA", "yes"),
 		template.EnvVar("ENABLE_OCTAVIA", "yes"),
+		template.EnvVar("HORIZON_KEYSTONE_URL", keystone.APIInternalURL(ks)),
 		template.SecretEnvVar("HORIZON_SECRET_KEY", secret.Name, "secret-key"),
 	}
 
