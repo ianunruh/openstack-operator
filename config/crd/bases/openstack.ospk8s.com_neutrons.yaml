@@ -484,6 +484,11 @@ spec:
                         type: object
                     type: object
                 type: object
+              tls:
+                properties:
+                  caBundle:
+                    type: string
+                type: object
             type: object
           status:
             description: NeutronStatus defines the observed state of Neutron

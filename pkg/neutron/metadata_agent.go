@@ -5,6 +5,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -29,6 +30,8 @@ func MetadataAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.Env
 
 	volumes = append(volumes,
 		template.HostPathVolume("host-run-netns", "/run/netns"))
+
+	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,

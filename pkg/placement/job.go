@@ -5,6 +5,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -16,6 +17,8 @@ func DBSyncJob(instance *openstackv1beta1.Placement, env []corev1.EnvVar, volume
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-placement", "/etc/placement/placement.conf", "placement.conf"),
 	}
+
+	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,

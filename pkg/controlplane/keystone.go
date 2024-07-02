@@ -12,6 +12,7 @@ func Keystone(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Keyston
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "keystone")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
+	spec.API.TLS = tlsServerDefaults(spec.API.TLS, instance)
 
 	spec.BootstrapJob.NodeSelector = controllerNodeSelector(spec.BootstrapJob.NodeSelector, instance)
 
@@ -20,6 +21,8 @@ func Keystone(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Keyston
 	spec.Broker = brokerUserDefaults(spec.Broker, instance)
 	spec.Cache = cacheDefaults(spec.Cache, instance)
 	spec.Database = databaseDefaults(spec.Database, instance)
+
+	spec.TLS = tlsClientDefaults(spec.TLS, instance)
 
 	if spec.OIDC.Enabled {
 		if spec.OIDC.DashboardURL == "" {

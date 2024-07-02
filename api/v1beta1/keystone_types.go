@@ -46,6 +46,9 @@ type KeystoneSpec struct {
 	Cache CacheSpec `json:"cache,omitempty"`
 
 	// +optional
+	TLS TLSClientSpec `json:"tls,omitempty"`
+
+	// +optional
 	Notifications KeystoneNotificationsSpec `json:"notifications,omitempty"`
 
 	// +optional
@@ -70,6 +73,9 @@ type KeystoneAPISpec struct {
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// +optional
+	TLS TLSServerSpec `json:"tls,omitempty"`
 }
 
 type KeystoneNotificationsSpec struct {

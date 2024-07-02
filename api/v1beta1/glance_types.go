@@ -40,6 +40,9 @@ type GlanceSpec struct {
 	Cache CacheSpec `json:"cache,omitempty"`
 
 	// +optional
+	TLS TLSClientSpec `json:"tls,omitempty"`
+
+	// +optional
 	Backends []GlanceBackendSpec `json:"backends,omitempty"`
 
 	// +optional

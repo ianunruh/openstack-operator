@@ -47,6 +47,7 @@ func (r *Keystone) Default() {
 	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultKeystoneAPIImage)
+	r.Spec.API.TLS = tlsServerDefault(r.Spec.API.TLS, r.Name, "api")
 
 	if r.Spec.OIDC.Enabled {
 		if len(r.Spec.OIDC.Scopes) == 0 {

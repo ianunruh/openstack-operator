@@ -57,6 +57,8 @@ func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Key
 }
 
 type httpdParams struct {
+	TLS bool
+
 	OIDC httpdOIDCParams
 }
 
@@ -71,7 +73,9 @@ type httpdOIDCParams struct {
 }
 
 func httpdParamsFrom(instance *openstackv1beta1.Keystone) httpdParams {
-	params := httpdParams{}
+	params := httpdParams{
+		TLS: instance.Spec.API.TLS.Secret != "",
+	}
 
 	if oidcSpec := instance.Spec.OIDC; oidcSpec.Enabled {
 		params.OIDC = httpdOIDCParams{

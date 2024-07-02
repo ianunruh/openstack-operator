@@ -7,6 +7,7 @@ metadata:
 spec:
   isCA: {{ .IsCA }}
   commonName: {{ .Name }}
+  dnsNames: [{{ StringsJoin .DNSNames ", " }}]
   secretName: {{ .SecretName }}
   usages: [{{ StringsJoin .Usages ", " }}]
   privateKey:
@@ -14,5 +15,5 @@ spec:
     size: 256
   issuerRef:
     name: {{ .IssuerName }}
-    kind: Issuer
+    kind: {{ .IssuerKind }}
     group: cert-manager.io

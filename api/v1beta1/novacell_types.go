@@ -38,6 +38,9 @@ type NovaCellSpec struct {
 	Broker RabbitMQUserSpec `json:"broker,omitempty"`
 
 	// +optional
+	TLS TLSClientSpec `json:"tls,omitempty"`
+
+	// +optional
 	Conductor NovaConductorSpec `json:"conductor,omitempty"`
 
 	// +optional

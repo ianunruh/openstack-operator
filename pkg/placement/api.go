@@ -8,6 +8,7 @@ import (
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/httpd"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -37,6 +38,8 @@ func APIDeployment(instance *openstackv1beta1.Placement, env []corev1.EnvVar, vo
 		template.SubPathVolumeMount("etc-placement", "/etc/placement/placement.conf", "placement.conf"),
 		template.SubPathVolumeMount("etc-placement", "/var/lib/kolla/config_files/config.json", "kolla.json"),
 	}
+
+	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,

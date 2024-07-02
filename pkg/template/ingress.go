@@ -73,3 +73,17 @@ func GenericIngress(name, namespace string, spec *openstackv1beta1.IngressSpec, 
 
 	return ingress
 }
+
+func GenericIngressWithTLS(name, namespace string, spec *openstackv1beta1.IngressSpec, tlsSpec openstackv1beta1.TLSServerSpec, labels map[string]string) *netv1.Ingress {
+	ingress := GenericIngress(name, namespace, spec, labels)
+
+	if ingress.Annotations == nil {
+		ingress.Annotations = make(map[string]string)
+	}
+
+	if tlsSpec.Secret != "" {
+		ingress.Annotations["nginx.ingress.kubernetes.io/backend-protocol"] = "HTTPS"
+	}
+
+	return ingress
+}

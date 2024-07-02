@@ -20,6 +20,7 @@ func Glance(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Glance {
 
 	spec.Cache = cacheDefaults(spec.Cache, instance)
 	spec.Database = databaseDefaults(spec.Database, instance)
+	spec.TLS = tlsClientDefaults(spec.TLS, instance)
 
 	if spec.Backends == nil {
 		spec.Backends = []openstackv1beta1.GlanceBackendSpec{

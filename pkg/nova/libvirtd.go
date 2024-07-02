@@ -5,6 +5,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -76,6 +77,8 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.E
 		template.HostPathVolume("host-var-lib-libvirt", "/var/lib/libvirt"),
 		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"),
 		template.HostPathVolume("host-var-log-libvirt", "/var/log/libvirt"))
+
+	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,

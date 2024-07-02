@@ -13,6 +13,7 @@ func Horizon(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Horizon 
 	spec.Server.NodeSelector = controllerNodeSelector(spec.Server.NodeSelector, instance)
 
 	spec.Cache = cacheDefaults(spec.Cache, instance)
+	spec.TLS = tlsClientDefaults(spec.TLS, instance)
 
 	if instance.Spec.Keystone.OIDC.Enabled {
 		spec.SSO.Enabled = true

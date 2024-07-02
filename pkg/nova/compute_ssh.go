@@ -7,6 +7,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -37,6 +38,8 @@ func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1
 		template.VolumeMount("ssh-keys", "/tmp/ssh-keys"),
 		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
 	}
+
+	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	runAsRootUser := int64(0)
 	privileged := true

@@ -6,6 +6,7 @@ import (
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/octavia/amphora"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -22,6 +23,8 @@ func WorkerDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, v
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
 		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-worker.json"),
 	}
+
+	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	volumeMounts = append(volumeMounts, amphora.VolumeMounts(instance)...)
 	volumes = append(volumes, amphora.Volumes(instance)...)

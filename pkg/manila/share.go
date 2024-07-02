@@ -5,6 +5,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/rookceph"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -22,6 +23,8 @@ func ShareStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar, vo
 		template.SubPathVolumeMount("etc-manila", "/etc/manila/manila.conf", "manila.conf"),
 		template.SubPathVolumeMount("etc-manila", "/var/lib/kolla/config_files/config.json", "kolla-manila-share.json"),
 	}
+
+	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
 	for _, backend := range instance.Spec.Backends {

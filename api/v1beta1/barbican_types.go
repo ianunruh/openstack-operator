@@ -46,6 +46,9 @@ type BarbicanSpec struct {
 	Cache CacheSpec `json:"cache,omitempty"`
 
 	// +optional
+	TLS TLSClientSpec `json:"tls,omitempty"`
+
+	// +optional
 	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 

@@ -94,6 +94,15 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return result, err
 	}
 
+	// TODO if disabled, clean up resources
+	pkiResources := keystone.PKIResources(instance)
+	for _, resource := range pkiResources {
+		controllerutil.SetControllerReference(instance, resource, r.Scheme)
+		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	secrets := keystone.Secrets(instance)
 	for _, secret := range secrets {
 		controllerutil.SetControllerReference(instance, secret, r.Scheme)
@@ -116,6 +125,7 @@ func (r *KeystoneReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
 		template.EnvVar("KOLLA_CONFIG_STRATEGY", "COPY_ALWAYS"),
+		template.EnvVar("REQUESTS_CA_BUNDLE", "/etc/ssl/certs/ca-certificates.crt"),
 		template.SecretEnvVar("OS_DEFAULT__TRANSPORT_URL", instance.Spec.Broker.Secret, "connection"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 	}

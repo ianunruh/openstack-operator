@@ -17,6 +17,7 @@ func Placement(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Placem
 
 	spec.Cache = cacheDefaults(spec.Cache, instance)
 	spec.Database = databaseDefaults(spec.Database, instance)
+	spec.TLS = tlsClientDefaults(spec.TLS, instance)
 
 	return &openstackv1beta1.Placement{
 		ObjectMeta: metav1.ObjectMeta{

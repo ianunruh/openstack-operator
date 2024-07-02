@@ -483,6 +483,11 @@ spec:
                             type: object
                         type: object
                     type: object
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
+                    type: object
                 type: object
               broker:
                 description: RabbitMQSpec defines the desired state of RabbitMQ
@@ -1271,6 +1276,11 @@ spec:
                             type: object
                         type: object
                     type: object
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
+                    type: object
                   volume:
                     properties:
                       image:
@@ -1849,6 +1859,11 @@ spec:
                   image:
                     description: deprecated, use component specific images instead
                     type: string
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
+                    type: object
                 type: object
               heat:
                 description: HeatSpec defines the desired state of Heat
@@ -2368,6 +2383,11 @@ spec:
                   image:
                     description: deprecated, use component specific images instead
                     type: string
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
+                    type: object
                 type: object
               horizon:
                 description: HorizonSpec defines the desired state of Horizon
@@ -2484,6 +2504,11 @@ spec:
                           type: object
                         type: array
                     type: object
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
+                    type: object
                 type: object
               ingress:
                 properties:
@@ -2578,6 +2603,18 @@ spec:
                               otherwise to an implementation-defined value. Requests cannot exceed Limits.
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          issuer:
+                            properties:
+                              kind:
+                                type: string
+                              name:
+                                type: string
+                            type: object
+                          secret:
+                            type: string
                         type: object
                     type: object
                   bootstrapJob:
@@ -2960,6 +2997,11 @@ spec:
                           type: string
                         type: array
                       secret:
+                        type: string
+                    type: object
+                  tls:
+                    properties:
+                      caBundle:
                         type: string
                     type: object
                 type: object
@@ -3400,6 +3442,11 @@ spec:
                   image:
                     description: deprecated, use component specific images instead
                     type: string
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
+                    type: object
                 type: object
               manila:
                 description: ManilaSpec defines the desired state of Manila
@@ -3937,6 +3984,11 @@ spec:
                             type: object
                         type: object
                     type: object
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
+                    type: object
                 required:
                 - backends
                 type: object
@@ -4383,6 +4435,11 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                             type: object
                         type: object
+                    type: object
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
                     type: object
                 type: object
               nodeSelector:
@@ -5100,6 +5157,11 @@ spec:
                                         type: object
                                     type: object
                                 type: object
+                              tls:
+                                properties:
+                                  caBundle:
+                                    type: string
+                                type: object
                             type: object
                           type: object
                         conductor:
@@ -5495,6 +5557,11 @@ spec:
                                   type: object
                               type: object
                           type: object
+                        tls:
+                          properties:
+                            caBundle:
+                              type: string
+                          type: object
                       required:
                       - name
                       type: object
@@ -5742,6 +5809,11 @@ spec:
                               More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                             type: object
                         type: object
+                    type: object
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
                     type: object
                 type: object
               octavia:
@@ -6339,6 +6411,11 @@ spec:
                     properties:
                       enabled:
                         type: boolean
+                    type: object
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
                     type: object
                   worker:
                     properties:
@@ -7104,6 +7181,11 @@ spec:
                   image:
                     description: deprecated, use component specific images instead
                     type: string
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
+                    type: object
                 type: object
               rally:
                 description: RallySpec defines the desired state of Rally
@@ -7291,6 +7373,28 @@ spec:
                     type: object
                   image:
                     type: string
+                type: object
+              tls:
+                properties:
+                  client:
+                    properties:
+                      caBundle:
+                        type: string
+                    type: object
+                  disabled:
+                    type: boolean
+                  server:
+                    properties:
+                      issuer:
+                        properties:
+                          kind:
+                            type: string
+                          name:
+                            type: string
+                        type: object
+                      secret:
+                        type: string
+                    type: object
                 type: object
             required:
             - domain

@@ -126,6 +126,18 @@ spec:
                           More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                         type: object
                     type: object
+                  tls:
+                    properties:
+                      issuer:
+                        properties:
+                          kind:
+                            type: string
+                          name:
+                            type: string
+                        type: object
+                      secret:
+                        type: string
+                    type: object
                 type: object
               bootstrapJob:
                 properties:
@@ -504,6 +516,11 @@ spec:
                       type: string
                     type: array
                   secret:
+                    type: string
+                type: object
+              tls:
+                properties:
+                  caBundle:
                     type: string
                 type: object
             type: object
