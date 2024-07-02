@@ -53,8 +53,8 @@ func tlsClientDefaults(spec openstackv1beta1.TLSClientSpec, instance *openstackv
 		return spec
 	}
 
-	if len(spec.CASecrets) == 0 {
-		spec.CASecrets = instance.Spec.TLS.Client.CASecrets
+	if spec.CABundle == "" {
+		spec.CABundle = instance.Spec.TLS.Client.CABundle
 	}
 
 	return spec

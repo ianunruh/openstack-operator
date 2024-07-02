@@ -29,6 +29,10 @@ func ConfigMap(instance *openstackv1beta1.Placement) *corev1.ConfigMap {
 
 	cfg.Section("keystone_authtoken").NewKey("memcached_servers", strings.Join(spec.Cache.Servers, ","))
 
+	if instance.Spec.TLS.CABundle != "" {
+		cfg.Section("keystone_authtoken").NewKey("cafile", "/etc/ssl/certs/openstack-ca.crt")
+	}
+
 	template.MergeINI(cfg, spec.ExtraConfig)
 
 	cm.Data["placement.conf"] = template.MustOutputINI(cfg).String()

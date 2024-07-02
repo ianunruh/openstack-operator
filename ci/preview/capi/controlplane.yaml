@@ -9,8 +9,7 @@ spec:
     tlsSecretName: wildcard-tls
   tls:
     client:
-      caSecrets:
-      - default-ca-root
+      caBundle: default-ca-root
     server:
       issuer:
         name: default-ca

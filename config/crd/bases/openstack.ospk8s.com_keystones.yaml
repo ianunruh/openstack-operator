@@ -520,10 +520,8 @@ spec:
                 type: object
               tls:
                 properties:
-                  caSecrets:
-                    items:
-                      type: string
-                    type: array
+                  caBundle:
+                    type: string
                 type: object
             type: object
           status:

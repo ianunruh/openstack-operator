@@ -4,7 +4,7 @@ import "fmt"
 
 type TLSClientSpec struct {
 	// +optional
-	CASecrets []string `json:"caSecrets,omitempty"`
+	CABundle string `json:"caBundle,omitempty"`
 }
 
 type TLSServerSpec struct {

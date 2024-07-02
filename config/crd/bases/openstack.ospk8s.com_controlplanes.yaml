@@ -2976,10 +2976,8 @@ spec:
                     type: object
                   tls:
                     properties:
-                      caSecrets:
-                        items:
-                          type: string
-                        type: array
+                      caBundle:
+                        type: string
                     type: object
                 type: object
               magnum:
@@ -7123,6 +7121,11 @@ spec:
                   image:
                     description: deprecated, use component specific images instead
                     type: string
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
+                    type: object
                 type: object
               rally:
                 description: RallySpec defines the desired state of Rally
@@ -7315,10 +7318,8 @@ spec:
                 properties:
                   client:
                     properties:
-                      caSecrets:
-                        items:
-                          type: string
-                        type: array
+                      caBundle:
+                        type: string
                     type: object
                   disabled:
                     type: boolean
