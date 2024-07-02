@@ -85,6 +85,9 @@ type NovaAPISpec struct {
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// +optional
+	TLS TLSServerSpec `json:"tls,omitempty"`
 }
 
 type NovaConductorSpec struct {

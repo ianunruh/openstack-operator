@@ -44,7 +44,9 @@ func (r *Horizon) Default() {
 	horizonlog.Info("default", "name", r.Name)
 
 	r.Spec.Cache = cacheDefault(r.Spec.Cache)
+
 	r.Spec.Server.Image = imageDefault(r.Spec.Image, DefaultHorizonServerImage)
+	r.Spec.Server.TLS = tlsServerDefault(r.Spec.Server.TLS, r.Name, "server")
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

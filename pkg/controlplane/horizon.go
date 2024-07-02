@@ -11,6 +11,7 @@ func Horizon(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Horizon 
 
 	spec.Server.Ingress = ingressDefaults(spec.Server.Ingress, instance, "horizon")
 	spec.Server.NodeSelector = controllerNodeSelector(spec.Server.NodeSelector, instance)
+	spec.Server.TLS = tlsServerDefaults(spec.Server.TLS, instance)
 
 	spec.Cache = cacheDefaults(spec.Cache, instance)
 	spec.TLS = tlsClientDefaults(spec.TLS, instance)

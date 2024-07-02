@@ -46,8 +46,12 @@ func (r *Manila) Default() {
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
+
 	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultManilaAPIImage)
+	r.Spec.API.TLS = tlsServerDefault(r.Spec.API.TLS, r.Name, "api")
+
 	r.Spec.Scheduler.Image = imageDefault(r.Spec.Scheduler.Image, DefaultManilaSchedulerImage)
+
 	r.Spec.Share.Image = imageDefault(r.Spec.Share.Image, DefaultManilaShareImage)
 }
 

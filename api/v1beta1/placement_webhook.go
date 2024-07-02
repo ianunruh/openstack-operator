@@ -45,7 +45,9 @@ func (r *Placement) Default() {
 
 	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
+
 	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultPlacementAPIImage)
+	r.Spec.API.TLS = tlsServerDefault(r.Spec.API.TLS, r.Name, "api")
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

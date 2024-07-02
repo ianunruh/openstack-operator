@@ -6,7 +6,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func AppendTLSServerVolumes(spec openstackv1beta1.TLSServerSpec, volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount) {
+func AppendTLSServerVolumes(spec openstackv1beta1.TLSServerSpec, mountPath string, volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount) {
 	if spec.Secret == "" {
 		return
 	}
@@ -17,7 +17,7 @@ func AppendTLSServerVolumes(spec openstackv1beta1.TLSServerSpec, volumes *[]core
 		template.SecretVolume("secret-tls", spec.Secret, &defaultMode))
 
 	*volumeMounts = append(*volumeMounts,
-		template.VolumeMount("secret-tls", "/etc/keystone/certs"))
+		template.VolumeMount("secret-tls", mountPath))
 }
 
 func HTTPActionScheme(spec openstackv1beta1.TLSServerSpec) corev1.URIScheme {

@@ -46,7 +46,10 @@ func (r *Barbican) Default() {
 	r.Spec.Broker = brokerDefault(r.Spec.Broker, r.Name, defaultVirtualHost)
 	r.Spec.Cache = cacheDefault(r.Spec.Cache)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
+
 	r.Spec.API.Image = imageDefault(r.Spec.Image, DefaultBarbicanAPIImage)
+	r.Spec.API.TLS = tlsServerDefault(r.Spec.API.TLS, r.Name, "api")
+
 	r.Spec.Worker.Image = imageDefault(r.Spec.Image, DefaultBarbicanWorkerImage)
 }
 

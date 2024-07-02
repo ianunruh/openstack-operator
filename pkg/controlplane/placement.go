@@ -12,6 +12,7 @@ func Placement(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Placem
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "placement")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
+	spec.API.TLS = tlsServerDefaults(spec.API.TLS, instance)
 
 	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
 

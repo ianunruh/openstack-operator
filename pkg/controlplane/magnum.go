@@ -14,6 +14,7 @@ func Magnum(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Magnum {
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "magnum")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
+	spec.API.TLS = tlsServerDefaults(spec.API.TLS, instance)
 
 	spec.Conductor.NodeSelector = controllerNodeSelector(spec.Conductor.NodeSelector, instance)
 

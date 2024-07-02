@@ -51,11 +51,16 @@ func (r *Octavia) Default() {
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 
 	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultOctaviaAPIImage)
+	r.Spec.API.TLS = tlsServerDefault(r.Spec.API.TLS, r.Name, "api")
+
 	r.Spec.DriverAgent.Image = imageDefault(r.Spec.DriverAgent.Image, DefaultOctaviaDriverAgentImage)
+
 	r.Spec.HealthManager.Image = imageDefault(r.Spec.HealthManager.Image, DefaultOctaviaHealthManagerImage)
 	r.Spec.HealthManager.InitDHCPImage = imageDefault(r.Spec.HealthManager.InitDHCPImage, DefaultOctaviaHealthManagerInitDHCPImage)
 	r.Spec.HealthManager.InitOVSImage = imageDefault(r.Spec.HealthManager.InitOVSImage, DefaultOVSSwitchImage)
+
 	r.Spec.Housekeeping.Image = imageDefault(r.Spec.Housekeeping.Image, DefaultOctaviaHousekeepingImage)
+
 	r.Spec.Worker.Image = imageDefault(r.Spec.Worker.Image, DefaultOctaviaWorkerImage)
 
 	if r.Spec.Amphora.Enabled {

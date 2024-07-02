@@ -110,6 +110,15 @@ func (r *BarbicanReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return result, err
 	}
 
+	// TODO if disabled, clean up resources
+	pkiResources := barbican.PKIResources(instance)
+	for _, resource := range pkiResources {
+		controllerutil.SetControllerReference(instance, resource, r.Scheme)
+		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	secret := barbican.Secret(instance)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
 	if err := template.CreateSecret(ctx, r.Client, secret, log); err != nil {

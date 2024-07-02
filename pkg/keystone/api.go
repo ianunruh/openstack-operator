@@ -45,7 +45,7 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
-	pki.AppendTLSServerVolumes(spec.TLS, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/keystone/certs", &volumes, &volumeMounts)
 
 	initVolumeMounts := append(volumeMounts,
 		template.VolumeMount("credential-keys", "/var/run/secrets/credential-keys"),

@@ -51,7 +51,10 @@ func (r *Nova) Default() {
 	r.Spec.CellDatabase = databaseDefault(r.Spec.CellDatabase, fmt.Sprintf("%s-cell0", r.Name))
 
 	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultNovaAPIImage)
+	r.Spec.API.TLS = tlsServerDefault(r.Spec.API.TLS, r.Name, "api")
+
 	r.Spec.Conductor.Image = imageDefault(r.Spec.Conductor.Image, DefaultNovaConductorImage)
+
 	r.Spec.Scheduler.Image = imageDefault(r.Spec.Scheduler.Image, DefaultNovaSchedulerImage)
 
 	if r.Spec.Neutron.Secret == "" {
