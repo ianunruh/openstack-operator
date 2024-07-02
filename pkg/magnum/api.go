@@ -23,8 +23,9 @@ func APIDeployment(instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volum
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Path: "/",
-				Port: intstr.FromInt(9511),
+				Path:   "/",
+				Port:   intstr.FromInt(9511),
+				Scheme: pki.HTTPActionScheme(spec.TLS),
 			},
 		},
 		InitialDelaySeconds: 5,
@@ -38,6 +39,7 @@ func APIDeployment(instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volum
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/magnum/certs", &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,

@@ -113,6 +113,15 @@ func (r *ManilaReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return result, err
 	}
 
+	// TODO if disabled, clean up resources
+	pkiResources := manila.PKIResources(instance)
+	for _, resource := range pkiResources {
+		controllerutil.SetControllerReference(instance, resource, r.Scheme)
+		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	cm := manila.ConfigMap(instance)
 	controllerutil.SetControllerReference(instance, cm, r.Scheme)
 	if err := template.EnsureConfigMap(ctx, r.Client, cm, log); err != nil {

@@ -40,6 +40,7 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/glance/certs", &volumes, &volumeMounts)
 
 	var deployStrategyType appsv1.DeploymentStrategyType
 

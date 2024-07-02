@@ -24,8 +24,9 @@ func APIDeployment(instance *openstackv1beta1.Placement, env []corev1.EnvVar, vo
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Path: "/",
-				Port: intstr.FromInt(8778),
+				Path:   "/",
+				Port:   intstr.FromInt(8778),
+				Scheme: pki.HTTPActionScheme(spec.TLS),
 			},
 		},
 		InitialDelaySeconds: 5,
@@ -40,6 +41,7 @@ func APIDeployment(instance *openstackv1beta1.Placement, env []corev1.EnvVar, vo
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/placement/certs", &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
