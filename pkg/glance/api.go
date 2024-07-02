@@ -1,6 +1,7 @@
 package glance
 
 import (
+	"fmt"
 	"slices"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -116,12 +117,29 @@ func APIIngress(instance *openstackv1beta1.Glance) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 	name := template.Combine(instance.Name, APIComponentLabel)
 
-	ingress := template.GenericIngress(name, instance.Namespace, instance.Spec.API.Ingress, labels)
+	spec := instance.Spec.API
+
+	ingress := template.GenericIngressWithTLS(name, instance.Namespace, spec.Ingress, spec.TLS, labels)
 	ingress.Annotations = template.MergeStringMaps(ingress.Annotations, map[string]string{
 		"nginx.ingress.kubernetes.io/proxy-body-size": "0",
 	})
 
 	return ingress
+}
+
+func APIInternalURL(instance *openstackv1beta1.Glance) string {
+	scheme := "http"
+	if instance.Spec.API.TLS.Secret != "" {
+		scheme = "https"
+	}
+	return fmt.Sprintf("%s://%s-api.%s.svc:9292", scheme, instance.Name, instance.Namespace)
+}
+
+func APIPublicURL(instance *openstackv1beta1.Glance) string {
+	if instance.Spec.API.Ingress == nil {
+		return APIInternalURL(instance)
+	}
+	return fmt.Sprintf("https://%s", instance.Spec.API.Ingress.Host)
 }
 
 func isReadWriteOnce(accessModes []corev1.PersistentVolumeAccessMode) bool {

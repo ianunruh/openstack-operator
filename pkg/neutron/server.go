@@ -1,6 +1,8 @@
 package neutron
 
 import (
+	"fmt"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -92,6 +94,22 @@ func ServerIngress(instance *openstackv1beta1.Neutron) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, ServerComponentLabel)
 
 	name := template.Combine(instance.Name, "server")
+	spec := instance.Spec.Server
 
-	return template.GenericIngress(name, instance.Namespace, instance.Spec.Server.Ingress, labels)
+	return template.GenericIngressWithTLS(name, instance.Namespace, spec.Ingress, spec.TLS, labels)
+}
+
+func ServerInternalURL(instance *openstackv1beta1.Neutron) string {
+	scheme := "http"
+	if instance.Spec.Server.TLS.Secret != "" {
+		scheme = "https"
+	}
+	return fmt.Sprintf("%s://%s-server.%s.svc:9696", scheme, instance.Name, instance.Namespace)
+}
+
+func ServerPublicURL(instance *openstackv1beta1.Neutron) string {
+	if instance.Spec.Server.Ingress == nil {
+		return ServerInternalURL(instance)
+	}
+	return fmt.Sprintf("https://%s", instance.Spec.Server.Ingress.Host)
 }

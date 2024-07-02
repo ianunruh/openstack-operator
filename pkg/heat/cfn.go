@@ -1,6 +1,8 @@
 package heat
 
 import (
+	"fmt"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -92,6 +94,22 @@ func CFNIngress(instance *openstackv1beta1.Heat) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, CFNComponentLabel)
 
 	name := template.Combine(instance.Name, "cfn")
+	spec := instance.Spec.CFN
 
-	return template.GenericIngress(name, instance.Namespace, instance.Spec.CFN.Ingress, labels)
+	return template.GenericIngressWithTLS(name, instance.Namespace, spec.Ingress, spec.TLS, labels)
+}
+
+func CFNInternalURL(instance *openstackv1beta1.Heat) string {
+	scheme := "http"
+	if instance.Spec.CFN.TLS.Secret != "" {
+		scheme = "https"
+	}
+	return fmt.Sprintf("%s://%s-cfn.%s.svc:8000/v1", scheme, instance.Name, instance.Namespace)
+}
+
+func CFNPublicURL(instance *openstackv1beta1.Heat) string {
+	if instance.Spec.CFN.Ingress == nil {
+		return APIInternalURL(instance)
+	}
+	return fmt.Sprintf("https://%s/v1", instance.Spec.CFN.Ingress.Host)
 }

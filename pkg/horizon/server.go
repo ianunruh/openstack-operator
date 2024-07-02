@@ -103,9 +103,11 @@ func ServerService(instance *openstackv1beta1.Horizon) *corev1.Service {
 
 func ServerIngress(instance *openstackv1beta1.Horizon) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, ServerComponentLabel)
-	name := template.Combine(instance.Name, ServerComponentLabel)
 
-	ingress := template.GenericIngress(name, instance.Namespace, instance.Spec.Server.Ingress, labels)
+	name := template.Combine(instance.Name, ServerComponentLabel)
+	spec := instance.Spec.Server
+
+	ingress := template.GenericIngressWithTLS(name, instance.Namespace, spec.Ingress, spec.TLS, labels)
 	ingress.Annotations = template.MergeStringMaps(ingress.Annotations, map[string]string{
 		"nginx.ingress.kubernetes.io/proxy-body-size": "0",
 	})

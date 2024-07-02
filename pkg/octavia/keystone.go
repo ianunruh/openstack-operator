@@ -2,7 +2,6 @@ package octavia
 
 import (
 	"context"
-	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,8 +26,8 @@ func KeystoneService(instance *openstackv1beta1.Octavia) *openstackv1beta1.Keyst
 		Spec: openstackv1beta1.KeystoneServiceSpec{
 			Name:        "octavia",
 			Type:        "load-balancer",
-			InternalURL: fmt.Sprintf("http://%s-api.%s.svc:9876", instance.Name, instance.Namespace),
-			PublicURL:   fmt.Sprintf("https://%s", instance.Spec.API.Ingress.Host),
+			InternalURL: APIInternalURL(instance),
+			PublicURL:   APIPublicURL(instance),
 		},
 	}
 }
