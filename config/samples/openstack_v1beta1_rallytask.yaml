@@ -3,5 +3,5 @@ kind: RallyTask
 metadata:
   name: nova-list-hypervisors
 spec:
-  image: xrally/xrally-openstack:2.1.0
+  image: xrally/xrally-openstack:3.0.0
   path: samples/tasks/scenarios/nova/list-hypervisors.yaml
