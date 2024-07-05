@@ -23,7 +23,7 @@ func DBSyncJob(instance *openstackv1beta1.Rally, env []corev1.EnvVar, volumes []
 		Containers: []corev1.Container{
 			{
 				Name:  "db-sync",
-				Image: instance.Spec.Image,
+				Image: spec.Image,
 				Command: []string{
 					"bash",
 					"-c",

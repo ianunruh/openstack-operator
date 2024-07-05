@@ -45,7 +45,8 @@ func (r *Rally) Default() {
 
 	r.Spec.Data = volumeDefault(r.Spec.Data)
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
-	r.Spec.Image = imageDefault(r.Spec.Image, DefaultRallyImage)
+	r.Spec.DBSyncJob.Image = imageDefault(r.Spec.DBSyncJob.Image, DefaultRallyImage)
+	r.Spec.Toolbox.Image = imageDefault(r.Spec.Toolbox.Image, DefaultRallyImage)
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.

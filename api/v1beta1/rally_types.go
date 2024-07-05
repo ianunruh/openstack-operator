@@ -17,13 +17,18 @@ limitations under the License.
 package v1beta1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // RallySpec defines the desired state of Rally
 type RallySpec struct {
+	// deprecated, use component specific images instead
 	// +optional
 	Image string `json:"image,omitempty"`
+
+	// +optional
+	Toolbox RallyToolboxSpec `json:"toolbox,omitempty"`
 
 	// +optional
 	Data VolumeSpec `json:"data,omitempty"`
@@ -36,6 +41,20 @@ type RallySpec struct {
 
 	// +optional
 	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
+}
+
+type RallyToolboxSpec struct {
+	// +optional
+	Enabled bool `json:"enabled,omitempty"`
+
+	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 // RallyStatus defines the observed state of Rally
