@@ -58,7 +58,7 @@ const (
 
 	DefaultPlacementAPIImage = "kolla/placement-api:2023.2-ubuntu-jammy"
 
-	DefaultRallyImage = "xrally/xrally-openstack:2.1.0"
+	DefaultRallyImage = "xrally/xrally-openstack:3.0.0"
 
 	DefaultMariaDBImage         = "docker.io/bitnami/mariadb:10.5.8-debian-10-r21"
 	DefaultMariaDBExporterImage = "docker.io/bitnami/mysqld-exporter:0.13.0"
