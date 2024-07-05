@@ -27,10 +27,13 @@ func ToolboxDeployment(instance *openstackv1beta1.Rally, env []corev1.EnvVar, vo
 		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:         "toolbox",
-				Image:        spec.Image,
-				Command:      []string{"/bin/bash"},
-				Env:          env,
+				Name:    "toolbox",
+				Image:   spec.Image,
+				Command: []string{"/bin/bash"},
+				Env:     env,
+				EnvFrom: []corev1.EnvFromSource{
+					template.EnvFromSecret(template.Combine(instance.Name, "keystone")),
+				},
 				Resources:    spec.Resources,
 				Stdin:        true,
 				VolumeMounts: volumeMounts,
