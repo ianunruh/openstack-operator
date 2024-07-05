@@ -1,10 +1,4 @@
 resources:
-- cinder-storageclass.yaml
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.29.0/manifests/cinder-csi-plugin/cinder-csi-controllerplugin-rbac.yaml
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.29.0/manifests/cinder-csi-plugin/cinder-csi-controllerplugin.yaml
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.29.0/manifests/cinder-csi-plugin/cinder-csi-nodeplugin-rbac.yaml
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.29.0/manifests/cinder-csi-plugin/cinder-csi-nodeplugin.yaml
-- https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.29.0/manifests/cinder-csi-plugin/csi-cinder-driver.yaml
 - https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.29.0/manifests/controller-manager/cloud-controller-manager-role-bindings.yaml
 - https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.29.0/manifests/controller-manager/cloud-controller-manager-roles.yaml
 - https://raw.githubusercontent.com/kubernetes/cloud-provider-openstack/v1.29.0/manifests/controller-manager/openstack-cloud-controller-manager-ds.yaml

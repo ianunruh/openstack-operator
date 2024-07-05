@@ -56,6 +56,11 @@ kubectl -n kube-system create secret generic cloud-config --from-file=cloud.conf
 
 rm cloud.conf clouds.yaml
 
+log "Applying cloud provider manifests"
+kubectl kustomize cloud-provider | \
+    sed "s/\$(CLUSTER_NAME)/$CLUSTER_NAME/" | \
+    kubectl apply -f-
+
 # Install cluster networking
 log "Applying Calico operator manifests"
 kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.4/manifests/tigera-operator.yaml --server-side=true
@@ -79,8 +84,8 @@ done
 
 kubectl -n calico-system rollout status deploy calico-kube-controllers
 
-log "Applying cloud provider manifests"
-kubectl kustomize cloud-provider | \
+log "Applying cinder manifests"
+kubectl kustomize cinder-csi | \
     sed "s/\$(CLUSTER_NAME)/$CLUSTER_NAME/" | \
     kubectl apply -f-
 
