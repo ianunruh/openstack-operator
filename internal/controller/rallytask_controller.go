@@ -92,6 +92,7 @@ func (r *RallyTaskReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	env := []corev1.EnvVar{
+		template.EnvVar("OS_ENDPOINT_TYPE", "public"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", cluster.Spec.Database.Secret, "connection"),
 		template.EnvVar("RALLY_TASK_PATH", instance.Spec.Path),
 	}
