@@ -69,7 +69,7 @@ patches:
 
 # [CERTMANAGER] To enable webhook, uncomment all the sections with [CERTMANAGER] prefix.
 # patches here are for enabling the CA injection for each CRD
-#- path: patches/cainjection_in_controlplanes.yaml
+- path: patches/cainjection_in_controlplanes.yaml
 - path: patches/cainjection_in_mariadbs.yaml
 - path: patches/cainjection_in_mariadbdatabases.yaml
 - path: patches/cainjection_in_keystones.yaml

@@ -7595,6 +7595,8 @@ spec:
                     type: object
                   disabled:
                     type: boolean
+                  externalIssuer:
+                    type: boolean
                   server:
                     properties:
                       issuer:

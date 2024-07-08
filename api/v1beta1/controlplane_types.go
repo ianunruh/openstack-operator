@@ -122,6 +122,9 @@ type ControlPlaneTLSSpec struct {
 
 	// +optional
 	Server TLSServerSpec `json:"server,omitempty"`
+
+	// +optional
+	ExternalIssuer bool `json:"externalIssuer,omitempty"`
 }
 
 // ControlPlaneStatus defines the observed state of ControlPlane
