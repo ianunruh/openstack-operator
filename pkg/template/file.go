@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -38,7 +37,7 @@ func ReadFile(app, filename string) (string, error) {
 
 	path := filepath.Join(basePath, app, filename)
 
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return "", err
 	}
