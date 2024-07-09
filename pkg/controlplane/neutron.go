@@ -43,7 +43,7 @@ func neutronNovaDefaults(spec openstackv1beta1.NeutronNovaSpec, nova *openstackv
 		spec.MetadataHost = template.Combine(nova.Name, cell.Name, "metadata")
 	}
 
-	if spec.MetadataProtocol == "" && cell.Metadata.TLS.Secret != "" {
+	if spec.MetadataProtocol == "" && isTLSEnabled(cell.Metadata.TLS) {
 		spec.MetadataProtocol = "https"
 	}
 
