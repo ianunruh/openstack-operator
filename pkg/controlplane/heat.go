@@ -14,11 +14,11 @@ func Heat(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Heat {
 
 	spec.API.Ingress = ingressDefaults(spec.API.Ingress, instance, "heat")
 	spec.API.NodeSelector = controllerNodeSelector(spec.API.NodeSelector, instance)
-	// spec.API.TLS = tlsServerDefaults(spec.API.TLS, instance)
+	spec.API.TLS = tlsServerDefaults(spec.API.TLS, instance)
 
 	spec.CFN.Ingress = ingressDefaults(spec.CFN.Ingress, instance, "heat-cfn")
 	spec.CFN.NodeSelector = controllerNodeSelector(spec.CFN.NodeSelector, instance)
-	// spec.CFN.TLS = tlsServerDefaults(spec.CFN.TLS, instance)
+	spec.CFN.TLS = tlsServerDefaults(spec.CFN.TLS, instance)
 
 	spec.DBSyncJob.NodeSelector = controllerNodeSelector(spec.DBSyncJob.NodeSelector, instance)
 
