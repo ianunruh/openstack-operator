@@ -6,6 +6,7 @@ import (
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/httpd"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -33,10 +34,13 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 	// }
 
 	volumeMounts := []corev1.VolumeMount{
-		template.SubPathVolumeMount("etc-nova", "/etc/apache2/sites-available/000-default.conf", "httpd-nova-metadata.conf"),
+		template.SubPathVolumeMount("etc-nova", "/etc/apache2/sites-available/000-default.conf", "httpd.conf"),
 		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
 		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-api.json"),
 	}
+
+	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/nova/certs", 0444, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
