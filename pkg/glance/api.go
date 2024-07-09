@@ -11,9 +11,9 @@ import (
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/pki"
+	"github.com/ianunruh/openstack-operator/pkg/pki/tlsproxy"
 	"github.com/ianunruh/openstack-operator/pkg/rookceph"
 	"github.com/ianunruh/openstack-operator/pkg/template"
-	"github.com/ianunruh/openstack-operator/pkg/tlsproxy"
 )
 
 const (
