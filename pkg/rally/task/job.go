@@ -29,10 +29,7 @@ func RunnerJob(instance *openstackv1beta1.RallyTask, cluster *openstackv1beta1.R
 					"-c",
 					template.MustReadFile(rally.AppLabel, "run-task.sh"),
 				},
-				Env: env,
-				EnvFrom: []corev1.EnvFromSource{
-					template.EnvFromSecret(template.Combine(cluster.Name, "keystone")),
-				},
+				Env:          env,
 				VolumeMounts: volumeMounts,
 			},
 		},
