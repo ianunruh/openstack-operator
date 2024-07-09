@@ -63,7 +63,9 @@ spec:
   heat: {}
   barbican: {}
   magnum: {}
-  rally: {}
+  rally:
+    toolbox:
+      enabled: true
   octavia:
     amphora:
       enabled: true

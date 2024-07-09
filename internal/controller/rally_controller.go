@@ -98,6 +98,7 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 	env := []corev1.EnvVar{
 		template.EnvVar("CONFIG_HASH", configHash),
+		template.EnvVar("OS_ENDPOINT_TYPE", "public"),
 		template.SecretEnvVar("OS_DATABASE__CONNECTION", instance.Spec.Database.Secret, "connection"),
 	}
 
@@ -111,11 +112,35 @@ func (r *RallyReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return result, err
 	}
 
+	if err := r.reconcileToolbox(ctx, instance, env, volumes, deps, log); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
+	}
+
 	if err := reporter.Reconciled(ctx); err != nil {
 		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *RallyReconciler) reconcileToolbox(ctx context.Context, instance *openstackv1beta1.Rally, env []corev1.EnvVar, volumes []corev1.Volume, deps *template.ConditionWaiter, log logr.Logger) error {
+	if !instance.Spec.Toolbox.Enabled {
+		// TODO clean up toolbox deployment
+		return nil
+	}
+
+	deploy := rally.ToolboxDeployment(instance, env, volumes)
+	controllerutil.SetControllerReference(instance, deploy, r.Scheme)
+	if err := template.EnsureDeployment(ctx, r.Client, deploy, log); err != nil {
+		return err
+	}
+	template.AddDeploymentReadyCheck(deps, deploy)
+
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
