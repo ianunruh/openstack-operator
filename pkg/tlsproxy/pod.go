@@ -15,7 +15,7 @@ func MustReadConfig() string {
 }
 
 func Container(port int32, spec openstackv1beta1.TLSProxySpec, probe *corev1.Probe, volumeMounts []corev1.VolumeMount) corev1.Container {
-	runAsUser := int64(99)
+	runAsUser := int64(0)
 
 	return corev1.Container{
 		Name:  "tlsproxy",
@@ -48,5 +48,5 @@ func VolumeMounts(name, subPath string) []corev1.VolumeMount {
 }
 
 func AppendTLSServerVolumes(spec openstackv1beta1.TLSServerSpec, volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount) {
-	pki.AppendTLSServerVolumes(spec, "/usr/local/etc/haproxy/certs", 0444, volumes, volumeMounts)
+	pki.AppendTLSServerVolumes(spec, "/usr/local/etc/haproxy/certs", 0400, volumes, volumeMounts)
 }
