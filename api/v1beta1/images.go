@@ -68,6 +68,8 @@ const (
 
 	DefaultRabbitMQImage           = "docker.io/bitnami/rabbitmq:3.8.9-debian-10-r58"
 	DefaultRabbitMQManagementImage = "rabbitmq:3.8.9-management"
+
+	DefaultTLSProxyImage = "haproxy:3.0.2"
 )
 
 func imageDefault(image, fallback string) string {

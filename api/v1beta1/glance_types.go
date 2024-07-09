@@ -80,6 +80,9 @@ type GlanceAPISpec struct {
 
 	// +optional
 	TLS TLSServerSpec `json:"tls,omitempty"`
+
+	// +optional
+	TLSProxy TLSProxySpec `json:"tlsProxy,omitempty"`
 }
 
 // GlanceStatus defines the observed state of Glance

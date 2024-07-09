@@ -1,10 +1,22 @@
 package v1beta1
 
-import "fmt"
+import (
+	"fmt"
+
+	corev1 "k8s.io/api/core/v1"
+)
 
 type TLSClientSpec struct {
 	// +optional
 	CABundle string `json:"caBundle,omitempty"`
+}
+
+type TLSProxySpec struct {
+	// +optional
+	Image string `json:"image,omitempty"`
+
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
 type TLSServerSpec struct {
@@ -21,6 +33,11 @@ type IssuerRef struct {
 
 	// +optional
 	Kind string `json:"kind,omitempty"`
+}
+
+func tlsProxyDefault(spec TLSProxySpec) TLSProxySpec {
+	spec.Image = imageDefault(spec.Image, DefaultTLSProxyImage)
+	return spec
 }
 
 func tlsServerDefault(spec TLSServerSpec, name, component string) TLSServerSpec {

@@ -39,7 +39,7 @@ func APIDeployment(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes
 	}
 
 	volumeMounts := []corev1.VolumeMount{
-		template.SubPathVolumeMount("etc-nova", "/etc/apache2/sites-available/000-default.conf", "httpd.conf"),
+		template.SubPathVolumeMount("etc-nova", "/etc/apache2/sites-available/000-default.conf", "httpd-nova-api.conf"),
 		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
 		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-api.json"),
 	}
