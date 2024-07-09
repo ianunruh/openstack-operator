@@ -29,6 +29,8 @@ func ConfigMap(instance *openstackv1beta1.Nova, cinder *openstackv1beta1.Cinder)
 
 	cm.Data["nova.conf"] = template.MustOutputINI(cfg).String()
 
+	cm.Data["httpd.conf"] = template.MustRenderFile(AppLabel, "httpd.conf", httpdParamsFrom(instance))
+
 	cm.Data["kolla-nova-api.json"] = template.MustReadFile(AppLabel, "kolla-nova-api.json")
 	cm.Data["kolla-nova-conductor.json"] = template.MustReadFile(AppLabel, "kolla-nova-conductor.json")
 	cm.Data["kolla-nova-scheduler.json"] = template.MustReadFile(AppLabel, "kolla-nova-scheduler.json")
@@ -71,4 +73,14 @@ func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Nov
 	return template.Ensure(ctx, c, instance, log, func(intended *openstackv1beta1.Nova) {
 		instance.Spec = intended.Spec
 	})
+}
+
+type httpdParams struct {
+	TLS bool
+}
+
+func httpdParamsFrom(instance *openstackv1beta1.Nova) httpdParams {
+	return httpdParams{
+		TLS: instance.Spec.API.TLS.Secret != "",
+	}
 }
