@@ -29,7 +29,10 @@ func DBSyncJob(instance *openstackv1beta1.Rally, env []corev1.EnvVar, volumes []
 					"-c",
 					template.MustReadFile(AppLabel, "db-sync.sh"),
 				},
-				Env:          env,
+				Env: env,
+				EnvFrom: []corev1.EnvFromSource{
+					template.EnvFromSecret(template.Combine(instance.Name, "keystone")),
+				},
 				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
