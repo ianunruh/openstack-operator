@@ -12,6 +12,7 @@ import (
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/template"
+	"github.com/ianunruh/openstack-operator/pkg/tlsproxy"
 )
 
 const (
@@ -66,11 +67,16 @@ func ConfigMap(instance *openstackv1beta1.Glance) *corev1.ConfigMap {
 	cfg.Section("").NewKey("enabled_backends", strings.Join(backendNames, ","))
 	cfg.Section("glance_store").NewKey("default_backend", defaultBackend)
 
+	if spec.API.TLS.Secret != "" {
+		cfg.Section("").NewKey("bind_host", "127.0.0.1")
+	}
+
 	template.MergeINI(cfg, spec.ExtraConfig)
 
 	cm.Data["glance-api.conf"] = template.MustOutputINI(cfg).String()
 
 	cm.Data["kolla.json"] = template.MustReadFile(AppLabel, "kolla.json")
+	cm.Data["tlsproxy.conf"] = tlsproxy.MustReadConfig()
 
 	return cm
 }

@@ -48,6 +48,7 @@ func (r *Glance) Default() {
 
 	r.Spec.API.Image = imageDefault(r.Spec.API.Image, DefaultGlanceAPIImage)
 	r.Spec.API.TLS = tlsServerDefault(r.Spec.API.TLS, r.Name, "api")
+	r.Spec.API.TLSProxy = tlsProxyDefault(r.Spec.API.TLSProxy)
 
 	if r.Spec.Backends == nil {
 		r.Spec.Backends = []GlanceBackendSpec{

@@ -13,6 +13,7 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/rookceph"
 	"github.com/ianunruh/openstack-operator/pkg/template"
+	"github.com/ianunruh/openstack-operator/pkg/tlsproxy"
 )
 
 const (
@@ -26,8 +27,10 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
-			TCPSocket: &corev1.TCPSocketAction{
-				Port: intstr.FromInt(9292),
+			HTTPGet: &corev1.HTTPGetAction{
+				Path:   "/healthcheck",
+				Port:   intstr.FromInt(9292),
+				Scheme: pki.HTTPActionScheme(spec.TLS),
 			},
 		},
 		InitialDelaySeconds: 5,
@@ -41,7 +44,6 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
-	pki.AppendTLSServerVolumes(spec.TLS, "/etc/glance/certs", 0444, &volumes, &volumeMounts)
 
 	var deployStrategyType appsv1.DeploymentStrategyType
 
@@ -65,6 +67,33 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 		}
 	}
 
+	apiContainer := corev1.Container{
+		Name:         "api",
+		Image:        spec.Image,
+		Command:      []string{"/usr/local/bin/kolla_start"},
+		Env:          env,
+		Resources:    spec.Resources,
+		VolumeMounts: volumeMounts,
+	}
+
+	var containers []corev1.Container
+
+	if spec.TLS.Secret == "" {
+		apiContainer.Ports = []corev1.ContainerPort{
+			{Name: "http", ContainerPort: 9292},
+		}
+		apiContainer.LivenessProbe = probe
+		apiContainer.StartupProbe = probe
+	} else {
+		tlsProxyVolumeMounts := tlsproxy.VolumeMounts("etc-glance", "tlsproxy.conf")
+		tlsproxy.AppendTLSServerVolumes(spec.TLS, &volumes, &tlsProxyVolumeMounts)
+
+		containers = append(containers,
+			tlsproxy.Container(9292, spec.TLSProxy, probe, tlsProxyVolumeMounts))
+	}
+
+	containers = append(containers, apiContainer)
+
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
@@ -73,21 +102,7 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: template.NodePodAntiAffinity(labels),
 		},
-		Containers: []corev1.Container{
-			{
-				Name:    "api",
-				Image:   spec.Image,
-				Command: []string{"/usr/local/bin/kolla_start"},
-				Env:     env,
-				Ports: []corev1.ContainerPort{
-					{Name: "http", ContainerPort: 9292},
-				},
-				LivenessProbe: probe,
-				StartupProbe:  probe,
-				Resources:     spec.Resources,
-				VolumeMounts:  volumeMounts,
-			},
-		},
+		Containers: containers,
 		SecurityContext: &corev1.PodSecurityContext{
 			RunAsUser: &appUID,
 			FSGroup:   &appUID,
