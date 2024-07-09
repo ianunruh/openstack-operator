@@ -39,9 +39,11 @@ func neutronNovaDefaults(spec openstackv1beta1.NeutronNovaSpec, nova *openstackv
 	// TODO support multiple cells
 	cell := nova.Spec.Cells[0]
 
-	spec.MetadataHost = template.Combine(nova.Name, cell.Name, "metadata")
+	if spec.MetadataHost == "" {
+		spec.MetadataHost = template.Combine(nova.Name, cell.Name, "metadata")
+	}
 
-	if cell.Metadata.TLS.Secret != "" {
+	if spec.MetadataProtocol == "" && cell.Metadata.TLS.Secret != "" {
 		spec.MetadataProtocol = "https"
 	}
 
