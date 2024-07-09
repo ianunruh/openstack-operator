@@ -5,6 +5,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/httpd"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -32,6 +33,7 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 	// }
 
 	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-nova", "/etc/apache2/sites-available/000-default.conf", "httpd-nova-metadata.conf"),
 		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
 		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-api.json"),
 	}
@@ -43,10 +45,11 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 		NodeSelector: spec.NodeSelector,
 		Containers: []corev1.Container{
 			{
-				Name:    "metadata",
-				Image:   spec.Image,
-				Command: []string{"/usr/local/bin/kolla_start"},
-				Env:     env,
+				Name:      "metadata",
+				Image:     spec.Image,
+				Command:   []string{"/usr/local/bin/kolla_start"},
+				Lifecycle: httpd.Lifecycle(),
+				Env:       env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 8775},
 				},
@@ -55,10 +58,6 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 				Resources:    spec.Resources,
 				VolumeMounts: volumeMounts,
 			},
-		},
-		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &appUID,
-			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})
