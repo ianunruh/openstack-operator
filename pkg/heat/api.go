@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/httpd"
 	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -36,6 +37,7 @@ func APIDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 	}
 
 	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-heat", "/etc/apache2/sites-available/000-default.conf", "httpd-heat-api.conf"),
 		template.SubPathVolumeMount("etc-heat", "/etc/heat/heat.conf", "heat.conf"),
 		template.SubPathVolumeMount("etc-heat", "/var/lib/kolla/config_files/config.json", "kolla-heat-api.json"),
 	}
@@ -53,10 +55,11 @@ func APIDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 		},
 		Containers: []corev1.Container{
 			{
-				Name:    "api",
-				Image:   spec.Image,
-				Command: []string{"/usr/local/bin/kolla_start"},
-				Env:     env,
+				Name:      "api",
+				Image:     spec.Image,
+				Command:   []string{"/usr/local/bin/kolla_start"},
+				Lifecycle: httpd.Lifecycle(),
+				Env:       env,
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 8004},
 				},
@@ -65,10 +68,6 @@ func APIDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 				Resources:     spec.Resources,
 				VolumeMounts:  volumeMounts,
 			},
-		},
-		SecurityContext: &corev1.PodSecurityContext{
-			RunAsUser: &appUID,
-			FSGroup:   &appUID,
 		},
 		Volumes: volumes,
 	})
