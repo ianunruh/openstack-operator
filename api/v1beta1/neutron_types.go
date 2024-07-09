@@ -87,9 +87,18 @@ type NeutronMetadataAgentSpec struct {
 
 	// +optional
 	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// +optional
+	ExtraConfig ExtraConfig `json:"extraConfig,omitempty"`
 }
 
 type NeutronNovaSpec struct {
+	// +optional
+	MetadataHost string `json:"metadataHost,omitempty"`
+
+	// +optional
+	MetadataProtocol string `json:"metadataProtocol,omitempty"`
+
 	// +optional
 	Secret string `json:"secret,omitempty"`
 }

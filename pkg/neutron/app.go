@@ -32,7 +32,7 @@ func ConfigMap(instance *openstackv1beta1.Neutron) *corev1.ConfigMap {
 	template.MergeINI(cfg, spec.ExtraConfig)
 
 	cm.Data["neutron.conf"] = template.MustOutputINI(cfg).String()
-	cm.Data["neutron_ovn_metadata_agent.ini"] = template.MustReadFile(AppLabel, "neutron_ovn_metadata_agent.ini")
+	cm.Data["neutron_ovn_metadata_agent.ini"] = renderMetadataConfig(instance)
 
 	cm.Data["kolla-neutron-metadata-agent.json"] = template.MustReadFile(AppLabel, "kolla-neutron-metadata-agent.json")
 	cm.Data["kolla-neutron-server.json"] = template.MustReadFile(AppLabel, "kolla-neutron-server.json")
@@ -44,4 +44,15 @@ func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Neu
 	return template.Ensure(ctx, c, instance, log, func(intended *openstackv1beta1.Neutron) {
 		instance.Spec = intended.Spec
 	})
+}
+
+func renderMetadataConfig(instance *openstackv1beta1.Neutron) string {
+	cfg := template.MustLoadINI(AppLabel, "neutron_ovn_metadata_agent.ini")
+
+	cfg.Section("").NewKey("nova_metadata_host", instance.Spec.Nova.MetadataHost)
+	cfg.Section("").NewKey("nova_metadata_protocol", instance.Spec.Nova.MetadataProtocol)
+
+	template.MergeINI(cfg, instance.Spec.MetadataAgent.ExtraConfig)
+
+	return template.MustOutputINI(cfg).String()
 }

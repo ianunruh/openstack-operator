@@ -4440,6 +4440,12 @@ spec:
                     type: string
                   metadataAgent:
                     properties:
+                      extraConfig:
+                        additionalProperties:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        type: object
                       image:
                         type: string
                       nodeSelector:
@@ -4505,6 +4511,10 @@ spec:
                     type: object
                   nova:
                     properties:
+                      metadataHost:
+                        type: string
+                      metadataProtocol:
+                        type: string
                       secret:
                         type: string
                     type: object
