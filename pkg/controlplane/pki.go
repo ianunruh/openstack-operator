@@ -78,3 +78,7 @@ func tlsServerDefaults(spec openstackv1beta1.TLSServerSpec, instance *openstackv
 
 	return spec
 }
+
+func isTLSEnabled(spec openstackv1beta1.TLSServerSpec) bool {
+	return spec.Issuer.Name != "" || spec.Secret != ""
+}

@@ -52,9 +52,7 @@ func (r *Neutron) Default() {
 	r.Spec.Server.Image = imageDefault(r.Spec.Server.Image, DefaultNeutronServerImage)
 	r.Spec.Server.TLS = tlsServerDefault(r.Spec.Server.TLS, r.Name, "server")
 
-	if r.Spec.Nova.Secret == "" {
-		r.Spec.Nova.Secret = "nova-keystone"
-	}
+	r.Spec.Nova = neutronNovaDefault(r.Spec.Nova)
 
 	if r.Spec.Placement.Secret == "" {
 		r.Spec.Placement.Secret = "placement-keystone"
@@ -88,4 +86,19 @@ func (r *Neutron) ValidateDelete() (admission.Warnings, error) {
 
 	// TODO(user): fill in your validation logic upon object deletion.
 	return admission.Warnings{}, nil
+}
+
+func neutronNovaDefault(spec NeutronNovaSpec) NeutronNovaSpec {
+	if spec.MetadataHost == "" {
+		spec.MetadataHost = "nova-cell1-metadata"
+	}
+	if spec.MetadataProtocol == "" {
+		spec.MetadataProtocol = "http"
+	}
+
+	if spec.Secret == "" {
+		spec.Secret = "nova-keystone"
+	}
+
+	return spec
 }
