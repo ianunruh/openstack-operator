@@ -78,6 +78,8 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 
 	reporter := controlplane.NewReporter(instance, r.Client, r.Recorder)
 
+	deps := template.NewConditionWaiter(r.Scheme, log)
+
 	// TODO if disabled, clean up resources
 	pkiResources := controlplane.PKIResources(instance)
 	for _, resource := range pkiResources {
@@ -92,12 +94,14 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	if err := ovn.Ensure(ctx, r.Client, ovnControlPlane, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	ovn.AddReadyCheck(deps, ovnControlPlane)
 
 	if cache := controlplane.Cache(instance); cache != nil {
 		controllerutil.SetControllerReference(instance, cache, r.Scheme)
 		if err := memcached.Ensure(ctx, r.Client, cache, log); err != nil {
 			return ctrl.Result{}, err
 		}
+		memcached.AddReadyCheck(deps, cache)
 	}
 
 	if database := controlplane.Database(instance); database != nil {
@@ -105,6 +109,7 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		if err := mariadb.Ensure(ctx, r.Client, database, log); err != nil {
 			return ctrl.Result{}, err
 		}
+		mariadb.AddReadyCheck(deps, database)
 	}
 
 	if broker := controlplane.Broker(instance); broker != nil {
@@ -112,6 +117,7 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		if err := rabbitmq.Ensure(ctx, r.Client, broker, log); err != nil {
 			return ctrl.Result{}, err
 		}
+		rabbitmq.AddReadyCheck(deps, broker)
 	}
 
 	identity := controlplane.Keystone(instance)
@@ -119,24 +125,28 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	if err := keystone.Ensure(ctx, r.Client, identity, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	keystone.AddReadyCheck(deps, identity)
 
 	image := controlplane.Glance(instance)
 	controllerutil.SetControllerReference(instance, image, r.Scheme)
 	if err := glance.Ensure(ctx, r.Client, image, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	glance.AddReadyCheck(deps, image)
 
 	pm := controlplane.Placement(instance)
 	controllerutil.SetControllerReference(instance, pm, r.Scheme)
 	if err := placement.Ensure(ctx, r.Client, pm, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	placement.AddReadyCheck(deps, pm)
 
 	if volume := controlplane.Cinder(instance); volume != nil {
 		controllerutil.SetControllerReference(instance, volume, r.Scheme)
 		if err := cinder.Ensure(ctx, r.Client, volume, log); err != nil {
 			return ctrl.Result{}, err
 		}
+		cinder.AddReadyCheck(deps, volume)
 	}
 
 	compute := controlplane.Nova(instance)
@@ -144,18 +154,21 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	if err := nova.Ensure(ctx, r.Client, compute, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	nova.AddReadyCheck(deps, compute)
 
 	network := controlplane.Neutron(instance)
 	controllerutil.SetControllerReference(instance, network, r.Scheme)
 	if err := neutron.Ensure(ctx, r.Client, network, log); err != nil {
 		return ctrl.Result{}, err
 	}
+	neutron.AddReadyCheck(deps, network)
 
 	if dashboard := controlplane.Horizon(instance); dashboard != nil {
 		controllerutil.SetControllerReference(instance, dashboard, r.Scheme)
 		if err := horizon.Ensure(ctx, r.Client, dashboard, log); err != nil {
 			return ctrl.Result{}, err
 		}
+		horizon.AddReadyCheck(deps, dashboard)
 	}
 
 	if keyManager := controlplane.Barbican(instance); keyManager != nil {
@@ -163,6 +176,7 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		if err := barbican.Ensure(ctx, r.Client, keyManager, log); err != nil {
 			return ctrl.Result{}, err
 		}
+		barbican.AddReadyCheck(deps, keyManager)
 	}
 
 	if orchestration := controlplane.Heat(instance); orchestration != nil {
@@ -170,6 +184,7 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		if err := heat.Ensure(ctx, r.Client, orchestration, log); err != nil {
 			return ctrl.Result{}, err
 		}
+		heat.AddReadyCheck(deps, orchestration)
 	}
 
 	if containerInfra := controlplane.Magnum(instance); containerInfra != nil {
@@ -177,12 +192,14 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		if err := magnum.Ensure(ctx, r.Client, containerInfra, log); err != nil {
 			return ctrl.Result{}, err
 		}
+		magnum.AddReadyCheck(deps, containerInfra)
 	}
 	if loadBalancer := controlplane.Octavia(instance); loadBalancer != nil {
 		controllerutil.SetControllerReference(instance, loadBalancer, r.Scheme)
 		if err := octavia.Ensure(ctx, r.Client, loadBalancer, log); err != nil {
 			return ctrl.Result{}, err
 		}
+		octavia.AddReadyCheck(deps, loadBalancer)
 	}
 
 	if sfs := controlplane.Manila(instance); sfs != nil {
@@ -190,6 +207,7 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		if err := manila.Ensure(ctx, r.Client, sfs, log); err != nil {
 			return ctrl.Result{}, err
 		}
+		manila.AddReadyCheck(deps, sfs)
 	}
 
 	if benchmark := controlplane.Rally(instance); benchmark != nil {
@@ -197,12 +215,18 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		if err := rally.Ensure(ctx, r.Client, benchmark, log); err != nil {
 			return ctrl.Result{}, err
 		}
+		rally.AddReadyCheck(deps, benchmark)
 	}
 
 	demoUser := controlplane.DemoKeystoneUser(instance)
 	controllerutil.SetControllerReference(instance, demoUser, r.Scheme)
 	if err := keystoneuser.Ensure(ctx, r.Client, demoUser, log); err != nil {
 		return ctrl.Result{}, err
+	}
+	keystoneuser.AddReadyCheck(deps, demoUser)
+
+	if result, err := deps.Wait(ctx, reporter.Pending); err != nil || !result.IsZero() {
+		return result, err
 	}
 
 	if err := reporter.Running(ctx); err != nil {
