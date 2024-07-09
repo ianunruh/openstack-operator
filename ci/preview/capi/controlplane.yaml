@@ -7,13 +7,6 @@ spec:
   ingress:
     className: nginx
     tlsSecretName: wildcard-tls
-  tls:
-    client:
-      caBundle: default-ca-root
-    server:
-      issuer:
-        name: default-ca
-        kind: Issuer
   glance:
     backends:
     - name: ssd

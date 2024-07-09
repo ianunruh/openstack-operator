@@ -10,7 +10,7 @@ import (
 
 func PKIResources(instance *openstackv1beta1.ControlPlane) []*unstructured.Unstructured {
 	spec := instance.Spec.TLS
-	if spec.Disabled || spec.Server.Issuer.Name == "" {
+	if spec.Disabled || spec.ExternalIssuer || spec.Server.Issuer.Name == "" {
 		return nil
 	}
 
