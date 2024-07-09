@@ -33,8 +33,12 @@ func ConfigMap(instance *openstackv1beta1.Heat) *corev1.ConfigMap {
 
 	cm.Data["heat.conf"] = template.MustOutputINI(cfg).String()
 
+	cm.Data["httpd-heat-api.conf"] = template.MustReadFile(AppLabel, "httpd-heat-api.conf")
 	cm.Data["kolla-heat-api.json"] = template.MustReadFile(AppLabel, "kolla-heat-api.json")
+
+	cm.Data["httpd-heat-api-cfn.conf"] = template.MustReadFile(AppLabel, "httpd-heat-api-cfn.conf")
 	cm.Data["kolla-heat-api-cfn.json"] = template.MustReadFile(AppLabel, "kolla-heat-api-cfn.json")
+
 	cm.Data["kolla-heat-engine.json"] = template.MustReadFile(AppLabel, "kolla-heat-engine.json")
 
 	return cm
