@@ -1,6 +1,7 @@
 package tlsproxy
 
 import (
+	"path/filepath"
 	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
@@ -10,8 +11,12 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
+var (
+	templatePath = filepath.Join("pki", "tlsproxy")
+)
+
 func MustReadConfig() string {
-	return template.MustReadFile("tlsproxy", "haproxy.cfg")
+	return template.MustReadFile(templatePath, "haproxy.cfg")
 }
 
 func Container(port int32, spec openstackv1beta1.TLSProxySpec, probe *corev1.Probe, volumeMounts []corev1.VolumeMount) corev1.Container {
@@ -23,7 +28,7 @@ func Container(port int32, spec openstackv1beta1.TLSProxySpec, probe *corev1.Pro
 		Command: []string{
 			"bash",
 			"-c",
-			template.MustReadFile("tlsproxy", "run.sh"),
+			template.MustReadFile(templatePath, "run.sh"),
 		},
 		Env: []corev1.EnvVar{
 			template.EnvVar("SERVICE_HTTP_PORT", strconv.Itoa(int(port))),
