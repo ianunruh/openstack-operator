@@ -63,6 +63,7 @@ func novaCellDefaults(cells []openstackv1beta1.NovaCellSpec, instance *openstack
 		}
 
 		spec.Metadata.NodeSelector = controllerNodeSelector(spec.Metadata.NodeSelector, instance)
+		spec.Metadata.TLS = tlsServerDefaults(spec.Metadata.TLS, instance)
 
 		// TODO handle naming for multiple cells
 		spec.NoVNCProxy.Ingress = ingressDefaults(spec.NoVNCProxy.Ingress, instance, "novnc")
