@@ -33,10 +33,10 @@ func ConfigMap(instance *openstackv1beta1.Heat) *corev1.ConfigMap {
 
 	cm.Data["heat.conf"] = template.MustOutputINI(cfg).String()
 
-	cm.Data["httpd-heat-api.conf"] = template.MustReadFile(AppLabel, "httpd-heat-api.conf")
+	cm.Data["httpd-heat-api.conf"] = template.MustRenderFile(AppLabel, "httpd-heat-api.conf", httpdParamsFrom(instance))
 	cm.Data["kolla-heat-api.json"] = template.MustReadFile(AppLabel, "kolla-heat-api.json")
 
-	cm.Data["httpd-heat-api-cfn.conf"] = template.MustReadFile(AppLabel, "httpd-heat-api-cfn.conf")
+	cm.Data["httpd-heat-api-cfn.conf"] = template.MustRenderFile(AppLabel, "httpd-heat-api-cfn.conf", httpdParamsFrom(instance))
 	cm.Data["kolla-heat-api-cfn.json"] = template.MustReadFile(AppLabel, "kolla-heat-api-cfn.json")
 
 	cm.Data["kolla-heat-engine.json"] = template.MustReadFile(AppLabel, "kolla-heat-engine.json")
@@ -48,4 +48,14 @@ func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.Hea
 	return template.Ensure(ctx, c, instance, log, func(intended *openstackv1beta1.Heat) {
 		instance.Spec = intended.Spec
 	})
+}
+
+type httpdParams struct {
+	TLS bool
+}
+
+func httpdParamsFrom(instance *openstackv1beta1.Heat) httpdParams {
+	return httpdParams{
+		TLS: instance.Spec.API.TLS.Secret != "",
+	}
 }
