@@ -156,7 +156,7 @@ func (r *ControlPlaneReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 	nova.AddReadyCheck(deps, compute)
 
-	network := controlplane.Neutron(instance)
+	network := controlplane.Neutron(instance, compute)
 	controllerutil.SetControllerReference(instance, network, r.Scheme)
 	if err := neutron.Ensure(ctx, r.Client, network, log); err != nil {
 		return ctrl.Result{}, err
