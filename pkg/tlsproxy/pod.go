@@ -15,6 +15,8 @@ func MustReadConfig() string {
 }
 
 func Container(port int32, spec openstackv1beta1.TLSProxySpec, probe *corev1.Probe, volumeMounts []corev1.VolumeMount) corev1.Container {
+	runAsUser := int64(99)
+
 	return corev1.Container{
 		Name:  "tlsproxy",
 		Image: spec.Image,
@@ -30,7 +32,11 @@ func Container(port int32, spec openstackv1beta1.TLSProxySpec, probe *corev1.Pro
 		Ports: []corev1.ContainerPort{
 			{Name: "http", ContainerPort: port},
 		},
-		Resources:    spec.Resources,
+		Resources: spec.Resources,
+		SecurityContext: &corev1.SecurityContext{
+			RunAsUser:  &runAsUser,
+			RunAsGroup: &runAsUser,
+		},
 		VolumeMounts: volumeMounts,
 	}
 }
