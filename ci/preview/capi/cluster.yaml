@@ -89,7 +89,7 @@ spec:
   template:
     spec:
       cloudName: default
-      flavor: c1-medium
+      flavor: hm1-medium
       identityRef:
         kind: Secret
         name: cluster-admin-keystone
@@ -128,7 +128,7 @@ spec:
   template:
     spec:
       cloudName: default
-      flavor: c1-large
+      flavor: hm1-large
       identityRef:
         kind: Secret
         name: cluster-admin-keystone
