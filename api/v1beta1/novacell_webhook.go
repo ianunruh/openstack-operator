@@ -47,7 +47,10 @@ func (r *NovaCell) Default() {
 	r.Spec.Database = databaseDefault(r.Spec.Database, r.Name)
 
 	r.Spec.Metadata.Image = imageDefault(r.Spec.Metadata.Image, DefaultNovaAPIImage)
+	r.Spec.Metadata.TLS = tlsServerDefault(r.Spec.Metadata.TLS, r.Name, "metadata")
+
 	r.Spec.Conductor.Image = imageDefault(r.Spec.Conductor.Image, DefaultNovaConductorImage)
+
 	r.Spec.NoVNCProxy.Image = imageDefault(r.Spec.NoVNCProxy.Image, DefaultNovaNoVNCProxyImage)
 
 	if r.Spec.Compute == nil {
