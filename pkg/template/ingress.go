@@ -13,6 +13,11 @@ import (
 
 func EnsureIngress(ctx context.Context, c client.Client, instance *netv1.Ingress, log logr.Logger) error {
 	return Ensure(ctx, c, instance, log, func(intended *netv1.Ingress) {
+		// carry over default ingress class
+		if intended.Spec.IngressClassName == nil {
+			intended.Spec.IngressClassName = instance.Spec.IngressClassName
+		}
+
 		instance.Spec = intended.Spec
 		instance.Annotations = intended.Annotations
 	})
