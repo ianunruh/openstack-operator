@@ -76,6 +76,9 @@ type NeutronServerSpec struct {
 
 	// +optional
 	TLS TLSServerSpec `json:"tls,omitempty"`
+
+	// +optional
+	TLSProxy TLSProxySpec `json:"tlsProxy,omitempty"`
 }
 
 type NeutronMetadataAgentSpec struct {

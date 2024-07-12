@@ -51,6 +51,7 @@ func (r *Neutron) Default() {
 
 	r.Spec.Server.Image = imageDefault(r.Spec.Server.Image, DefaultNeutronServerImage)
 	r.Spec.Server.TLS = tlsServerDefault(r.Spec.Server.TLS, r.Name, "server")
+	r.Spec.Server.TLSProxy = tlsProxyDefault(r.Spec.Server.TLSProxy)
 
 	r.Spec.Nova = neutronNovaDefault(r.Spec.Nova)
 
