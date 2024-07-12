@@ -10,11 +10,14 @@ import (
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/pki"
+	"github.com/ianunruh/openstack-operator/pkg/pki/tlsproxy"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
 const (
 	ServerComponentLabel = "server"
+
+	ServerPort int32 = 9696
 )
 
 func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
@@ -25,8 +28,8 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Path:   "/",
-				Port:   intstr.FromInt(9696),
+				Path:   "/healthcheck",
+				Port:   intstr.FromInt32(ServerPort),
 				Scheme: pki.HTTPActionScheme(spec.TLS),
 			},
 		},
@@ -41,7 +44,33 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
-	pki.AppendTLSServerVolumes(spec.TLS, "/etc/neutron/certs", 0444, &volumes, &volumeMounts)
+
+	apiContainer := corev1.Container{
+		Name:         "server",
+		Image:        spec.Image,
+		Command:      []string{"/usr/local/bin/kolla_start"},
+		Env:          env,
+		Resources:    spec.Resources,
+		VolumeMounts: volumeMounts,
+	}
+
+	var containers []corev1.Container
+
+	if spec.TLS.Secret == "" {
+		apiContainer.Ports = []corev1.ContainerPort{
+			{Name: "http", ContainerPort: ServerPort},
+		}
+		apiContainer.LivenessProbe = probe
+		apiContainer.StartupProbe = probe
+	} else {
+		tlsProxyVolumeMounts := tlsproxy.VolumeMounts("etc-neutron", "tlsproxy.conf")
+		tlsproxy.AppendTLSServerVolumes(spec.TLS, &volumes, &tlsProxyVolumeMounts)
+
+		containers = append(containers,
+			tlsproxy.Container(ServerPort, spec.TLSProxy, probe, tlsProxyVolumeMounts))
+	}
+
+	containers = append(containers, apiContainer)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
@@ -51,21 +80,7 @@ func ServerDeployment(instance *openstackv1beta1.Neutron, env []corev1.EnvVar, v
 		Affinity: &corev1.Affinity{
 			PodAntiAffinity: template.NodePodAntiAffinity(labels),
 		},
-		Containers: []corev1.Container{
-			{
-				Name:    "server",
-				Image:   spec.Image,
-				Command: []string{"/usr/local/bin/kolla_start"},
-				Env:     env,
-				Ports: []corev1.ContainerPort{
-					{Name: "http", ContainerPort: 9696},
-				},
-				LivenessProbe: probe,
-				StartupProbe:  probe,
-				Resources:     spec.Resources,
-				VolumeMounts:  volumeMounts,
-			},
-		},
+		Containers: containers,
 		SecurityContext: &corev1.PodSecurityContext{
 			RunAsUser: &appUID,
 			FSGroup:   &appUID,
@@ -84,7 +99,7 @@ func ServerService(instance *openstackv1beta1.Neutron) *corev1.Service {
 
 	svc := template.GenericService(name, instance.Namespace, labels)
 	svc.Spec.Ports = []corev1.ServicePort{
-		{Name: "http", Port: 9696},
+		{Name: "http", Port: ServerPort},
 	}
 
 	return svc
@@ -104,7 +119,7 @@ func ServerInternalURL(instance *openstackv1beta1.Neutron) string {
 	if instance.Spec.Server.TLS.Secret != "" {
 		scheme = "https"
 	}
-	return fmt.Sprintf("%s://%s-server.%s.svc:9696", scheme, instance.Name, instance.Namespace)
+	return fmt.Sprintf("%s://%s-server.%s.svc:%d", scheme, instance.Name, instance.Namespace, ServerPort)
 }
 
 func ServerPublicURL(instance *openstackv1beta1.Neutron) string {

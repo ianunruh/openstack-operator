@@ -9,6 +9,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/pki/tlsproxy"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
@@ -17,7 +18,7 @@ const (
 )
 
 var (
-	appUID = int64(42435)
+	appUID int64 = 42435
 )
 
 func ConfigMap(instance *openstackv1beta1.Neutron) *corev1.ConfigMap {
@@ -29,6 +30,10 @@ func ConfigMap(instance *openstackv1beta1.Neutron) *corev1.ConfigMap {
 
 	cfg.Section("keystone_authtoken").NewKey("memcached_servers", strings.Join(spec.Cache.Servers, ","))
 
+	if spec.Server.TLS.Secret != "" {
+		cfg.Section("").NewKey("bind_host", "127.0.0.1")
+	}
+
 	template.MergeINI(cfg, spec.ExtraConfig)
 
 	cm.Data["neutron.conf"] = template.MustOutputINI(cfg).String()
@@ -36,6 +41,8 @@ func ConfigMap(instance *openstackv1beta1.Neutron) *corev1.ConfigMap {
 
 	cm.Data["kolla-neutron-metadata-agent.json"] = template.MustReadFile(AppLabel, "kolla-neutron-metadata-agent.json")
 	cm.Data["kolla-neutron-server.json"] = template.MustReadFile(AppLabel, "kolla-neutron-server.json")
+
+	cm.Data["tlsproxy.conf"] = tlsproxy.MustReadConfig()
 
 	return cm
 }
