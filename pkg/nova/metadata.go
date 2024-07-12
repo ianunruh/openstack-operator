@@ -3,6 +3,7 @@ package nova
 import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/httpd"
@@ -12,6 +13,8 @@ import (
 
 const (
 	MetadataComponentLabel = "metadata"
+
+	MetadataBinary = "nova-metadata-wsgi"
 )
 
 func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
@@ -19,19 +22,17 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 
 	spec := instance.Spec.Metadata
 
-	env = append(env, template.EnvVar("OS_DEFAULT__ENABLED_APIS", "metadata"))
-
-	// probe := &corev1.Probe{
-	// 	ProbeHandler: corev1.ProbeHandler{
-	// 		HTTPGet: &corev1.HTTPGetAction{
-	// 			Path: "/",
-	// 			Port: intstr.FromInt(8775),
-	// 		},
-	// 	},
-	// 	InitialDelaySeconds: 5,
-	// 	PeriodSeconds:       10,
-	// 	TimeoutSeconds:      5,
-	// }
+	probe := &corev1.Probe{
+		ProbeHandler: corev1.ProbeHandler{
+			HTTPGet: &corev1.HTTPGetAction{
+				Port:   intstr.FromInt(8775),
+				Scheme: pki.HTTPActionScheme(spec.TLS),
+			},
+		},
+		InitialDelaySeconds: 5,
+		PeriodSeconds:       10,
+		TimeoutSeconds:      5,
+	}
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-nova", "/etc/apache2/sites-available/000-default.conf", "httpd.conf"),
@@ -40,7 +41,7 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
-	pki.AppendTLSServerVolumes(spec.TLS, "/etc/nova/certs", 0444, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/nova/certs", 0400, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
@@ -57,10 +58,10 @@ func MetadataDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvVar
 				Ports: []corev1.ContainerPort{
 					{Name: "http", ContainerPort: 8775},
 				},
-				// LivenessProbe: probe,
-				// StartupProbe:  probe,
-				Resources:    spec.Resources,
-				VolumeMounts: volumeMounts,
+				LivenessProbe: probe,
+				StartupProbe:  probe,
+				Resources:     spec.Resources,
+				VolumeMounts:  volumeMounts,
 			},
 		},
 		Volumes: volumes,

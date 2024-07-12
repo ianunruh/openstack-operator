@@ -1,6 +1,8 @@
 package controlplane
 
 import (
+	"fmt"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
@@ -40,7 +42,8 @@ func neutronNovaDefaults(spec openstackv1beta1.NeutronNovaSpec, nova *openstackv
 	cell := nova.Spec.Cells[0]
 
 	if spec.MetadataHost == "" {
-		spec.MetadataHost = template.Combine(nova.Name, cell.Name, "metadata")
+		metadataSvc := template.Combine(nova.Name, cell.Name, "metadata")
+		spec.MetadataHost = fmt.Sprintf("%s.%s.svc", metadataSvc, nova.Namespace)
 	}
 
 	if spec.MetadataProtocol == "" && isTLSEnabled(cell.Metadata.TLS) {

@@ -18,7 +18,8 @@ func ConfigMap(instance *openstackv1beta1.NovaCell, cluster *openstackv1beta1.No
 
 	cm.Data["nova.conf"] = template.MustOutputINI(cfg).String()
 
-	cm.Data["httpd.conf"] = template.MustRenderFile(nova.AppLabel, "httpd.conf", nova.HttpdParamsFrom(8775, instance.Spec.Metadata.TLS))
+	cm.Data["httpd.conf"] = template.MustRenderFile(nova.AppLabel, "httpd.conf",
+		nova.HttpdParamsFrom(8775, nova.MetadataBinary, instance.Spec.Metadata.TLS))
 
 	cm.Data["kolla-nova-api.json"] = template.MustReadFile(nova.AppLabel, "kolla-nova-api.json")
 	cm.Data["kolla-nova-conductor.json"] = template.MustReadFile(nova.AppLabel, "kolla-nova-conductor.json")

@@ -16,6 +16,8 @@ import (
 
 const (
 	APIComponentLabel = "api"
+
+	APIBinary = "nova-api-wsgi"
 )
 
 func APIDeployment(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.Deployment {
@@ -23,12 +25,9 @@ func APIDeployment(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes
 
 	spec := instance.Spec.API
 
-	env = append(env, template.EnvVar("OS_DEFAULT__ENABLED_APIS", "osapi_compute"))
-
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{
 			HTTPGet: &corev1.HTTPGetAction{
-				Path:   "/",
 				Port:   intstr.FromInt(8774),
 				Scheme: pki.HTTPActionScheme(spec.TLS),
 			},
@@ -45,7 +44,7 @@ func APIDeployment(instance *openstackv1beta1.Nova, env []corev1.EnvVar, volumes
 	}
 
 	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
-	pki.AppendTLSServerVolumes(spec.TLS, "/etc/nova/certs", 0444, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/nova/certs", 0400, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
