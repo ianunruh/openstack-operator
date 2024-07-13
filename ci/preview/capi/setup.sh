@@ -7,8 +7,8 @@ setup_kubectl
 
 export OPENSTACK_CLOUD_YAML_B64=$(kubectl get secret cluster-admin-keystone -o 'jsonpath={.data.clouds\.yaml}')
 
-log "Applying preview profiles"
-for profile in $(echo "$GITHUB_PR_DESCRIPTION" | awk '/^\/profile /{print $2}' | tr , '\n'); do
+for profile in $(echo "$GITHUB_PR_BODY" | awk '/^\/profiles? /{print $2}' | tr , '\n'); do
+    log "Applying preview profile: $profile"
     ./profiles/$profile/apply.sh
 done
 
