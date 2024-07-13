@@ -64,6 +64,7 @@ jobs:
           PREVIEW_KUBECONFIG: ${{ secrets.PREVIEW_KUBECONFIG }}
           GCLOUD_SVC_ACCOUNT_KEY_JSON: ${{ secrets.GCLOUD_SVC_ACCOUNT_KEY_JSON }}
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_READ }}
+          GITHUB_PR_DESCRIPTION: ${{ github.event.pull_request.description }}
 
       - name: Post comment to PR
         uses: marocchino/sticky-pull-request-comment@v2

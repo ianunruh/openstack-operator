@@ -1,0 +1,8 @@
+apiVersion: openstack.ospk8s.com/v1beta1
+kind: ControlPlane
+metadata:
+  name: default
+spec:
+  keystone:
+    api:
+      replicas: 3
