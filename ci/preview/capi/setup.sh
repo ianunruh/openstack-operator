@@ -7,9 +7,15 @@ setup_kubectl
 
 export OPENSTACK_CLOUD_YAML_B64=$(kubectl get secret cluster-admin-keystone -o 'jsonpath={.data.clouds\.yaml}')
 
+for profile in $(echo "$GITHUB_PR_BODY" | awk '/^\/profiles? /{print $2}' | tr , '\n'); do
+    log "Applying preview profile: $profile"
+    ./profiles/$profile/apply.sh
+done
+
 log "Generating and applying Cluster API manifests to undercloud"
-sed "s/\$(CLUSTER_NAME)/$CLUSTER_NAME/" cluster.yaml | \
-    sed -e "s/\$(OPENSTACK_FAILURE_DOMAIN)/$OPENSTACK_FAILURE_DOMAIN/" | \
+kustomize build --load-restrictor LoadRestrictionsNone cluster | \
+    sed "s/\$(CLUSTER_NAME)/$CLUSTER_NAME/" | \
+    sed "s/\$(OPENSTACK_FAILURE_DOMAIN)/$OPENSTACK_FAILURE_DOMAIN/" | \
     kubectl apply -f-
 
 log "Waiting for Kubernetes control plane to be available"
@@ -57,7 +63,7 @@ kubectl -n kube-system create secret generic cloud-config --from-file=cloud.conf
 rm cloud.conf clouds.yaml
 
 log "Applying cloud provider manifests"
-kubectl kustomize cloud-provider | \
+kustomize build cloud-provider | \
     sed "s/\$(CLUSTER_NAME)/$CLUSTER_NAME/" | \
     kubectl apply -f-
 
@@ -84,8 +90,8 @@ done
 
 kubectl -n calico-system rollout status deploy calico-kube-controllers
 
-log "Applying cinder manifests"
-kubectl kustomize cinder-csi | \
+log "Applying cinder-csi manifests"
+kustomize build cinder-csi | \
     sed "s/\$(CLUSTER_NAME)/$CLUSTER_NAME/" | \
     kubectl apply -f-
 
@@ -143,4 +149,6 @@ log "Waiting for openstack-operator to become ready"
 kubectl -n openstack-system rollout status deploy openstack-operator-controller-manager
 
 log "Applying OpenStack control plane manifests"
-sed "s/\$(CLUSTER_DOMAIN)/$CLUSTER_DOMAIN/" controlplane.yaml | kubectl apply -f-
+kustomize build --load-restrictor LoadRestrictionsNone controlplane | \
+    sed "s/\$(CLUSTER_DOMAIN)/$CLUSTER_DOMAIN/" | \
+    kubectl apply -f-
