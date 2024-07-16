@@ -45,6 +45,7 @@ func (r *RabbitMQ) Default() {
 
 	r.Spec.Image = imageDefault(r.Spec.Image, DefaultRabbitMQImage)
 	r.Spec.Volume = volumeDefault(r.Spec.Volume)
+	r.Spec.TLS = tlsServerDefault(r.Spec.TLS, r.Name, "server")
 }
 
 // TODO(user): change verbs to "verbs=create;update;delete" if you want to enable deletion validation.
