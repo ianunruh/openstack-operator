@@ -13,11 +13,11 @@ const (
 	ConductorComponentLabel = "conductor"
 )
 
-func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaConductorSpec, tlsSpec openstackv1beta1.TLSClientSpec, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
+func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaConductorSpec, brokerSpec openstackv1beta1.RabbitMQUserSpec, tlsSpec openstackv1beta1.TLSClientSpec, env []corev1.EnvVar, volumes []corev1.Volume) *appsv1.StatefulSet {
 	labels := template.Labels(name, AppLabel, ConductorComponentLabel)
 
 	probe := &corev1.Probe{
-		ProbeHandler:        amqpHealthProbeHandler("nova-conductor"),
+		ProbeHandler:        amqpHealthProbeHandler("nova-conductor", brokerSpec),
 		InitialDelaySeconds: 5,
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,

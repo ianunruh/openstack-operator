@@ -210,7 +210,14 @@ func (r *NovaCellReconciler) reconcileConductor(ctx context.Context, instance *o
 		return err
 	}
 
-	sts := nova.ConductorStatefulSet(instance.Name, instance.Namespace, instance.Spec.Conductor, instance.Spec.TLS, env, volumes)
+	sts := nova.ConductorStatefulSet(
+		instance.Name,
+		instance.Namespace,
+		instance.Spec.Conductor,
+		instance.Spec.Broker,
+		instance.Spec.TLS,
+		env,
+		volumes)
 	controllerutil.SetControllerReference(instance, sts, r.Scheme)
 	if err := template.EnsureStatefulSet(ctx, r.Client, sts, log); err != nil {
 		return err

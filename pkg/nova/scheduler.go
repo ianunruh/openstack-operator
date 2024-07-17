@@ -19,7 +19,7 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, 
 	spec := instance.Spec.Scheduler
 
 	probe := &corev1.Probe{
-		ProbeHandler:        amqpHealthProbeHandler("nova-scheduler"),
+		ProbeHandler:        amqpHealthProbeHandler("nova-scheduler", instance.Spec.Broker),
 		InitialDelaySeconds: 5,
 		PeriodSeconds:       10,
 		TimeoutSeconds:      5,
