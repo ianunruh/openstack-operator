@@ -55,19 +55,6 @@ func ClusterStatefulSet(instance *openstackv1beta1.RabbitMQ, configHash string) 
 		template.ConfigMapVolume("config", instance.Name, nil),
 	}
 
-	if instance.Spec.TLS.Secret != "" {
-		env = append(env,
-			template.EnvVar("RABBITMQ_SSL_CACERTFILE", "/bitnami/rabbitmq/certs/ca.crt"),
-			template.EnvVar("RABBITMQ_SSL_CERTFILE", "/bitnami/rabbitmq/certs/tls.crt"),
-			template.EnvVar("RABBITMQ_SSL_KEYFILE", "/bitnami/rabbitmq/certs/tls.key"),
-			template.EnvVar("RABBITMQ_MANAGEMENT_SSL_CACERTFILE", "/bitnami/rabbitmq/certs/ca.crt"),
-			template.EnvVar("RABBITMQ_MANAGEMENT_SSL_CERTFILE", "/bitnami/rabbitmq/certs/tls.crt"),
-			template.EnvVar("RABBITMQ_MANAGEMENT_SSL_KEYFILE", "/bitnami/rabbitmq/certs/tls.key"),
-			// ingress does not provide a client TLS cert
-			template.EnvVar("RABBITMQ_MANAGEMENT_SSL_FAIL_IF_NO_PEER_CERT", "no"),
-			template.EnvVar("RABBITMQ_MANAGEMENT_SSL_VERIFY", "verify_none"))
-	}
-
 	pki.AppendTLSServerVolumes(instance.Spec.TLS, "/bitnami/rabbitmq/certs", 0444, &volumes, &volumeMounts)
 
 	// TODO pod anti-affinity

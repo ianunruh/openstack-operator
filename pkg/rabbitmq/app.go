@@ -17,7 +17,7 @@ func ConfigMap(instance *openstackv1beta1.RabbitMQ) *corev1.ConfigMap {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	cm := template.GenericConfigMap(instance.Name, instance.Namespace, labels)
 
-	cm.Data["rabbitmq.conf"] = template.MustReadFile(AppLabel, "rabbitmq.conf")
+	cm.Data["rabbitmq.conf"] = template.MustRenderFile(AppLabel, "rabbitmq.conf", configParamsFrom(instance))
 
 	return cm
 }
@@ -33,4 +33,14 @@ func Secret(instance *openstackv1beta1.RabbitMQ) *corev1.Secret {
 	secret.StringData["connection"] = fmt.Sprintf("rabbit://admin:%s@%s:15672", password, instance.Name)
 
 	return secret
+}
+
+type configParams struct {
+	TLS bool
+}
+
+func configParamsFrom(instance *openstackv1beta1.RabbitMQ) configParams {
+	return configParams{
+		TLS: instance.Spec.TLS.Secret != "",
+	}
 }
