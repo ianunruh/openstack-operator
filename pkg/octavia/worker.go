@@ -25,6 +25,7 @@ func WorkerDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, v
 	}
 
 	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendRabbitMQTLSClientVolumes(instance.Spec.Broker, &volumes, &volumeMounts)
 
 	volumeMounts = append(volumeMounts, amphora.VolumeMounts(instance)...)
 	volumes = append(volumes, amphora.Volumes(instance)...)

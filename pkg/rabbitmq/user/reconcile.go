@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/go-logr/logr"
 	batchv1 "k8s.io/api/batch/v1"
@@ -16,8 +17,10 @@ import (
 )
 
 const (
-	defaultBrokerPort uint16 = 5672
-	defaultAdminPort  uint16 = 15672
+	defaultBrokerPort    uint16 = 5672
+	defaultBrokerTLSPort uint16 = 5671
+	defaultAdminPort     uint16 = 15672
+	defaultAdminTLSPort  uint16 = 15671
 )
 
 func SetupJob(instance *openstackv1beta1.RabbitMQUser) *batchv1.Job {
@@ -84,7 +87,7 @@ func SetupJob(instance *openstackv1beta1.RabbitMQUser) *batchv1.Job {
 	return job
 }
 
-func Secret(instance *openstackv1beta1.RabbitMQUser) *corev1.Secret {
+func Secret(instance *openstackv1beta1.RabbitMQUser, password string) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, rabbitmq.AppLabel)
 	secret := template.GenericSecret(instance.Spec.Secret, instance.Namespace, labels)
 
@@ -93,22 +96,55 @@ func Secret(instance *openstackv1beta1.RabbitMQUser) *corev1.Secret {
 	hostname := clusterName
 	port := defaultBrokerPort
 	username := instance.Spec.Name
-	password := template.MustGeneratePassword()
 	vhost := instance.Spec.VirtualHost
+
+	if password == "" {
+		password = template.MustGeneratePassword()
+	}
+
+	useTLS := false
 
 	if clusterName == "" {
 		externalSpec := instance.Spec.External
 
 		hostname = externalSpec.Host
+
+		if externalSpec.TLS.CABundle != "" {
+			port = defaultBrokerTLSPort
+			useTLS = true
+		}
+
 		if externalSpec.Port > 0 {
 			port = externalSpec.Port
 		}
+	} else if instance.Spec.TLS.CABundle != "" {
+		port = defaultBrokerTLSPort
+		useTLS = true
 	}
 
-	secret.StringData["connection"] = fmt.Sprintf("rabbit://%s:%s@%s:%d/%s", username, password, hostname, port, vhost)
+	var driverOpts []string
+
+	if useTLS {
+		driverOpts = append(driverOpts, "ssl=True")
+		driverOpts = append(driverOpts, "ssl_ca_file=/etc/ssl/certs/rabbitmq/ca.crt")
+	}
+
+	var query string
+	if len(driverOpts) > 0 {
+		query = fmt.Sprintf("?%s", strings.Join(driverOpts, "&"))
+	}
+
+	secret.StringData["connection"] = fmt.Sprintf(
+		"rabbit://%s:%s@%s:%d/%s%s",
+		username, password, hostname, port, vhost, query)
+
 	secret.StringData["password"] = password
 
 	return secret
+}
+
+func PasswordFromSecret(secret *corev1.Secret) string {
+	return string(secret.Data["password"])
 }
 
 func Ensure(ctx context.Context, c client.Client, instance *openstackv1beta1.RabbitMQUser, log logr.Logger) error {

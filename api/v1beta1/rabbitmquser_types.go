@@ -46,6 +46,9 @@ type ExternalBrokerSpec struct {
 
 	// +optional
 	AdminPort uint16 `json:"adminPort,omitempty"`
+
+	// +optional
+	TLS TLSClientSpec `json:"tls,omitempty"`
 }
 
 // RabbitMQUserSpec defines the desired state of RabbitMQUser
@@ -62,6 +65,9 @@ type RabbitMQUserSpec struct {
 
 	// +optional
 	SetupJob JobSpec `json:"setupJob,omitempty"`
+
+	// +optional
+	TLS TLSClientSpec `json:"tls,omitempty"`
 }
 
 func brokerDefault(spec RabbitMQUserSpec, instance, virtualHost string) RabbitMQUserSpec {

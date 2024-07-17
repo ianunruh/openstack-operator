@@ -31,6 +31,7 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, 
 	}
 
 	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendRabbitMQTLSClientVolumes(instance.Spec.Broker, &volumes, &volumeMounts)
 
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    instance.Namespace,

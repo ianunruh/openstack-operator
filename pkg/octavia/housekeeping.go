@@ -25,6 +25,7 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 	}
 
 	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendRabbitMQTLSClientVolumes(instance.Spec.Broker, &volumes, &volumeMounts)
 
 	var initContainers []corev1.Container
 

@@ -25,6 +25,7 @@ func ShareStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar, vo
 	}
 
 	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendRabbitMQTLSClientVolumes(instance.Spec.Broker, &volumes, &volumeMounts)
 
 	cephSecrets := rookceph.NewClientSecretAppender(&volumes, &volumeMounts)
 	for _, backend := range instance.Spec.Backends {

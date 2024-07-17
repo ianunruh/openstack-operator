@@ -166,6 +166,11 @@ spec:
                             type: string
                           port:
                             type: integer
+                          tls:
+                            properties:
+                              caBundle:
+                                type: string
+                            type: object
                         required:
                         - adminSecret
                         - host
@@ -239,6 +244,11 @@ spec:
                                   More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                                 type: object
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          caBundle:
+                            type: string
                         type: object
                       virtualHost:
                         type: string
@@ -983,6 +993,11 @@ spec:
                             type: string
                           port:
                             type: integer
+                          tls:
+                            properties:
+                              caBundle:
+                                type: string
+                            type: object
                         required:
                         - adminSecret
                         - host
@@ -1056,6 +1071,11 @@ spec:
                                   More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                                 type: object
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          caBundle:
+                            type: string
                         type: object
                       virtualHost:
                         type: string
@@ -1553,6 +1573,11 @@ spec:
                     type: string
                   port:
                     type: integer
+                  tls:
+                    properties:
+                      caBundle:
+                        type: string
+                    type: object
                 required:
                 - adminSecret
                 - host
@@ -2095,6 +2120,11 @@ spec:
                             type: string
                           port:
                             type: integer
+                          tls:
+                            properties:
+                              caBundle:
+                                type: string
+                            type: object
                         required:
                         - adminSecret
                         - host
@@ -2168,6 +2198,11 @@ spec:
                                   More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                                 type: object
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          caBundle:
+                            type: string
                         type: object
                       virtualHost:
                         type: string
@@ -2852,6 +2887,11 @@ spec:
                             type: string
                           port:
                             type: integer
+                          tls:
+                            properties:
+                              caBundle:
+                                type: string
+                            type: object
                         required:
                         - adminSecret
                         - host
@@ -2925,6 +2965,11 @@ spec:
                                   More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                                 type: object
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          caBundle:
+                            type: string
                         type: object
                       virtualHost:
                         type: string
@@ -3271,6 +3316,11 @@ spec:
                             type: string
                           port:
                             type: integer
+                          tls:
+                            properties:
+                              caBundle:
+                                type: string
+                            type: object
                         required:
                         - adminSecret
                         - host
@@ -3344,6 +3394,11 @@ spec:
                                   More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                                 type: object
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          caBundle:
+                            type: string
                         type: object
                       virtualHost:
                         type: string
@@ -3757,6 +3812,11 @@ spec:
                             type: string
                           port:
                             type: integer
+                          tls:
+                            properties:
+                              caBundle:
+                                type: string
+                            type: object
                         required:
                         - adminSecret
                         - host
@@ -3830,6 +3890,11 @@ spec:
                                   More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                                 type: object
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          caBundle:
+                            type: string
                         type: object
                       virtualHost:
                         type: string
@@ -4189,6 +4254,11 @@ spec:
                             type: string
                           port:
                             type: integer
+                          tls:
+                            properties:
+                              caBundle:
+                                type: string
+                            type: object
                         required:
                         - adminSecret
                         - host
@@ -4262,6 +4332,11 @@ spec:
                                   More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                                 type: object
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          caBundle:
+                            type: string
                         type: object
                       virtualHost:
                         type: string
@@ -4926,6 +5001,11 @@ spec:
                             type: string
                           port:
                             type: integer
+                          tls:
+                            properties:
+                              caBundle:
+                                type: string
+                            type: object
                         required:
                         - adminSecret
                         - host
@@ -4999,6 +5079,11 @@ spec:
                                   More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                                 type: object
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          caBundle:
+                            type: string
                         type: object
                       virtualHost:
                         type: string
@@ -5142,6 +5227,11 @@ spec:
                                   type: string
                                 port:
                                   type: integer
+                                tls:
+                                  properties:
+                                    caBundle:
+                                      type: string
+                                  type: object
                               required:
                               - adminSecret
                               - host
@@ -5215,6 +5305,11 @@ spec:
                                         More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                                       type: object
                                   type: object
+                              type: object
+                            tls:
+                              properties:
+                                caBundle:
+                                  type: string
                               type: object
                             virtualHost:
                               type: string
@@ -6223,6 +6318,11 @@ spec:
                             type: string
                           port:
                             type: integer
+                          tls:
+                            properties:
+                              caBundle:
+                                type: string
+                            type: object
                         required:
                         - adminSecret
                         - host
@@ -6296,6 +6396,11 @@ spec:
                                   More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
                                 type: object
                             type: object
+                        type: object
+                      tls:
+                        properties:
+                          caBundle:
+                            type: string
                         type: object
                       virtualHost:
                         type: string
