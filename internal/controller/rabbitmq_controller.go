@@ -78,6 +78,15 @@ func (r *RabbitMQReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	deps := template.NewConditionWaiter(r.Scheme, log)
 
+	// TODO if disabled, clean up resources
+	pkiResources := rabbitmq.PKIResources(instance)
+	for _, resource := range pkiResources {
+		controllerutil.SetControllerReference(instance, resource, r.Scheme)
+		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
 	if err := r.reconcileRBAC(ctx, instance, log); err != nil {
 		return ctrl.Result{}, err
 	}
