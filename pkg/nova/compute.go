@@ -57,7 +57,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.En
 		template.HostPathVolume("host-var-lib-libvirt", "/var/lib/libvirt"),
 		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"))
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,

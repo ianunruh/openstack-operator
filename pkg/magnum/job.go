@@ -18,7 +18,7 @@ func DBSyncJob(instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volumes [
 		template.SubPathVolumeMount("etc-magnum", "/etc/magnum/magnum.conf", "magnum.conf"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,

@@ -30,7 +30,7 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Nova, env []corev1.EnvVar, 
 		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-scheduler.json"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    instance.Namespace,

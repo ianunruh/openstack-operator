@@ -39,7 +39,7 @@ func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1
 		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	runAsRootUser := int64(0)
 	privileged := true

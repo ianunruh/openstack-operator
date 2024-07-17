@@ -18,7 +18,7 @@ func DBSyncJob(instance *openstackv1beta1.Placement, env []corev1.EnvVar, volume
 		template.SubPathVolumeMount("etc-placement", "/etc/placement/placement.conf", "placement.conf"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,

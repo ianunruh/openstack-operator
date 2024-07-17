@@ -40,7 +40,7 @@ func APIDeployment(instance *openstackv1beta1.Magnum, env []corev1.EnvVar, volum
 		template.SubPathVolumeMount("etc-magnum", "/var/lib/kolla/config_files/config.json", "kolla-magnum-api.json"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 	pki.AppendTLSServerVolumes(spec.TLS, "/etc/magnum/certs", 0444, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{

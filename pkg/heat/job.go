@@ -18,7 +18,7 @@ func DBSyncJob(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes []c
 		template.SubPathVolumeMount("etc-heat", "/etc/heat/heat.conf", "heat.conf"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,

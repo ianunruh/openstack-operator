@@ -34,7 +34,7 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 		template.VolumeMount("pod-var-run-octavia", "/var/run/octavia"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 	pki.AppendTLSServerVolumes(spec.TLS, "/etc/octavia/certs", 0400, &volumes, &volumeMounts)
 
 	apiVolumeMounts := append(volumeMounts,

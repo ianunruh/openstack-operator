@@ -7,7 +7,11 @@ import (
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
-func AppendTLSClientVolumes(spec openstackv1beta1.TLSClientSpec, volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount) {
+func AppendKollaTLSClientVolumes(spec openstackv1beta1.TLSClientSpec, volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount) {
+	AppendTLSClientVolumes(spec, "kolla-ca", "/var/lib/kolla/config_files/ca-certificates/openstack.crt", volumes, volumeMounts)
+}
+
+func AppendTLSClientVolumes(spec openstackv1beta1.TLSClientSpec, name, mountPath string, volumes *[]corev1.Volume, volumeMounts *[]corev1.VolumeMount) {
 	if spec.CABundle == "" {
 		return
 	}
@@ -15,8 +19,8 @@ func AppendTLSClientVolumes(spec openstackv1beta1.TLSClientSpec, volumes *[]core
 	defaultMode := int32(0444)
 
 	*volumes = append(*volumes,
-		template.SecretVolume("tls-ca-bundle", spec.CABundle, &defaultMode))
+		template.SecretVolume(name, spec.CABundle, &defaultMode))
 
 	*volumeMounts = append(*volumeMounts,
-		template.SubPathVolumeMount("tls-ca-bundle", "/var/lib/kolla/config_files/ca-certificates/openstack.crt", "ca.crt"))
+		template.SubPathVolumeMount(name, mountPath, "ca.crt"))
 }

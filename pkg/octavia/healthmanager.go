@@ -43,7 +43,7 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 	volumes = append(volumes, amphora.Volumes(instance)...)
 
 	// XXX wire this into initVolumeMounts
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	hmNetworkID := instance.Status.Amphora.NetworkIDs[0]
 

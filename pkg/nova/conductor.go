@@ -28,7 +28,7 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-conductor.json"),
 	}
 
-	pki.AppendTLSClientVolumes(tlsSpec, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(tlsSpec, &volumes, &volumeMounts)
 
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    namespace,

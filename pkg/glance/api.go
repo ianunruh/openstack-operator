@@ -43,7 +43,7 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 		template.SubPathVolumeMount("etc-glance", "/var/lib/kolla/config_files/config.json", "kolla.json"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	var deployStrategyType appsv1.DeploymentStrategyType
 

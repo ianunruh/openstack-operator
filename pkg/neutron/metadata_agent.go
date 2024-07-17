@@ -31,7 +31,7 @@ func MetadataAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.Env
 	volumes = append(volumes,
 		template.HostPathVolume("host-run-netns", "/run/netns"))
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,

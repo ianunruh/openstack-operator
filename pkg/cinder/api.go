@@ -42,7 +42,7 @@ func APIDeployment(instance *openstackv1beta1.Cinder, env []corev1.EnvVar, volum
 		template.SubPathVolumeMount("etc-cinder", "/var/lib/kolla/config_files/config.json", "kolla-cinder-api.json"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 	pki.AppendTLSServerVolumes(spec.TLS, "/etc/cinder/certs", 0400, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{

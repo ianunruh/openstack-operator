@@ -42,7 +42,7 @@ func APIDeployment(instance *openstackv1beta1.Heat, env []corev1.EnvVar, volumes
 		template.SubPathVolumeMount("etc-heat", "/var/lib/kolla/config_files/config.json", "kolla-heat-api.json"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 	pki.AppendTLSServerVolumes(spec.TLS, "/etc/heat/certs", 0444, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{

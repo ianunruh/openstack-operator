@@ -42,7 +42,7 @@ func APIDeployment(instance *openstackv1beta1.Placement, env []corev1.EnvVar, vo
 		template.SubPathVolumeMount("etc-placement", "/var/lib/kolla/config_files/config.json", "kolla.json"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 	pki.AppendTLSServerVolumes(spec.TLS, "/etc/placement/certs", 0400, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{

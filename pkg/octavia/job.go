@@ -18,7 +18,7 @@ func DBSyncJob(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volumes 
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,

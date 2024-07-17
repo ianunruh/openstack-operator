@@ -40,7 +40,7 @@ func APIDeployment(instance *openstackv1beta1.Manila, env []corev1.EnvVar, volum
 		template.SubPathVolumeMount("etc-manila", "/var/lib/kolla/config_files/config.json", "kolla-manila-api.json"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 	pki.AppendTLSServerVolumes(spec.TLS, "/etc/manila/certs", 0444, &volumes, &volumeMounts)
 
 	deploy := template.GenericDeployment(template.Component{

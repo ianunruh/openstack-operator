@@ -24,7 +24,7 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-housekeeping.json"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	var initContainers []corev1.Container
 
