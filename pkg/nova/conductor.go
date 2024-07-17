@@ -29,6 +29,7 @@ func ConductorStatefulSet(name, namespace string, spec openstackv1beta1.NovaCond
 	}
 
 	pki.AppendKollaTLSClientVolumes(tlsSpec, &volumes, &volumeMounts)
+	pki.AppendRabbitMQTLSClientVolumes(brokerSpec, &volumes, &volumeMounts)
 
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    namespace,
