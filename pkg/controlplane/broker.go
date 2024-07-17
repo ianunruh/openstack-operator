@@ -32,6 +32,8 @@ func Broker(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.RabbitMQ 
 func brokerUserDefaults(spec openstackv1beta1.RabbitMQUserSpec, instance *openstackv1beta1.ControlPlane) openstackv1beta1.RabbitMQUserSpec {
 	if spec.External == nil {
 		spec.External = instance.Spec.ExternalBroker
+	} else if spec.TLS.CABundle == "" {
+		spec.TLS.CABundle = instance.Spec.TLS.Client.CABundle
 	}
 	return spec
 }
