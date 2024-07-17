@@ -55,7 +55,7 @@ func ClusterStatefulSet(instance *openstackv1beta1.RabbitMQ, configHash string) 
 		template.ConfigMapVolume("config", instance.Name, nil),
 	}
 
-	pki.AppendTLSServerVolumes(instance.Spec.TLS, "/bitnami/rabbitmq/certs", 0444, &volumes, &volumeMounts)
+	pki.AppendTLSServerVolumes(instance.Spec.TLS, "/opt/bitnami/rabbitmq/certs", 0444, &volumes, &volumeMounts)
 
 	// TODO pod anti-affinity
 	sts := template.GenericStatefulSet(template.Component{
