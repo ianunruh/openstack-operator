@@ -18,10 +18,8 @@ import (
 )
 
 const (
-	defaultBrokerPort    uint16 = 5672
-	defaultBrokerTLSPort uint16 = 5671
-	defaultAdminPort     uint16 = 15672
-	defaultAdminTLSPort  uint16 = 15671
+	defaultBrokerPort uint16 = 5672
+	defaultAdminPort  uint16 = 15672
 )
 
 func SetupJob(instance *openstackv1beta1.RabbitMQUser) *batchv1.Job {
@@ -126,7 +124,6 @@ func Secret(instance *openstackv1beta1.RabbitMQUser, password string) *corev1.Se
 		hostname = externalSpec.Host
 
 		if externalSpec.TLS.CABundle != "" {
-			port = defaultBrokerTLSPort
 			useTLS = true
 		}
 
@@ -134,7 +131,6 @@ func Secret(instance *openstackv1beta1.RabbitMQUser, password string) *corev1.Se
 			port = externalSpec.Port
 		}
 	} else if instance.Spec.TLS.CABundle != "" {
-		port = defaultBrokerTLSPort
 		useTLS = true
 	}
 

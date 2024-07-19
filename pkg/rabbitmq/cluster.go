@@ -103,12 +103,10 @@ func ClusterStatefulSet(instance *openstackv1beta1.RabbitMQ, configHash string) 
 				},
 				Env: env,
 				Ports: []corev1.ContainerPort{
-					{Name: "amqp-tls", ContainerPort: 5671},
 					{Name: "amqp", ContainerPort: 5672},
 					{Name: "dist", ContainerPort: 25672},
 					{Name: "epmd", ContainerPort: 4369},
 					{Name: "metrics", ContainerPort: 9419},
-					{Name: "stats-tls", ContainerPort: 15671},
 					{Name: "stats", ContainerPort: 15672},
 				},
 				Resources:    instance.Spec.Resources,
@@ -131,11 +129,9 @@ func ClusterService(instance *openstackv1beta1.RabbitMQ) *corev1.Service {
 
 	svc := template.GenericService(instance.Name, instance.Namespace, labels)
 	svc.Spec.Ports = []corev1.ServicePort{
-		{Name: "amqp-tls", Port: 5671},
 		{Name: "amqp", Port: 5672},
 		{Name: "dist", Port: 25672},
 		{Name: "epmd", Port: 4369},
-		{Name: "stats-tls", Port: 15671},
 		{Name: "stats", Port: 15672},
 	}
 
@@ -165,12 +161,7 @@ func ClusterManagementIngress(instance *openstackv1beta1.RabbitMQ) *netv1.Ingres
 		instance.Spec.TLS,
 		labels)
 
-	portName := "stats"
-	if instance.Spec.TLS.Secret != "" {
-		portName = "stats-tls"
-	}
-
-	ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Port.Name = portName
+	ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Port.Name = "stats"
 
 	return ingress
 }
