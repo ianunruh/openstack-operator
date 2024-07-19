@@ -28,12 +28,19 @@ RABBITMQ_VHOST=$(echo "${RABBITMQ_USER_CONNECTION}" | \
 # Resolve vHost to / if no value is set
 RABBITMQ_VHOST="${RABBITMQ_VHOST:-/}"
 
+rabbitmq_ssl_opts=""
+if [ ! -z "$RABBITMQ_TLS_CA_BUNDLE" ]
+then
+  rabbitmq_ssl_opts="--ssl --ssl-ca-cert-file=$RABBITMQ_TLS_CA_BUNDLE"
+fi
+
 function rabbitmqadmin_cli () {
   rabbitmqadmin \
     --host="${RABBIT_HOSTNAME}" \
     --port="${RABBIT_PORT}" \
     --username="${RABBITMQ_ADMIN_USERNAME}" \
     --password="${RABBITMQ_ADMIN_PASSWORD}" \
+    ${rabbitmq_ssl_opts} \
     ${@}
 }
 

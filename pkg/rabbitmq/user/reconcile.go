@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/rabbitmq"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -57,6 +58,25 @@ func SetupJob(instance *openstackv1beta1.RabbitMQUser) *batchv1.Job {
 		}
 	}
 
+	env := []corev1.EnvVar{
+		template.EnvVar("RABBIT_HOSTNAME", hostname),
+		template.EnvVar("RABBIT_PORT", strconv.Itoa(int(port))),
+		adminUsernameEnv,
+		template.SecretEnvVar("RABBITMQ_ADMIN_PASSWORD", adminSecret, secretPasswordKey),
+		template.SecretEnvVar("RABBITMQ_USER_CONNECTION", instance.Spec.Secret, "connection"),
+	}
+
+	var (
+		volumes      []corev1.Volume
+		volumeMounts []corev1.VolumeMount
+	)
+
+	pki.AppendRabbitMQTLSClientVolumes(instance.Spec, &volumes, &volumeMounts)
+
+	if instance.Spec.TLS.CABundle != "" || (instance.Spec.External != nil && instance.Spec.External.TLS.CABundle != "") {
+		env = append(env, template.EnvVar("RABBITMQ_TLS_CA_BUNDLE", "/etc/ssl/certs/rabbitmq/ca.crt"))
+	}
+
 	job := template.GenericJob(template.Component{
 		Namespace:    instance.Namespace,
 		Labels:       labels,
@@ -70,16 +90,12 @@ func SetupJob(instance *openstackv1beta1.RabbitMQUser) *batchv1.Job {
 					"-c",
 					template.MustReadFile(rabbitmq.AppLabel, "user-setup.sh"),
 				},
-				Env: []corev1.EnvVar{
-					template.EnvVar("RABBIT_HOSTNAME", hostname),
-					template.EnvVar("RABBIT_PORT", strconv.Itoa(int(port))),
-					adminUsernameEnv,
-					template.SecretEnvVar("RABBITMQ_ADMIN_PASSWORD", adminSecret, secretPasswordKey),
-					template.SecretEnvVar("RABBITMQ_USER_CONNECTION", instance.Spec.Secret, "connection"),
-				},
-				Resources: spec.Resources,
+				Env:          env,
+				Resources:    spec.Resources,
+				VolumeMounts: volumeMounts,
 			},
 		},
+		Volumes: volumes,
 	})
 
 	job.Name = template.Combine(namePrefix, "user", instance.Name)
