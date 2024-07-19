@@ -17,6 +17,8 @@ func Broker(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.RabbitMQ 
 
 	spec.NodeSelector = controllerNodeSelector(spec.NodeSelector, instance)
 
+	spec.TLS = tlsServerDefaults(spec.TLS, instance)
+
 	// TODO labels
 	return &openstackv1beta1.RabbitMQ{
 		ObjectMeta: metav1.ObjectMeta{
@@ -30,6 +32,9 @@ func Broker(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.RabbitMQ 
 func brokerUserDefaults(spec openstackv1beta1.RabbitMQUserSpec, instance *openstackv1beta1.ControlPlane) openstackv1beta1.RabbitMQUserSpec {
 	if spec.External == nil {
 		spec.External = instance.Spec.ExternalBroker
+	}
+	if spec.TLS.CABundle == "" {
+		spec.TLS.CABundle = instance.Spec.TLS.Client.CABundle
 	}
 	return spec
 }

@@ -164,7 +164,7 @@ func (r *NovaComputeSetReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		return ctrl.Result{}, err
 	}
 
-	if err := r.reconcileCompute(ctx, instance, cinder, env, volumes, log); err != nil {
+	if err := r.reconcileCompute(ctx, instance, cell, cinder, env, volumes, log); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -221,7 +221,7 @@ func (r *NovaComputeSetReconciler) reconcileLibvirtd(ctx context.Context, instan
 	return nil
 }
 
-func (r *NovaComputeSetReconciler) reconcileCompute(ctx context.Context, instance *openstackv1beta1.NovaComputeSet, cinder *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
+func (r *NovaComputeSetReconciler) reconcileCompute(ctx context.Context, instance *openstackv1beta1.NovaComputeSet, cell *openstackv1beta1.NovaCell, cinder *openstackv1beta1.Cinder, env []corev1.EnvVar, volumes []corev1.Volume, log logr.Logger) error {
 	var volumeMounts []corev1.VolumeMount
 
 	if cinder != nil {
@@ -237,7 +237,7 @@ func (r *NovaComputeSetReconciler) reconcileCompute(ctx context.Context, instanc
 		}
 	}
 
-	ds := nova.ComputeDaemonSet(instance, env, volumeMounts, volumes)
+	ds := nova.ComputeDaemonSet(instance, cell.Spec.Broker, env, volumeMounts, volumes)
 	controllerutil.SetControllerReference(instance, ds, r.Scheme)
 	if err := template.EnsureDaemonSet(ctx, r.Client, ds, log); err != nil {
 		return err

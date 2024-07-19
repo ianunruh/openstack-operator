@@ -23,7 +23,8 @@ func SchedulerStatefulSet(instance *openstackv1beta1.Manila, env []corev1.EnvVar
 		template.SubPathVolumeMount("etc-manila", "/var/lib/kolla/config_files/config.json", "kolla-manila-scheduler.json"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendRabbitMQTLSClientVolumes(instance.Spec.Broker, &volumes, &volumeMounts)
 
 	sts := template.GenericStatefulSet(template.Component{
 		Namespace:    instance.Namespace,

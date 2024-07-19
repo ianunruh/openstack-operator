@@ -25,6 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -77,6 +78,15 @@ func (r *RabbitMQReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 	reporter := rabbitmq.NewReporter(instance, r.Client, r.Recorder)
 
 	deps := template.NewConditionWaiter(r.Scheme, log)
+
+	// TODO if disabled, clean up resources
+	pkiResources := rabbitmq.PKIResources(instance)
+	for _, resource := range pkiResources {
+		controllerutil.SetControllerReference(instance, resource, r.Scheme)
+		if err := template.EnsureResource(ctx, r.Client, resource, log); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
 
 	if err := r.reconcileRBAC(ctx, instance, log); err != nil {
 		return ctrl.Result{}, err
@@ -179,9 +189,26 @@ func (r *RabbitMQReconciler) reconcileRBAC(ctx context.Context, instance *openst
 }
 
 func (r *RabbitMQReconciler) reconcileSecret(ctx context.Context, instance *openstackv1beta1.RabbitMQ, log logr.Logger) error {
-	secret := rabbitmq.Secret(instance)
+	var erlangCookie, password string
+
+	currentSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.Name,
+			Namespace: instance.Namespace,
+		},
+	}
+	if err := r.Client.Get(ctx, client.ObjectKeyFromObject(currentSecret), currentSecret); err != nil {
+		if !errors.IsNotFound(err) {
+			return err
+		}
+	} else {
+		erlangCookie = rabbitmq.ErlangCookieFromSecret(currentSecret)
+		password = rabbitmq.PasswordFromSecret(currentSecret)
+	}
+
+	secret := rabbitmq.Secret(instance, erlangCookie, password)
 	controllerutil.SetControllerReference(instance, secret, r.Scheme)
-	return template.CreateSecret(ctx, r.Client, secret, log)
+	return template.EnsureSecret(ctx, r.Client, secret, log)
 }
 
 func (r *RabbitMQReconciler) reconcileConfigMap(ctx context.Context, instance *openstackv1beta1.RabbitMQ, log logr.Logger) ([]string, error) {

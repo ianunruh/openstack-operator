@@ -11,6 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/pki"
 	"github.com/ianunruh/openstack-operator/pkg/prometheus"
 	"github.com/ianunruh/openstack-operator/pkg/template"
 )
@@ -23,6 +24,38 @@ func ClusterStatefulSet(instance *openstackv1beta1.RabbitMQ, configHash string) 
 	labels := template.Labels(instance.Name, AppLabel, ClusterComponentLabel)
 
 	runAsUser := int64(1001)
+
+	env := []corev1.EnvVar{
+		template.EnvVar("CONFIG_HASH", configHash),
+		template.EnvVar("BITNAMI_DEBUG", "false"),
+		template.FieldEnvVar("MY_POD_IP", "status.podIP"),
+		template.FieldEnvVar("MY_POD_NAME", "metadata.name"),
+		template.FieldEnvVar("MY_POD_NAMESPACE", "metadata.namespace"),
+		template.EnvVar("K8S_SERVICE_NAME", "rabbitmq-headless"),
+		template.EnvVar("K8S_ADDRESS_TYPE", "hostname"),
+		template.EnvVar("RABBITMQ_FORCE_BOOT", "no"),
+		template.EnvVar("RABBITMQ_NODE_NAME", "rabbit@$(MY_POD_NAME).$(K8S_SERVICE_NAME).$(MY_POD_NAMESPACE).svc.cluster.local"),
+		template.EnvVar("K8S_HOSTNAME_SUFFIX", ".$(K8S_SERVICE_NAME).$(MY_POD_NAMESPACE).svc.cluster.local"),
+		template.EnvVar("RABBITMQ_MNESIA_DIR", "/bitnami/rabbitmq/mnesia/$(RABBITMQ_NODE_NAME)"),
+		template.EnvVar("RABBITMQ_LOGS", "-"),
+		template.EnvVar("RABBITMQ_ULIMIT_NOFILES", "65536"),
+		template.EnvVar("RABBITMQ_USE_LONGNAME", "true"),
+		template.SecretEnvVar("RABBITMQ_ERL_COOKIE", instance.Name, "erlang-cookie"),
+		template.EnvVar("RABBITMQ_USERNAME", "admin"),
+		template.SecretEnvVar("RABBITMQ_PASSWORD", instance.Name, "password"),
+		template.EnvVar("RABBITMQ_PLUGINS", "rabbitmq_management, rabbitmq_peer_discovery_k8s, rabbitmq_auth_backend_ldap, rabbitmq_prometheus"),
+	}
+
+	volumeMounts := []corev1.VolumeMount{
+		template.SubPathVolumeMount("config", "/bitnami/rabbitmq/conf/rabbitmq.conf", "rabbitmq.conf"),
+		template.VolumeMount("data", "/bitnami/rabbitmq/mnesia"),
+	}
+
+	volumes := []corev1.Volume{
+		template.ConfigMapVolume("config", instance.Name, nil),
+	}
+
+	pki.AppendTLSServerVolumes(instance.Spec.TLS, "/opt/bitnami/rabbitmq/certs", 0444, &volumes, &volumeMounts)
 
 	// TODO pod anti-affinity
 	sts := template.GenericStatefulSet(template.Component{
@@ -68,26 +101,7 @@ func ClusterStatefulSet(instance *openstackv1beta1.RabbitMQ, configHash string) 
 					SuccessThreshold:    1,
 					FailureThreshold:    3,
 				},
-				Env: []corev1.EnvVar{
-					template.EnvVar("CONFIG_HASH", configHash),
-					template.EnvVar("BITNAMI_DEBUG", "false"),
-					template.FieldEnvVar("MY_POD_IP", "status.podIP"),
-					template.FieldEnvVar("MY_POD_NAME", "metadata.name"),
-					template.FieldEnvVar("MY_POD_NAMESPACE", "metadata.namespace"),
-					template.EnvVar("K8S_SERVICE_NAME", "rabbitmq-headless"),
-					template.EnvVar("K8S_ADDRESS_TYPE", "hostname"),
-					template.EnvVar("RABBITMQ_FORCE_BOOT", "no"),
-					template.EnvVar("RABBITMQ_NODE_NAME", "rabbit@$(MY_POD_NAME).$(K8S_SERVICE_NAME).$(MY_POD_NAMESPACE).svc.cluster.local"),
-					template.EnvVar("K8S_HOSTNAME_SUFFIX", ".$(K8S_SERVICE_NAME).$(MY_POD_NAMESPACE).svc.cluster.local"),
-					template.EnvVar("RABBITMQ_MNESIA_DIR", "/bitnami/rabbitmq/mnesia/$(RABBITMQ_NODE_NAME)"),
-					template.EnvVar("RABBITMQ_LOGS", "-"),
-					template.EnvVar("RABBITMQ_ULIMIT_NOFILES", "65536"),
-					template.EnvVar("RABBITMQ_USE_LONGNAME", "true"),
-					template.SecretEnvVar("RABBITMQ_ERL_COOKIE", instance.Name, "erlang-cookie"),
-					template.EnvVar("RABBITMQ_USERNAME", "admin"),
-					template.SecretEnvVar("RABBITMQ_PASSWORD", instance.Name, "password"),
-					template.EnvVar("RABBITMQ_PLUGINS", "rabbitmq_management, rabbitmq_peer_discovery_k8s, rabbitmq_auth_backend_ldap, rabbitmq_prometheus"),
-				},
+				Env: env,
 				Ports: []corev1.ContainerPort{
 					{Name: "amqp", ContainerPort: 5672},
 					{Name: "dist", ContainerPort: 25672},
@@ -95,23 +109,11 @@ func ClusterStatefulSet(instance *openstackv1beta1.RabbitMQ, configHash string) 
 					{Name: "metrics", ContainerPort: 9419},
 					{Name: "stats", ContainerPort: 15672},
 				},
-				Resources: instance.Spec.Resources,
-				VolumeMounts: []corev1.VolumeMount{
-					{
-						Name:      "config",
-						MountPath: "/bitnami/rabbitmq/conf/rabbitmq.conf",
-						SubPath:   "rabbitmq.conf",
-					},
-					{
-						Name:      "data",
-						MountPath: "/bitnami/rabbitmq/mnesia",
-					},
-				},
+				Resources:    instance.Spec.Resources,
+				VolumeMounts: volumeMounts,
 			},
 		},
-		Volumes: []corev1.Volume{
-			template.ConfigMapVolume("config", instance.Name, nil),
-		},
+		Volumes: volumes,
 		VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
 			template.PersistentVolumeClaim("data", labels, instance.Spec.Volume),
 		},
@@ -152,7 +154,12 @@ func ClusterHeadlessService(instance *openstackv1beta1.RabbitMQ) *corev1.Service
 func ClusterManagementIngress(instance *openstackv1beta1.RabbitMQ) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, ClusterComponentLabel)
 
-	ingress := template.GenericIngress(instance.Name, instance.Namespace, instance.Spec.Management.Ingress, labels)
+	ingress := template.GenericIngressWithTLS(
+		instance.Name,
+		instance.Namespace,
+		instance.Spec.Management.Ingress,
+		instance.Spec.TLS,
+		labels)
 
 	ingress.Spec.Rules[0].HTTP.Paths[0].Backend.Service.Port.Name = "stats"
 

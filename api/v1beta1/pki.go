@@ -2,6 +2,7 @@ package v1beta1
 
 import (
 	"fmt"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 )
@@ -40,10 +41,10 @@ func tlsProxyDefault(spec TLSProxySpec) TLSProxySpec {
 	return spec
 }
 
-func tlsServerDefault(spec TLSServerSpec, name, component string) TLSServerSpec {
+func tlsServerDefault(spec TLSServerSpec, name ...string) TLSServerSpec {
 	if spec.Secret == "" {
 		if spec.Issuer.Name != "" {
-			spec.Secret = fmt.Sprintf("%s-%s-tls", name, component)
+			spec.Secret = fmt.Sprintf("%s-tls", strings.Join(name, "-"))
 		}
 	}
 	return spec

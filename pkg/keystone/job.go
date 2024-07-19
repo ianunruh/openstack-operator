@@ -19,7 +19,7 @@ func BootstrapJob(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, volu
 		template.VolumeMount("fernet-keys", "/etc/keystone/fernet-keys"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	env = append(env,
 		template.SecretEnvVar("KEYSTONE_ADMIN_PASSWORD", instance.Name, "OS_PASSWORD"),
@@ -66,7 +66,7 @@ func DBSyncJob(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, volumes
 		template.SubPathVolumeMount("etc-keystone", "/etc/keystone/keystone.conf", "keystone.conf"),
 	}
 
-	pki.AppendTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,
