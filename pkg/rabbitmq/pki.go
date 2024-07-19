@@ -5,7 +5,6 @@ import (
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
 	"github.com/ianunruh/openstack-operator/pkg/pki"
-	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
 func PKIResources(instance *openstackv1beta1.RabbitMQ) []*unstructured.Unstructured {
@@ -17,6 +16,5 @@ func PKIResources(instance *openstackv1beta1.RabbitMQ) []*unstructured.Unstructu
 }
 
 func ServerCertificate(instance *openstackv1beta1.RabbitMQ) *unstructured.Unstructured {
-	name := template.Combine(instance.Name, "server")
-	return pki.ServerCertificate(name, instance.Namespace, instance.Spec.TLS)
+	return pki.ServerCertificate(instance.Name, instance.Namespace, instance.Spec.TLS)
 }
