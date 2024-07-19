@@ -30,7 +30,7 @@ func SetupJob(instance *openstackv1beta1.RabbitMQUser) *batchv1.Job {
 
 	namePrefix := instance.Spec.Cluster
 
-	hostname := clusterName
+	hostname := fmt.Sprintf("%s.%s.svc", clusterName, instance.Namespace)
 	port := defaultAdminPort
 
 	adminSecret := clusterName
