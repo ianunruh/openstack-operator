@@ -107,7 +107,7 @@ func Secret(instance *openstackv1beta1.RabbitMQUser, password string) *corev1.Se
 
 	clusterName := instance.Spec.Cluster
 
-	hostname := clusterName
+	hostname := fmt.Sprintf("%s.%s.svc", clusterName, instance.Namespace)
 	port := defaultBrokerPort
 	username := instance.Spec.Name
 	vhost := instance.Spec.VirtualHost

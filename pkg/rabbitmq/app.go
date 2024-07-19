@@ -22,17 +22,32 @@ func ConfigMap(instance *openstackv1beta1.RabbitMQ) *corev1.ConfigMap {
 	return cm
 }
 
-func Secret(instance *openstackv1beta1.RabbitMQ) *corev1.Secret {
+func Secret(instance *openstackv1beta1.RabbitMQ, erlangCookie, password string) *corev1.Secret {
 	labels := template.AppLabels(instance.Name, AppLabel)
 	secret := template.GenericSecret(instance.Name, instance.Namespace, labels)
 
-	password := template.MustGeneratePassword()
+	hostname := fmt.Sprintf("%s.%s.svc", instance.Name, instance.Namespace)
 
-	secret.StringData["erlang-cookie"] = template.MustGeneratePassword()
+	if erlangCookie == "" {
+		erlangCookie = template.MustGeneratePassword()
+	}
+	if password == "" {
+		password = template.MustGeneratePassword()
+	}
+
+	secret.StringData["erlang-cookie"] = erlangCookie
 	secret.StringData["password"] = password
-	secret.StringData["connection"] = fmt.Sprintf("rabbit://admin:%s@%s:15672", password, instance.Name)
+	secret.StringData["connection"] = fmt.Sprintf("rabbit://admin:%s@%s:15672", password, hostname)
 
 	return secret
+}
+
+func ErlangCookieFromSecret(secret *corev1.Secret) string {
+	return string(secret.Data["erlang-cookie"])
+}
+
+func PasswordFromSecret(secret *corev1.Secret) string {
+	return string(secret.Data["password"])
 }
 
 type configParams struct {
