@@ -51,7 +51,7 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.E
 		TimeoutSeconds:      5,
 	}
 
-	volumeMounts = append(volumeMounts,
+	volumeMounts = slices.Concat(volumeMounts, []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-libvirt", "/etc/libvirt/libvirtd.conf", "libvirtd.conf"),
 		template.SubPathVolumeMount("etc-libvirt", "/etc/libvirt/qemu.conf", "qemu.conf"),
 		template.SubPathVolumeMount("etc-libvirt", "/scripts/libvirtd-start.sh", "libvirtd-start.sh"),
@@ -65,7 +65,8 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.E
 		template.VolumeMount("host-sys-fs-cgroup", "/sys/fs/cgroup"),
 		template.BidirectionalVolumeMount("host-var-lib-libvirt", "/var/lib/libvirt"),
 		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
-		template.VolumeMount("host-var-log-libvirt", "/var/log/libvirt"))
+		template.VolumeMount("host-var-log-libvirt", "/var/log/libvirt"),
+	})
 
 	volumes = slices.Concat(volumes, []corev1.Volume{
 		template.ConfigMapVolume("etc-libvirt", configMapName, nil),
