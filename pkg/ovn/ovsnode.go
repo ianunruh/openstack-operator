@@ -1,6 +1,8 @@
 package ovn
 
 import (
+	"slices"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -25,18 +27,21 @@ func OVSNodeDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev1.E
 		template.VolumeMount("host-var-lib-openvswitch", "/var/lib/openvswitch"),
 	}
 
-	dbVolumeMounts := append(volumeMounts,
-		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-openvswitch-ovsdb.json"))
+	dbVolumeMounts := slices.Concat(volumeMounts, []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-openvswitch-ovsdb.json"),
+	})
 
-	switchVolumeMounts := append(volumeMounts,
-		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-openvswitch-vswitchd.json"))
+	switchVolumeMounts := slices.Concat(volumeMounts, []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-ovn", "/var/lib/kolla/config_files/config.json", "kolla-openvswitch-vswitchd.json"),
+	})
 
-	volumes = append(volumes,
+	volumes = slices.Concat(volumes, []corev1.Volume{
 		template.HostPathVolume("host-lib-modules", "/lib/modules"),
 		template.HostPathVolume("host-sys", "/sys"),
 		template.HostPathVolume("host-etc-openvswitch", "/etc/openvswitch"),
 		template.HostPathVolume("host-run-openvswitch", "/run/openvswitch"),
-		template.HostPathVolume("host-var-lib-openvswitch", "/var/lib/openvswitch"))
+		template.HostPathVolume("host-var-lib-openvswitch", "/var/lib/openvswitch"),
+	})
 
 	privileged := true
 

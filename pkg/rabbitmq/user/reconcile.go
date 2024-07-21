@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -72,7 +73,9 @@ func SetupJob(instance *openstackv1beta1.RabbitMQUser) *batchv1.Job {
 	pki.AppendRabbitMQTLSClientVolumes(instance.Spec, &volumes, &volumeMounts)
 
 	if instance.Spec.TLS.CABundle != "" || (instance.Spec.External != nil && instance.Spec.External.TLS.CABundle != "") {
-		env = append(env, template.EnvVar("RABBITMQ_TLS_CA_BUNDLE", "/etc/ssl/certs/rabbitmq/ca.crt"))
+		env = slices.Concat(env, []corev1.EnvVar{
+			template.EnvVar("RABBITMQ_TLS_CA_BUNDLE", "/etc/ssl/certs/rabbitmq/ca.crt"),
+		})
 	}
 
 	job := template.GenericJob(template.Component{

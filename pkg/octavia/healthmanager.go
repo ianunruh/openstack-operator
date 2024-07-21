@@ -1,6 +1,8 @@
 package octavia
 
 import (
+	"slices"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -32,15 +34,16 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 		template.VolumeMount("pod-shared", "/tmp/pod-shared"),
 		template.SubPathVolumeMount("keystone", "/etc/openstack/clouds.yaml", "clouds.yaml"),
 	}
-	volumeMounts = append(volumeMounts, initVolumeMounts...)
-	volumes = append(volumes,
+	volumeMounts = slices.Concat(volumeMounts, initVolumeMounts)
+	volumes = slices.Concat(volumes, []corev1.Volume{
 		template.EmptyDirVolume("pod-shared"),
 		template.HostPathVolume("host-var-run-openvswitch", "/var/run/openvswitch"),
-		template.SecretVolume("keystone", "octavia-keystone", &defaultMode))
+		template.SecretVolume("keystone", "octavia-keystone", &defaultMode),
+	})
 
 	// pki volumes
-	volumeMounts = append(volumeMounts, amphora.VolumeMounts(instance)...)
-	volumes = append(volumes, amphora.Volumes(instance)...)
+	volumeMounts = slices.Concat(volumeMounts, amphora.VolumeMounts(instance))
+	volumes = slices.Concat(volumes, amphora.Volumes(instance))
 
 	// XXX wire this into initVolumeMounts
 	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
@@ -48,10 +51,11 @@ func HealthManagerDaemonSet(instance *openstackv1beta1.Octavia, env []corev1.Env
 
 	hmNetworkID := instance.Status.Amphora.NetworkIDs[0]
 
-	initEnv := append(env,
+	initEnv := slices.Concat(env, []corev1.EnvVar{
 		template.FieldEnvVar("HOSTNAME", "spec.nodeName"),
 		template.EnvVar("HM_IFACE", "o-hm0"),
-		template.EnvVar("HM_NETWORK_ID", hmNetworkID))
+		template.EnvVar("HM_NETWORK_ID", hmNetworkID),
+	})
 
 	privileged := true
 	runAsRootUser := int64(0)

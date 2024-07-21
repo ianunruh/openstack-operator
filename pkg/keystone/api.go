@@ -2,6 +2,7 @@ package keystone
 
 import (
 	"fmt"
+	"slices"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -48,13 +49,15 @@ func APIDeployment(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, vol
 	pki.AppendRabbitMQTLSClientVolumes(instance.Spec.Broker, &volumes, &volumeMounts)
 	pki.AppendTLSServerVolumes(spec.TLS, "/etc/keystone/certs", 0400, &volumes, &volumeMounts)
 
-	initVolumeMounts := append(volumeMounts,
+	initVolumeMounts := slices.Concat(volumeMounts, []corev1.VolumeMount{
 		template.VolumeMount("credential-keys", "/var/run/secrets/credential-keys"),
-		template.VolumeMount("fernet-keys", "/var/run/secrets/fernet-keys"))
+		template.VolumeMount("fernet-keys", "/var/run/secrets/fernet-keys"),
+	})
 
-	volumes = append(volumes,
+	volumes = slices.Concat(volumes, []corev1.Volume{
 		template.EmptyDirVolume("pod-credential-keys"),
-		template.EmptyDirVolume("pod-fernet-keys"))
+		template.EmptyDirVolume("pod-fernet-keys"),
+	})
 
 	var envFrom []corev1.EnvFromSource
 

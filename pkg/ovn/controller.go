@@ -1,6 +1,7 @@
 package ovn
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 
@@ -23,10 +24,11 @@ func ControllerDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev
 
 	privileged := true
 
-	env = append(env,
-		template.FieldEnvVar("HOSTNAME", "spec.nodeName"))
+	env = slices.Concat(env, []corev1.EnvVar{
+		template.FieldEnvVar("HOSTNAME", "spec.nodeName"),
+	})
 
-	setupEnv := append(env, setupNodeEnv(nodeSpec)...)
+	setupEnv := slices.Concat(env, setupNodeEnv(nodeSpec))
 
 	envFrom := []corev1.EnvFromSource{
 		template.EnvFromConfigMap(template.Combine(instance.Name, "ovsdb")),
@@ -39,14 +41,16 @@ func ControllerDaemonSet(instance *openstackv1beta1.OVNControlPlane, env []corev
 		template.VolumeMount("host-var-lib-openvswitch", "/var/lib/openvswitch"),
 	}
 
-	initVolumeMounts := append(volumeMounts,
+	initVolumeMounts := slices.Concat(volumeMounts, []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-ovn", "/scripts/get-encap-ip.py", "get-encap-ip.py"),
-		template.SubPathVolumeMount("etc-ovn", "/scripts/setup-node.sh", "setup-node.sh"))
+		template.SubPathVolumeMount("etc-ovn", "/scripts/setup-node.sh", "setup-node.sh"),
+	})
 
-	volumes = append(volumes,
+	volumes = slices.Concat(volumes, []corev1.Volume{
 		template.HostPathVolume("host-etc-openvswitch", "/etc/openvswitch"),
 		template.HostPathVolume("host-run-openvswitch", "/run/openvswitch"),
-		template.HostPathVolume("host-var-lib-openvswitch", "/var/lib/openvswitch"))
+		template.HostPathVolume("host-var-lib-openvswitch", "/var/lib/openvswitch"),
+	})
 
 	ds := template.GenericDaemonSet(template.Component{
 		Namespace:    instance.Namespace,
@@ -98,9 +102,10 @@ func setupNodeEnv(spec openstackv1beta1.OVNNodeSpec) []corev1.EnvVar {
 	}
 
 	if gateway {
-		env = append(env,
+		env = slices.Concat(env, []corev1.EnvVar{
 			template.EnvVar("BRIDGE_MAPPINGS", strings.Join(spec.BridgeMappings, ",")),
-			template.EnvVar("BRIDGE_PORTS", strings.Join(spec.BridgePorts, ",")))
+			template.EnvVar("BRIDGE_PORTS", strings.Join(spec.BridgePorts, ",")),
+		})
 	}
 
 	return env

@@ -1,6 +1,8 @@
 package octavia
 
 import (
+	"slices"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -27,8 +29,8 @@ func WorkerDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, v
 	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 	pki.AppendRabbitMQTLSClientVolumes(instance.Spec.Broker, &volumes, &volumeMounts)
 
-	volumeMounts = append(volumeMounts, amphora.VolumeMounts(instance)...)
-	volumes = append(volumes, amphora.Volumes(instance)...)
+	volumeMounts = slices.Concat(volumeMounts, amphora.VolumeMounts(instance))
+	volumes = slices.Concat(volumes, amphora.Volumes(instance))
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,

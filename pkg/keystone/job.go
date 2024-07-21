@@ -1,6 +1,8 @@
 package keystone
 
 import (
+	"slices"
+
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -21,11 +23,12 @@ func BootstrapJob(instance *openstackv1beta1.Keystone, env []corev1.EnvVar, volu
 
 	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 
-	env = append(env,
+	env = slices.Concat(env, []corev1.EnvVar{
 		template.SecretEnvVar("KEYSTONE_ADMIN_PASSWORD", instance.Name, "OS_PASSWORD"),
 		template.EnvVar("KEYSTONE_API_URL", APIPublicURL(instance)),
 		template.EnvVar("KEYSTONE_API_INTERNAL_URL", APIInternalURL(instance)),
-		template.EnvVar("KEYSTONE_REGION", "RegionOne"))
+		template.EnvVar("KEYSTONE_REGION", "RegionOne"),
+	})
 
 	job := template.GenericJob(template.Component{
 		Namespace: instance.Namespace,
