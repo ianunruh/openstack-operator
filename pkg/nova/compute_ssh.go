@@ -1,6 +1,7 @@
 package nova
 
 import (
+	"slices"
 	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -24,13 +25,15 @@ func ComputeSSHDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1
 
 	defaultMode := int32(0400)
 
-	env = append(env,
+	env = slices.Concat(env, []corev1.EnvVar{
 		template.EnvVar("NOVA_USER_UID", strconv.Itoa(int(appUID))),
-		template.EnvVar("SSH_PORT", strconv.Itoa(ComputeSSHPort)))
+		template.EnvVar("SSH_PORT", strconv.Itoa(ComputeSSHPort)),
+	})
 
-	volumes = append(volumes,
+	volumes = slices.Concat(volumes, []corev1.Volume{
 		template.SecretVolume("ssh-keys", "nova-compute-ssh", &defaultMode),
-		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"))
+		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"),
+	})
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-nova", "/scripts/compute-ssh.sh", "compute-ssh.sh"),

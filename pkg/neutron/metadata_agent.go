@@ -1,6 +1,8 @@
 package neutron
 
 import (
+	"slices"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -28,8 +30,9 @@ func MetadataAgentDaemonSet(instance *openstackv1beta1.Neutron, env []corev1.Env
 		template.SubPathVolumeMount("etc-neutron", "/var/lib/kolla/config_files/config.json", "kolla-neutron-metadata-agent.json"),
 	}
 
-	volumes = append(volumes,
-		template.HostPathVolume("host-run-netns", "/run/netns"))
+	volumes = slices.Concat(volumes, []corev1.Volume{
+		template.HostPathVolume("host-run-netns", "/run/netns"),
+	})
 
 	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 	pki.AppendRabbitMQTLSClientVolumes(instance.Spec.Broker, &volumes, &volumeMounts)

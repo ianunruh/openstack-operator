@@ -58,7 +58,9 @@ func APIDeployment(instance *openstackv1beta1.Glance, env []corev1.EnvVar, volum
 				Name:      "images",
 				MountPath: imageBackendPath(backend.Name),
 			})
-			volumes = append(volumes, template.PersistentVolume("images", pvcName))
+			volumes = slices.Concat(volumes, []corev1.Volume{
+				template.PersistentVolume("images", pvcName),
+			})
 
 			if isReadWriteOnce(pvcSpec.AccessModes) {
 				// avoid state where new pods cannot mount PVC due to exclusivity

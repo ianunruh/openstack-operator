@@ -1,6 +1,8 @@
 package nova
 
 import (
+	"slices"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -65,7 +67,7 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.E
 		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
 		template.VolumeMount("host-var-log-libvirt", "/var/log/libvirt"))
 
-	volumes = append(volumes,
+	volumes = slices.Concat(volumes, []corev1.Volume{
 		template.ConfigMapVolume("etc-libvirt", configMapName, nil),
 		template.EmptyDirVolume("pod-tmp"),
 		template.HostPathVolume("host-dev", "/dev"),
@@ -76,7 +78,8 @@ func LibvirtdDaemonSet(instance *openstackv1beta1.NovaComputeSet, env []corev1.E
 		template.HostPathVolume("host-sys-fs-cgroup", "/sys/fs/cgroup"),
 		template.HostPathVolume("host-var-lib-libvirt", "/var/lib/libvirt"),
 		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"),
-		template.HostPathVolume("host-var-log-libvirt", "/var/log/libvirt"))
+		template.HostPathVolume("host-var-log-libvirt", "/var/log/libvirt"),
+	})
 
 	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 

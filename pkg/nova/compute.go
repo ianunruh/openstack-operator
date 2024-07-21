@@ -1,6 +1,7 @@
 package nova
 
 import (
+	"slices"
 	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -33,7 +34,7 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, brokerSpec open
 		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
 	}
 
-	volumeMounts = append(volumeMounts,
+	volumeMounts = slices.Concat(volumeMounts, []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-nova", "/etc/nova/nova.conf", "nova.conf"),
 		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-compute.json"),
 		template.VolumeMount("pod-tmp", "/tmp"),
@@ -44,9 +45,10 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, brokerSpec open
 		template.VolumeMount("host-run", "/run"),
 		template.ReadOnlyVolumeMount("host-sys-fs-cgroup", "/sys/fs/cgroup"),
 		template.BidirectionalVolumeMount("host-var-lib-libvirt", "/var/lib/libvirt"),
-		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"))
+		template.BidirectionalVolumeMount("host-var-lib-nova", "/var/lib/nova"),
+	})
 
-	volumes = append(volumes,
+	volumes = slices.Concat(volumes, []corev1.Volume{
 		template.EmptyDirVolume("pod-tmp"),
 		template.EmptyDirVolume("pod-shared"),
 		template.HostPathVolume("host-dev", "/dev"),
@@ -55,7 +57,8 @@ func ComputeDaemonSet(instance *openstackv1beta1.NovaComputeSet, brokerSpec open
 		template.HostPathVolume("host-run", "/run"),
 		template.HostPathVolume("host-sys-fs-cgroup", "/sys/fs/cgroup"),
 		template.HostPathVolume("host-var-lib-libvirt", "/var/lib/libvirt"),
-		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"))
+		template.HostPathVolume("host-var-lib-nova", "/var/lib/nova"),
+	})
 
 	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
 	pki.AppendRabbitMQTLSClientVolumes(brokerSpec, &volumes, &volumeMounts)

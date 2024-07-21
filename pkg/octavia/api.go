@@ -2,6 +2,7 @@ package octavia
 
 import (
 	"fmt"
+	"slices"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -26,8 +27,9 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 
 	runAsRootUser := int64(0)
 
-	volumes = append(volumes,
-		template.EmptyDirVolume("pod-var-run-octavia"))
+	volumes = slices.Concat(volumes, []corev1.Volume{
+		template.EmptyDirVolume("pod-var-run-octavia"),
+	})
 
 	volumeMounts := []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-octavia", "/etc/octavia/octavia.conf", "octavia.conf"),
@@ -38,12 +40,14 @@ func APIDeployment(instance *openstackv1beta1.Octavia, env []corev1.EnvVar, volu
 	pki.AppendRabbitMQTLSClientVolumes(instance.Spec.Broker, &volumes, &volumeMounts)
 	pki.AppendTLSServerVolumes(spec.TLS, "/etc/octavia/certs", 0400, &volumes, &volumeMounts)
 
-	driverAgentVolumeMounts := append(volumeMounts,
-		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-driver-agent.json"))
-
-	apiVolumeMounts := append(volumeMounts,
+	apiVolumeMounts := slices.Concat(volumeMounts, []corev1.VolumeMount{
 		template.SubPathVolumeMount("etc-octavia", "/etc/apache2/sites-available/000-default.conf", "httpd.conf"),
-		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-api.json"))
+		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-api.json"),
+	})
+
+	driverAgentVolumeMounts := slices.Concat(volumeMounts, []corev1.VolumeMount{
+		template.SubPathVolumeMount("etc-octavia", "/var/lib/kolla/config_files/config.json", "kolla-octavia-driver-agent.json"),
+	})
 
 	probe := &corev1.Probe{
 		ProbeHandler: corev1.ProbeHandler{

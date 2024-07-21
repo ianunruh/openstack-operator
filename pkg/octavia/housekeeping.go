@@ -1,6 +1,8 @@
 package octavia
 
 import (
+	"slices"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
@@ -30,8 +32,8 @@ func HousekeepingDeployment(instance *openstackv1beta1.Octavia, env []corev1.Env
 	var initContainers []corev1.Container
 
 	if instance.Spec.Amphora.Enabled {
-		volumeMounts = append(volumeMounts, amphora.VolumeMounts(instance)...)
-		volumes = append(volumes, amphora.Volumes(instance)...)
+		volumeMounts = slices.Concat(volumeMounts, amphora.VolumeMounts(instance))
+		volumes = slices.Concat(volumes, amphora.Volumes(instance))
 
 		initContainers = append(initContainers, amphora.InitContainer(spec.Image, spec.Resources, volumeMounts))
 	}
