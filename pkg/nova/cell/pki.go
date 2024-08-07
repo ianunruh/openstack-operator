@@ -13,10 +13,18 @@ func PKIResources(instance *openstackv1beta1.NovaCell) []*unstructured.Unstructu
 	if cert := MetadataCertificate(instance); cert != nil {
 		resources = append(resources, cert)
 	}
+	if cert := NoVNCProxyCertificate(instance); cert != nil {
+		resources = append(resources, cert)
+	}
 	return resources
 }
 
 func MetadataCertificate(instance *openstackv1beta1.NovaCell) *unstructured.Unstructured {
 	name := template.Combine(instance.Name, "metadata")
 	return pki.ServerCertificate(name, instance.Namespace, instance.Spec.Metadata.TLS)
+}
+
+func NoVNCProxyCertificate(instance *openstackv1beta1.NovaCell) *unstructured.Unstructured {
+	name := template.Combine(instance.Name, "novncproxy")
+	return pki.ServerCertificate(name, instance.Namespace, instance.Spec.NoVNCProxy.TLS)
 }

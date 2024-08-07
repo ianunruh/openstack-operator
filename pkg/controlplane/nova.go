@@ -4,6 +4,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	openstackv1beta1 "github.com/ianunruh/openstack-operator/api/v1beta1"
+	"github.com/ianunruh/openstack-operator/pkg/template"
 )
 
 func Nova(instance *openstackv1beta1.ControlPlane) *openstackv1beta1.Nova {
@@ -65,9 +66,10 @@ func novaCellDefaults(cells []openstackv1beta1.NovaCellSpec, instance *openstack
 		spec.Metadata.NodeSelector = controllerNodeSelector(spec.Metadata.NodeSelector, instance)
 		spec.Metadata.TLS = tlsServerDefaults(spec.Metadata.TLS, instance)
 
-		// TODO handle naming for multiple cells
-		spec.NoVNCProxy.Ingress = ingressDefaults(spec.NoVNCProxy.Ingress, instance, "novnc")
+		spec.NoVNCProxy.Ingress = ingressDefaults(spec.NoVNCProxy.Ingress, instance,
+			template.Combine("nova", spec.Name, "novnc"))
 		spec.NoVNCProxy.NodeSelector = controllerNodeSelector(spec.NoVNCProxy.NodeSelector, instance)
+		spec.NoVNCProxy.TLS = tlsServerDefaults(spec.NoVNCProxy.TLS, instance)
 
 		spec.Broker = brokerUserDefaults(spec.Broker, instance)
 		spec.Database = databaseDefaults(spec.Database, instance)

@@ -1,6 +1,8 @@
 package nova
 
 import (
+	"slices"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -24,7 +26,16 @@ func NoVNCProxyDeployment(instance *openstackv1beta1.NovaCell, env []corev1.EnvV
 		template.SubPathVolumeMount("etc-nova", "/var/lib/kolla/config_files/config.json", "kolla-nova-novncproxy.json"),
 	}
 
+	pki.AppendTLSServerVolumes(spec.TLS, "/etc/nova/certs", 0444, &volumes, &volumeMounts)
 	pki.AppendKollaTLSClientVolumes(instance.Spec.TLS, &volumes, &volumeMounts)
+
+	if spec.TLS.Secret != "" {
+		env = slices.Concat(env, []corev1.EnvVar{
+			template.EnvVar("OS_DEFAULT__SSL_ONLY", "true"),
+			template.EnvVar("OS_DEFAULT__CERT", "/etc/nova/certs/tls.crt"),
+			template.EnvVar("OS_DEFAULT__KEY", "/etc/nova/certs/tls.key"),
+		})
+	}
 
 	deploy := template.GenericDeployment(template.Component{
 		Namespace:    instance.Namespace,
@@ -72,5 +83,7 @@ func NoVNCProxyIngress(instance *openstackv1beta1.NovaCell) *netv1.Ingress {
 	labels := template.Labels(instance.Name, AppLabel, APIComponentLabel)
 	name := template.Combine(instance.Name, "novncproxy")
 
-	return template.GenericIngress(name, instance.Namespace, instance.Spec.NoVNCProxy.Ingress, labels)
+	spec := instance.Spec.NoVNCProxy
+
+	return template.GenericIngressWithTLS(name, instance.Namespace, spec.Ingress, spec.TLS, labels)
 }

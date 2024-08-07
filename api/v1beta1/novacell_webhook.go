@@ -52,6 +52,7 @@ func (r *NovaCell) Default() {
 	r.Spec.Conductor.Image = imageDefault(r.Spec.Conductor.Image, DefaultNovaConductorImage)
 
 	r.Spec.NoVNCProxy.Image = imageDefault(r.Spec.NoVNCProxy.Image, DefaultNovaNoVNCProxyImage)
+	r.Spec.NoVNCProxy.TLS = tlsServerDefault(r.Spec.NoVNCProxy.TLS, r.Name, "novncproxy")
 
 	if r.Spec.Compute == nil {
 		r.Spec.Compute = map[string]NovaComputeSetSpec{
